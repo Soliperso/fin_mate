@@ -43,3 +43,27 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# Secrets and API keys
+*.key
+*.pem
+google-services.json
+GoogleService-Info.plist
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.isar
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.config.dart

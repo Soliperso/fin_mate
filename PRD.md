@@ -1,222 +1,180 @@
 # Product Requirements Document (PRD)
 
-## Product Name  
-**FinMate** (placeholder – to be branded later)
+## Product Name
+**FinMate** (final branding TBD)
 
 ---
 
 ## 1. Vision & Goals
 
-### Vision  
-Build a **professional, visually appealing, and secure financial app** that empowers individuals, families, and groups to:  
-1. Manage personal finances with clarity.  
-2. Split and settle bills easily.  
-3. Gain actionable insights from AI forecasts.  
+### Vision
+Deliver an intelligent, secure, and visually delightful financial platform—empowering individuals, families, and groups to effortlessly manage, split, and forecast their finances, while fostering trust, engagement, and financial growth.
 
-### Goals  
-- Deliver a **cross-platform app** (iOS, Android, Web) using **Flutter**.  
-- Combine **personal finance, bill splitting, and AI predictions** in one seamless app.  
-- Establish trust through **secure, compliant, and privacy-first design**.  
-- Provide a **stunning UI** that reflects growth, confidence, and simplicity.  
+### Goals
+- Launch a multi-platform app (iOS, Android, Web — Flutter).
+- Unite personal finance, bill-splitting, collaborative AI forecasting, and proactive money wellness.
+- Build enduring trust through security, privacy-compliance, and transparency.
+- Ensure exceptional visual polish, accessible UX, and gamified user journeys.
 
 ---
 
 ## 2. Target Users
-- **Young professionals & students** → manage expenses, split bills with roommates/friends.  
-- **Families & couples** → shared household budgets and goals.  
-- **Freelancers & gig workers** → irregular income forecasting.  
-- **Tech-savvy users** → early adopters seeking AI-powered financial insights.  
+- **Young professionals & students**
+- **Families & couples**
+- **Freelancers & gig workers**
+- **Tech-savvy and privacy-focused users**
+- **Parents/child accounts** for financial education and oversight
+- **Power users and partners** requiring integrations
 
 ---
 
-## 3. Core Features (MVP)
+## 3. Core Features (MVP + Add-ons)
 
 ### 3.1 Authentication & Security
-- Supabase Auth (JWT).  
-- Multi-factor Authentication (MFA): SMS/email OTP + TOTP.  
-- Biometric login (FaceID/TouchID via `local_auth`).  
-- Role-Based Access Control (RBAC) for shared wallets.  
+- Supabase Auth (JWT)
+- MFA (OTP, TOTP), biometric login
+- RBAC for shared wallets
+- **Privacy "nutrition labels" dashboard** (clear, visual summary of data security, single-click data deletion)
+- **Proactive "paranoid" mode** (strong MFA for high-risk actions, device warnings, extra controls)
 
 ### 3.2 Personal Finance Management
-- **Dashboard**:  
-  - Net worth overview.  
-  - Monthly cash flow (income vs. expenses).  
-  - Upcoming bills timeline.  
-  - “Money Health” score (visual gauge).  
-- **Budgets**:  
-  - Category-based spending.  
-  - Alerts for overspending.  
-- **Savings Goals**:  
-  - Individual + shared.  
-  - Progress visualization.  
-- **Transactions**:  
-  - Auto-import via Plaid/TrueLayer.  
-  - Manual entry fallback.  
-  - Smart categorization with manual overrides.  
+- **Instant background data sync** — cross-device updates without user action
+- **Dashboard**: net worth, cash flow, upcoming bills, "money health" gauge
+- **Budgets**: category-based, smart alerts
+- **Savings goals**: individual/shared, progress visuals, actionable recommendations
+- **Transactions**: bank import, manual entry, smart categorization
+- **Emergency Fund Tracker** — widget monitoring readiness for unforeseen expenses, with nudges about financial resilience
+- **Personalized goal suggestions from AI** ("Cut coffee spend for $XX savings")
+- **Document assistant** with secure receipt/tax record storage and export tools
+- **Community benchmarks** — privacy-friendly comparisons motivating better habits
+- **Customizable insights frequency** — users choose daily, weekly, or monthly reports
 
 ### 3.3 Bill Splitting
-- Create groups for roommates, trips, or families.  
-- Add expenses with equal, percentage, or custom splits.  
-- Track balances and who owes who.  
-- Settlement flows:  
-  - Manual records (MVP).  
-  - Stripe/PayPal settlement (Phase 2).  
-- Notifications and reminders.  
+- Create groups (roommates, trips, families), invite by email/SMS
+- Add expenses/custom splits, track balances, settlement flows
+- **Manual settlement with evidence upload** (receipt/bank shot), Stripe/PayPal integration (Phase 2)
+- Notifications and calendar integration
+- **Recurring payments and smart scheduling** — seamless future splits, AI-suggested timing for payments
 
 ### 3.4 AI Insights & Forecasting
-- Weekly digest: “Where your money went.”  
-- 3–6 month cashflow forecast.  
-- Scenario planning (baseline, optimistic, conservative).  
-- Personalized recommendations (e.g., “Cut dining out 20% to save $250 in 3 months”).  
-- Explainable insights with assumptions displayed.  
+- Weekly digest: "Where your money went"
+- 3–6 month cashflow forecast
+- Scenario planning (baseline, optimistic, conservative)
+- Personalized, explainable recommendations for savings
+- **Conversational AI assistant** — chat-style, users manage finances with natural language
+- **Integrated help bot/FAQ** — answers context-sensitive finance questions
+- **Tax season dashboard/export** (PDF/CSV summaries for users)
 
 ---
 
 ## 4. Extended Features (Phase 2+)
-- Shared wallets & joint accounts.  
-- Subscription manager (detect recurring charges).  
-- Multi-currency support (with real-time FX).  
-- Conversational AI assistant (chat-style).  
-- Smart notifications (overspending, bill reminders, forecast alerts).  
+- **Shared & joint wallets** with parental controls
+- **Subscription manager**, recurring charge detection and cancellation assist
+- **Multi-currency and FX support**
+- **Advanced smart notifications**
+- **Community feature voting** (users upvote roadmap priorities)
+- **Rich API & plugin system** for partners/power users
+- **Integrated rewards platform** — targeted cashback or local offers for savings or engagement
+- **On-device analytics option** for privacy-first regions, in addition to cloud analytics
 
 ---
 
 ## 5. Visual Design Guidelines
 
 ### Principles
-- Trustworthy → professional & clean.  
-- Clarity → minimal clutter, high readability.  
-- Confidence → strong visuals for financial growth.  
-- Delight → subtle gradients & animations.  
+- Trustworthy, clear, confident, delightful
+- **Gamified elements** (badges, achievement streaks for positive habits)
+- **Adaptive onboarding wizard** based on user type
+- **Accessibility**: high-contrast, screen-reader support, dynamic font scaling (AA/AAA standards)
 
-### Color Palette
-- **Primary**:  
-  - Deep Navy (#1A2B4C) – trust, security.  
-  - Emerald Green (#2ECC71) – growth, success.  
-- **Secondary**:  
-  - Royal Purple (#6C5CE7) – premium fintech.  
-  - Teal Blue (#00CEC9) – balance & freshness.  
-- **Neutral**: Light Gray (#F5F7FA), White (#FFFFFF), Charcoal (#2D3436).  
-- **Status**:  
-  - Success Green (#27AE60).  
-  - Warning Orange (#F39C12).  
-  - Error Red (#E74C3C).  
-
-### Typography
-- Inter or Poppins (Google Fonts).  
-- Bold, high-contrast numbers for balances.  
-
-### Components
-- Rounded cards, soft shadows.  
-- Charts with green for gains, red for losses.  
-- Light + dark mode support.  
+### Palette & Components
+- **Deep navy, emerald green, royal purple, teal blue, neutrals, status colors**
+- **Inter/Poppins fonts**; large, clear numbers
+- Rounded cards, soft shadows; green/red charts for gains/losses
+- Light and dark modes
+- **Motion for milestone success** (animated progress, celebratory cues)
 
 ---
 
 ## 6. Tech Stack
 
-### Frontend (Flutter)
-- Framework: Flutter (Material 3, Cupertino).  
-- State Management: Riverpod or Bloc.  
-- Routing: GoRouter.  
-- Charts: `fl_chart`, `syncfusion_flutter_charts`.  
-- Animations: `rive`, `lottie`.  
+### Frontend
+- **Flutter** (Material 3, Cupertino)
+- **Riverpod/Bloc**; GoRouter; fl_chart/syncfusion
+- **Rive/Lottie** for animations
 
 ### Backend
-- Supabase (auth, Postgres, storage).  
-- Plaid/TrueLayer (bank data).  
-- Stripe/PayPal (settlements).  
-- OpenAI (AI insights).  
-- PostHog or Amplitude (analytics).  
+- **Supabase** (auth, DB, storage, KMS)
+- **Plaid/TrueLayer** (plus support for Salt Edge, Finicity)
+- **Stripe/PayPal**; OpenAI (with fallback), Amplitude/PostHog
 
 ### Local
-- Hive/Isar (encrypted offline storage).  
-- Intl (currency formatting & localization).  
+- **Hive/Isar** encrypted storage (offline enablement)
+- **Intl** for localization
+- **Edge caching**, serverless functions for dashboards, AI answers
 
 ---
 
 ## 7. Security & Compliance
-
-### Authentication
-- MFA + biometrics.  
-- Passkey/WebAuthn readiness.  
-
-### Data Security
-- AES-256 encryption at rest.  
-- TLS 1.3 encryption in transit.  
-- Encrypted local storage (Hive/Isar).  
-- Key rotation with KMS.  
-
-### Backend & API Security
-- OAuth2 with Plaid/TrueLayer (no credential storage).  
-- Rate limiting, input validation, audit logging.  
-
-### Fraud Prevention
-- Anomaly detection for suspicious logins.  
-- Transaction verification for high-value splits.  
-
-### Privacy & Compliance
-- GDPR/CCPA compliance.  
-- PCI-DSS (Stripe/PayPal handles cards).  
-- SOC2 readiness.  
-- User data deletion requests honored.  
-
-### Secure Development Lifecycle
-- Code reviews for security.  
-- Static & dependency analysis.  
-- Annual penetration testing.  
+- **MFA, biometrics, passkey readiness**
+- **AES-256/TLS 1.3**; KMS key management/rotation
+- **Rate limiting, auditing, input validation**, OAuth2 for integrations
+- **Fraud detection, anomaly review**; PCI, GDPR, SOC2 readiness
+- **Secure development lifecycle** (freq. code review, SAST, DAST, pen-testing)
+- **Predictive fraud alerts** for unusual behaviour
 
 ---
 
 ## 8. Metrics for Success (KPIs)
 
-### MVP KPIs
-- Daily Active Users (DAU).  
-- Retention rates (Day 7, Day 30).  
-- # of transactions categorized per user.  
-- # of bills split per group.  
-- Engagement with AI insights.  
+### MVP Activation
+- DAU/MAU ratio, 7/30/90-day retention
+- Time-to-first action (split, goal, etc)
+- Engagement: AI next-action rates, bill settlements, dashboard visits
 
-### Growth KPIs
-- Net Promoter Score (NPS).  
-- % of settlements completed in-app.  
-- Premium conversion rate.  
+### Growth
+- NPS (in-app micro-surveys), conversion rates to premium
+- Settlement completion, document exports, goal milestones achieved
 
 ---
 
 ## 9. Release Plan
 
 ### Phase 1 (0–3 months)
-- Auth + onboarding.  
-- Dashboard (balances, budgets, bills).  
-- Bill splitting (manual settlement).  
-- Weekly AI digest.  
+- Authentication/onboarding (smart flows)
+- Dashboard, budgeting, saving metrics, bill splitting (manual, evidence attach)
+- Weekly AI digest, conversational assistant, document upload, tax export tools
+- Emergency fund, goal suggestion widgets
+- Customizable insights, community benchmarks
 
 ### Phase 2 (3–6 months)
-- Stripe/PayPal settlements.  
-- Shared goals & wallets.  
-- Advanced AI forecasting.  
-- Subscription manager.  
+- Stripe/PayPal settlements
+- Shared/joint wallets, parental controls
+- Subscription manager, recurring charge cancellation
+- Multi-currency, FX rates
+- Rewards (pilot), API/plugin (pilot)
+- Adaptive notifications, predictive fraud alerts
 
 ### Phase 3 (6–12 months)
-- Multi-currency support.  
-- Conversational AI assistant.  
-- Smart notifications.  
-- Web app release.  
+- Web app full release
+- API, plugin ecosystem, region-specific bank expansion
+- Community feature voting, on-device analytics, rich integrations
+- Advanced smart notifications, automated recurring groups
+
+**Each phase includes beta releases, feedback sprints, and regular user research updates.**
 
 ---
 
 ## 10. Risks & Mitigations
-- **Banking API limits/costs** → support manual entry & offline mode.  
-- **User trust in AI** → explain assumptions & show confidence levels.  
-- **Privacy concerns** → transparent consent + zero-knowledge option.  
-- **Complex UX** → keep core flows ≤3 steps.  
+- **Banking API limits/costs**: More providers, manual/offline support, edge caching
+- **User trust in AI**: Transparent forecasts, explainability, opt-in actions
+- **Privacy concerns**: Nutrition labels, data controls, on-device analytics, consent flows
+- **Complex UX**: Persona-driven onboarding, max 3 steps per flow
 
 ---
 
 ## 11. Open Questions
-- Monetization: freemium vs. subscription?  
-- Region focus: US first (Plaid) or EU/UK (TrueLayer)?  
-- AI compute: cloud-based or on-device for privacy?  
-
-
+- Monetization (freemium, premium, partner features)
+- Initial region focus (US, EU, UK)
+- AI compute model (cloud, on-device hybrid)
+- Which partner rewards/network integrations present most value at launch?

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
@@ -8,6 +9,7 @@ import '../../features/bill_splitting/presentation/pages/bills_page.dart';
 import '../../features/bill_splitting/presentation/pages/group_detail_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/ai_insights/presentation/pages/insights_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -15,8 +17,14 @@ final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>()
 class AppRouter {
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/onboarding',
+    initialLocation: '/',
     routes: [
+      // Splash Screen
+      GoRoute(
+        path: '/',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
       // Auth Routes
       GoRoute(
         path: '/onboarding',
@@ -69,6 +77,11 @@ class AppRouter {
             name: 'insights',
             builder: (context, state) => const InsightsPage(),
           ),
+          GoRoute(
+            path: '/profile',
+            name: 'profile',
+            builder: (context, state) => const ProfilePage(),
+          ),
         ],
       ),
     ],
@@ -111,6 +124,11 @@ class MainShell extends StatelessWidget {
             selectedIcon: Icon(Icons.lightbulb),
             label: 'Insights',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );
@@ -122,6 +140,7 @@ class MainShell extends StatelessWidget {
     if (location.startsWith('/bills')) return 1;
     if (location.startsWith('/budgets')) return 2;
     if (location.startsWith('/insights')) return 3;
+    if (location.startsWith('/profile')) return 4;
     return 0;
   }
 
@@ -138,6 +157,9 @@ class MainShell extends StatelessWidget {
         break;
       case 3:
         context.go('/insights');
+        break;
+      case 4:
+        context.go('/profile');
         break;
     }
   }

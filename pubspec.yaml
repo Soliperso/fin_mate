@@ -41,11 +41,34 @@ dependencies:
   # Routing
   go_router: ^14.6.2
 
+  # Backend & Auth
+  supabase_flutter: ^2.9.1
+
+  # Local Storage (Encrypted)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+
+  # Security
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.2
+
   # UI
   google_fonts: ^6.2.1
+  fl_chart: ^0.70.1
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
 
   # Utilities
   intl: ^0.20.1
+  uuid: ^4.5.1
+  equatable: ^2.0.7
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  logger: ^2.5.0
+
+  # Permissions
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +80,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
