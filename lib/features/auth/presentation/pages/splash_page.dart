@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../providers/auth_providers.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
+class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -40,12 +42,24 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 
     _animationController.forward();
 
-    // Navigate to onboarding after animation completes
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      if (mounted) {
+    // Check auth status and navigate accordingly
+    _checkAuthAndNavigate();
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    await Future.delayed(const Duration(milliseconds: 2500));
+
+    if (!mounted) return;
+
+    final user = await ref.read(currentUserProvider.future);
+
+    if (mounted) {
+      if (user != null) {
+        context.go('/dashboard');
+      } else {
         context.go('/onboarding');
       }
-    });
+    }
   }
 
   @override

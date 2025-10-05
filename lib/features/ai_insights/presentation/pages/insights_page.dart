@@ -38,6 +38,7 @@ class InsightsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('AI Insights'),
         actions: [
           IconButton(

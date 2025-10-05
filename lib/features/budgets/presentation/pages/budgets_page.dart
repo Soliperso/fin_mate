@@ -41,6 +41,7 @@ class BudgetsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Budgets'),
         actions: [
           IconButton(

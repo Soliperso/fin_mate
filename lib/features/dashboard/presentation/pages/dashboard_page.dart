@@ -15,6 +15,7 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

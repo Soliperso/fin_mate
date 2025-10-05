@@ -1,0 +1,88 @@
+name: Deploy Android
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  deploy-android:
+    name: Deploy to Play Store
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Create key.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+
+      - name: Upload to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.finmate.app
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ github.event.inputs.track || 'internal' }}
+          status: completed
+          whatsNewDirectory: distribution/whatsnew
+          mappingFile: build/app/outputs/mapping/release/mapping.txt
+
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f android/app/upload-keystore.jks
+          rm -f android/key.properties

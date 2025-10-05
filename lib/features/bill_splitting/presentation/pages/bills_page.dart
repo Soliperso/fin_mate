@@ -35,6 +35,7 @@ class BillsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Bill Splitting'),
         actions: [
           IconButton(

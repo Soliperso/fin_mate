@@ -64,13 +64,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () => context.go('/signup'),
+                            onPressed: () => context.push('/signup'),
                             child: const Text('Get Started'),
                           ),
                         ),
                         const SizedBox(height: AppSizes.md),
                         TextButton(
-                          onPressed: () => context.go('/login'),
+                          onPressed: () => context.push('/login'),
                           child: const Text('Already have an account? Log in'),
                         ),
                       ],
@@ -79,7 +79,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Row(
                       children: [
                         TextButton(
-                          onPressed: () => context.go('/login'),
+                          onPressed: () => context.push('/login'),
                           child: const Text('Skip'),
                         ),
                         const Spacer(),

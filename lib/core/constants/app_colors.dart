@@ -36,5 +36,9 @@ class AppColors {
   static const cardBackground = white;
   static const cardBackgroundDark = Color(0xFF1E2731);
 
+  // Border Colors
+  static const borderLight = Color(0xFFE1E8ED);
+  static const borderDark = Color(0xFF2D3748);
+
   AppColors._();
 }

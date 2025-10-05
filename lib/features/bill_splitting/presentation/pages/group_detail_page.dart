@@ -39,6 +39,7 @@ class GroupDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(groupName),
         actions: [
           IconButton(

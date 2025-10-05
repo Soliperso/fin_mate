@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../providers/auth_providers.dart';
 
-class SignupPage extends StatefulWidget {
+class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _SignupPageState extends ConsumerState<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -18,16 +20,18 @@ class _SignupPageState extends State<SignupPage> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
   bool _acceptedTerms = false;
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/onboarding'),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
@@ -53,6 +57,29 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                 ),
                 const SizedBox(height: AppSizes.xxl),
+                if (authState.errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.sm),
+                      border: Border.all(color: AppColors.error),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: AppColors.error),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: Text(
+                            authState.errorMessage!,
+                            style: TextStyle(color: AppColors.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                ],
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -168,8 +195,8 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton(
-                  onPressed: _isLoading || !_acceptedTerms ? null : _handleSignup,
-                  child: _isLoading
+                  onPressed: authState.isLoading || !_acceptedTerms ? null : _handleSignup,
+                  child: authState.isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
@@ -201,11 +228,27 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _handleSignup() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      // TODO: Implement actual signup logic with Supabase
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        context.go('/dashboard');
+      try {
+        await ref.read(authNotifierProvider.notifier).signUpWithEmail(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              fullName: _nameController.text.trim(),
+            );
+        if (mounted) {
+          // Navigate to email verification page
+          context.go('/verify-email', extra: _emailController.text.trim());
+        }
+      } catch (e) {
+        // Error is already handled in the provider
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(ref.read(authNotifierProvider).errorMessage ??
+                  'Failed to create account. Please try again.'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }
