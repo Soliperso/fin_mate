@@ -13,6 +13,7 @@ import '../../features/bill_splitting/presentation/pages/bills_page.dart';
 import '../../features/bill_splitting/presentation/pages/group_detail_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
+import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/ai_insights/presentation/pages/insights_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
@@ -143,6 +144,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/transactions',
             name: 'transactions',
             builder: (context, state) => const TransactionsPage(),
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'add-transaction',
+                builder: (context, state) {
+                  final type = state.uri.queryParameters['type'];
+                  return AddTransactionPage(transactionType: type);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/insights',
@@ -178,6 +189,8 @@ class MainShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        indicatorColor: Theme.of(context).colorScheme.primary,
         selectedIndex: _calculateSelectedIndex(context),
         onDestinationSelected: (index) => _onItemTapped(index, context),
         destinations: const [

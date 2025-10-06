@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../widgets/net_worth_card.dart';
 import '../widgets/cash_flow_card.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/upcoming_bills_card.dart';
 import '../widgets/quick_action_button.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.user;
+
+    // Extract initials from user's full name
+    String getInitials() {
+      if (user?.fullName == null || user?.fullName?.isEmpty == true) {
+        return 'U';
+      }
+      final names = user!.fullName!.trim().split(' ');
+      if (names.length == 1) {
+        return names[0][0].toUpperCase();
+      }
+      return '${names.first[0]}${names.last[0]}'.toUpperCase();
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -33,11 +51,24 @@ class DashboardPage extends StatelessWidget {
               // TODO: Navigate to notifications
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {
-              // TODO: Navigate to profile
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () => context.go('/profile'),
+              borderRadius: BorderRadius.circular(20),
+              child: CircleAvatar(
+                backgroundColor: AppColors.emeraldGreen,
+                radius: 18,
+                child: Text(
+                  getInitials(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -77,7 +108,7 @@ class DashboardPage extends StatelessWidget {
                       label: 'Add Expense',
                       color: AppColors.error,
                       onTap: () {
-                        // TODO: Add expense
+                        context.go('/transactions/add?type=expense');
                       },
                     ),
                   ),
@@ -88,7 +119,7 @@ class DashboardPage extends StatelessWidget {
                       label: 'Add Income',
                       color: AppColors.success,
                       onTap: () {
-                        // TODO: Add income
+                        context.go('/transactions/add?type=income');
                       },
                     ),
                   ),
@@ -99,7 +130,7 @@ class DashboardPage extends StatelessWidget {
                       label: 'Split Bill',
                       color: AppColors.royalPurple,
                       onTap: () {
-                        // TODO: Navigate to bill splitting
+                        context.go('/bills');
                       },
                     ),
                   ),
@@ -140,7 +171,7 @@ class DashboardPage extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              // TODO: View all transactions
+                              context.go('/transactions');
                             },
                             child: const Text('View All'),
                           ),

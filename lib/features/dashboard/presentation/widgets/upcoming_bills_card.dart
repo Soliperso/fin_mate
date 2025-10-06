@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -30,7 +31,7 @@ class UpcomingBillsCard extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    // TODO: View all bills
+                    context.go('/bills');
                   },
                   child: const Text('View All'),
                 ),
@@ -64,7 +65,9 @@ class UpcomingBillsCard extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: bills.length > 3 ? 3 : bills.length,
-                separatorBuilder: (context, index) => const Divider(),
+                separatorBuilder: (context, index) => Divider(
+                  color: AppColors.borderLight.withValues(alpha: 0.3),
+                ),
                 itemBuilder: (context, index) {
                   final bill = bills[index];
                   final dueDate = DateTime.parse(bill['dueDate'] as String);

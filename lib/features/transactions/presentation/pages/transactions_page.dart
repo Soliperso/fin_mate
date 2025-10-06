@@ -12,24 +12,63 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Income', 'Expense', 'Transfer'];
+  String _searchQuery = '';
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  // Advanced filter options
+  String? _selectedCategory;
+  DateTimeRange? _dateRange;
+  double? _minAmount;
+  double? _maxAmount;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transactions'),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search transactions...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              )
+            : const Text('Transactions'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
-              // TODO: Implement search functionality
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: Implement filter functionality
-            },
+            icon: Icon(
+              Icons.filter_list,
+              color: _hasActiveFilters() ? AppColors.emeraldGreen : null,
+            ),
+            onPressed: _showFilterBottomSheet,
           ),
         ],
       ),
@@ -63,7 +102,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     side: BorderSide(
-                      color: isSelected ? AppColors.emeraldGreen : AppColors.borderLight,
+                      color: isSelected ? AppColors.emeraldGreen : Colors.transparent,
                     ),
                   ),
                 );
@@ -71,7 +110,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
           ),
 
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: AppColors.borderLight.withValues(alpha: 0.3),
+          ),
 
           // Transactions list
           Expanded(
@@ -143,15 +185,37 @@ class _TransactionsPageState extends State<TransactionsPage> {
       },
     ];
 
-    // Filter transactions based on selected filter
-    final filteredTransactions = _selectedFilter == 'All'
-        ? mockTransactions
-        : mockTransactions.where((t) {
-            if (_selectedFilter == 'Income') return t['type'] == 'income';
-            if (_selectedFilter == 'Expense') return t['type'] == 'expense';
-            if (_selectedFilter == 'Transfer') return t['type'] == 'transfer';
-            return true;
-          }).toList();
+    // Filter transactions based on selected filter, search query, and advanced filters
+    var filteredTransactions = mockTransactions.where((t) {
+      // Filter by type (All, Income, Expense, Transfer)
+      if (_selectedFilter != 'All') {
+        if (_selectedFilter == 'Income' && t['type'] != 'income') return false;
+        if (_selectedFilter == 'Expense' && t['type'] != 'expense') return false;
+        if (_selectedFilter == 'Transfer' && t['type'] != 'transfer') return false;
+      }
+
+      // Filter by search query
+      if (_searchQuery.isNotEmpty) {
+        final title = (t['title'] as String).toLowerCase();
+        final category = (t['category'] as String).toLowerCase();
+        final query = _searchQuery.toLowerCase();
+        if (!title.contains(query) && !category.contains(query)) {
+          return false;
+        }
+      }
+
+      // Filter by category
+      if (_selectedCategory != null && t['category'] != _selectedCategory) {
+        return false;
+      }
+
+      // Filter by amount range
+      final amount = (t['amount'] as double).abs();
+      if (_minAmount != null && amount < _minAmount!) return false;
+      if (_maxAmount != null && amount > _maxAmount!) return false;
+
+      return true;
+    }).toList();
 
     if (filteredTransactions.isEmpty) {
       return Center(
@@ -186,11 +250,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         final isTransfer = transaction['type'] == 'transfer';
 
         return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.sm),
-            side: BorderSide(color: AppColors.borderLight),
-          ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSizes.md,
@@ -256,6 +315,208 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ),
         );
       },
+    );
+  }
+
+  bool _hasActiveFilters() {
+    return _selectedCategory != null ||
+        _dateRange != null ||
+        _minAmount != null ||
+        _maxAmount != null;
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(AppSizes.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter Transactions',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _selectedCategory = null;
+                            _dateRange = null;
+                            _minAmount = null;
+                            _maxAmount = null;
+                          });
+                          setState(() {});
+                        },
+                        child: const Text('Clear All'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Category Filter
+                  Text(
+                    'Category',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Wrap(
+                    spacing: AppSizes.sm,
+                    children: [
+                      'Income',
+                      'Food & Dining',
+                      'Utilities',
+                      'Transfer',
+                      'Shopping',
+                      'Entertainment',
+                    ].map((category) {
+                      final isSelected = _selectedCategory == category;
+                      return FilterChip(
+                        label: Text(category),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setModalState(() {
+                            _selectedCategory = selected ? category : null;
+                          });
+                        },
+                        backgroundColor: Colors.transparent,
+                        selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.emeraldGreen,
+                        labelStyle: TextStyle(
+                          color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        side: BorderSide(
+                          color: isSelected ? AppColors.emeraldGreen : AppColors.borderLight,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Date Range Filter
+                  Text(
+                    'Date Range',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        initialDateRange: _dateRange,
+                      );
+                      if (picked != null) {
+                        setModalState(() {
+                          _dateRange = picked;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      _dateRange == null
+                          ? 'Select Date Range'
+                          : '${_dateRange!.start.toString().split(' ')[0]} - ${_dateRange!.end.toString().split(' ')[0]}',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _dateRange != null ? AppColors.emeraldGreen : null,
+                      side: BorderSide(
+                        color: _dateRange != null ? AppColors.emeraldGreen : AppColors.borderLight,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Amount Range Filter
+                  Text(
+                    'Amount Range',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'Min Amount',
+                            prefixText: '\$',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setModalState(() {
+                              _minAmount = double.tryParse(value);
+                            });
+                          },
+                          controller: TextEditingController(
+                            text: _minAmount?.toString() ?? '',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.md),
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'Max Amount',
+                            prefixText: '\$',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setModalState(() {
+                              _maxAmount = double.tryParse(value);
+                            });
+                          },
+                          controller: TextEditingController(
+                            text: _maxAmount?.toString() ?? '',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Apply Button
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {}); // Update the main page
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.emeraldGreen,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Apply Filters'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
