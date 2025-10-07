@@ -147,4 +147,82 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Failed to resend OTP: $e');
     }
   }
+
+  @override
+  Future<void> enableEmailMfa() async {
+    try {
+      await _remoteDataSource.enableEmailMfa();
+    } catch (e) {
+      throw Exception('Failed to enable email MFA: $e');
+    }
+  }
+
+  @override
+  Future<String> enableTotpMfa() async {
+    try {
+      return await _remoteDataSource.enableTotpMfa();
+    } catch (e) {
+      throw Exception('Failed to enable TOTP MFA: $e');
+    }
+  }
+
+  @override
+  Future<void> verifyAndActivateTotpMfa({
+    required String secret,
+    required String code,
+  }) async {
+    try {
+      await _remoteDataSource.verifyAndActivateTotpMfa(
+        secret: secret,
+        code: code,
+      );
+    } catch (e) {
+      throw Exception('Failed to verify and activate TOTP MFA: $e');
+    }
+  }
+
+  @override
+  Future<void> disableMfa() async {
+    try {
+      await _remoteDataSource.disableMfa();
+    } catch (e) {
+      throw Exception('Failed to disable MFA: $e');
+    }
+  }
+
+  @override
+  Future<void> sendMfaEmailOtp() async {
+    try {
+      await _remoteDataSource.sendMfaEmailOtp();
+    } catch (e) {
+      throw Exception('Failed to send MFA email OTP: $e');
+    }
+  }
+
+  @override
+  Future<bool> verifyMfaCode(String code) async {
+    try {
+      return await _remoteDataSource.verifyMfaCode(code);
+    } catch (e) {
+      throw Exception('Failed to verify MFA code: $e');
+    }
+  }
+
+  @override
+  Future<bool> isMfaEnabled() async {
+    try {
+      return await _remoteDataSource.isMfaEnabled();
+    } catch (e) {
+      throw Exception('Failed to check MFA status: $e');
+    }
+  }
+
+  @override
+  Future<String?> getMfaMethod() async {
+    try {
+      return await _remoteDataSource.getMfaMethod();
+    } catch (e) {
+      throw Exception('Failed to get MFA method: $e');
+    }
+  }
 }

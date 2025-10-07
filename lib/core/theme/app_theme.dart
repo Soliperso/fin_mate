@@ -10,7 +10,7 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
         primary: AppColors.emeraldGreen,
-        secondary: AppColors.royalPurple,
+        secondary: AppColors.slateBlue,
         tertiary: AppColors.tealBlue,
         error: AppColors.error,
         surface: AppColors.white,
@@ -84,7 +84,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
         primary: AppColors.emeraldGreen,
-        secondary: AppColors.royalPurple,
+        secondary: AppColors.slateBlue,
         tertiary: AppColors.tealBlue,
         error: AppColors.error,
         surface: AppColors.cardBackgroundDark,

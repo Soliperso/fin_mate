@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/secure_storage_provider.dart';
+import '../../../../core/services/biometric_provider.dart';
 import '../providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -200,12 +201,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: AppSizes.lg),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Implement biometric login
+                Consumer(
+                  builder: (context, ref, child) {
+                    final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
+
+                    return isBiometricAvailable.when(
+                      data: (isAvailable) {
+                        if (!isAvailable) return const SizedBox.shrink();
+
+                        // Check if credentials are saved
+                        return FutureBuilder<bool>(
+                          future: ref.read(secureStorageServiceProvider).isRememberMeEnabled(),
+                          builder: (context, snapshot) {
+                            // Only show if user has saved credentials
+                            if (!snapshot.hasData || !snapshot.data!) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return OutlinedButton.icon(
+                              onPressed: authState.isLoading ? null : _handleBiometricLogin,
+                              icon: const Icon(Icons.fingerprint),
+                              label: const Text('Use Biometric Login'),
+                            );
+                          },
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    );
                   },
-                  icon: const Icon(Icons.fingerprint),
-                  label: const Text('Use Biometric Login'),
                 ),
               ],
             ),
@@ -228,8 +252,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             email: email,
             password: password,
           );
+
+          // Check if biometric is available and enable it
+          final biometricService = ref.read(biometricServiceProvider);
+          final isAvailable = await biometricService.isBiometricAvailable();
+          if (isAvailable) {
+            await storageService.setBiometricEnabled(true);
+          }
         } else {
           await storageService.clearCredentials();
+          await storageService.setBiometricEnabled(false);
         }
 
         await ref.read(authNotifierProvider.notifier).signInWithEmail(
@@ -247,6 +279,88 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           );
         }
+      }
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    print('🔐 Biometric login button pressed');
+
+    try {
+      final biometricService = ref.read(biometricServiceProvider);
+      final storageService = ref.read(secureStorageServiceProvider);
+
+      print('📱 Checking biometric availability...');
+      final isAvailable = await biometricService.isBiometricAvailable();
+      print('📱 Biometric available: $isAvailable');
+
+      if (!isAvailable) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Biometric authentication is not available on this device'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+        return;
+      }
+
+      print('🔑 Getting saved credentials...');
+      final email = await storageService.getSavedEmail();
+      final password = await storageService.getSavedPassword();
+      print('🔑 Email found: ${email != null}, Password found: ${password != null}');
+
+      if (email == null || password == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No saved credentials found. Please login with "Remember me" enabled first.'),
+              backgroundColor: AppColors.warning,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+
+      print('👆 Starting biometric authentication...');
+      // Authenticate with biometrics
+      final result = await biometricService.authenticate(
+        localizedReason: 'Authenticate to access FinMate',
+      );
+
+      print('👆 Biometric result: ${result.success}');
+      if (!result.success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.errorMessage ?? 'Biometric authentication failed'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+        return;
+      }
+
+      print('✅ Biometric success, signing in...');
+      // Sign in with saved credentials
+      await ref.read(authNotifierProvider.notifier).signInWithEmail(
+            email: email,
+            password: password,
+          );
+      print('✅ Sign in complete');
+    } catch (e, stackTrace) {
+      print('❌ Biometric login error: $e');
+      print('Stack trace: $stackTrace');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Biometric login failed: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }

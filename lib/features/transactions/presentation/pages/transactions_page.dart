@@ -1,35 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../domain/entities/transaction_entity.dart';
+import '../providers/transaction_providers.dart';
 
-class TransactionsPage extends StatefulWidget {
+class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
 
   @override
-  State<TransactionsPage> createState() => _TransactionsPageState();
+  ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
 }
 
-class _TransactionsPageState extends State<TransactionsPage> {
-  String _selectedFilter = 'All';
-  final List<String> _filters = ['All', 'Income', 'Expense', 'Transfer'];
-  String _searchQuery = '';
+class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _minAmountController = TextEditingController();
+  final TextEditingController _maxAmountController = TextEditingController();
 
-  // Advanced filter options
-  String? _selectedCategory;
-  DateTimeRange? _dateRange;
-  double? _minAmount;
-  double? _maxAmount;
+  @override
+  void initState() {
+    super.initState();
+    // Refresh transactions when page is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(transactionListProvider.notifier).refresh();
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _minAmountController.dispose();
+    _maxAmountController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(transactionListProvider);
+    final notifier = ref.read(transactionListProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -42,9 +54,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
+                  notifier.setSearchQuery(value);
                 },
               )
             : const Text('Transactions'),
@@ -55,8 +65,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
               setState(() {
                 if (_isSearching) {
                   _isSearching = false;
-                  _searchQuery = '';
                   _searchController.clear();
+                  notifier.setSearchQuery('');
                 } else {
                   _isSearching = true;
                 }
@@ -66,9 +76,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: _hasActiveFilters() ? AppColors.emeraldGreen : null,
+              color: state.hasActiveFilters ? AppColors.emeraldGreen : null,
             ),
-            onPressed: _showFilterBottomSheet,
+            onPressed: () => _showFilterBottomSheet(context),
           ),
         ],
       ),
@@ -78,35 +88,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-            child: ListView.builder(
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              itemCount: _filters.length,
-              itemBuilder: (context, index) {
-                final filter = _filters[index];
-                final isSelected = filter == _selectedFilter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: AppSizes.sm),
-                  child: FilterChip(
-                    label: Text(filter),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = filter;
-                      });
-                    },
-                    backgroundColor: Colors.transparent,
-                    selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
-                    checkmarkColor: AppColors.emeraldGreen,
-                    labelStyle: TextStyle(
-                      color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? AppColors.emeraldGreen : Colors.transparent,
-                    ),
-                  ),
-                );
-              },
+              children: [
+                _buildFilterChip(context, 'All', state.selectedFilter, notifier),
+                const SizedBox(width: AppSizes.sm),
+                _buildFilterChip(context, 'Income', state.selectedFilter, notifier),
+                const SizedBox(width: AppSizes.sm),
+                _buildFilterChip(context, 'Expense', state.selectedFilter, notifier),
+                const SizedBox(width: AppSizes.sm),
+                _buildFilterChip(context, 'Transfer', state.selectedFilter, notifier),
+              ],
             ),
           ),
 
@@ -117,14 +109,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
           // Transactions list
           Expanded(
-            child: _buildTransactionsList(),
+            child: _buildTransactionsList(state, notifier),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Implement add transaction functionality
-          _showAddTransactionDialog();
+        onPressed: () async {
+          await context.push('/transactions/add');
+          // Refresh transactions after returning from add page
+          if (mounted) {
+            ref.read(transactionListProvider.notifier).refresh();
+          }
         },
         backgroundColor: AppColors.emeraldGreen,
         child: const Icon(Icons.add),
@@ -132,92 +127,68 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  Widget _buildTransactionsList() {
-    // Mock transactions data - replace with actual data later
-    final mockTransactions = [
-      {
-        'title': 'Salary',
-        'category': 'Income',
-        'amount': 5000.00,
-        'date': 'Today, 10:30 AM',
-        'type': 'income',
-        'icon': Icons.attach_money,
+  Widget _buildFilterChip(
+    BuildContext context,
+    String filter,
+    String selectedFilter,
+    TransactionListNotifier notifier,
+  ) {
+    final isSelected = filter == selectedFilter;
+    return FilterChip(
+      label: Text(filter),
+      selected: isSelected,
+      onSelected: (selected) {
+        notifier.setFilter(filter);
       },
-      {
-        'title': 'Grocery Shopping',
-        'category': 'Food & Dining',
-        'amount': -85.50,
-        'date': 'Yesterday, 3:45 PM',
-        'type': 'expense',
-        'icon': Icons.shopping_cart,
-      },
-      {
-        'title': 'Electric Bill',
-        'category': 'Utilities',
-        'amount': -120.00,
-        'date': 'Dec 3, 2024',
-        'type': 'expense',
-        'icon': Icons.bolt,
-      },
-      {
-        'title': 'Freelance Project',
-        'category': 'Income',
-        'amount': 1200.00,
-        'date': 'Dec 2, 2024',
-        'type': 'income',
-        'icon': Icons.work,
-      },
-      {
-        'title': 'Coffee Shop',
-        'category': 'Food & Dining',
-        'amount': -12.50,
-        'date': 'Dec 2, 2024',
-        'type': 'expense',
-        'icon': Icons.coffee,
-      },
-      {
-        'title': 'Transfer to Savings',
-        'category': 'Transfer',
-        'amount': -500.00,
-        'date': 'Dec 1, 2024',
-        'type': 'transfer',
-        'icon': Icons.swap_horiz,
-      },
-    ];
+      backgroundColor: Colors.transparent,
+      selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
+      checkmarkColor: AppColors.emeraldGreen,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.emeraldGreen : Colors.transparent,
+      ),
+    );
+  }
 
-    // Filter transactions based on selected filter, search query, and advanced filters
-    var filteredTransactions = mockTransactions.where((t) {
-      // Filter by type (All, Income, Expense, Transfer)
-      if (_selectedFilter != 'All') {
-        if (_selectedFilter == 'Income' && t['type'] != 'income') return false;
-        if (_selectedFilter == 'Expense' && t['type'] != 'expense') return false;
-        if (_selectedFilter == 'Transfer' && t['type'] != 'transfer') return false;
-      }
+  Widget _buildTransactionsList(
+    TransactionListState state,
+    TransactionListNotifier notifier,
+  ) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-      // Filter by search query
-      if (_searchQuery.isNotEmpty) {
-        final title = (t['title'] as String).toLowerCase();
-        final category = (t['category'] as String).toLowerCase();
-        final query = _searchQuery.toLowerCase();
-        if (!title.contains(query) && !category.contains(query)) {
-          return false;
-        }
-      }
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: AppSizes.md),
+            Text(
+              'Failed to load transactions',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.error,
+                  ),
+            ),
+            const SizedBox(height: AppSizes.sm),
+            TextButton(
+              onPressed: () => notifier.loadTransactions(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-      // Filter by category
-      if (_selectedCategory != null && t['category'] != _selectedCategory) {
-        return false;
-      }
-
-      // Filter by amount range
-      final amount = (t['amount'] as double).abs();
-      if (_minAmount != null && amount < _minAmount!) return false;
-      if (_maxAmount != null && amount > _maxAmount!) return false;
-
-      return true;
-    }).toList();
-
-    if (filteredTransactions.isEmpty) {
+    if (state.filteredTransactions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -229,103 +200,362 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
             const SizedBox(height: AppSizes.md),
             Text(
-              'No transactions found',
+              state.transactions.isEmpty
+                  ? 'No transactions yet'
+                  : 'No transactions found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
             ),
+            if (state.hasActiveFilters || state.searchQuery.isNotEmpty) ...[
+              const SizedBox(height: AppSizes.sm),
+              TextButton(
+                onPressed: () {
+                  notifier.clearFilters();
+                  notifier.setSearchQuery('');
+                  _searchController.clear();
+                },
+                child: const Text('Clear filters'),
+              ),
+            ],
           ],
         ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSizes.md),
-      itemCount: filteredTransactions.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppSizes.sm),
-      itemBuilder: (context, index) {
-        final transaction = filteredTransactions[index];
-        final amount = transaction['amount'] as double;
-        final isIncome = amount > 0;
-        final isTransfer = transaction['type'] == 'transfer';
+    return RefreshIndicator(
+      onRefresh: () => notifier.refresh(),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(AppSizes.md),
+        itemCount: state.filteredTransactions.length,
+        separatorBuilder: (context, index) => const SizedBox(height: AppSizes.sm),
+        itemBuilder: (context, index) {
+          final transaction = state.filteredTransactions[index];
+          return _buildTransactionCard(context, transaction, notifier);
+        },
+      ),
+    );
+  }
 
-        return Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.md,
-              vertical: AppSizes.xs,
-            ),
-            leading: CircleAvatar(
-              backgroundColor: isIncome
-                  ? AppColors.success.withValues(alpha: 0.2)
-                  : isTransfer
-                      ? AppColors.royalPurple.withValues(alpha: 0.2)
-                      : AppColors.error.withValues(alpha: 0.2),
-              child: Icon(
-                transaction['icon'] as IconData,
-                color: isIncome
-                    ? AppColors.success
-                    : isTransfer
-                        ? AppColors.royalPurple
-                        : AppColors.error,
+  Widget _buildTransactionCard(
+    BuildContext context,
+    TransactionEntity transaction,
+    TransactionListNotifier notifier,
+  ) {
+    final isIncome = transaction.type == TransactionType.income;
+    final isTransfer = transaction.type == TransactionType.transfer;
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
+
+    return Card(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md,
+          vertical: AppSizes.xs,
+        ),
+        leading: CircleAvatar(
+          backgroundColor: isIncome
+              ? AppColors.success.withValues(alpha: 0.2)
+              : isTransfer
+                  ? AppColors.slateBlue.withValues(alpha: 0.2)
+                  : AppColors.error.withValues(alpha: 0.2),
+          child: Icon(
+            _getTransactionIcon(transaction),
+            color: isIncome
+                ? AppColors.success
+                : isTransfer
+                    ? AppColors.slateBlue
+                    : AppColors.error,
+          ),
+        ),
+        title: Text(
+          transaction.description ?? 'Transaction',
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            if (transaction.categoryName != null)
+              Text(
+                transaction.categoryName!,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+            const SizedBox(height: 2),
+            Text(
+              dateFormat.format(transaction.date),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
               ),
             ),
-            title: Text(
-              transaction['title'] as String,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
+            if (transaction.accountName != null)
+              Text(
+                transaction.accountName!,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
               ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        trailing: Text(
+          '${isIncome ? '+' : isTransfer ? '' : '-'}${currencyFormat.format(transaction.amount.abs())}',
+          style: TextStyle(
+            color: isIncome
+                ? AppColors.success
+                : isTransfer
+                    ? AppColors.slateBlue
+                    : AppColors.error,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        onTap: () => _showTransactionDetails(context, transaction, notifier),
+      ),
+    );
+  }
+
+  IconData _getTransactionIcon(TransactionEntity transaction) {
+    // Use category-based icons if available
+    if (transaction.categoryName != null) {
+      final category = transaction.categoryName!.toLowerCase();
+      if (category.contains('food') || category.contains('dining')) {
+        return Icons.restaurant;
+      } else if (category.contains('transport') || category.contains('gas')) {
+        return Icons.directions_car;
+      } else if (category.contains('shopping')) {
+        return Icons.shopping_bag;
+      } else if (category.contains('entertainment')) {
+        return Icons.movie;
+      } else if (category.contains('utilities') || category.contains('bill')) {
+        return Icons.bolt;
+      } else if (category.contains('health')) {
+        return Icons.local_hospital;
+      } else if (category.contains('salary') || category.contains('income')) {
+        return Icons.attach_money;
+      }
+    }
+
+    // Default icons based on type
+    switch (transaction.type) {
+      case TransactionType.income:
+        return Icons.arrow_downward;
+      case TransactionType.expense:
+        return Icons.arrow_upward;
+      case TransactionType.transfer:
+        return Icons.swap_horiz;
+    }
+  }
+
+  void _showTransactionDetails(
+    BuildContext context,
+    TransactionEntity transaction,
+    TransactionListNotifier notifier,
+  ) {
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final dateFormat = DateFormat('MMMM d, yyyy • h:mm a');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSizes.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 4),
                 Text(
-                  transaction['category'] as String,
-                  style: TextStyle(
+                  'Transaction Details',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // Amount
+            Text(
+              currencyFormat.format(transaction.amount.abs()),
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: transaction.type == TransactionType.income
+                        ? AppColors.success
+                        : transaction.type == TransactionType.transfer
+                            ? AppColors.slateBlue
+                            : AppColors.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSizes.xs),
+            Text(
+              transaction.type.toString().split('.').last.toUpperCase(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
-                    fontSize: 12,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // Details
+            _buildDetailRow('Description', transaction.description ?? 'N/A'),
+            if (transaction.categoryName != null)
+              _buildDetailRow('Category', transaction.categoryName!),
+            if (transaction.accountName != null)
+              _buildDetailRow('Account', transaction.accountName!),
+            if (transaction.toAccountName != null)
+              _buildDetailRow('To Account', transaction.toAccountName!),
+            _buildDetailRow('Date', dateFormat.format(transaction.date)),
+            if (transaction.notes != null && transaction.notes!.isNotEmpty)
+              _buildDetailRow('Notes', transaction.notes!),
+
+            const SizedBox(height: AppSizes.lg),
+
+            // Actions
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await context.push('/transactions/add?id=${transaction.id}');
+                      // Refresh after editing
+                      if (context.mounted) {
+                        notifier.refresh();
+                      }
+                    },
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Edit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.emeraldGreen,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  transaction['date'] as String,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
+                const SizedBox(width: AppSizes.md),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _confirmDelete(context, transaction, notifier);
+                    },
+                    icon: const Icon(Icons.delete),
+                    label: const Text('Delete'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                    ),
                   ),
                 ),
               ],
             ),
-            trailing: Text(
-              '${amount > 0 ? '+' : ''}\$${amount.abs().toStringAsFixed(2)}',
-              style: TextStyle(
-                color: isIncome
-                    ? AppColors.success
-                    : isTransfer
-                        ? AppColors.royalPurple
-                        : AppColors.error,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            onTap: () {
-              // TODO: Show transaction details
-            },
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
-  bool _hasActiveFilters() {
-    return _selectedCategory != null ||
-        _dateRange != null ||
-        _minAmount != null ||
-        _maxAmount != null;
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void _showFilterBottomSheet() {
+  void _confirmDelete(
+    BuildContext context,
+    TransactionEntity transaction,
+    TransactionListNotifier notifier,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Transaction'),
+        content: const Text(
+          'Are you sure you want to delete this transaction? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await notifier.deleteTransaction(transaction.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Transaction deleted successfully'
+                          : 'Failed to delete transaction',
+                    ),
+                    backgroundColor: success ? AppColors.success : AppColors.error,
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    final state = ref.read(transactionListProvider);
+    final notifier = ref.read(transactionListProvider.notifier);
+    final categoriesAsync = ref.read(categoriesProvider(null));
+
+    // Local state for the modal
+    String? selectedCategory = state.selectedCategory;
+    DateTimeRange? dateRange = state.dateRange;
+    double? minAmount = state.minAmount;
+    double? maxAmount = state.maxAmount;
+
+    _minAmountController.text = minAmount?.toString() ?? '';
+    _maxAmountController.text = maxAmount?.toString() ?? '';
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -338,226 +568,184 @@ class _TransactionsPageState extends State<TransactionsPage> {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: Container(
-              padding: const EdgeInsets.all(AppSizes.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Filter Transactions',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setModalState(() {
-                            _selectedCategory = null;
-                            _dateRange = null;
-                            _minAmount = null;
-                            _maxAmount = null;
-                          });
-                          setState(() {});
-                        },
-                        child: const Text('Clear All'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.lg),
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(AppSizes.lg),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filter Transactions',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() {
+                              selectedCategory = null;
+                              dateRange = null;
+                              minAmount = null;
+                              maxAmount = null;
+                              _minAmountController.clear();
+                              _maxAmountController.clear();
+                            });
+                          },
+                          child: const Text('Clear All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSizes.lg),
 
-                  // Category Filter
-                  Text(
-                    'Category',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  Wrap(
-                    spacing: AppSizes.sm,
-                    children: [
-                      'Income',
-                      'Food & Dining',
-                      'Utilities',
-                      'Transfer',
-                      'Shopping',
-                      'Entertainment',
-                    ].map((category) {
-                      final isSelected = _selectedCategory == category;
-                      return FilterChip(
-                        label: Text(category),
-                        selected: isSelected,
-                        onSelected: (selected) {
+                    // Category Filter
+                    Text(
+                      'Category',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    categoriesAsync.when(
+                      data: (categories) {
+                        return Wrap(
+                          spacing: AppSizes.sm,
+                          children: categories.map((category) {
+                            final isSelected = selectedCategory == category.name;
+                            return FilterChip(
+                              label: Text(category.name),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setModalState(() {
+                                  selectedCategory = selected ? category.name : null;
+                                });
+                              },
+                              backgroundColor: Colors.transparent,
+                              selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
+                              checkmarkColor: AppColors.emeraldGreen,
+                              labelStyle: TextStyle(
+                                color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                              side: BorderSide(
+                                color: isSelected ? AppColors.emeraldGreen : AppColors.borderLight,
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                      loading: () => const CircularProgressIndicator(),
+                      error: (_, stack) => const Text('Failed to load categories'),
+                    ),
+                    const SizedBox(height: AppSizes.lg),
+
+                    // Date Range Filter
+                    Text(
+                      'Date Range',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                          initialDateRange: dateRange,
+                        );
+                        if (picked != null) {
                           setModalState(() {
-                            _selectedCategory = selected ? category : null;
+                            dateRange = picked;
                           });
-                        },
-                        backgroundColor: Colors.transparent,
-                        selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.emeraldGreen,
-                        labelStyle: TextStyle(
-                          color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_today),
+                      label: Text(
+                        dateRange == null
+                            ? 'Select Date Range'
+                            : '${DateFormat('MMM d').format(dateRange!.start)} - ${DateFormat('MMM d, y').format(dateRange!.end)}',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: dateRange != null ? AppColors.emeraldGreen : null,
                         side: BorderSide(
-                          color: isSelected ? AppColors.emeraldGreen : AppColors.borderLight,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-
-                  // Date Range Filter
-                  Text(
-                    'Date Range',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                        initialDateRange: _dateRange,
-                      );
-                      if (picked != null) {
-                        setModalState(() {
-                          _dateRange = picked;
-                        });
-                      }
-                    },
-                    icon: const Icon(Icons.calendar_today),
-                    label: Text(
-                      _dateRange == null
-                          ? 'Select Date Range'
-                          : '${_dateRange!.start.toString().split(' ')[0]} - ${_dateRange!.end.toString().split(' ')[0]}',
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _dateRange != null ? AppColors.emeraldGreen : null,
-                      side: BorderSide(
-                        color: _dateRange != null ? AppColors.emeraldGreen : AppColors.borderLight,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-
-                  // Amount Range Filter
-                  Text(
-                    'Amount Range',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Min Amount',
-                            prefixText: '\$',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setModalState(() {
-                              _minAmount = double.tryParse(value);
-                            });
-                          },
-                          controller: TextEditingController(
-                            text: _minAmount?.toString() ?? '',
-                          ),
+                          color: dateRange != null ? AppColors.emeraldGreen : AppColors.borderLight,
                         ),
                       ),
-                      const SizedBox(width: AppSizes.md),
-                      Expanded(
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Max Amount',
-                            prefixText: '\$',
-                            border: OutlineInputBorder(),
+                    ),
+                    const SizedBox(height: AppSizes.lg),
+
+                    // Amount Range Filter
+                    Text(
+                      'Amount Range',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setModalState(() {
-                              _maxAmount = double.tryParse(value);
-                            });
-                          },
-                          controller: TextEditingController(
-                            text: _maxAmount?.toString() ?? '',
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _minAmountController,
+                            decoration: const InputDecoration(
+                              labelText: 'Min Amount',
+                              prefixText: '\$',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              setModalState(() {
+                                minAmount = double.tryParse(value);
+                              });
+                            },
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-
-                  // Apply Button
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {}); // Update the main page
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.emeraldGreen,
-                      foregroundColor: Colors.white,
+                        const SizedBox(width: AppSizes.md),
+                        Expanded(
+                          child: TextField(
+                            controller: _maxAmountController,
+                            decoration: const InputDecoration(
+                              labelText: 'Max Amount',
+                              prefixText: '\$',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              setModalState(() {
+                                maxAmount = double.tryParse(value);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Text('Apply Filters'),
-                  ),
-                ],
+                    const SizedBox(height: AppSizes.lg),
+
+                    // Apply Button
+                    ElevatedButton(
+                      onPressed: () {
+                        notifier.setCategory(selectedCategory);
+                        notifier.setDateRange(dateRange);
+                        notifier.setAmountRange(minAmount, maxAmount);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.emeraldGreen,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Apply Filters'),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _showAddTransactionDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.md)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Add Transaction',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.lg),
-              Text(
-                'Transaction functionality coming soon!',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.lg),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -17,6 +17,7 @@ import '../../features/transactions/presentation/pages/add_transaction_page.dart
 import '../../features/ai_insights/presentation/pages/insights_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/profile/presentation/pages/security_settings_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -150,7 +151,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'add-transaction',
                 builder: (context, state) {
                   final type = state.uri.queryParameters['type'];
-                  return AddTransactionPage(transactionType: type);
+                  final id = state.uri.queryParameters['id'];
+                  return AddTransactionPage(
+                    transactionType: type,
+                    transactionId: id,
+                  );
                 },
               ),
             ],
@@ -169,6 +174,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'edit',
                 name: 'profile-edit',
                 builder: (context, state) => const EditProfilePage(),
+              ),
+              GoRoute(
+                path: 'security',
+                name: 'security-settings',
+                builder: (context, state) => const SecuritySettingsPage(),
               ),
             ],
           ),
@@ -200,6 +210,11 @@ class MainShell extends StatelessWidget {
             label: 'Dashboard',
           ),
           NavigationDestination(
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: Icon(Icons.account_balance_wallet),
+            label: 'Budgets',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),
             label: 'Bills',
@@ -207,7 +222,7 @@ class MainShell extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Icons.swap_horiz_outlined),
             selectedIcon: Icon(Icons.swap_horiz),
-            label: 'Transactions',
+            label: 'Activities',
           ),
           NavigationDestination(
             icon: Icon(Icons.lightbulb_outline),
@@ -222,9 +237,10 @@ class MainShell extends StatelessWidget {
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/dashboard')) return 0;
-    if (location.startsWith('/bills')) return 1;
-    if (location.startsWith('/transactions')) return 2;
-    if (location.startsWith('/insights')) return 3;
+    if (location.startsWith('/budgets')) return 1;
+    if (location.startsWith('/bills')) return 2;
+    if (location.startsWith('/transactions')) return 3;
+    if (location.startsWith('/insights')) return 4;
     return 0;
   }
 
@@ -234,12 +250,15 @@ class MainShell extends StatelessWidget {
         context.go('/dashboard');
         break;
       case 1:
-        context.go('/bills');
+        context.go('/budgets');
         break;
       case 2:
-        context.go('/transactions');
+        context.go('/bills');
         break;
       case 3:
+        context.go('/transactions');
+        break;
+      case 4:
         context.go('/insights');
         break;
     }

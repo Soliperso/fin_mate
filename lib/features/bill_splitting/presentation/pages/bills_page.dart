@@ -118,12 +118,12 @@ class BillsPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSizes.md),
                     decoration: BoxDecoration(
-                      color: AppColors.royalPurple.withValues(alpha: 0.1),
+                      color: AppColors.slateBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
                       Icons.group,
-                      color: AppColors.royalPurple,
+                      color: AppColors.slateBlue,
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),

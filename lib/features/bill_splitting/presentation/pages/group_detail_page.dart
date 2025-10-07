@@ -60,7 +60,7 @@ class GroupDetailPage extends StatelessWidget {
               padding: const EdgeInsets.all(AppSizes.lg),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.royalPurple, AppColors.tealBlue],
+                  colors: [AppColors.slateBlue, AppColors.tealBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

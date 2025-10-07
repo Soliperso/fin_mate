@@ -15,6 +15,10 @@ class SecureStorageService {
   static const _keyRememberMe = 'remember_me';
   static const _keyEmail = 'saved_email';
   static const _keyPassword = 'saved_password';
+  static const _keyBiometricEnabled = 'biometric_enabled';
+  static const _keyMfaEnabled = 'mfa_enabled';
+  static const _keyMfaMethod = 'mfa_method';
+  static const _keyTotpSecret = 'totp_secret';
 
   /// Save credentials securely
   Future<void> saveCredentials({
@@ -60,5 +64,69 @@ class SecureStorageService {
   /// Clear all stored data
   Future<void> clearAll() async {
     await _storage.deleteAll();
+  }
+
+  // ============================================================================
+  // Biometric Settings
+  // ============================================================================
+
+  /// Enable/disable biometric authentication
+  Future<void> setBiometricEnabled(bool enabled) async {
+    await _storage.write(key: _keyBiometricEnabled, value: enabled.toString());
+  }
+
+  /// Check if biometric authentication is enabled
+  Future<bool> isBiometricEnabled() async {
+    final value = await _storage.read(key: _keyBiometricEnabled);
+    return value == 'true';
+  }
+
+  // ============================================================================
+  // MFA Settings
+  // ============================================================================
+
+  /// Enable/disable MFA
+  Future<void> setMfaEnabled(bool enabled) async {
+    await _storage.write(key: _keyMfaEnabled, value: enabled.toString());
+  }
+
+  /// Check if MFA is enabled
+  Future<bool> isMfaEnabled() async {
+    final value = await _storage.read(key: _keyMfaEnabled);
+    return value == 'true';
+  }
+
+  /// Set MFA method (email or totp)
+  Future<void> setMfaMethod(String method) async {
+    await _storage.write(key: _keyMfaMethod, value: method);
+  }
+
+  /// Get MFA method
+  Future<String?> getMfaMethod() async {
+    return await _storage.read(key: _keyMfaMethod);
+  }
+
+  /// Save TOTP secret
+  Future<void> saveTotpSecret(String secret) async {
+    await _storage.write(key: _keyTotpSecret, value: secret);
+  }
+
+  /// Get TOTP secret
+  Future<String?> getTotpSecret() async {
+    return await _storage.read(key: _keyTotpSecret);
+  }
+
+  /// Clear TOTP secret
+  Future<void> clearTotpSecret() async {
+    await _storage.delete(key: _keyTotpSecret);
+  }
+
+  /// Clear all MFA settings
+  Future<void> clearMfaSettings() async {
+    await Future.wait([
+      _storage.delete(key: _keyMfaEnabled),
+      _storage.delete(key: _keyMfaMethod),
+      _storage.delete(key: _keyTotpSecret),
+    ]);
   }
 }

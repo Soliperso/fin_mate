@@ -7,7 +7,7 @@ class AppColors {
   static const emeraldGreen = Color(0xFF2ECC71);
 
   // Secondary Colors
-  static const royalPurple = Color(0xFF6C5CE7);
+  static const slateBlue = Color(0xFF2C5F8D); // Professional slate blue
   static const tealBlue = Color(0xFF00CEC9);
 
   // Neutral Colors

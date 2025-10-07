@@ -264,7 +264,7 @@ class InsightsPage extends StatelessWidget {
       case 'Transportation':
         return AppColors.tealBlue;
       case 'Shopping':
-        return AppColors.royalPurple;
+        return AppColors.slateBlue;
       case 'Bills & Utilities':
         return AppColors.warning;
       default:

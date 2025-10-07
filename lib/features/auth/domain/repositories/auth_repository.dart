@@ -49,4 +49,35 @@ abstract class AuthRepository {
 
   /// Resend OTP to email
   Future<void> resendOTP(String email);
+
+  // ============================================================================
+  // MFA Methods
+  // ============================================================================
+
+  /// Enable MFA with email OTP
+  Future<void> enableEmailMfa();
+
+  /// Enable MFA with TOTP (returns secret for QR code generation)
+  Future<String> enableTotpMfa();
+
+  /// Verify and activate TOTP MFA
+  Future<void> verifyAndActivateTotpMfa({
+    required String secret,
+    required String code,
+  });
+
+  /// Disable MFA
+  Future<void> disableMfa();
+
+  /// Send email OTP for MFA verification
+  Future<void> sendMfaEmailOtp();
+
+  /// Verify MFA code (works for both email and TOTP)
+  Future<bool> verifyMfaCode(String code);
+
+  /// Check if user has MFA enabled
+  Future<bool> isMfaEnabled();
+
+  /// Get current MFA method
+  Future<String?> getMfaMethod();
 }

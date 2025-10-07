@@ -19,12 +19,17 @@ class NetWorthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
+    // Determine gradient colors based on net worth
+    final gradientColors = netWorth > 0
+        ? [AppColors.emeraldGreen, AppColors.tealBlue]
+        : [AppColors.error, const Color(0xFFD32F2F)]; // Red gradient for zero or negative
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.lg),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.emeraldGreen, AppColors.tealBlue],
+        gradient: LinearGradient(
+          colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

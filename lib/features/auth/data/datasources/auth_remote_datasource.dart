@@ -1,14 +1,23 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/services/mfa_service.dart';
+import '../../../../core/services/secure_storage_service.dart';
 import '../models/user_model.dart';
 
 /// Remote datasource for authentication
 class AuthRemoteDataSource {
   final SupabaseClient _supabase;
+  final MfaService _mfaService;
+  final SecureStorageService _storage;
 
-  AuthRemoteDataSource({SupabaseClient? supabaseClient})
-      : _supabase = supabaseClient ?? supabase;
+  AuthRemoteDataSource({
+    SupabaseClient? supabaseClient,
+    MfaService? mfaService,
+    SecureStorageService? storage,
+  })  : _supabase = supabaseClient ?? supabase,
+        _mfaService = mfaService ?? MfaService(),
+        _storage = storage ?? SecureStorageService();
 
   /// Get current user
   Future<UserModel?> getCurrentUser() async {
@@ -191,5 +200,197 @@ class AuthRemoteDataSource {
       type: OtpType.signup,
       email: email,
     );
+  }
+
+  // ============================================================================
+  // MFA Methods
+  // ============================================================================
+
+  /// Enable MFA with email OTP
+  Future<void> enableEmailMfa() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    // Update user profile to indicate MFA is enabled with email method
+    await _supabase.from('user_profiles').update({
+      'mfa_enabled': true,
+      'mfa_method': 'email',
+    }).eq('id', user.id);
+
+    // Save to local storage
+    await _storage.setMfaEnabled(true);
+    await _storage.setMfaMethod('email');
+  }
+
+  /// Enable MFA with TOTP (returns secret for QR code generation)
+  Future<String> enableTotpMfa() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    // Generate TOTP secret
+    final secret = _mfaService.generateTotpSecret();
+
+    // Save secret temporarily (will be confirmed after verification)
+    await _storage.saveTotpSecret(secret);
+
+    return secret;
+  }
+
+  /// Verify and activate TOTP MFA
+  Future<void> verifyAndActivateTotpMfa({
+    required String secret,
+    required String code,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    // Verify the TOTP code
+    final isValid = _mfaService.verifyTotpCode(
+      secret: secret,
+      code: code,
+    );
+
+    if (!isValid) {
+      throw Exception('Invalid TOTP code');
+    }
+
+    // Update user profile to indicate MFA is enabled with TOTP
+    await _supabase.from('user_profiles').update({
+      'mfa_enabled': true,
+      'mfa_method': 'totp',
+      'totp_secret': secret,
+    }).eq('id', user.id);
+
+    // Save to local storage
+    await _storage.setMfaEnabled(true);
+    await _storage.setMfaMethod('totp');
+    await _storage.saveTotpSecret(secret);
+  }
+
+  /// Disable MFA
+  Future<void> disableMfa() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    // Update user profile
+    await _supabase.from('user_profiles').update({
+      'mfa_enabled': false,
+      'mfa_method': null,
+      'totp_secret': null,
+    }).eq('id', user.id);
+
+    // Clear local storage
+    await _storage.clearMfaSettings();
+  }
+
+  /// Send email OTP for MFA verification
+  Future<void> sendMfaEmailOtp() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null || user.email == null) {
+      throw Exception('No authenticated user');
+    }
+
+    // Use Supabase's OTP functionality
+    await _supabase.auth.signInWithOtp(email: user.email!);
+  }
+
+  /// Verify MFA code (works for both email and TOTP)
+  Future<bool> verifyMfaCode(String code) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    // Get MFA method from local storage first, then fallback to database
+    String? mfaMethod = await _storage.getMfaMethod();
+
+    if (mfaMethod == null) {
+      // Fetch from database
+      final profile = await _supabase
+          .from('user_profiles')
+          .select('mfa_method')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      mfaMethod = profile?['mfa_method'];
+    }
+
+    if (mfaMethod == 'totp') {
+      // Verify TOTP code
+      final secret = await _storage.getTotpSecret();
+      if (secret == null) {
+        // Fetch from database
+        final profile = await _supabase
+            .from('user_profiles')
+            .select('totp_secret')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        final dbSecret = profile?['totp_secret'];
+        if (dbSecret == null) {
+          throw Exception('TOTP secret not found');
+        }
+
+        return _mfaService.verifyTotpCode(
+          secret: dbSecret,
+          code: code,
+        );
+      }
+
+      return _mfaService.verifyTotpCode(
+        secret: secret,
+        code: code,
+      );
+    } else if (mfaMethod == 'email') {
+      // Verify email OTP using Supabase
+      try {
+        final response = await _supabase.auth.verifyOTP(
+          type: OtpType.email,
+          email: user.email!,
+          token: code,
+        );
+        return response.user != null;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /// Check if user has MFA enabled
+  Future<bool> isMfaEnabled() async {
+    // Check local storage first
+    final localMfaEnabled = await _storage.isMfaEnabled();
+    if (localMfaEnabled) return true;
+
+    // Fallback to database
+    final user = _supabase.auth.currentUser;
+    if (user == null) return false;
+
+    final profile = await _supabase
+        .from('user_profiles')
+        .select('mfa_enabled')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    return profile?['mfa_enabled'] == true;
+  }
+
+  /// Get current MFA method
+  Future<String?> getMfaMethod() async {
+    // Check local storage first
+    final localMethod = await _storage.getMfaMethod();
+    if (localMethod != null) return localMethod;
+
+    // Fallback to database
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final profile = await _supabase
+        .from('user_profiles')
+        .select('mfa_method')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    return profile?['mfa_method'];
   }
 }

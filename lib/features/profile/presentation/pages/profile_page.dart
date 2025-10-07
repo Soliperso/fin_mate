@@ -152,14 +152,14 @@ class ProfilePage extends ConsumerWidget {
                                   subtitle: 'Update your name, email, and phone',
                                   onTap: () => context.push('/profile/edit'),
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.lock_outline,
                                   title: 'Security',
                                   subtitle: 'Password, biometric, 2FA',
-                                  onTap: () {},
+                                  onTap: () => context.push('/profile/security'),
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.credit_card,
                                   title: 'Payment Methods',
@@ -191,21 +191,21 @@ class ProfilePage extends ConsumerWidget {
                                   subtitle: 'Manage notification preferences',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.dark_mode_outlined,
                                   title: 'Appearance',
                                   subtitle: 'Light or dark theme',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.language,
                                   title: 'Language',
                                   subtitle: 'English (US)',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.attach_money,
                                   title: 'Currency',
@@ -237,21 +237,21 @@ class ProfilePage extends ConsumerWidget {
                                   subtitle: 'FAQs and support articles',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.privacy_tip_outlined,
                                   title: 'Privacy Policy',
                                   subtitle: 'Read our privacy policy',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.description_outlined,
                                   title: 'Terms of Service',
                                   subtitle: 'Read our terms',
                                   onTap: () {},
                                 ),
-                                const Divider(height: 1),
+                                _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.info_outline,
                                   title: 'About',
@@ -407,6 +407,17 @@ class ProfilePage extends ConsumerWidget {
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSizes.md,
         vertical: AppSizes.xs,
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md * 3),
+      child: Divider(
+        height: 1,
+        thickness: 0.5,
+        color: AppColors.lightGray.withValues(alpha: 0.5),
       ),
     );
   }
