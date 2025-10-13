@@ -10,12 +10,16 @@ class ProfileModel extends ProfileEntity {
     super.phone,
     super.dateOfBirth,
     super.currency,
+    super.role,
     required super.createdAt,
     required super.updatedAt,
   });
 
   /// Create ProfileModel from JSON (from database)
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    final role = (json['role'] as String?) ?? 'user';
+    print('🔍 ProfileModel created with role: $role, isAdmin: ${role == 'admin'}');
+
     return ProfileModel(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -26,6 +30,7 @@ class ProfileModel extends ProfileEntity {
           ? DateTime.parse(json['date_of_birth'] as String)
           : null,
       currency: (json['currency'] as String?) ?? 'USD',
+      role: role,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -41,6 +46,7 @@ class ProfileModel extends ProfileEntity {
       'phone': phone,
       'date_of_birth': dateOfBirth?.toIso8601String().split('T')[0],
       'currency': currency,
+      'role': role,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -56,6 +62,7 @@ class ProfileModel extends ProfileEntity {
       phone: phone,
       dateOfBirth: dateOfBirth,
       currency: currency,
+      role: role,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -71,6 +78,7 @@ class ProfileModel extends ProfileEntity {
       phone: entity.phone,
       dateOfBirth: entity.dateOfBirth,
       currency: entity.currency,
+      role: entity.role,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

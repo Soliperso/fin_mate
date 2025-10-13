@@ -77,7 +77,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: AppSizes.md),
 
@@ -276,7 +276,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             // Email OTP
             Card(
               child: ListTile(
-                leading: const Icon(Icons.email, color: AppColors.emeraldGreen),
+                leading: const Icon(Icons.email, color: AppColors.primaryTeal),
                 title: Text(MfaMethod.email.displayName),
                 subtitle: Text(MfaMethod.email.description),
                 trailing: const Icon(Icons.chevron_right),
@@ -463,25 +463,23 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                   code: code,
                 );
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('TOTP MFA enabled successfully'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                  setState(() {});
-                }
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('TOTP MFA enabled successfully'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+                setState(() {});
               } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Invalid code: ${e.toString()}'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Invalid code: ${e.toString()}'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
               } finally {
                 codeController.dispose();
               }

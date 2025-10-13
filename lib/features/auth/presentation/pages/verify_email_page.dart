@@ -44,7 +44,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Icon(
                 Icons.mark_email_read_outlined,
                 size: 80,
-                color: AppColors.emeraldGreen,
+                color: AppColors.primaryTeal,
               ),
               const SizedBox(height: AppSizes.xl),
               Text(
@@ -74,21 +74,21 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Container(
                 padding: const EdgeInsets.all(AppSizes.md),
                 decoration: BoxDecoration(
-                  color: AppColors.emeraldGreen.withValues(alpha: 0.1),
+                  color: AppColors.primaryTeal.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSizes.sm),
-                  border: Border.all(color: AppColors.emeraldGreen.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.mail_outline, color: AppColors.emeraldGreen, size: 20),
+                        Icon(Icons.mail_outline, color: AppColors.primaryTeal, size: 20),
                         const SizedBox(width: AppSizes.sm),
                         Text(
                           'Check your email',
                           style: TextStyle(
-                            color: AppColors.emeraldGreen,
+                            color: AppColors.primaryTeal,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

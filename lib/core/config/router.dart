@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../guards/admin_guard.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
@@ -18,6 +19,9 @@ import '../../features/ai_insights/presentation/pages/insights_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
+import '../../features/admin/presentation/pages/user_management_page.dart';
+import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
+import '../../features/admin/presentation/pages/system_settings_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -66,15 +70,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/onboarding') ||
           state.matchedLocation.startsWith('/verify-email') ||
           state.matchedLocation == '/';
+      final isAdminRoute = state.matchedLocation.startsWith('/admin');
 
       // If not authenticated and trying to access protected route
       if (!isAuthenticated && !isAuthRoute) {
-        return '/onboarding';
+        return '/login';
       }
 
       // If authenticated and trying to access auth routes, redirect to dashboard
       if (isAuthenticated && isAuthRoute && state.matchedLocation != '/' && !state.matchedLocation.startsWith('/verify-email')) {
         return '/dashboard';
+      }
+
+      // Admin route protection
+      if (isAdminRoute) {
+        final isAdmin = ref.read(isAdminProvider);
+        if (!isAdmin) {
+          return '/dashboard'; // Redirect non-admins
+        }
       }
 
       return null; // No redirect
@@ -183,6 +196,23 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+
+      // Admin Routes (protected by admin guard in redirect)
+      GoRoute(
+        path: '/admin/users',
+        name: 'admin-users',
+        builder: (context, state) => const UserManagementPage(),
+      ),
+      GoRoute(
+        path: '/admin/analytics',
+        name: 'admin-analytics',
+        builder: (context, state) => const SystemAnalyticsPageEnhanced(),
+      ),
+      GoRoute(
+        path: '/admin/settings',
+        name: 'admin-settings',
+        builder: (context, state) => const SystemSettingsPage(),
       ),
     ],
   );

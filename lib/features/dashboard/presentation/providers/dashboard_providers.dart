@@ -65,13 +65,17 @@ final dashboardNotifierProvider = StateNotifierProvider<DashboardNotifier, Async
 });
 
 /// Provider for monthly cash flow data
-final monthlyFlowDataProvider = FutureProvider<List<MonthlyFlowData>>((ref) async {
+final monthlyFlowDataProvider = FutureProvider.autoDispose<List<MonthlyFlowData>>((ref) async {
+  // Watch the dashboard state to trigger refresh when dashboard updates
+  ref.watch(dashboardNotifierProvider);
   final repository = ref.watch(dashboardRepositoryProvider);
   return repository.getMonthlyFlowData(months: 6);
 });
 
 /// Provider for net worth snapshots
-final netWorthSnapshotsProvider = FutureProvider<List<NetWorthSnapshot>>((ref) async {
+final netWorthSnapshotsProvider = FutureProvider.autoDispose<List<NetWorthSnapshot>>((ref) async {
+  // Watch the dashboard state to trigger refresh when dashboard updates
+  ref.watch(dashboardNotifierProvider);
   final repository = ref.watch(dashboardRepositoryProvider);
   return repository.getNetWorthSnapshots(days: 30);
 });

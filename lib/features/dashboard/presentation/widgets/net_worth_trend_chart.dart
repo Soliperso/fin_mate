@@ -117,7 +117,7 @@ class NetWorthTrendChart extends StatelessWidget {
                             ))
                         .toList(),
                     isCurved: true,
-                    color: isGrowth ? AppColors.emeraldGreen : AppColors.error,
+                    color: isGrowth ? AppColors.primaryTeal : AppColors.error,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: FlDotData(
@@ -125,7 +125,7 @@ class NetWorthTrendChart extends StatelessWidget {
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: 4,
-                          color: isGrowth ? AppColors.emeraldGreen : AppColors.error,
+                          color: isGrowth ? AppColors.primaryTeal : AppColors.error,
                           strokeWidth: 2,
                           strokeColor: AppColors.white,
                         );
@@ -136,10 +136,10 @@ class NetWorthTrendChart extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           isGrowth
-                              ? AppColors.emeraldGreen.withValues(alpha: 0.2)
+                              ? AppColors.primaryTeal.withValues(alpha: 0.2)
                               : AppColors.error.withValues(alpha: 0.2),
                           isGrowth
-                              ? AppColors.emeraldGreen.withValues(alpha: 0.0)
+                              ? AppColors.primaryTeal.withValues(alpha: 0.0)
                               : AppColors.error.withValues(alpha: 0.0),
                         ],
                         begin: Alignment.topCenter,

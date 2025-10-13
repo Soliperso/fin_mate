@@ -70,6 +70,7 @@ dependencies:
   logger: ^2.5.0
   flutter_dotenv: ^5.2.1
   image_picker: ^1.1.2
+  connectivity_plus: ^6.1.0
 
   # Permissions
   permission_handler: ^11.3.1

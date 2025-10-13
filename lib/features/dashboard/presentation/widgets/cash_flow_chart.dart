@@ -117,14 +117,14 @@ class _CashFlowChartState extends State<CashFlowChart> {
         padding: const EdgeInsets.all(AppSizes.xs),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.emeraldGreen.withValues(alpha: 0.2)
+              ? AppColors.primaryTeal.withValues(alpha: 0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),
         child: Icon(
           icon,
           size: 20,
-          color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+          color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
         ),
       ),
     );

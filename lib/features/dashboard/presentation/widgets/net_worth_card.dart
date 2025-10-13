@@ -21,7 +21,7 @@ class NetWorthCard extends StatelessWidget {
 
     // Determine gradient colors based on net worth
     final gradientColors = netWorth > 0
-        ? [AppColors.emeraldGreen, AppColors.tealBlue]
+        ? [AppColors.primaryTeal, AppColors.tealBlue]
         : [AppColors.error, const Color(0xFFD32F2F)]; // Red gradient for zero or negative
 
     return Container(

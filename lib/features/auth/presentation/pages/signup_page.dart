@@ -172,7 +172,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         child: const Text(
                           'Terms of Service',
                           style: TextStyle(
-                            color: AppColors.emeraldGreen,
+                            color: AppColors.primaryTeal,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -185,7 +185,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         child: const Text(
                           'Privacy Policy',
                           style: TextStyle(
-                            color: AppColors.emeraldGreen,
+                            color: AppColors.primaryTeal,
                             decoration: TextDecoration.underline,
                           ),
                         ),

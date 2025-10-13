@@ -107,7 +107,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       child: Container(
                         padding: const EdgeInsets.all(AppSizes.sm),
                         decoration: BoxDecoration(
-                          color: AppColors.emeraldGreen,
+                          color: AppColors.primaryTeal,
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.white, width: 3),
                         ),
@@ -212,11 +212,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     child: Text(currency),
                   );
                 }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedCurrency = value);
-                  }
-                },
+                onChanged: null,
               ),
               const SizedBox(height: AppSizes.xxl),
 
@@ -250,7 +246,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         height: 120,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.emeraldGreen, width: 4),
+          border: Border.all(color: AppColors.primaryTeal, width: 4),
           image: DecorationImage(
             image: FileImage(File(_selectedAvatarPath!)),
             fit: BoxFit.cover,
@@ -266,7 +262,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         height: 120,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.emeraldGreen, width: 4),
+          border: Border.all(color: AppColors.primaryTeal, width: 4),
           image: DecorationImage(
             image: NetworkImage(profile.avatarUrl!),
             fit: BoxFit.cover,
@@ -281,8 +277,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       height: 120,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.emeraldGreen.withValues(alpha: 0.2),
-        border: Border.all(color: AppColors.emeraldGreen, width: 4),
+        color: AppColors.primaryTeal.withValues(alpha: 0.2),
+        border: Border.all(color: AppColors.primaryTeal, width: 4),
       ),
       child: Center(
         child: Text(
@@ -290,7 +286,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           style: const TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.bold,
-            color: AppColors.emeraldGreen,
+            color: AppColors.primaryTeal,
           ),
         ),
       ),

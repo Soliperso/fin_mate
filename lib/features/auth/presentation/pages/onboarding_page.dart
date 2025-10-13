@@ -113,7 +113,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             padding: const EdgeInsets.all(AppSizes.xl),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.emeraldGreen, AppColors.tealBlue],
+                colors: [AppColors.primaryTeal, AppColors.tealBlue],
               ),
               shape: BoxShape.circle,
             ),
@@ -150,7 +150,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       width: isActive ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.emeraldGreen : AppColors.textTertiary,
+        color: isActive ? AppColors.primaryTeal : AppColors.textTertiary,
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
       ),
     );

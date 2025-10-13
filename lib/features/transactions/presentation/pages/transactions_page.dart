@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 
 class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
@@ -76,7 +77,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: state.hasActiveFilters ? AppColors.emeraldGreen : null,
+              color: state.hasActiveFilters ? AppColors.primaryTeal : null,
             ),
             onPressed: () => _showFilterBottomSheet(context),
           ),
@@ -113,7 +114,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await context.push('/transactions/add');
           // Refresh transactions after returning from add page
@@ -121,8 +122,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ref.read(transactionListProvider.notifier).refresh();
           }
         },
-        backgroundColor: AppColors.emeraldGreen,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('New Transaction'),
       ),
     );
   }
@@ -141,14 +142,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         notifier.setFilter(filter);
       },
       backgroundColor: Colors.transparent,
-      selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.emeraldGreen,
+      selectedColor: AppColors.primaryTeal.withValues(alpha: 0.2),
+      checkmarkColor: AppColors.primaryTeal,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+        color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       side: BorderSide(
-        color: isSelected ? AppColors.emeraldGreen : Colors.transparent,
+        color: isSelected ? AppColors.primaryTeal : Colors.transparent,
       ),
     );
   }
@@ -443,7 +444,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     icon: const Icon(Icons.edit),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.emeraldGreen,
+                      foregroundColor: AppColors.primaryTeal,
                     ),
                   ),
                 ),
@@ -519,6 +520,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             onPressed: () async {
               Navigator.pop(context);
               final success = await notifier.deleteTransaction(transaction.id);
+
+              // Invalidate dashboard provider to refresh dashboard data
+              if (success) {
+                ref.invalidate(dashboardNotifierProvider);
+              }
+
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -624,14 +631,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                 });
                               },
                               backgroundColor: Colors.transparent,
-                              selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.2),
-                              checkmarkColor: AppColors.emeraldGreen,
+                              selectedColor: AppColors.primaryTeal.withValues(alpha: 0.2),
+                              checkmarkColor: AppColors.primaryTeal,
                               labelStyle: TextStyle(
-                                color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
+                                color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
                               side: BorderSide(
-                                color: isSelected ? AppColors.emeraldGreen : AppColors.borderLight,
+                                color: isSelected ? AppColors.primaryTeal : AppColors.borderLight,
                               ),
                             );
                           }).toList(),
@@ -671,9 +678,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             : '${DateFormat('MMM d').format(dateRange!.start)} - ${DateFormat('MMM d, y').format(dateRange!.end)}',
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: dateRange != null ? AppColors.emeraldGreen : null,
+                        foregroundColor: dateRange != null ? AppColors.primaryTeal : null,
                         side: BorderSide(
-                          color: dateRange != null ? AppColors.emeraldGreen : AppColors.borderLight,
+                          color: dateRange != null ? AppColors.primaryTeal : AppColors.borderLight,
                         ),
                       ),
                     ),
@@ -735,7 +742,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.emeraldGreen,
+                        backgroundColor: AppColors.primaryTeal,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Apply Filters'),

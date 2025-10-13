@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/notification_provider.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../providers/dashboard_providers.dart';
 import '../widgets/net_worth_card.dart';
@@ -25,6 +28,7 @@ class DashboardPage extends ConsumerWidget {
     final user = authState.user;
     final dashboardState = ref.watch(dashboardNotifierProvider);
     final unreadCount = ref.watch(unreadNotificationCountProvider);
+    final profileState = ref.watch(currentUserProfileProvider);
 
     // Extract initials from user's full name
     String getInitials() {
@@ -94,18 +98,25 @@ class DashboardPage extends ConsumerWidget {
             child: InkWell(
               onTap: () => context.go('/profile'),
               borderRadius: BorderRadius.circular(20),
-              child: CircleAvatar(
-                backgroundColor: AppColors.emeraldGreen,
-                radius: 18,
-                child: Text(
-                  getInitials(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
+              child: profileState.profile?.avatarUrl != null &&
+                      profileState.profile!.avatarUrl!.isNotEmpty
+                  ? CircleAvatar(
+                      radius: 18,
+                      backgroundImage:
+                          NetworkImage(profileState.profile!.avatarUrl!),
+                    )
+                  : CircleAvatar(
+                      backgroundColor: AppColors.primaryTeal,
+                      radius: 18,
+                      child: Text(
+                        getInitials(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
             ),
           ),
         ],
@@ -116,6 +127,7 @@ class DashboardPage extends ConsumerWidget {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
           },
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppSizes.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +210,7 @@ class DashboardPage extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -218,7 +230,7 @@ class DashboardPage extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -262,11 +274,33 @@ class DashboardPage extends ConsumerWidget {
                           Center(
                             child: Padding(
                               padding: const EdgeInsets.all(AppSizes.lg),
-                              child: Text(
-                                'No recent transactions',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.textSecondary,
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.receipt_long_outlined,
+                                    size: 48,
+                                    color: AppColors.textSecondary.withValues(alpha: 0.5),
+                                  ),
+                                  const SizedBox(height: AppSizes.sm),
+                                  Text(
+                                    'No recent transactions',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSizes.md),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.go('/transactions/add?type=expense');
+                                    },
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('Add Transaction'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryTeal,
+                                      foregroundColor: Colors.white,
                                     ),
+                                  ),
+                                ],
                               ),
                             ),
                           )
@@ -277,10 +311,13 @@ class DashboardPage extends ConsumerWidget {
                             return _buildTransactionItem(
                               context,
                               icon: _getIconForTransaction(transaction),
-                              title: transaction.description ?? 'Transaction',
-                              category: transaction.categoryName ?? 'Uncategorized',
+                              title: transaction.description ?? 'No description',
+                              subtitle: transaction.categoryName ?? 'Uncategorized',
                               amount: amount,
                               date: transaction.date,
+                              onTap: () {
+                                context.go('/transactions/add?type=${transaction.type.name}&id=${transaction.id}');
+                              },
                             );
                           }),
                       ],
@@ -291,40 +328,45 @@ class DashboardPage extends ConsumerWidget {
             ),
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.xl),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: AppColors.error,
-                ),
-                const SizedBox(height: AppSizes.md),
-                Text(
-                  'Failed to load dashboard',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Text(
-                  error.toString(),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.lg),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    ref.read(dashboardNotifierProvider.notifier).loadDashboard();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
+        loading: () => SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Column(
+            children: [
+              const SkeletonCard(height: 150),
+              const SkeletonCard(height: 100),
+              const SizedBox(height: AppSizes.lg),
+              Row(
+                children: [
+                  Expanded(child: const SkeletonCard(height: 80)),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(child: const SkeletonCard(height: 80)),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(child: const SkeletonCard(height: 80)),
+                ],
+              ),
+              const SkeletonCard(height: 120),
+              const SkeletonChart(height: 200),
+              const SkeletonCard(height: 150),
+            ],
+          ),
+        ),
+        error: (error, stack) => RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(dashboardNotifierProvider.notifier).refresh();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height - 200,
+              child: EmptyState(
+                icon: Icons.error_outline,
+                title: 'Failed to load dashboard',
+                message: 'Unable to fetch your financial data. Please check your connection and try again.',
+                actionLabel: 'Retry',
+                onAction: () {
+                  ref.read(dashboardNotifierProvider.notifier).loadDashboard();
+                },
+              ),
             ),
           ),
         ),
@@ -333,26 +375,43 @@ class DashboardPage extends ConsumerWidget {
   }
 
   IconData _getIconForTransaction(TransactionEntity transaction) {
+    // Map category names to icons based on database categories
+    final categoryName = transaction.categoryName?.toLowerCase() ?? '';
+
+    // Income categories
     if (transaction.type == TransactionType.income) {
-      return Icons.attach_money;
+      if (categoryName.contains('salary')) {
+        return Icons.work_outline;
+      } else if (categoryName.contains('freelance')) {
+        return Icons.laptop_mac;
+      } else if (categoryName.contains('investment')) {
+        return Icons.trending_up;
+      } else if (categoryName.contains('gift')) {
+        return Icons.card_giftcard;
+      } else {
+        return Icons.attach_money;
+      }
     }
 
-    // Map common category names to icons
-    final categoryName = transaction.categoryName?.toLowerCase() ?? '';
-    if (categoryName.contains('food') || categoryName.contains('dining') || categoryName.contains('restaurant')) {
+    // Expense categories
+    if (categoryName.contains('food') || categoryName.contains('dining')) {
       return Icons.restaurant;
-    } else if (categoryName.contains('shopping') || categoryName.contains('retail')) {
-      return Icons.shopping_bag;
-    } else if (categoryName.contains('transport') || categoryName.contains('car') || categoryName.contains('gas')) {
+    } else if (categoryName.contains('transportation')) {
       return Icons.directions_car;
-    } else if (categoryName.contains('coffee') || categoryName.contains('cafe')) {
-      return Icons.local_cafe;
-    } else if (categoryName.contains('entertainment') || categoryName.contains('movie')) {
+    } else if (categoryName.contains('shopping')) {
+      return Icons.shopping_bag;
+    } else if (categoryName.contains('entertainment')) {
       return Icons.movie;
-    } else if (categoryName.contains('health') || categoryName.contains('medical')) {
+    } else if (categoryName.contains('bills') || categoryName.contains('utilities')) {
+      return Icons.receipt_long;
+    } else if (categoryName.contains('healthcare') || categoryName.contains('health')) {
       return Icons.local_hospital;
-    } else if (categoryName.contains('utility') || categoryName.contains('bill')) {
-      return Icons.receipt;
+    } else if (categoryName.contains('education')) {
+      return Icons.school;
+    } else if (categoryName.contains('housing')) {
+      return Icons.home;
+    } else if (categoryName.contains('personal care')) {
+      return Icons.spa;
     } else {
       return Icons.payment;
     }
@@ -362,12 +421,30 @@ class DashboardPage extends ConsumerWidget {
     BuildContext context, {
     required IconData icon,
     required String title,
-    required String category,
+    required String subtitle,
     required double amount,
     required DateTime date,
+    VoidCallback? onTap,
   }) {
     final isPositive = amount >= 0;
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+    // Calculate relative date
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final transactionDate = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(transactionDate).inDays;
+
+    String dateText;
+    if (difference == 0) {
+      dateText = 'Today';
+    } else if (difference == 1) {
+      dateText = 'Yesterday';
+    } else if (difference < 7) {
+      dateText = '$difference days ago';
+    } else {
+      dateText = DateFormat('MMM d').format(date);
+    }
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -384,10 +461,19 @@ class DashboardPage extends ConsumerWidget {
           color: isPositive ? AppColors.success : AppColors.error,
         ),
       ),
-      title: Text(title),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+      ),
       subtitle: Text(
-        category,
-        style: Theme.of(context).textTheme.bodySmall,
+        subtitle,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.textSecondary,
+          fontSize: 14,
+        ),
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -395,17 +481,23 @@ class DashboardPage extends ConsumerWidget {
         children: [
           Text(
             '${isPositive ? '+' : ''}${currencyFormat.format(amount)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: isPositive ? AppColors.success : AppColors.error,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
           ),
+          const SizedBox(height: 2),
           Text(
-            DateFormat('MMM d').format(date),
-            style: Theme.of(context).textTheme.bodySmall,
+            dateText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
+      onTap: onTap,
     );
   }
 }

@@ -78,7 +78,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
             end: Alignment.bottomRight,
             colors: [
               AppColors.deepNavy,
-              AppColors.emeraldGreen,
+              AppColors.primaryTeal,
             ],
           ),
         ),
@@ -111,7 +111,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                         child: const Icon(
                           Icons.account_balance_wallet_rounded,
                           size: 60,
-                          color: AppColors.emeraldGreen,
+                          color: AppColors.primaryTeal,
                         ),
                       ),
                       const SizedBox(height: AppSizes.xl),

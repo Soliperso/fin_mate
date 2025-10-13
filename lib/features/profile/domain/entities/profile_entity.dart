@@ -9,6 +9,7 @@ class ProfileEntity extends Equatable {
   final String? phone;
   final DateTime? dateOfBirth;
   final String currency;
+  final String role;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +21,7 @@ class ProfileEntity extends Equatable {
     this.phone,
     this.dateOfBirth,
     this.currency = 'USD',
+    this.role = 'user',
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,6 +35,7 @@ class ProfileEntity extends Equatable {
         phone,
         dateOfBirth,
         currency,
+        role,
         createdAt,
         updatedAt,
       ];
@@ -45,6 +48,7 @@ class ProfileEntity extends Equatable {
     String? phone,
     DateTime? dateOfBirth,
     String? currency,
+    String? role,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -56,6 +60,7 @@ class ProfileEntity extends Equatable {
       phone: phone ?? this.phone,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       currency: currency ?? this.currency,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -75,4 +80,7 @@ class ProfileEntity extends Equatable {
     }
     return email[0].toUpperCase();
   }
+
+  /// Check if user has admin role
+  bool get isAdmin => role == 'admin';
 }

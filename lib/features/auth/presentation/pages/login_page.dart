@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/secure_storage_provider.dart';
@@ -15,6 +16,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  final _logger = Logger();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -227,7 +229,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -284,15 +286,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _handleBiometricLogin() async {
-    print('🔐 Biometric login button pressed');
+    _logger.d('Biometric login button pressed');
 
     try {
       final biometricService = ref.read(biometricServiceProvider);
       final storageService = ref.read(secureStorageServiceProvider);
 
-      print('📱 Checking biometric availability...');
+      _logger.d('Checking biometric availability...');
       final isAvailable = await biometricService.isBiometricAvailable();
-      print('📱 Biometric available: $isAvailable');
+      _logger.d('Biometric available: $isAvailable');
 
       if (!isAvailable) {
         if (mounted) {
@@ -306,10 +308,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      print('🔑 Getting saved credentials...');
+      _logger.d('Getting saved credentials...');
       final email = await storageService.getSavedEmail();
       final password = await storageService.getSavedPassword();
-      print('🔑 Email found: ${email != null}, Password found: ${password != null}');
+      _logger.d('Email found: ${email != null}, Password found: ${password != null}');
 
       if (email == null || password == null) {
         if (mounted) {
@@ -324,13 +326,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      print('👆 Starting biometric authentication...');
+      _logger.d('Starting biometric authentication...');
       // Authenticate with biometrics
       final result = await biometricService.authenticate(
         localizedReason: 'Authenticate to access FinMate',
       );
 
-      print('👆 Biometric result: ${result.success}');
+      _logger.d('Biometric result: ${result.success}');
       if (!result.success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -343,16 +345,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      print('✅ Biometric success, signing in...');
+      _logger.d('Biometric success, signing in...');
       // Sign in with saved credentials
       await ref.read(authNotifierProvider.notifier).signInWithEmail(
             email: email,
             password: password,
           );
-      print('✅ Sign in complete');
+      _logger.d('Sign in complete');
     } catch (e, stackTrace) {
-      print('❌ Biometric login error: $e');
-      print('Stack trace: $stackTrace');
+      _logger.e('Biometric login error', error: e, stackTrace: stackTrace);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

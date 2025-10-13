@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**FinMate** is a cross-platform financial management app built with Flutter, combining personal finance tracking, bill splitting, and AI-powered forecasting. This is currently a greenfield project in its initial setup phase.
+**FinMate** is a cross-platform financial management app built with Flutter, combining personal finance tracking, bill splitting, savings goals, and AI-powered forecasting. The app uses Supabase for backend services and follows clean architecture principles.
 
 ## Key Commands
 
 ### Development
 ```bash
-# Run the app in development mode
+# Run the app (requires Supabase credentials in .env)
 flutter run
 
 # Run on specific device
@@ -19,8 +19,8 @@ flutter run -d <device_id>
 # Hot reload: Press 'r' in the terminal
 # Hot restart: Press 'R' in the terminal
 
-# Run with specific build flavor (when implemented)
-flutter run --flavor dev
+# Get dependencies after pulling changes
+flutter pub get
 ```
 
 ### Testing
@@ -37,7 +37,7 @@ flutter test --coverage
 
 ### Code Quality
 ```bash
-# Analyze code for issues
+# Analyze code for issues (run before commits)
 flutter analyze
 
 # Format code
@@ -47,159 +47,237 @@ dart format .
 flutter pub outdated
 ```
 
-### Building
+### Database Migrations
 ```bash
-# Build for Android
-flutter build apk
-flutter build appbundle
+# Apply migrations to Supabase (requires project linking)
+supabase db push
 
-# Build for iOS
-flutter build ios
-flutter build ipa
-
-# Build for web
-flutter build web
-```
-
-### Dependencies
-```bash
-# Get dependencies
-flutter pub get
-
-# Upgrade dependencies
-flutter pub upgrade
+# If not linked, run migrations manually:
+# 1. Go to: https://supabase.com/dashboard/project/{project_id}/sql/new
+# 2. Copy content from supabase/migrations/09_create_bill_splitting_and_savings_goals.sql
+# 3. Paste and click RUN
 ```
 
 ## Architecture & Design
 
-### Tech Stack (Planned)
-- **Framework**: Flutter with Material 3 design system
-- **State Management**: Riverpod or Bloc (TBD)
-- **Routing**: GoRouter
-- **Backend**: Supabase (Auth, Postgres, Storage)
-- **Local Storage**: Hive/Isar with AES-256 encryption
-- **External APIs**:
-  - Plaid/TrueLayer for bank integration
-  - OpenAI for AI insights
-  - Stripe/PayPal for settlements
+### Tech Stack (Currently Implemented)
+- **Framework**: Flutter 3.37+ with Material 3 design system
+- **State Management**: Riverpod (StateNotifier pattern)
+- **Routing**: GoRouter with auth guards
+- **Backend**: Supabase (Auth, Postgres, Storage, Realtime)
+- **Local Storage**: flutter_secure_storage for sensitive data
+- **Security**: MFA (TOTP/Email OTP), Biometric auth via local_auth
 
-### Planned Module Structure
-The codebase will follow a feature-first architecture:
+### Feature-First Architecture
+
+The codebase follows clean architecture with feature-first organization:
 
 ```
 lib/
-├── core/           # Shared utilities, constants, themes
-├── features/       # Feature modules (auth, dashboard, bills, etc.)
-│   ├── auth/
-│   ├── dashboard/
-│   ├── bill_splitting/
-│   ├── budgets/
-│   └── ai_insights/
-├── shared/         # Shared widgets and services
+├── core/
+│   ├── config/          # App configuration, router, Supabase client
+│   ├── constants/       # App colors, sizes, effects
+│   ├── services/        # Cross-cutting services (biometric, MFA, notifications, secure storage)
+│   ├── theme/           # Material 3 theme configuration
+│   └── utils/           # Shared utilities
+├── features/
+│   ├── auth/            # Authentication & onboarding
+│   ├── dashboard/       # Net worth, cash flow, money health
+│   ├── transactions/    # Transaction CRUD, accounts, categories
+│   ├── budgets/         # Budget tracking and alerts
+│   ├── bill_splitting/  # Group expenses and settlements
+│   ├── profile/         # User profile and settings
+│   └── ai_insights/     # AI-powered insights (UI only)
+├── shared/              # Shared widgets (buttons, containers, states)
 └── main.dart
 ```
 
-### Color System
-The app uses a professional fintech color palette:
-- **Primary**: Deep Navy (#1A2B4C), Emerald Green (#2ECC71)
-- **Secondary**: Royal Purple (#6C5CE7), Teal Blue (#00CEC9)
-- **Neutral**: Light Gray (#F5F7FA), White (#FFFFFF), Charcoal (#2D3436)
-- **Status**: Success (#27AE60), Warning (#F39C12), Error (#E74C3C)
+### Each Feature Module Structure
+```
+feature_name/
+├── data/
+│   ├── datasources/     # Remote data sources (Supabase API calls)
+│   ├── models/          # Data models with JSON serialization
+│   └── repositories/    # Repository implementations
+├── domain/
+│   ├── entities/        # Business entities (pure Dart classes)
+│   └── repositories/    # Repository interfaces
+└── presentation/
+    ├── pages/           # Full screen UI components
+    ├── widgets/         # Feature-specific widgets
+    └── providers/       # Riverpod state providers
+```
 
-### Typography
-- Primary font: Inter or Poppins
-- Bold, high-contrast numbers for financial displays
+### Database Schema (Supabase)
 
-## Security Requirements
+**Core Tables:**
+- `user_profiles` - User data and MFA settings
+- `accounts` - Financial accounts (cash, checking, savings, etc.)
+- `categories` - Transaction categories
+- `transactions` - Financial transactions
+- `recurring_transactions` - Scheduled transactions
+- `budgets` - Budget tracking
+- `net_worth_snapshots` - Historical net worth tracking
+- `notifications` - In-app notifications
 
-This is a financial app with strict security requirements:
+**Bill Splitting Tables:**
+- `bill_groups` - Groups for splitting expenses
+- `group_members` - Members in each group with roles
+- `group_expenses` - Expenses to be split
+- `expense_splits` - Individual split amounts
+- `settlements` - Payment records between members
 
-### Authentication & Authorization
-- Implement MFA (SMS/email OTP + TOTP)
-- Support biometric login via `local_auth` package
-- Use Supabase Auth with JWT tokens
-- Implement RBAC for shared wallets
+**Savings Goals Tables:**
+- `savings_goals` - Goal tracking with progress
+- `goal_contributions` - Contributions to goals
 
-### Data Protection
-- **Local Storage**: All sensitive data must be encrypted using Hive/Isar encryption
-- **Network**: All API calls must use TLS 1.3
-- **Sensitive Data**: Never log API keys, tokens, or financial data
-- **PII Handling**: Follow GDPR/CCPA guidelines
+### State Management Patterns
 
-### Banking Integration
-- Use OAuth2 with Plaid/TrueLayer (never store credentials)
-- Implement rate limiting for API calls
-- Add input validation for all financial transactions
+**Riverpod Providers Used:**
+- `FutureProvider` - Async data fetching
+- `StateNotifierProvider` - Mutable state management
+- `Provider` - Simple dependency injection
+
+**Example Pattern:**
+```dart
+// Repository provider
+final repositoryProvider = Provider<Repository>((ref) {
+  return RepositoryImpl(datasource: RemoteDatasource());
+});
+
+// Data provider
+final dataProvider = FutureProvider<List<Item>>((ref) async {
+  final repository = ref.watch(repositoryProvider);
+  return await repository.getData();
+});
+
+// Operations provider
+final operationsProvider = StateNotifierProvider<OperationsNotifier, AsyncValue<void>>((ref) {
+  return OperationsNotifier(ref.watch(repositoryProvider));
+});
+```
+
+### Routing & Navigation
+
+GoRouter handles routing with authenticated and unauthenticated routes:
+- `/splash` - Initial loading
+- `/onboarding` - First-time user experience
+- `/login`, `/signup` - Authentication
+- `/` - Main app shell with bottom navigation
+- `/dashboard`, `/transactions`, `/budgets`, `/bills`, `/insights` - Main features
+
+Auth state changes trigger automatic navigation via redirect logic in `lib/core/config/router.dart`.
+
+## Security & Data Handling
+
+### Critical Security Rules
+- **Never commit** `.env` file (contains Supabase credentials)
+- **Never log** sensitive data (tokens, passwords, financial amounts in production)
+- All Supabase operations use **Row Level Security (RLS)** policies
+- Financial amounts are stored as `DECIMAL(15,2)` in database
+- User sessions managed via Supabase JWT tokens
+- MFA required for sensitive operations when enabled
+
+### Environment Configuration
+Required in `.env` file:
+```
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_ANON_KEY=xxxxx
+```
+
+### Data Encryption
+- Sensitive data uses `flutter_secure_storage`
+- TOTP secrets encrypted at rest
+- Biometric credentials stored in platform keychain
 
 ## Development Guidelines
 
-### Code Organization
-- Use feature-first folder structure once features are implemented
-- Keep business logic separate from UI code
-- Use dependency injection for testability
+### When Adding New Features
 
-### State Management
-- When implementing state management, use either Riverpod or Bloc consistently
-- Keep state immutable
-- Handle loading, error, and success states explicitly
+1. **Create feature module structure:**
+   ```
+   lib/features/new_feature/
+   ├── data/
+   ├── domain/
+   └── presentation/
+   ```
+
+2. **Database changes require migration:**
+   - Create new file: `supabase/migrations/XX_description.sql`
+   - Include table creation, indexes, RLS policies, and triggers
+   - Test locally before deploying
+
+3. **Follow naming conventions:**
+   - Entities: `FeatureNameEntity` (e.g., `BillGroup`)
+   - Models: `FeatureNameModel` extends entity
+   - Providers: `featureNameProvider`, `featureNameOperationsProvider`
+   - Pages: `FeaturePage` (e.g., `BillsPage`)
+
+4. **State management:**
+   - UI reads from `FutureProvider` or `StateNotifierProvider`
+   - Mutations go through `StateNotifier` classes
+   - Always invalidate providers after mutations: `ref.invalidate(provider)`
 
 ### UI/UX Standards
-- Follow Material 3 design guidelines
-- Support both light and dark themes
-- Ensure accessibility (screen readers, color contrast)
-- Keep critical financial flows to ≤3 steps
-- Use rounded cards with soft shadows for visual consistency
+- **NO changes to styling/colors** without explicit user request
+- Use existing shared widgets from `lib/shared/widgets/`
+- Follow Material 3 design (already configured in theme)
+- All financial amounts display with 2 decimal places
+- Loading states use `CircularProgressIndicator` or shimmer
+- Error states show user-friendly messages with retry option
 
 ### Testing Requirements
-- Write widget tests for all UI components
-- Write unit tests for business logic
-- Integration tests for critical flows (auth, transactions)
-- Mock external API calls in tests
+- Widget tests for complex UI components
+- Unit tests for business logic (repositories, services)
+- Mock Supabase calls in tests
+- Test error handling paths
 
-## MVP Phase Features (0-3 months)
+## Current Implementation Status
 
-1. **Authentication & Onboarding**
-   - Supabase auth integration
-   - MFA and biometric login
-   - User onboarding flow
+### ✅ Fully Implemented
+- Authentication (email/password, MFA, biometric)
+- User profiles with avatar upload
+- Transactions with accounts and categories
+- Budgets with progress tracking
+- Dashboard with net worth and cash flow
+- Notifications system
+- Bill Splitting (backend + basic UI)
 
-2. **Dashboard**
-   - Net worth overview
-   - Monthly cash flow visualization
-   - Upcoming bills timeline
-   - "Money Health" score
+### ⚠️ Partial Implementation
+- Bill Splitting (needs expense creation UI, settlement flow)
+- Savings Goals (database ready, needs frontend)
+- AI Insights (UI mockup only, needs backend integration)
 
-3. **Bill Splitting**
-   - Group creation for roommates/trips
-   - Expense entry with multiple split methods
-   - Balance tracking
-   - Manual settlement records
+### ❌ Not Implemented
+- Bank integration (Plaid/TrueLayer)
+- Payment processing (Stripe/PayPal for settlements)
+- AI-powered forecasting and recommendations
+- Document storage for receipts
+- Multi-currency support
 
-4. **AI Insights**
-   - Weekly spending digest
-   - Basic categorization
-   - Simple recommendations
+## Troubleshooting
+
+### Common Issues
+
+**"Table does not exist" errors:**
+- Migrations not applied to Supabase
+- Solution: Run migrations from `supabase/migrations/` in SQL editor
+
+**Authentication errors:**
+- Check `.env` file has correct Supabase credentials
+- Verify Supabase project is not paused
+
+**Hot reload not working:**
+- Use hot restart (capital R) after changing providers or route configuration
+
+**RLS policy errors:**
+- Check user is authenticated: `Supabase.instance.client.auth.currentUser`
+- Verify RLS policies in Supabase dashboard match user context
 
 ## Important Context
 
-- **Project Status**: Early stage - currently has only Flutter boilerplate code
-- **Target SDK**: Dart 3.10.0-162.1.beta or higher
-- **Platforms**: iOS, Android, Web (in order of priority)
-- **Monetization**: TBD (freemium vs subscription)
-- **Primary Market**: US initially (Plaid integration), then EU/UK
-
-## Dependencies Management
-
-Current dependencies are minimal. When adding new packages:
-- Verify compatibility with Flutter 3.x
-- Check package maintenance status and popularity
-- Ensure packages support all target platforms
-- Review security advisories for financial-related packages
-
-## Performance Considerations
-
-- Optimize for 60fps animations
-- Implement pagination for transaction lists
-- Use lazy loading for charts and visualizations
-- Cache API responses appropriately
-- Implement offline-first architecture for core features
+- **Target SDK**: Dart 3.10.0+, Flutter 3.37+
+- **Platforms**: iOS, Android, Web (iOS priority for development)
+- **Design System**: Material 3 with custom fintech color palette
+- **Backend**: Single Supabase project handles all environments
+- **State**: Riverpod for all state management (no Bloc or other libraries)

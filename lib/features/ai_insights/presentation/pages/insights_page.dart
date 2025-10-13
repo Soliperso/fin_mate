@@ -149,7 +149,7 @@ class InsightsPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.auto_awesome, color: AppColors.emeraldGreen),
+                        const Icon(Icons.auto_awesome, color: AppColors.primaryTeal),
                         const SizedBox(width: AppSizes.sm),
                         Text(
                           'This Week\'s Summary',
@@ -260,7 +260,7 @@ class InsightsPage extends StatelessWidget {
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'Food & Dining':
-        return AppColors.emeraldGreen;
+        return AppColors.primaryTeal;
       case 'Transportation':
         return AppColors.tealBlue;
       case 'Shopping':

@@ -10,10 +10,16 @@ class BudgetRemoteDataSource {
 
   /// Get all budgets for current user
   Future<List<BudgetModel>> getBudgets({bool? isActive}) async {
+    // Get current user ID
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     var query = _supabase.from('budgets').select('''
           *,
           categories(name, icon, color)
-        ''');
+        ''').eq('user_id', currentUserId);
 
     if (isActive != null) {
       query = query.eq('is_active', isActive);
@@ -51,9 +57,19 @@ class BudgetRemoteDataSource {
 
   /// Create new budget
   Future<BudgetModel> createBudget(BudgetModel budget) async {
+    // Get current user ID
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    // Prepare data with user ID
+    final budgetData = budget.toJson();
+    budgetData['user_id'] = currentUserId;
+
     final response = await _supabase
         .from('budgets')
-        .insert(budget.toJson())
+        .insert(budgetData)
         .select('''
           *,
           categories(name, icon, color)
@@ -123,9 +139,16 @@ class BudgetRemoteDataSource {
     required DateTime endDate,
   }) async {
     try {
+      // Get current user ID
+      final currentUserId = _supabase.auth.currentUser?.id;
+      if (currentUserId == null) {
+        return 0.0;
+      }
+
       var query = _supabase
           .from('transactions')
           .select('amount')
+          .eq('user_id', currentUserId)
           .eq('type', 'expense')
           .gte('date', startDate.toIso8601String().split('T')[0])
           .lte('date', endDate.toIso8601String().split('T')[0]);

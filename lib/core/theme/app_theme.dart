@@ -9,7 +9,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
-        primary: AppColors.emeraldGreen,
+        primary: AppColors.primaryTeal,
         secondary: AppColors.slateBlue,
         tertiary: AppColors.tealBlue,
         error: AppColors.error,
@@ -64,7 +64,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.emeraldGreen, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryTeal, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -83,7 +83,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: AppColors.emeraldGreen,
+        primary: AppColors.primaryTeal,
         secondary: AppColors.slateBlue,
         tertiary: AppColors.tealBlue,
         error: AppColors.error,
@@ -138,7 +138,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.emeraldGreen, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryTeal, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/guards/admin_guard.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
 
@@ -56,16 +57,23 @@ class ProfilePage extends ConsumerWidget {
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Profile Header
-                      Container(
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    await ref
+                        .read(currentUserProfileProvider.notifier)
+                        .loadProfile();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        // Profile Header
+                        Container(
                         width: double.infinity,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              AppColors.emeraldGreen,
+                              AppColors.primaryTeal,
                               AppColors.tealBlue
                             ],
                           ),
@@ -102,6 +110,44 @@ class ProfilePage extends ConsumerWidget {
                                     color: AppColors.white.withValues(alpha: 0.9),
                                   ),
                             ),
+                            const SizedBox(height: AppSizes.sm),
+                            // Admin Badge
+                            if (profile?.isAdmin == true)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.md,
+                                  vertical: AppSizes.xs,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                                  border: Border.all(
+                                    color: AppColors.white.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.shield_outlined,
+                                      size: 16,
+                                      color: AppColors.white,
+                                    ),
+                                    const SizedBox(width: AppSizes.xs),
+                                    Text(
+                                      'Admin',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                            color: AppColors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             const SizedBox(height: AppSizes.lg),
                             // Edit Profile Button
                             OutlinedButton.icon(
@@ -262,6 +308,47 @@ class ProfilePage extends ConsumerWidget {
                             ),
                             const SizedBox(height: AppSizes.lg),
 
+                            // Admin Section (only visible for admins)
+                            if (profile?.isAdmin == true) ...[
+                              Text(
+                                'Admin',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                              const SizedBox(height: AppSizes.sm),
+                              _buildSettingsCard(
+                                context,
+                                children: [
+                                  _buildSettingsTile(
+                                    icon: Icons.people_outline,
+                                    title: 'User Management',
+                                    subtitle: 'View and manage all users',
+                                    onTap: () => context.push('/admin/users'),
+                                  ),
+                                  _buildDivider(),
+                                  _buildSettingsTile(
+                                    icon: Icons.analytics_outlined,
+                                    title: 'System Analytics',
+                                    subtitle: 'View system-wide statistics',
+                                    onTap: () => context.push('/admin/analytics'),
+                                  ),
+                                  _buildDivider(),
+                                  _buildSettingsTile(
+                                    icon: Icons.settings_outlined,
+                                    title: 'System Settings',
+                                    subtitle: 'Configure system parameters',
+                                    onTap: () => context.push('/admin/settings'),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: AppSizes.lg),
+                            ],
+
                             // Logout Button
                             SizedBox(
                               width: double.infinity,
@@ -290,7 +377,8 @@ class ProfilePage extends ConsumerWidget {
                           ],
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
     );
@@ -341,7 +429,7 @@ class ProfilePage extends ConsumerWidget {
           style: const TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.bold,
-            color: AppColors.emeraldGreen,
+            color: AppColors.primaryTeal,
           ),
         ),
       ),
@@ -376,12 +464,12 @@ class ProfilePage extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(AppSizes.sm),
         decoration: BoxDecoration(
-          color: AppColors.emeraldGreen.withValues(alpha: 0.1),
+          color: AppColors.primaryTeal.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),
         child: Icon(
           icon,
-          color: AppColors.emeraldGreen,
+          color: AppColors.primaryTeal,
           size: 24,
         ),
       ),
@@ -439,7 +527,7 @@ class ProfilePage extends ConsumerWidget {
               try {
                 await ref.read(authNotifierProvider.notifier).signOut();
                 if (context.mounted) {
-                  context.go('/onboarding');
+                  context.go('/login');
                 }
               } catch (e) {
                 if (context.mounted) {
