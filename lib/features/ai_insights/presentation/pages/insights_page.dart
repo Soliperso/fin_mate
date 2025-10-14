@@ -1,40 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/error_retry_widget.dart';
+import '../providers/insights_providers.dart';
 
-class InsightsPage extends StatelessWidget {
+class InsightsPage extends ConsumerWidget {
   const InsightsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Mock data
-    final insights = [
-      {
-        'title': 'Spending Alert',
-        'description': 'You\'ve spent 20% more on dining out this month compared to last month.',
-        'type': 'warning',
-        'icon': Icons.trending_up,
-      },
-      {
-        'title': 'Great Job!',
-        'description': 'You\'re on track to save \$500 this month. Keep it up!',
-        'type': 'success',
-        'icon': Icons.celebration,
-      },
-      {
-        'title': 'Bill Reminder',
-        'description': 'Your electric bill is typically higher in winter. Consider budgeting an extra \$50.',
-        'type': 'info',
-        'icon': Icons.lightbulb,
-      },
-    ];
-
-    final categories = [
-      {'name': 'Food & Dining', 'amount': 450.0, 'percentage': 28.0},
-      {'name': 'Transportation', 'amount': 280.0, 'percentage': 18.0},
-      {'name': 'Shopping', 'amount': 320.0, 'percentage': 20.0},
-      {'name': 'Bills & Utilities', 'amount': 550.0, 'percentage': 34.0},
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final insightsAsync = ref.watch(spendingInsightsProvider);
+    final categoryBreakdownAsync = ref.watch(defaultCategoryBreakdownProvider);
+    final forecastAsync = ref.watch(defaultForecastProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -44,151 +25,163 @@ class InsightsPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // TODO: Refresh insights
+              ref.invalidate(spendingInsightsProvider);
+              ref.invalidate(defaultCategoryBreakdownProvider);
+              ref.invalidate(defaultForecastProvider);
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Insights Section
-            Text(
-              'Personalized Insights',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: AppSizes.md),
-            ...insights.map((insight) => _buildInsightCard(context, insight)),
-            const SizedBox(height: AppSizes.lg),
-
-            // Spending Breakdown
-            Text(
-              'Spending Breakdown',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: AppSizes.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: Column(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(spendingInsightsProvider);
+          ref.invalidate(defaultCategoryBreakdownProvider);
+          ref.invalidate(defaultForecastProvider);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Insights Section
+              Text(
+                'Personalized Insights',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSizes.md),
+              insightsAsync.when(
+                data: (insights) {
+                  if (insights.isEmpty) {
+                    return const EmptyState(
+                      icon: Icons.insights,
+                      title: 'No Insights Yet',
+                      message: 'Start adding transactions to get personalized financial insights',
+                      animated: false,
+                    );
+                  }
+                  return Column(
+                    children: insights.map((insight) => _buildInsightCard(context, insight)).toList(),
+                  );
+                },
+                loading: () => Column(
                   children: [
-                    // Pie chart placeholder
-                    Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGray,
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Spending Chart\n(To be implemented)',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.md),
-                    ...categories.map((category) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: _getCategoryColor(category['name'] as String),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.sm),
-                            Expanded(
-                              child: Text(
-                                category['name'] as String,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ),
-                            Text(
-                              '${category['percentage']}%',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(width: AppSizes.sm),
-                            Text(
-                              '\$${(category['amount'] as double).toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                    const SkeletonCard(height: 100),
+                    const SkeletonCard(height: 100),
+                    const SkeletonCard(height: 100),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Weekly Digest
-            Text(
-              'Weekly Digest',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: AppSizes.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.auto_awesome, color: AppColors.primaryTeal),
-                        const SizedBox(width: AppSizes.sm),
-                        Text(
-                          'This Week\'s Summary',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.md),
-                    _buildDigestItem(context, 'Total Spent', '\$387.50'),
-                    _buildDigestItem(context, 'Top Category', 'Food & Dining'),
-                    _buildDigestItem(context, 'Transactions', '23'),
-                    _buildDigestItem(context, 'Avg per Day', '\$55.36'),
-                  ],
+                error: (error, stack) => ErrorRetryWidget(
+                  title: 'Failed to load insights',
+                  message: 'Unable to analyze your spending patterns',
+                  onRetry: () => ref.invalidate(spendingInsightsProvider),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: AppSizes.xl),
+
+              // Category Breakdown
+              Text(
+                'Spending by Category',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSizes.md),
+              categoryBreakdownAsync.when(
+                data: (categories) {
+                  if (categories.isEmpty) {
+                    return const EmptyState(
+                      icon: Icons.pie_chart,
+                      title: 'No Spending Data',
+                      message: 'Add some expenses to see your category breakdown',
+                      animated: false,
+                    );
+                  }
+                  return _buildCategoryBreakdown(context, categories);
+                },
+                loading: () => const SkeletonCard(height: 300),
+                error: (error, stack) => ErrorRetryWidget(
+                  title: 'Failed to load categories',
+                  message: 'Unable to load spending breakdown',
+                  onRetry: () => ref.invalidate(defaultCategoryBreakdownProvider),
+                ),
+              ),
+
+              const SizedBox(height: AppSizes.xl),
+
+              // Forecast Section
+              Text(
+                'Cashflow Forecast (Next 3 Months)',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSizes.md),
+              forecastAsync.when(
+                data: (forecast) {
+                  if (forecast.isEmpty) {
+                    return const EmptyState(
+                      icon: Icons.trending_up,
+                      title: 'No Forecast Available',
+                      message: 'Need more transaction history to generate forecasts',
+                      animated: false,
+                    );
+                  }
+                  return _buildForecastSection(context, forecast);
+                },
+                loading: () => const SkeletonCard(height: 250),
+                error: (error, stack) => ErrorRetryWidget(
+                  title: 'Failed to generate forecast',
+                  message: 'Unable to predict future cashflow',
+                  onRetry: () => ref.invalidate(defaultForecastProvider),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildInsightCard(BuildContext context, Map<String, dynamic> insight) {
+    final type = insight['color'] as String? ?? 'info';
     Color color;
     Color bgColor;
 
-    switch (insight['type']) {
+    switch (type) {
       case 'warning':
         color = AppColors.warning;
         bgColor = AppColors.warning.withValues(alpha: 0.1);
+        break;
+      case 'error':
+        color = AppColors.error;
+        bgColor = AppColors.error.withValues(alpha: 0.1);
         break;
       case 'success':
         color = AppColors.success;
         bgColor = AppColors.success.withValues(alpha: 0.1);
         break;
-      case 'info':
       default:
-        color = AppColors.info;
-        bgColor = AppColors.info.withValues(alpha: 0.1);
+        color = AppColors.primaryTeal;
+        bgColor = AppColors.primaryTeal.withValues(alpha: 0.1);
+    }
+
+    IconData icon;
+    switch (insight['icon'] as String?) {
+      case 'trending_up':
+        icon = Icons.trending_up;
+        break;
+      case 'check_circle':
+        icon = Icons.check_circle;
+        break;
+      case 'warning':
+        icon = Icons.warning;
+        break;
+      case 'savings':
+        icon = Icons.savings;
+        break;
+      case 'info':
+        icon = Icons.info;
+        break;
+      default:
+        icon = Icons.lightbulb;
     }
 
     return Card(
@@ -204,10 +197,7 @@ class InsightsPage extends StatelessWidget {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
-              child: Icon(
-                insight['icon'] as IconData,
-                color: color,
-              ),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -217,13 +207,15 @@ class InsightsPage extends StatelessWidget {
                   Text(
                     insight['title'] as String,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: color,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: AppSizes.xs),
                   Text(
-                    insight['description'] as String,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    insight['message'] as String,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -234,41 +226,153 @@ class InsightsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDigestItem(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.sm),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
+  Widget _buildCategoryBreakdown(BuildContext context, List<Map<String, dynamic>> categories) {
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final total = categories.fold(0.0, (sum, cat) => sum + (cat['total_amount'] as double));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Column(
+          children: categories.take(5).map((category) {
+            final amount = category['total_amount'] as double;
+            final percentage = total > 0 ? (amount / total * 100) : 0.0;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSizes.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        category['category_name'] as String,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      Text(
+                        currencyFormat.format(amount),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.xs),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: percentage / 100,
+                          backgroundColor: AppColors.lightGray,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryTeal),
+                          minHeight: 6,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.sm),
+                      Text(
+                        '${percentage.toStringAsFixed(1)}%',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'Food & Dining':
-        return AppColors.primaryTeal;
-      case 'Transportation':
-        return AppColors.tealBlue;
-      case 'Shopping':
-        return AppColors.slateBlue;
-      case 'Bills & Utilities':
-        return AppColors.warning;
-      default:
-        return AppColors.textTertiary;
-    }
+  Widget _buildForecastSection(BuildContext context, List<Map<String, dynamic>> forecast) {
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Column(
+          children: forecast.map((month) {
+            final monthStr = month['month'] as String;
+            final income = month['income'] as double;
+            final expense = month['expense'] as double;
+            final net = month['net'] as double;
+            final isPositive = net >= 0;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSizes.md),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      _formatMonthYear(monthStr),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'In: ${currencyFormat.format(income)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.success,
+                              ),
+                        ),
+                        Text(
+                          'Out: ${currencyFormat.format(expense)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.error,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.sm,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isPositive ? AppColors.success : AppColors.error)
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    ),
+                    child: Text(
+                      '${isPositive ? '+' : ''}${currencyFormat.format(net)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: isPositive ? AppColors.success : AppColors.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  String _formatMonthYear(String monthStr) {
+    final parts = monthStr.split('-');
+    if (parts.length != 2) return monthStr;
+
+    final year = parts[0];
+    final month = int.tryParse(parts[1]) ?? 1;
+
+    final monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    return '${monthNames[month - 1]} $year';
   }
 }
