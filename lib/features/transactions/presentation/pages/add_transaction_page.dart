@@ -475,8 +475,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ErrorSnackbar.show(
             context,
             message: 'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',
-            actionLabel: 'Retry',
-            onAction: _saveTransaction,
           );
         }
       }
