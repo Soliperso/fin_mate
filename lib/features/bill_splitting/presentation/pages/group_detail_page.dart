@@ -10,6 +10,7 @@ import '../widgets/add_expense_bottom_sheet.dart';
 import '../widgets/settle_up_bottom_sheet.dart';
 import '../widgets/members_section.dart';
 import '../widgets/settlement_history_section.dart';
+import '../widgets/add_member_bottom_sheet.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final String groupId;
@@ -66,12 +67,7 @@ class GroupDetailPage extends ConsumerWidget {
                       groupId: groupId,
                       members: members,
                       currentUserId: currentUserId,
-                      onAddMember: () {
-                        // TODO: Show add member bottom sheet
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Add member feature coming soon')),
-                        );
-                      },
+                      onAddMember: () => _showAddMemberSheet(context),
                     ),
                     loading: () => const Padding(
                       padding: EdgeInsets.all(AppSizes.xl),
@@ -231,6 +227,19 @@ class GroupDetailPage extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       builder: (context) => AddExpenseBottomSheet(groupId: groupId),
+    ).then((result) {
+      if (result == true) {
+        // Data will be refreshed automatically via provider invalidation
+      }
+    });
+  }
+
+  void _showAddMemberSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddMemberBottomSheet(groupId: groupId),
     ).then((result) {
       if (result == true) {
         // Data will be refreshed automatically via provider invalidation

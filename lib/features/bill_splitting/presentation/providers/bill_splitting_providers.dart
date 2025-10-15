@@ -266,3 +266,73 @@ final settlementOperationsProvider = StateNotifierProvider<SettlementOperationsN
   final repository = ref.watch(billSplittingRepositoryProvider);
   return SettlementOperationsNotifier(repository);
 });
+
+// State Notifier for Member Operations
+class MemberOperationsNotifier extends StateNotifier<AsyncValue<void>> {
+  final BillSplittingRepository _repository;
+
+  MemberOperationsNotifier(this._repository) : super(const AsyncValue.data(null));
+
+  Future<bool> addMember({
+    required String groupId,
+    required String userEmail,
+    MemberRole role = MemberRole.member,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.addGroupMember(
+        groupId: groupId,
+        userEmail: userEmail,
+        role: role,
+      );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      rethrow; // Re-throw to allow caller to handle specific error messages
+    }
+  }
+
+  Future<bool> removeMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.removeGroupMember(
+        groupId: groupId,
+        userId: userId,
+      );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      return false;
+    }
+  }
+
+  Future<bool> updateMemberRole({
+    required String groupId,
+    required String userId,
+    required MemberRole role,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.updateMemberRole(
+        groupId: groupId,
+        userId: userId,
+        role: role,
+      );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      return false;
+    }
+  }
+}
+
+final memberOperationsProvider = StateNotifierProvider<MemberOperationsNotifier, AsyncValue<void>>((ref) {
+  final repository = ref.watch(billSplittingRepositoryProvider);
+  return MemberOperationsNotifier(repository);
+});
