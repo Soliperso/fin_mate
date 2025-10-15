@@ -57,18 +57,23 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
         setState(() => _isLoading = false);
 
         String errorMessage = 'Failed to add member';
-        if (e.toString().contains('not found') || e.toString().contains('User not found')) {
-          errorMessage = 'No user found with this email address';
-        } else if (e.toString().contains('already exists') || e.toString().contains('duplicate')) {
+        final errorString = e.toString();
+
+        if (errorString.contains('User not found')) {
+          errorMessage = 'No user found with email "${_emailController.text.trim()}". Please check the email and try again.';
+        } else if (errorString.contains('Already a member')) {
           errorMessage = 'This user is already a member of the group';
-        } else if (e.toString().contains('permission')) {
+        } else if (errorString.contains('permission') || errorString.contains('denied')) {
           errorMessage = 'You don\'t have permission to add members';
+        } else {
+          errorMessage = 'Failed to add member. Please try again.';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -77,14 +82,19 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppSizes.md,
-        right: AppSizes.md,
-        top: AppSizes.md,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppSizes.md,
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
       ),
-      child: Form(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSizes.md,
+          right: AppSizes.md,
+          top: AppSizes.md,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSizes.md,
+        ),
+        child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Column(
@@ -318,6 +328,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

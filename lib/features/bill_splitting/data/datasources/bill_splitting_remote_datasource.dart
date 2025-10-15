@@ -132,10 +132,26 @@ class BillSplittingRemoteDatasource {
       final userResponse = await _supabase
           .from('user_profiles')
           .select('id')
-          .eq('email', userEmail)
-          .single();
+          .eq('email', userEmail.toLowerCase().trim())
+          .maybeSingle();
+
+      if (userResponse == null) {
+        throw Exception('User not found: No user exists with email $userEmail');
+      }
 
       final userId = userResponse['id'] as String;
+
+      // Check if user is already a member
+      final existingMember = await _supabase
+          .from('group_members')
+          .select('id')
+          .eq('group_id', groupId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (existingMember != null) {
+        throw Exception('Already a member: This user is already in the group');
+      }
 
       await _supabase.from('group_members').insert({
         'group_id': groupId,
@@ -143,6 +159,11 @@ class BillSplittingRemoteDatasource {
         'role': role.value,
       });
     } catch (e) {
+      // Re-throw with original message if it's already a custom exception
+      if (e.toString().contains('User not found') ||
+          e.toString().contains('Already a member')) {
+        rethrow;
+      }
       throw Exception('Failed to add group member: $e');
     }
   }
