@@ -41,3 +41,15 @@ final defaultForecastProvider = FutureProvider<List<Map<String, dynamic>>>((ref)
   final service = ref.watch(insightsServiceProvider);
   return await service.generateCashflowForecast(months: 3);
 });
+
+// Proactive alerts provider
+final proactiveAlertsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.getProactiveAlerts();
+});
+
+// Subscription changes provider
+final subscriptionChangesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.detectSubscriptionChanges();
+});

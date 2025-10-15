@@ -116,7 +116,7 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
               ),
               const SizedBox(height: AppSizes.md),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category (Optional)',
                   prefixIcon: Icon(Icons.category),

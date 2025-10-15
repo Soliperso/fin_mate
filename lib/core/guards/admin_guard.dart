@@ -12,7 +12,7 @@ class AdminGuard {
     return profileAsync.when(
       data: (profile) => profile?.isAdmin ?? false,
       loading: () => false,
-      error: (_, __) => false,
+      error: (error, stack) => false,
     );
   }
 
@@ -24,7 +24,7 @@ class AdminGuard {
     return profileAsync.when(
       data: (profile) => (profile?.isAdmin ?? false) ? profile : null,
       loading: () => null,
-      error: (_, __) => null,
+      error: (error, stack) => null,
     );
   }
 }
@@ -36,6 +36,6 @@ final isAdminProvider = Provider<bool>((ref) {
   return profileAsync.when(
     data: (profile) => profile?.isAdmin ?? false,
     loading: () => false,
-    error: (_, __) => false,
+    error: (error, stack) => false,
   );
 });

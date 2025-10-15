@@ -18,6 +18,8 @@ import '../widgets/net_worth_trend_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/upcoming_bills_card.dart';
 import '../widgets/quick_action_button.dart';
+import '../widgets/emergency_fund_card.dart';
+import '../providers/emergency_fund_provider.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -125,6 +127,7 @@ class DashboardPage extends ConsumerWidget {
         data: (stats) => RefreshIndicator(
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
+            ref.invalidate(emergencyFundStatusProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -142,6 +145,19 @@ class DashboardPage extends ConsumerWidget {
 
                 // Money Health Score
                 MoneyHealthScore(score: stats.moneyHealthScore),
+                const SizedBox(height: AppSizes.md),
+
+                // Emergency Fund Status
+                Consumer(
+                  builder: (context, ref, _) {
+                    final statusAsync = ref.watch(emergencyFundStatusProvider);
+                    return statusAsync.when(
+                      data: (status) => EmergencyFundCard(status: status),
+                      loading: () => const SkeletonCard(height: 240),
+                      error: (error, stack) => const SizedBox.shrink(),
+                    );
+                  },
+                ),
                 const SizedBox(height: AppSizes.lg),
 
                 // Quick Actions

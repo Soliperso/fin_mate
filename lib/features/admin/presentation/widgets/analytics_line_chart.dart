@@ -54,7 +54,7 @@ class AnalyticsLineChart extends StatelessWidget {
                 horizontalInterval: (maxValue - minValue) / 4,
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
-                    color: AppColors.borderLight.withOpacity(0.2),
+                    color: AppColors.borderLight.withValues(alpha: 0.2),
                     strokeWidth: 1,
                   );
                 },
@@ -138,8 +138,8 @@ class AnalyticsLineChart extends StatelessWidget {
                           show: true,
                           gradient: LinearGradient(
                             colors: [
-                              lineColor.withOpacity(0.3),
-                              lineColor.withOpacity(0.0),
+                              lineColor.withValues(alpha: 0.3),
+                              lineColor.withValues(alpha: 0.0),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,

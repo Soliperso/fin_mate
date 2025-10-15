@@ -18,19 +18,15 @@ class BillSplittingRemoteDatasource {
   // Groups
   Future<List<BillGroupModel>> getUserGroups() async {
     try {
-      print('🔍 Fetching user groups...');
       final response = await _supabase
           .from('bill_groups')
           .select()
           .order('created_at', ascending: false);
 
-      print('✅ Groups fetched successfully: ${(response as List).length} groups');
       return (response as List)
           .map((json) => BillGroupModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('❌ Failed to fetch groups - Error type: ${e.runtimeType}');
-      print('❌ Error details: $e');
       throw Exception('Failed to fetch groups: $e');
     }
   }
@@ -55,11 +51,9 @@ class BillSplittingRemoteDatasource {
   }) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      print('🔍 Creating group - User ID: $userId');
 
       if (userId == null) throw Exception('User not authenticated');
 
-      print('🔍 Inserting group with name: $name, description: $description');
 
       final response = await _supabase
           .from('bill_groups')
@@ -71,10 +65,8 @@ class BillSplittingRemoteDatasource {
           .select()
           .single();
 
-      print('✅ Group created successfully: ${response['id']}');
       return BillGroupModel.fromJson(response);
     } catch (e) {
-      print('❌ Failed to create group - Error: $e');
       throw Exception('Failed to create group: $e');
     }
   }
@@ -391,18 +383,14 @@ class BillSplittingRemoteDatasource {
   // Balances
   Future<List<GroupBalanceModel>> getGroupBalances(String groupId) async {
     try {
-      print('🔍 Fetching balances for group: $groupId');
       final response = await _supabase.rpc('get_group_balances', params: {
         'p_group_id': groupId,
       });
 
-      print('✅ Balances fetched successfully: ${(response as List).length} balances');
       return (response as List)
           .map((json) => GroupBalanceModel.fromJson(json))
           .toList();
     } catch (e) {
-      print('❌ Failed to fetch group balances - Error type: ${e.runtimeType}');
-      print('❌ Error details: $e');
       throw Exception('Failed to fetch group balances: $e');
     }
   }

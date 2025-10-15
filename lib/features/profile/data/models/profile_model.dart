@@ -18,7 +18,6 @@ class ProfileModel extends ProfileEntity {
   /// Create ProfileModel from JSON (from database)
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     final role = (json['role'] as String?) ?? 'user';
-    print('🔍 ProfileModel created with role: $role, isAdmin: ${role == 'admin'}');
 
     return ProfileModel(
       id: json['id'] as String,

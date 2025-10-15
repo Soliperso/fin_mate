@@ -42,17 +42,12 @@ class _CreateGroupBottomSheetState extends ConsumerState<CreateGroupBottomSheet>
       } else if (mounted) {
         // Check the error state
         final errorState = ref.read(groupOperationsProvider);
-        final errorMessage = errorState.hasError
-            ? errorState.error.toString()
-            : 'Failed to create group';
-        print('❌ Group creation error: $errorMessage');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to create group: ${errorState.hasError ? errorState.error : "Unknown error"}')),
         );
       }
     } catch (e) {
-      print('❌ Exception during group creation: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),

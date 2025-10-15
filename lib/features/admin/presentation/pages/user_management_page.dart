@@ -50,7 +50,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               border: Border(
                 bottom: BorderSide(
                   color: isDark
-                      ? AppColors.borderDark.withOpacity(0.3)
+                      ? AppColors.borderDark.withValues(alpha: 0.3)
                       : AppColors.borderLight,
                   width: 1,
                 ),
@@ -122,7 +122,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                           Icon(
                             Icons.people_outline,
                             size: 80,
-                            color: AppColors.textSecondary.withOpacity(0.5),
+                            color: AppColors.textSecondary.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: AppSizes.lg),
                           Text(

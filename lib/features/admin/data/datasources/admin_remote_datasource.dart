@@ -37,7 +37,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => AdminUserModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching users: $e');
       throw Exception('Failed to fetch users: $e');
     }
   }
@@ -54,7 +53,6 @@ class AdminRemoteDataSource {
       final data = response[0] as Map<String, dynamic>;
       return SystemStatsModel.fromJson(data);
     } catch (e) {
-      print('❌ Error fetching system stats: $e');
       throw Exception('Failed to fetch system stats: $e');
     }
   }
@@ -74,7 +72,6 @@ class AdminRemoteDataSource {
       final data = response[0] as Map<String, dynamic>;
       return AdminUserModel.fromJson(data);
     } catch (e) {
-      print('❌ Error fetching user details: $e');
       throw Exception('Failed to fetch user details: $e');
     }
   }
@@ -87,7 +84,6 @@ class AdminRemoteDataSource {
           .update({'role': role})
           .eq('id', userId);
     } catch (e) {
-      print('❌ Error updating user role: $e');
       throw Exception('Failed to update user role: $e');
     }
   }
@@ -115,7 +111,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => UserGrowthTrendModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching user growth trends: $e');
       throw Exception('Failed to fetch user growth trends: $e');
     }
   }
@@ -141,7 +136,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => FinancialTrendModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching financial trends: $e');
       throw Exception('Failed to fetch financial trends: $e');
     }
   }
@@ -156,7 +150,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => FeatureAdoptionModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching feature adoption stats: $e');
       throw Exception('Failed to fetch feature adoption stats: $e');
     }
   }
@@ -180,7 +173,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => CategoryBreakdownModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching category breakdown: $e');
       throw Exception('Failed to fetch category breakdown: $e');
     }
   }
@@ -200,7 +192,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => EngagementMetricModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching engagement metrics: $e');
       throw Exception('Failed to fetch engagement metrics: $e');
     }
   }
@@ -215,7 +206,6 @@ class AdminRemoteDataSource {
       final List<dynamic> data = response as List<dynamic>;
       return data.map((json) => NetWorthPercentileModel.fromJson(json)).toList();
     } catch (e) {
-      print('❌ Error fetching net worth percentiles: $e');
       throw Exception('Failed to fetch net worth percentiles: $e');
     }
   }

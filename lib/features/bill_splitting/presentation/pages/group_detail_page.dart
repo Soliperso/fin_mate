@@ -9,6 +9,7 @@ import '../providers/bill_splitting_providers.dart';
 import '../widgets/add_expense_bottom_sheet.dart';
 import '../widgets/settle_up_bottom_sheet.dart';
 import '../widgets/members_section.dart';
+import '../widgets/settlement_history_section.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final String groupId;
@@ -21,6 +22,7 @@ class GroupDetailPage extends ConsumerWidget {
     final membersAsync = ref.watch(groupMembersProvider(groupId));
     final expensesAsync = ref.watch(groupExpensesProvider(groupId));
     final balancesAsync = ref.watch(groupBalancesProvider(groupId));
+    final settlementsAsync = ref.watch(groupSettlementsProvider(groupId));
     final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
 
     return groupAsync.when(
@@ -44,6 +46,7 @@ class GroupDetailPage extends ConsumerWidget {
               ref.invalidate(groupMembersProvider(groupId));
               ref.invalidate(groupExpensesProvider(groupId));
               ref.invalidate(groupBalancesProvider(groupId));
+              ref.invalidate(groupSettlementsProvider(groupId));
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -83,6 +86,17 @@ class GroupDetailPage extends ConsumerWidget {
                             ),
                       ),
                     ),
+                  ),
+
+                  // Settlement History Section
+                  settlementsAsync.when(
+                    data: (settlements) => SettlementHistorySection(
+                      groupId: groupId,
+                      settlements: settlements,
+                      currentUserId: currentUserId,
+                    ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (error, stack) => const SizedBox.shrink(),
                   ),
 
                   // Expenses Section

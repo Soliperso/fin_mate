@@ -45,7 +45,9 @@ class _LoadingSkeletonState extends State<LoadingSkeleton>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Safely get theme brightness, fallback to light if no theme found
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey[800]! : AppColors.lightGray;
     final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
 

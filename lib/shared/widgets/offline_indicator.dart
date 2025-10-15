@@ -73,14 +73,17 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        widget.child,
-        SlideTransition(
-          position: _slideAnimation,
-          child: _buildOfflineBanner(context),
-        ),
-      ],
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: [
+          widget.child,
+          SlideTransition(
+            position: _slideAnimation,
+            child: _buildOfflineBanner(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -105,35 +108,39 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
         ),
         child: SafeArea(
           bottom: false,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.wifi_off,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: AppSizes.sm),
-              Expanded(
-                child: Text(
-                  'No internet connection',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.wifi_off,
+                  color: Colors.white,
+                  size: 20,
                 ),
-              ),
-              TextButton(
-                onPressed: _checkConnectivity,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.sm,
-                    vertical: 4,
+                const SizedBox(width: AppSizes.sm),
+                const Expanded(
+                  child: Text(
+                    'No internet connection',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                child: const Text('Retry'),
-              ),
-            ],
+                TextButton(
+                  onPressed: _checkConnectivity,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.sm,
+                      vertical: 4,
+                    ),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -171,12 +178,13 @@ class OfflineBanner extends StatelessWidget {
                 size: 16,
               ),
               const SizedBox(width: AppSizes.sm),
-              Text(
+              const Text(
                 'Offline mode',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),

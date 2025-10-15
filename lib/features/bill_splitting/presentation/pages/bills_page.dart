@@ -135,7 +135,6 @@ class BillsPage extends ConsumerWidget {
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
     final errorMessage = error.toString();
-    print('🔍 Error state - Full error: $errorMessage');
 
     final isMigrationError = errorMessage.contains('does not exist') ||
         (errorMessage.contains('relation') && errorMessage.contains('does not exist'));

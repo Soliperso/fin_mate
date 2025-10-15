@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
-import '../../../transactions/domain/entities/transaction_entity.dart';
 
 class InsightsService {
   final SupabaseClient _supabase;
@@ -336,5 +335,105 @@ class InsightsService {
     }
 
     return opportunity;
+  }
+
+  /// Get proactive alerts and notifications
+  Future<List<Map<String, dynamic>>> getProactiveAlerts() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final alerts = <Map<String, dynamic>>[];
+
+      // Check for upcoming bills (next 7 days)
+      final upcomingBills = await _getUpcomingBills(userId, 7);
+      if (upcomingBills.isNotEmpty) {
+        alerts.add({
+          'type': 'bill_reminder',
+          'severity': 'info',
+          'title': 'Upcoming Bills',
+          'message': 'You have ${upcomingBills.length} bills due in the next 7 days',
+          'count': upcomingBills.length,
+        });
+      }
+
+      // Check for spending increases
+      final patterns = await analyzeSpendingPatterns();
+      final trend = patterns['spending_trend'] as String;
+      if (trend == 'increasing') {
+        final avgDaily = patterns['average_daily_spending'] as double;
+        alerts.add({
+          'type': 'spending_increase',
+          'severity': 'warning',
+          'title': 'Spending Trending Up',
+          'message': 'Your daily spending has increased to \$${avgDaily.toStringAsFixed(2)}/day',
+        });
+      }
+
+      return alerts;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Get upcoming bills
+  Future<List<Map<String, dynamic>>> _getUpcomingBills(String userId, int days) async {
+    final endDate = DateTime.now().add(Duration(days: days));
+    final bills = await _supabase
+        .from('transactions')
+        .select('description, amount, date')
+        .eq('user_id', userId)
+        .eq('is_recurring', true)
+        .eq('type', 'expense')
+        .gte('date', DateTime.now().toIso8601String().split('T')[0])
+        .lte('date', endDate.toIso8601String().split('T')[0]);
+
+    return List<Map<String, dynamic>>.from(bills as List);
+  }
+
+  /// Detect subscription changes
+  Future<List<Map<String, dynamic>>> detectSubscriptionChanges() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return [];
+
+      // Get recurring transactions from last 2 months
+      final twoMonthsAgo = DateTime.now().subtract(const Duration(days: 60));
+      final recurring = await _supabase
+          .from('transactions')
+          .select('description, amount, date')
+          .eq('user_id', userId)
+          .eq('is_recurring', true)
+          .gte('date', twoMonthsAgo.toIso8601String().split('T')[0]);
+
+      // Group by description and check for amount changes
+      final subscriptionMap = <String, List<double>>{};
+      for (final tx in recurring as List) {
+        final desc = tx['description'] as String;
+        final amount = (tx['amount'] as num).toDouble();
+        subscriptionMap[desc] ??= [];
+        subscriptionMap[desc]!.add(amount);
+      }
+
+      final changes = <Map<String, dynamic>>[];
+      subscriptionMap.forEach((desc, amounts) {
+        if (amounts.length > 1) {
+          final firstAmount = amounts.first;
+          final lastAmount = amounts.last;
+          if ((lastAmount - firstAmount).abs() > 0.01) {
+            changes.add({
+              'description': desc,
+              'old_amount': firstAmount,
+              'new_amount': lastAmount,
+              'change': lastAmount - firstAmount,
+            });
+          }
+        }
+      });
+
+      return changes;
+    } catch (e) {
+      return [];
+    }
   }
 }

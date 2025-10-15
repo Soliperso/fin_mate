@@ -13,7 +13,7 @@ class UserListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? AppColors.cardBackgroundDark : AppColors.cardBackground;
-    final borderColor = isDark ? AppColors.borderDark.withOpacity(0.3) : AppColors.borderLight;
+    final borderColor = isDark ? AppColors.borderDark.withValues(alpha: 0.3) : AppColors.borderLight;
 
     return Container(
       decoration: BoxDecoration(
@@ -35,7 +35,7 @@ class UserListItem extends StatelessWidget {
                 // Avatar
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.primaryTeal.withOpacity(0.15),
+                  backgroundColor: AppColors.primaryTeal.withValues(alpha: 0.15),
                   backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
                       ? NetworkImage(user.avatarUrl!)
                       : null,
@@ -77,7 +77,7 @@ class UserListItem extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryTeal.withOpacity(0.15),
+                                color: AppColors.primaryTeal.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                               ),
                               child: Row(
@@ -165,7 +165,7 @@ class UserListItem extends StatelessWidget {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
       child: Row(

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state.dart';
@@ -65,7 +63,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                   summaryAsync.when(
                     data: (summary) => GoalsSummaryCard(summary: summary),
                     loading: () => const SkeletonCard(height: 150),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (error, stack) => const SizedBox.shrink(),
                   ),
                   const SizedBox(height: AppSizes.lg),
 

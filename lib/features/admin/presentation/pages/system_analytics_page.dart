@@ -67,7 +67,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       Text(
                         'Real-time system statistics',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.white.withOpacity(0.9),
+                              color: AppColors.white.withValues(alpha: 0.9),
                             ),
                       ),
                     ],
@@ -269,7 +269,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
     bool isLarge = false,
   }) {
     final cardColor = isDark ? AppColors.cardBackgroundDark : AppColors.cardBackground;
-    final borderColor = isDark ? AppColors.borderDark.withOpacity(0.3) : AppColors.borderLight;
+    final borderColor = isDark ? AppColors.borderDark.withValues(alpha: 0.3) : AppColors.borderLight;
 
     return Container(
       padding: EdgeInsets.all(isLarge ? AppSizes.lg : AppSizes.md),
@@ -286,7 +286,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(AppSizes.sm),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
                 child: Icon(icon, color: color, size: isLarge ? 28 : 24),

@@ -15,8 +15,9 @@ import '../../features/bill_splitting/presentation/pages/group_detail_page.dart'
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
-import '../../features/ai_insights/presentation/pages/insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
+import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
@@ -177,12 +178,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/insights',
             name: 'insights',
-            builder: (context, state) => const InsightsPage(),
+            builder: (context, state) => const AiInsightsPage(),
           ),
           GoRoute(
             path: '/goals',
             name: 'goals',
             builder: (context, state) => const SavingsGoalsPage(),
+          ),
+          GoRoute(
+            path: '/documents',
+            name: 'documents',
+            builder: (context, state) => const DocumentsPage(),
           ),
           GoRoute(
             path: '/profile',

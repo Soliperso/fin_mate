@@ -22,12 +22,9 @@ class ProfileRemoteDataSource {
       if (response == null) return null;
 
       // Debug logging
-      print('🔍 Profile data from database: $response');
-      print('🔍 Role field value: ${response['role']}');
 
       return ProfileModel.fromJson(response);
     } catch (e) {
-      print('❌ Error fetching profile: $e');
       throw Exception('Failed to fetch profile: $e');
     }
   }

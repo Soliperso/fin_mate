@@ -124,7 +124,7 @@ class AnalyticsBarChart extends StatelessWidget {
                       backDrawRodData: BackgroundBarChartRodData(
                         show: true,
                         toY: maxValue * 1.2,
-                        color: AppColors.lightGray.withOpacity(0.3),
+                        color: AppColors.lightGray.withValues(alpha: 0.3),
                       ),
                     ),
                   ],
@@ -136,7 +136,7 @@ class AnalyticsBarChart extends StatelessWidget {
                 horizontalInterval: maxValue / 4,
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
-                    color: AppColors.borderLight.withOpacity(0.2),
+                    color: AppColors.borderLight.withValues(alpha: 0.2),
                     strokeWidth: 1,
                   );
                 },

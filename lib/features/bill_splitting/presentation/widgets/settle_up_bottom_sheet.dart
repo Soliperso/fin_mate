@@ -236,6 +236,10 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
               ),
               const SizedBox(height: AppSizes.lg),
 
+              // Balance Summary
+              _buildBalanceSummary(context),
+              const SizedBox(height: AppSizes.lg),
+
               // User Selection
               if (availableUsers.isEmpty)
                 Container(
@@ -352,6 +356,105 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBalanceSummary(BuildContext context) {
+    final currentUserBalance = widget.balances.firstWhere(
+      (b) => b.userId == widget.currentUserId,
+      orElse: () => widget.balances.first,
+    );
+
+    final balance = currentUserBalance.balance;
+    final isOwed = balance > 0;
+
+    if (balance == 0) {
+      return Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: AppColors.success, size: 32),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'You\'re all settled up!',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'You don\'t owe anyone and no one owes you',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.success,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: (isOwed ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        border: Border.all(
+          color: (isOwed ? AppColors.success : AppColors.error).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isOwed ? Icons.arrow_downward : Icons.arrow_upward,
+            color: isOwed ? AppColors.success : AppColors.error,
+            size: 32,
+          ),
+          const SizedBox(width: AppSizes.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isOwed ? 'You are owed' : 'You owe',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${balance.abs().toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isOwed ? AppColors.success : AppColors.error,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isOwed
+                      ? 'Record when someone pays you'
+                      : 'Record a payment to settle your balance',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
