@@ -3,6 +3,7 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/services/sentry_service.dart';
 
 // ============================================================================
 // Data Source Provider
@@ -80,9 +81,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final user = await _repository.getCurrentUser();
       state = AuthState(user: user, isLoading: false);
+
+      // Set user context in Sentry
+      if (user != null) {
+        await _setUserContext(user);
+      }
     } catch (e) {
       state = AuthState(isLoading: false, errorMessage: e.toString());
     }
+  }
+
+  Future<void> _setUserContext(UserEntity user) async {
+    await SentryService.setUser(id: user.id, email: user.email);
+    SentryService.addBreadcrumb(
+      message: 'User authenticated',
+      category: 'auth',
+      data: {'user_id': user.id},
+    );
+  }
+
+  Future<void> _clearUserContext() async {
+    await SentryService.clearUser();
+    SentryService.addBreadcrumb(
+      message: 'User signed out',
+      category: 'auth',
+    );
   }
 
   Future<void> signInWithEmail({
@@ -96,6 +119,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
       );
       state = AuthState(user: user, isLoading: false);
+
+      // Set user context in Sentry
+      if (user != null) {
+        await _setUserContext(user);
+      }
     } catch (e) {
       state = AuthState(
         isLoading: false,
@@ -133,6 +161,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
+
+      // Clear user context from Sentry
+      await _clearUserContext();
     } catch (e) {
       state = AuthState(
         user: state.user,

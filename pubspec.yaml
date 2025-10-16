@@ -76,6 +76,9 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.1
 
+  # Error Tracking & Monitoring
+  sentry_flutter: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
