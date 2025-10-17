@@ -644,7 +644,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           }).toList(),
                         );
                       },
-                      loading: () => const CircularProgressIndicator(),
+                      loading: () => const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
                       error: (_, stack) => const Text('Failed to load categories'),
                     ),
                     const SizedBox(height: AppSizes.lg),
