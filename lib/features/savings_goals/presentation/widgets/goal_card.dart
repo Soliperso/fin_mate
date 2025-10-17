@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -20,7 +21,7 @@ class GoalCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: AppSizes.md),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to goal detail page
+          context.go('/goals/${goal.id}');
         },
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         child: Padding(

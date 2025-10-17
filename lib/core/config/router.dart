@@ -17,6 +17,7 @@ import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
+import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
 import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
@@ -184,6 +185,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/goals',
             name: 'goals',
             builder: (context, state) => const SavingsGoalsPage(),
+            routes: [
+              GoRoute(
+                path: ':goalId',
+                name: 'goal-detail',
+                builder: (context, state) {
+                  final goalId = state.pathParameters['goalId']!;
+                  return GoalDetailPage(goalId: goalId);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/documents',
