@@ -46,8 +46,6 @@ class SavingsGoalsPage extends ConsumerWidget {
                     icon: Icons.savings_outlined,
                     title: 'No Savings Goals Yet',
                     message: 'Start planning for your future by creating your first savings goal',
-                    actionLabel: 'Create Goal',
-                    onAction: () => _showCreateGoalSheet(context, ref),
                   ),
                 ),
               );
@@ -119,15 +117,10 @@ class SavingsGoalsPage extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: goalsAsync.maybeWhen(
-        data: (goals) => goals.isNotEmpty
-            ? FloatingActionButton.extended(
-                onPressed: () => _showCreateGoalSheet(context, ref),
-                icon: const Icon(Icons.add),
-                label: const Text('New Goal'),
-              )
-            : null,
-        orElse: () => null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateGoalSheet(context, ref),
+        icon: const Icon(Icons.add),
+        label: const Text('New Goal'),
       ),
     );
   }
