@@ -11,6 +11,7 @@ import '../widgets/settle_up_bottom_sheet.dart';
 import '../widgets/members_section.dart';
 import '../widgets/settlement_history_section.dart';
 import '../widgets/add_member_bottom_sheet.dart';
+import '../widgets/expense_detail_bottom_sheet.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final String groupId;
@@ -421,6 +422,17 @@ class GroupDetailPage extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSizes.sm),
       child: ListTile(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => ExpenseDetailBottomSheet(
+              expense: expense,
+              groupId: groupId,
+              currentUserId: currentUserId,
+            ),
+          );
+        },
         leading: Container(
           padding: const EdgeInsets.all(AppSizes.sm),
           decoration: BoxDecoration(
