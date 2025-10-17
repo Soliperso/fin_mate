@@ -89,7 +89,6 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
             notes: _notesController.text.trim().isEmpty
                 ? null
                 : _notesController.text.trim(),
-            splitType: _splitType,
           );
 
       if (success && mounted) {
@@ -235,28 +234,19 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
               ),
               const SizedBox(height: AppSizes.md),
 
-              // Split Type
-              DropdownButtonFormField<SplitType>(
-                initialValue: _splitType,
+              // Split Type (Read-only)
+              InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Split Type',
                   prefixIcon: Icon(Icons.pie_chart),
+                  helperText: 'Split type cannot be changed after creation',
                 ),
-                items: SplitType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type.value.toUpperCase()),
-                  );
-                }).toList(),
-                onChanged: isLoading
-                    ? null
-                    : (value) {
-                        if (value != null) {
-                          setState(() {
-                            _splitType = value;
-                          });
-                        }
-                      },
+                child: Text(
+                  _splitType.value.toUpperCase(),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
               ),
               const SizedBox(height: AppSizes.md),
 
