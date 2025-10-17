@@ -119,10 +119,15 @@ class SavingsGoalsPage extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateGoalSheet(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New Goal'),
+      floatingActionButton: goalsAsync.maybeWhen(
+        data: (goals) => goals.isNotEmpty
+            ? FloatingActionButton.extended(
+                onPressed: () => _showCreateGoalSheet(context, ref),
+                icon: const Icon(Icons.add),
+                label: const Text('New Goal'),
+              )
+            : null,
+        orElse: () => null,
       ),
     );
   }

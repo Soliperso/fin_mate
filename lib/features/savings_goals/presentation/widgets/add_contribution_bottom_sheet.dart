@@ -191,7 +191,7 @@ class _AddContributionBottomSheetState
               CustomButton(
                 onPressed: _isLoading ? null : _submitContribution,
                 isLoading: _isLoading,
-                child: const Text('Add Contribution'),
+                label: 'Add Contribution',
               ),
               const SizedBox(height: AppSizes.sm),
             ],
