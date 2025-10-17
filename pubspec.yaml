@@ -79,6 +79,9 @@ dependencies:
   # Error Tracking & Monitoring
   sentry_flutter: ^8.0.0
 
+  # App Info
+  package_info_plus: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

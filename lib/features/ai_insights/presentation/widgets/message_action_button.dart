@@ -21,7 +21,7 @@ class MessageActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: backgroundColor ?? AppColors.primaryTeal.withOpacity(0.1),
+      color: backgroundColor ?? AppColors.primaryTeal.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(AppSizes.radiusMd),
       child: InkWell(
         onTap: onTap,

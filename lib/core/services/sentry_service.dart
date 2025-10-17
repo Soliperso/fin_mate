@@ -186,9 +186,7 @@ class SentryService {
         withScope: (scope) {
           scope.level = level;
           if (extra != null) {
-            extra.forEach((key, value) {
-              scope.setExtra(key, value);
-            });
+            scope.setContexts('extra', extra);
           }
         },
       );
@@ -212,9 +210,7 @@ class SentryService {
       level: level,
       withScope: (scope) {
         if (extra != null) {
-          extra.forEach((key, value) {
-            scope.setExtra(key, value);
-          });
+          scope.setContexts('extra', extra);
         }
       },
     );

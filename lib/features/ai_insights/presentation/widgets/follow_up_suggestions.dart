@@ -20,10 +20,10 @@ class FollowUpSuggestions extends StatelessWidget {
       margin: const EdgeInsets.only(top: AppSizes.md),
       padding: const EdgeInsets.all(AppSizes.sm),
       decoration: BoxDecoration(
-        color: AppColors.primaryTeal.withOpacity(0.05),
+        color: AppColors.primaryTeal.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         border: Border.all(
-          color: AppColors.primaryTeal.withOpacity(0.2),
+          color: AppColors.primaryTeal.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -89,7 +89,7 @@ class _SuggestionChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: AppColors.primaryTeal.withOpacity(0.3),
+              color: AppColors.primaryTeal.withValues(alpha: 0.3),
               width: 1.5,
             ),
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),

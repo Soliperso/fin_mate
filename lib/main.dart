@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
+import 'core/services/analytics_service.dart';
 import 'core/error/global_error_handler.dart';
 import 'shared/widgets/offline_indicator.dart';
 
@@ -29,6 +29,10 @@ void main() async {
         anonKey: EnvConfig.supabaseAnonKey,
         debug: EnvConfig.enableLogging,
       );
+
+      // Initialize Analytics
+      final analytics = AnalyticsService(Supabase.instance.client);
+      await analytics.initialize();
 
       // Set up Flutter error handling
       FlutterError.onError = (FlutterErrorDetails details) {

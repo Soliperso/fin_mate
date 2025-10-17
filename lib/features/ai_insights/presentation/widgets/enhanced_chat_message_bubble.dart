@@ -150,7 +150,7 @@ class EnhancedChatMessageBubble extends StatelessWidget {
 
   Color _getBackgroundColor(bool isUser) {
     if (message.type == MessageType.error) {
-      return AppColors.error.withOpacity(0.1);
+      return AppColors.error.withValues(alpha: 0.1);
     }
     return isUser ? AppColors.primaryTeal : AppColors.lightGray;
   }

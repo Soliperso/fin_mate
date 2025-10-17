@@ -4,6 +4,7 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../../../core/services/sentry_service.dart';
+import '../../../../core/providers/analytics_provider.dart';
 
 // ============================================================================
 // Data Source Provider
@@ -71,8 +72,9 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  final Ref _ref;
 
-  AuthNotifier(this._repository) : super(AuthState()) {
+  AuthNotifier(this._repository, this._ref) : super(AuthState()) {
     _init();
   }
 
@@ -120,10 +122,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       state = AuthState(user: user, isLoading: false);
 
-      // Set user context in Sentry
-      if (user != null) {
-        await _setUserContext(user);
-      }
+      // Set user context in Sentry and track sign in
+      await _setUserContext(user);
+
+      // Track sign in event
+      final analytics = _ref.read(analyticsServiceProvider);
+      await analytics.trackSignIn(method: 'email');
     } catch (e) {
       state = AuthState(
         isLoading: false,
@@ -147,6 +151,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       // Don't set user - they need to verify email first
       state = AuthState(user: null, isLoading: false);
+
+      // Track sign up event (user not yet verified)
+      final analytics = _ref.read(analyticsServiceProvider);
+      await analytics.trackSignUp(method: 'email');
     } catch (e) {
       state = AuthState(
         isLoading: false,
@@ -159,6 +167,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
+      // Track sign out before clearing user
+      final analytics = _ref.read(analyticsServiceProvider);
+      await analytics.trackSignOut();
+
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
 
@@ -273,6 +285,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
   (ref) {
-    return AuthNotifier(ref.watch(authRepositoryProvider));
+    return AuthNotifier(ref.watch(authRepositoryProvider), ref);
   },
 );

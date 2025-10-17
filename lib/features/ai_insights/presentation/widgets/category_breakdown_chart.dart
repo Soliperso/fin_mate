@@ -27,7 +27,7 @@ class CategoryBreakdownChart extends StatelessWidget {
       margin: const EdgeInsets.only(top: AppSizes.sm),
       padding: const EdgeInsets.all(AppSizes.md),
       decoration: BoxDecoration(
-        color: AppColors.lightGray.withOpacity(0.5),
+        color: AppColors.lightGray.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
       ),
       child: Column(
@@ -86,8 +86,8 @@ class CategoryBreakdownChart extends StatelessWidget {
       AppColors.success,
       AppColors.warning,
       AppColors.error,
-      AppColors.primaryTeal.withOpacity(0.6),
-      AppColors.tealDark.withOpacity(0.6),
+      AppColors.primaryTeal.withValues(alpha: 0.6),
+      AppColors.tealDark.withValues(alpha: 0.6),
     ];
 
     return List.generate(categoryData.length.clamp(0, 5), (index) {
@@ -117,8 +117,8 @@ class CategoryBreakdownChart extends StatelessWidget {
       AppColors.success,
       AppColors.warning,
       AppColors.error,
-      AppColors.primaryTeal.withOpacity(0.6),
-      AppColors.tealDark.withOpacity(0.6),
+      AppColors.primaryTeal.withValues(alpha: 0.6),
+      AppColors.tealDark.withValues(alpha: 0.6),
     ];
 
     return ListView.separated(

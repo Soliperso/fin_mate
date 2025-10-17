@@ -199,7 +199,7 @@ class _UploadDocumentBottomSheetState
 
               // Document type
               DropdownButtonFormField<DocumentType>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Document Type',
                   border: OutlineInputBorder(),
