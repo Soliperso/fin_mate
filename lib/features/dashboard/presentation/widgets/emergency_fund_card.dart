@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/emergency_fund_status.dart';
 
 class EmergencyFundCard extends StatelessWidget {
@@ -239,7 +239,12 @@ class EmergencyFundCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      context.push('/goals');
+                      // Savings Goals feature coming in Phase 2
+                      SuccessSnackbar.show(
+                        context,
+                        message: 'Savings Goals feature coming soon!',
+                        duration: const Duration(seconds: 2),
+                      );
                     },
                     icon: const Icon(Icons.add_circle_outline),
                     label: const Text('Add to Emergency Fund'),

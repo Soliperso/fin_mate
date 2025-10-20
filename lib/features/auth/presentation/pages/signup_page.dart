@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/password_strength_indicator.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
 
 class SignupPage extends ConsumerStatefulWidget {
@@ -18,6 +20,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptedTerms = false;
@@ -27,13 +33,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -43,11 +42,36 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSizes.xl),
+                Center(
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primaryTeal.withValues(alpha: 0.15),
+                          AppColors.primaryTeal.withValues(alpha: 0.08),
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.person_add_outlined,
+                      size: 58,
+                      color: AppColors.primaryTeal.withValues(alpha: 0.7),
+                      weight: 210,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.lg),
                 Text(
                   'Create Account',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
@@ -55,6 +79,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.xxl),
                 if (authState.errorMessage != null) ...[
@@ -82,6 +107,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ],
                 TextFormField(
                   controller: _nameController,
+                  focusNode: _nameFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
                   decoration: const InputDecoration(
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outlined),
@@ -96,7 +124,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _emailController,
+                  focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
@@ -114,7 +145,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _passwordController,
+                  focusNode: _passwordFocusNode,
                   obscureText: _obscurePassword,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
+                  onChanged: (value) => setState(() {}), // Trigger rebuild for strength indicator
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outlined),
@@ -135,10 +170,16 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     return null;
                   },
                 ),
+                PasswordStrengthIndicator(password: _passwordController.text),
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _confirmPasswordController,
+                  focusNode: _confirmPasswordFocusNode,
                   obscureText: _obscureConfirmPassword,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) {
+                    if (_acceptedTerms) _handleSignup();
+                  },
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
                     prefixIcon: const Icon(Icons.lock_outlined),
@@ -241,12 +282,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       } catch (e) {
         // Error is already handled in the provider
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(ref.read(authNotifierProvider).errorMessage ??
-                  'Failed to create account. Please try again.'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: ref.read(authNotifierProvider).errorMessage ??
+                'Failed to create account. Please try again.',
           );
         }
       }
@@ -259,6 +298,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 }

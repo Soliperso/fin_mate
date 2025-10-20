@@ -64,23 +64,46 @@ class AuthRemoteDataSource {
     required String password,
     required String fullName,
   }) async {
-    final response = await _supabase.auth.signUp(
-      email: email,
-      password: password,
-      data: {
-        'full_name': fullName,
-      },
-    );
+    try {
+      // Remove emailRedirectTo to avoid web redirects on mobile
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': fullName,
+        },
+      );
 
-    if (response.user == null) {
-      throw Exception('Sign up failed: No user returned');
+      if (response.user == null) {
+        throw Exception('Sign up failed: No user returned');
+      }
+
+      // Check if email confirmation is required
+      // If session is null, it means email confirmation is required
+      if (response.session == null) {
+        // Email confirmation is enabled - user needs to verify email
+        // Sign out to ensure user must verify email before login
+        await _supabase.auth.signOut();
+      } else {
+        // Email confirmation is disabled - user is automatically logged in
+        // Still sign them out so they go through proper login flow
+        await _supabase.auth.signOut();
+      }
+
+      // Return user (will not be used since we sign out)
+      return UserModel.fromSupabase(response.user!, null);
+    } on AuthException catch (e) {
+      // Handle specific Supabase auth errors
+      if (e.message.contains('User already registered')) {
+        throw Exception('An account with this email already exists. Please log in.');
+      } else if (e.message.contains('Email rate limit exceeded')) {
+        throw Exception('Too many signup attempts. Please try again later.');
+      } else {
+        throw Exception('Sign up failed: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Sign up failed: $e');
     }
-
-    // Sign out after signup so user must verify email and login
-    await _supabase.auth.signOut();
-
-    // Return user (will not be used since we sign out)
-    return UserModel.fromSupabase(response.user!, null);
   }
 
   /// Sign out
@@ -194,12 +217,32 @@ class AuthRemoteDataSource {
     return UserModel.fromSupabase(response.user!, profile);
   }
 
-  /// Resend OTP to email
+  /// Resend confirmation email
   Future<void> resendOTP(String email) async {
-    await _supabase.auth.resend(
-      type: OtpType.signup,
-      email: email,
-    );
+    // For signup email confirmation, we need to use the resend method with signup type
+    // This will resend the email confirmation link
+    try {
+      // Remove emailRedirectTo to avoid web redirects on mobile
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } on AuthException catch (e) {
+      // Handle specific Supabase auth errors
+      if (e.message.contains('User not found') || e.message.contains('not found')) {
+        throw Exception('No account found with this email. Please sign up first.');
+      } else if (e.message.contains('already confirmed') || e.message.contains('Email already verified')) {
+        throw Exception('Email already confirmed. Please try logging in.');
+      } else if (e.message.contains('rate limit') || e.message.contains('too many')) {
+        throw Exception('Too many requests. Please wait a few minutes before trying again.');
+      } else if (e.message.contains('Anonymous sign-ins are disabled')) {
+        throw Exception('Email confirmation is not properly configured. Please contact support.');
+      } else {
+        throw Exception('Failed to resend confirmation email. Please try again later.');
+      }
+    } catch (e) {
+      throw Exception('Failed to resend confirmation email. Please try again later.');
+    }
   }
 
   // ============================================================================

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/settlement_entity.dart';
 
 class SettlementHistorySection extends ConsumerWidget {
@@ -244,9 +245,7 @@ class SettlementHistorySection extends ConsumerWidget {
                   Icons.receipt_long,
                   onTap: () {
                     // TODO: Open evidence URL
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Receipt viewing coming soon')),
-                    );
+                    ErrorSnackbar.show(context, message: 'Receipt viewing coming soon');
                   },
                 ),
               ],

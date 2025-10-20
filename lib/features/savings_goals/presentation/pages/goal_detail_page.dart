@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
 import '../widgets/add_contribution_bottom_sheet.dart';
 import '../widgets/edit_goal_bottom_sheet.dart';
@@ -499,19 +500,19 @@ class GoalDetailPage extends ConsumerWidget {
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Goal'),
         content: const Text(
           'Are you sure you want to delete this goal? This action cannot be undone.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               final notifier = ref.read(goalOperationsProvider.notifier);
               final success = await notifier.deleteGoal(goalId);
 
@@ -519,13 +520,9 @@ class GoalDetailPage extends ConsumerWidget {
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
                 context.pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Goal deleted successfully')),
-                );
+                SuccessSnackbar.show(context, message: 'Goal deleted successfully');
               } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete goal')),
-                );
+                ErrorSnackbar.show(context, message: 'Failed to delete goal');
               }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.error)),
@@ -561,13 +558,9 @@ class GoalDetailPage extends ConsumerWidget {
                 ref.invalidate(goalContributionsProvider(goalId));
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Contribution deleted')),
-                );
+                SuccessSnackbar.show(context, message: 'Contribution deleted');
               } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete contribution')),
-                );
+                ErrorSnackbar.show(context, message: 'Failed to delete contribution');
               }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.error)),

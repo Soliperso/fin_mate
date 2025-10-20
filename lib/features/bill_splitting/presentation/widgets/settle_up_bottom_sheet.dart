@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/group_balance_entity.dart';
 import '../providers/bill_splitting_providers.dart';
 
@@ -91,9 +92,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
   Future<void> _recordSettlement() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedUserId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a user')),
-      );
+      ErrorSnackbar.show(context, message: 'Please select a user');
       return;
     }
 
@@ -113,22 +112,17 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
         ref.invalidate(groupSettlementsProvider(widget.groupId));
 
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settlement recorded successfully')),
-        );
+        SuccessSnackbar.show(context, message: 'Settlement recorded successfully');
       } else if (mounted) {
         final errorState = ref.read(settlementOperationsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to record settlement: ${errorState.hasError ? errorState.error : "Unknown error"}'),
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to record settlement: ${errorState.hasError ? errorState.error : "Unknown error"}',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Error: $e');
       }
     }
   }

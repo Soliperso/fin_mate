@@ -14,6 +14,7 @@ import '../widgets/balance_timeline_chart.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import './insights_tab.dart';
 
 class AiInsightsPage extends ConsumerStatefulWidget {
@@ -79,9 +80,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         break;
       case 'add_transaction':
         // Show snackbar or navigate
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Navigate to add transaction')),
-        );
+        SuccessSnackbar.show(context, message: 'Navigate to add transaction');
         break;
       case 'view_details':
         _handleSendMessage('Tell me more details');

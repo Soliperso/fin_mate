@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/group_expense_entity.dart';
 import '../providers/bill_splitting_providers.dart';
 import 'edit_expense_bottom_sheet.dart';
@@ -270,13 +271,9 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
               if (success && context.mounted) {
                 ref.invalidate(groupExpensesProvider(groupId));
                 ref.invalidate(groupBalancesProvider(groupId));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Expense deleted successfully')),
-                );
+                SuccessSnackbar.show(context, message: 'Expense deleted successfully');
               } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete expense')),
-                );
+                ErrorSnackbar.show(context, message: 'Failed to delete expense');
               }
             },
             child: const Text('Delete', style: TextStyle(color: AppColors.error)),

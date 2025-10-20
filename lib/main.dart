@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,12 +24,25 @@ void main() async {
       // Initialize Sentry error tracking
       await SentryService.initialize();
 
-      // Initialize Supabase
+      // Initialize Supabase with deep link handling
       await Supabase.initialize(
         url: EnvConfig.supabaseUrl,
         anonKey: EnvConfig.supabaseAnonKey,
         debug: EnvConfig.enableLogging,
+        authOptions: FlutterAuthClientOptions(
+          authFlowType: AuthFlowType.pkce,
+          autoRefreshToken: true,
+        ),
       );
+
+      // Listen for deep link authentication (email confirmation)
+      Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+        final event = data.event;
+        if (event == AuthChangeEvent.signedIn) {
+          // User authenticated via deep link
+          print('User signed in via deep link');
+        }
+      });
 
       // Initialize Analytics
       final analytics = AnalyticsService(Supabase.instance.client);

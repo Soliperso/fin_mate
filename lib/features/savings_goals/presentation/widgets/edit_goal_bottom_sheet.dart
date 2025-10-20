@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/savings_goal_entity.dart';
 import '../providers/savings_goal_providers.dart';
 
@@ -81,13 +82,9 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
 
       if (success) {
         Navigator.pop(context, true); // Close bottom sheet with success
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Goal updated successfully!')),
-        );
+        SuccessSnackbar.show(context, message: 'Goal updated successfully!');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update goal')),
-        );
+        ErrorSnackbar.show(context, message: 'Failed to update goal');
       }
     }
   }

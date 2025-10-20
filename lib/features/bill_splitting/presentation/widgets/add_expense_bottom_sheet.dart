@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/group_expense_entity.dart';
 import '../providers/bill_splitting_providers.dart';
 
@@ -86,22 +87,17 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
         ref.invalidate(groupBalancesProvider(widget.groupId));
 
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Expense added successfully')),
-        );
+        SuccessSnackbar.show(context, message: 'Expense added successfully');
       } else if (mounted) {
         final errorState = ref.read(expenseOperationsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to add expense: ${errorState.hasError ? errorState.error : "Unknown error"}'),
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to add expense: ${errorState.hasError ? errorState.error : "Unknown error"}',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Error: $e');
       }
     }
   }

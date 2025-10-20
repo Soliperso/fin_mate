@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/bill_splitting_providers.dart';
 
 class CreateGroupBottomSheet extends ConsumerStatefulWidget {
@@ -36,22 +37,19 @@ class _CreateGroupBottomSheetState extends ConsumerState<CreateGroupBottomSheet>
 
       if (group != null && mounted) {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group created successfully')),
-        );
+        SuccessSnackbar.show(context, message: 'Group created successfully');
       } else if (mounted) {
         // Check the error state
         final errorState = ref.read(groupOperationsProvider);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create group: ${errorState.hasError ? errorState.error : "Unknown error"}')),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to create group: ${errorState.hasError ? errorState.error : "Unknown error"}',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Error: $e');
       }
     }
   }

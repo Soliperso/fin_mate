@@ -47,5 +47,16 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>FinMate needs Face ID permission to enable biometric login for secure and convenient access to your account.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.finmate</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

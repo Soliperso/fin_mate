@@ -2,12 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../guards/admin_guard.dart';
+// COMMENTED OUT - Admin guard not needed for MVP Phase 1
+// import '../guards/admin_guard.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/verify_email_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
+import '../../features/auth/presentation/pages/auth_callback_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/bill_splitting/presentation/pages/bills_page.dart';
@@ -16,15 +19,17 @@ import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
-import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
-import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
+// COMMENTED OUT - Savings Goals not in MVP Phase 1
+// import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
+// import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
 import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
-import '../../features/admin/presentation/pages/user_management_page.dart';
-import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
-import '../../features/admin/presentation/pages/system_settings_page.dart';
+// COMMENTED OUT - Admin panel not in MVP Phase 1 (internal tooling)
+// import '../../features/admin/presentation/pages/user_management_page.dart';
+// import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
+// import '../../features/admin/presentation/pages/system_settings_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -72,8 +77,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/signup') ||
           state.matchedLocation.startsWith('/onboarding') ||
           state.matchedLocation.startsWith('/verify-email') ||
+          state.matchedLocation.startsWith('/forgot-password') ||
+          state.matchedLocation.startsWith('/auth/callback') ||
           state.matchedLocation == '/';
-      final isAdminRoute = state.matchedLocation.startsWith('/admin');
+      // COMMENTED OUT - Admin routes not in MVP Phase 1
+      // final isAdminRoute = state.matchedLocation.startsWith('/admin');
 
       // If not authenticated and trying to access protected route
       if (!isAuthenticated && !isAuthRoute) {
@@ -85,13 +93,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/dashboard';
       }
 
-      // Admin route protection
-      if (isAdminRoute) {
-        final isAdmin = ref.read(isAdminProvider);
-        if (!isAdmin) {
-          return '/dashboard'; // Redirect non-admins
-        }
-      }
+      // COMMENTED OUT - Admin route protection not needed for MVP Phase 1
+      // if (isAdminRoute) {
+      //   final isAdmin = ref.read(isAdminProvider);
+      //   if (!isAdmin) {
+      //     return '/dashboard'; // Redirect non-admins
+      //   }
+      // }
 
       return null; // No redirect
     },
@@ -125,6 +133,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           final email = state.extra as String;
           return VerifyEmailPage(email: email);
         },
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'];
+          return ForgotPasswordPage(email: email);
+        },
+      ),
+      GoRoute(
+        path: '/auth/callback',
+        name: 'auth-callback',
+        builder: (context, state) => const AuthCallbackPage(),
       ),
 
       // Main App Shell with Bottom Navigation
@@ -181,21 +202,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'insights',
             builder: (context, state) => const AiInsightsPage(),
           ),
-          GoRoute(
-            path: '/goals',
-            name: 'goals',
-            builder: (context, state) => const SavingsGoalsPage(),
-            routes: [
-              GoRoute(
-                path: ':goalId',
-                name: 'goal-detail',
-                builder: (context, state) {
-                  final goalId = state.pathParameters['goalId']!;
-                  return GoalDetailPage(goalId: goalId);
-                },
-              ),
-            ],
-          ),
+          // COMMENTED OUT - Savings Goals not in MVP Phase 1
+          // GoRoute(
+          //   path: '/goals',
+          //   name: 'goals',
+          //   builder: (context, state) => const SavingsGoalsPage(),
+          //   routes: [
+          //     GoRoute(
+          //       path: ':goalId',
+          //       name: 'goal-detail',
+          //       builder: (context, state) {
+          //         final goalId = state.pathParameters['goalId']!;
+          //         return GoalDetailPage(goalId: goalId);
+          //       },
+          //     ),
+          //   ],
+          // ),
           GoRoute(
             path: '/documents',
             name: 'documents',
@@ -221,22 +243,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Admin Routes (protected by admin guard in redirect)
-      GoRoute(
-        path: '/admin/users',
-        name: 'admin-users',
-        builder: (context, state) => const UserManagementPage(),
-      ),
-      GoRoute(
-        path: '/admin/analytics',
-        name: 'admin-analytics',
-        builder: (context, state) => const SystemAnalyticsPageEnhanced(),
-      ),
-      GoRoute(
-        path: '/admin/settings',
-        name: 'admin-settings',
-        builder: (context, state) => const SystemSettingsPage(),
-      ),
+      // COMMENTED OUT - Admin routes not in MVP Phase 1 (internal tooling)
+      // GoRoute(
+      //   path: '/admin/users',
+      //   name: 'admin-users',
+      //   builder: (context, state) => const UserManagementPage(),
+      // ),
+      // GoRoute(
+      //   path: '/admin/analytics',
+      //   name: 'admin-analytics',
+      //   builder: (context, state) => const SystemAnalyticsPageEnhanced(),
+      // ),
+      // GoRoute(
+      //   path: '/admin/settings',
+      //   name: 'admin-settings',
+      //   builder: (context, state) => const SystemSettingsPage(),
+      // ),
     ],
   );
 });

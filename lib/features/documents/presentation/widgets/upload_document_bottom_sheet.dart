@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/document_entity.dart';
 import '../providers/document_providers.dart';
 
@@ -63,9 +64,9 @@ class _UploadDocumentBottomSheetState
 
   Future<void> _uploadDocument() async {
     if (_selectedFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a file')),
-      );
+      if (mounted) {
+        ErrorSnackbar.show(context, message: 'Please select a file');
+      }
       return;
     }
 
@@ -92,15 +93,11 @@ class _UploadDocumentBottomSheetState
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document uploaded successfully')),
-        );
+        SuccessSnackbar.show(context, message: 'Document uploaded successfully');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Upload failed: $e');
       }
     } finally {
       if (mounted) {

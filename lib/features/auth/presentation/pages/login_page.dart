@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/biometric_provider.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -20,6 +21,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
@@ -27,6 +30,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void initState() {
     super.initState();
     _loadSavedCredentials();
+    // Auto-focus email field when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emailFocusNode.requestFocus();
+    });
   }
 
   Future<void> _loadSavedCredentials() async {
@@ -52,13 +59,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -68,11 +68,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSizes.xl),
+                Center(
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primaryTeal.withValues(alpha: 0.15),
+                          AppColors.primaryTeal.withValues(alpha: 0.08),
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.lock_person_outlined,
+                      size: 58,
+                      color: AppColors.primaryTeal.withValues(alpha: 0.7),
+                      weight: 210,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.lg),
                 Text(
                   'Welcome Back',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
@@ -80,6 +105,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.xxl),
                 if (authState.errorMessage != null) ...[
@@ -107,7 +133,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ],
                 TextFormField(
                   controller: _emailController,
+                  focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
@@ -125,7 +154,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _passwordController,
+                  focusNode: _passwordFocusNode,
                   obscureText: _obscurePassword,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outlined),
@@ -150,7 +182,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       value: _rememberMe,
                       onChanged: authState.isLoading
                           ? null
-                          : (value) => setState(() => _rememberMe = value ?? false),
+                          : (value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                                // Clear fields when remember me is unchecked
+                                if (!_rememberMe) {
+                                  _emailController.clear();
+                                  _passwordController.clear();
+                                }
+                              });
+                            },
                     ),
                     Text(
                       'Remember me',
@@ -273,12 +314,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         // Router will automatically redirect to dashboard via redirect logic
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(ref.read(authNotifierProvider).errorMessage ??
-                'Failed to sign in. Please try again.'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: ref.read(authNotifierProvider).errorMessage ??
+                'Failed to sign in. Please try again.',
           );
         }
       }
@@ -298,11 +337,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!isAvailable) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Biometric authentication is not available on this device'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: 'Biometric authentication is not available on this device',
           );
         }
         return;
@@ -315,12 +352,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (email == null || password == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No saved credentials found. Please login with "Remember me" enabled first.'),
-              backgroundColor: AppColors.warning,
-              duration: Duration(seconds: 4),
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: 'No saved credentials found. Please login with "Remember me" enabled first.',
+            duration: const Duration(seconds: 4),
           );
         }
         return;
@@ -335,11 +370,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _logger.d('Biometric result: ${result.success}');
       if (!result.success) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result.errorMessage ?? 'Biometric authentication failed'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: result.errorMessage ?? 'Biometric authentication failed',
           );
         }
         return;
@@ -356,47 +389,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _logger.e('Biometric login error', error: e, stackTrace: stackTrace);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Biometric login failed: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Biometric login failed: ${e.toString()}',
         );
       }
     }
   }
 
-  Future<void> _handleForgotPassword() async {
+  void _handleForgotPassword() {
     final email = _emailController.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid email address'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    try {
-      await ref.read(authNotifierProvider.notifier).resetPassword(email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Password reset link sent to $email'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send reset link. Please try again.'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+    if (email.isNotEmpty) {
+      context.go('/forgot-password?email=${Uri.encodeComponent(email)}');
+    } else {
+      context.go('/forgot-password');
     }
   }
 
@@ -404,6 +410,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
@@ -368,7 +369,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
       ),
-      builder: (context) => Container(
+      builder: (sheetContext) => Container(
         padding: const EdgeInsets.all(AppSizes.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -385,7 +386,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(sheetContext),
                 ),
               ],
             ),
@@ -434,7 +435,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       await context.push('/transactions/add?id=${transaction.id}');
                       // Refresh after editing
                       if (context.mounted) {
@@ -452,7 +453,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       _confirmDelete(context, transaction, notifier);
                     },
                     icon: const Icon(Icons.delete),
@@ -506,19 +507,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Transaction'),
         content: const Text(
           'Are you sure you want to delete this transaction? This action cannot be undone.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               final success = await notifier.deleteTransaction(transaction.id);
 
               // Invalidate dashboard provider to refresh dashboard data
@@ -527,16 +528,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               }
 
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'Transaction deleted successfully'
-                          : 'Failed to delete transaction',
-                    ),
-                    backgroundColor: success ? AppColors.success : AppColors.error,
-                  ),
-                );
+                if (success) {
+                  SuccessSnackbar.show(
+                    context,
+                    message: 'Transaction deleted successfully',
+                  );
+                } else {
+                  ErrorSnackbar.show(
+                    context,
+                    message: 'Failed to delete transaction',
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(

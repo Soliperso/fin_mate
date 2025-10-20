@@ -9,7 +9,6 @@ import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
 import '../providers/transaction_providers.dart';
-import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -350,12 +349,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       _logger.d('Starting transaction submit...');
 
       // Show loading indicator
+      late BuildContext loadingDialogContext;
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (dialogContext) {
+          loadingDialogContext = dialogContext;
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       );
 
       try {
@@ -444,15 +447,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         }
 
         if (mounted) {
-          _logger.d('Closing dialog and showing success message...');
-          Navigator.pop(context); // Remove loading
+          _logger.d('Closing loading dialog...');
+          // Use the loading dialog context to pop the loading dialog
+          if (mounted) Navigator.pop(loadingDialogContext);
 
-          // Invalidate transaction providers to refresh the list
-          ref.invalidate(transactionListProvider);
+          // Small delay to ensure loading dialog is closed
+          await Future.delayed(const Duration(milliseconds: 100));
 
-          // Invalidate dashboard provider to refresh dashboard stats
-          ref.invalidate(dashboardNotifierProvider);
+          if (!mounted) return;
 
+          _logger.d('Showing success dialog...');
           // Show success animation dialog
           await SuccessDialog.show(
             context,
@@ -463,7 +467,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             autoDismissDuration: const Duration(milliseconds: 1500),
           );
 
+          _logger.d('Success dialog closed, popping page...');
           if (mounted) {
+            // Pop the transaction page
             context.pop(true); // Return true to indicate success
           }
         }
@@ -471,11 +477,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         _logger.e('Failed to save transaction', error: e, stackTrace: stackTrace);
 
         if (mounted) {
-          Navigator.pop(context); // Remove loading
-          ErrorSnackbar.show(
-            context,
-            message: 'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',
-          );
+          // Use the loading dialog context to pop the loading dialog
+          if (mounted) Navigator.pop(loadingDialogContext);
+          if (mounted) {
+            ErrorSnackbar.show(
+              context,
+              message: 'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',
+            );
+          }
         }
       }
     }

@@ -8,6 +8,7 @@ import '../../../../core/services/biometric_provider.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/mfa_provider.dart';
 import '../../../../core/services/mfa_service.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
 class SecuritySettingsPage extends ConsumerStatefulWidget {
@@ -157,10 +158,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   // TODO: Implement change password
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password change coming soon!'),
-                    ),
+                  SuccessSnackbar.show(
+                    context,
+                    message: 'Password change coming soon!',
                   );
                 },
               ),
@@ -186,11 +186,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
         if (!result.success) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result.errorMessage ?? 'Biometric authentication failed'),
-                backgroundColor: AppColors.error,
-              ),
+            ErrorSnackbar.show(
+              context,
+              message: result.errorMessage ?? 'Biometric authentication failed',
             );
           }
           setState(() => _isLoadingBiometric = false);
@@ -203,11 +201,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
         if (email == null || password == null) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Please enable "Remember me" when logging in to use biometric authentication'),
-                backgroundColor: AppColors.warning,
-              ),
+            ErrorSnackbar.show(
+              context,
+              message: 'Please enable "Remember me" when logging in to use biometric authentication',
             );
           }
           setState(() => _isLoadingBiometric = false);
@@ -217,22 +213,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         await storage.setBiometricEnabled(true);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Biometric login enabled'),
-              backgroundColor: AppColors.success,
-            ),
+          SuccessSnackbar.show(
+            context,
+            message: 'Biometric login enabled',
           );
         }
       } else {
         await storage.setBiometricEnabled(false);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Biometric login disabled'),
-              backgroundColor: AppColors.success,
-            ),
+          SuccessSnackbar.show(
+            context,
+            message: 'Biometric login disabled',
           );
         }
       }
@@ -240,11 +232,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update biometric setting: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to update biometric setting: ${e.toString()}',
         );
       }
     } finally {
@@ -321,22 +311,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       await authRepository.enableEmailMfa();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email MFA enabled successfully'),
-            backgroundColor: AppColors.success,
-          ),
+        SuccessSnackbar.show(
+          context,
+          message: 'Email MFA enabled successfully',
         );
       }
 
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to enable email MFA: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to enable email MFA: ${e.toString()}',
         );
       }
     } finally {
@@ -368,11 +354,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to enable TOTP MFA: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to enable TOTP MFA: ${e.toString()}',
         );
       }
     } finally {
@@ -447,11 +431,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             onPressed: () async {
               final code = codeController.text.trim();
               if (code.length != 6) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a 6-digit code'),
-                    backgroundColor: AppColors.error,
-                  ),
+                ErrorSnackbar.show(
+                  context,
+                  message: 'Please enter a 6-digit code',
                 );
                 return;
               }
@@ -465,20 +447,16 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
                 if (!context.mounted) return;
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('TOTP MFA enabled successfully'),
-                    backgroundColor: AppColors.success,
-                  ),
+                SuccessSnackbar.show(
+                  context,
+                  message: 'TOTP MFA enabled successfully',
                 );
                 setState(() {});
               } catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Invalid code: ${e.toString()}'),
-                    backgroundColor: AppColors.error,
-                  ),
+                ErrorSnackbar.show(
+                  context,
+                  message: 'Invalid code: ${e.toString()}',
                 );
               } finally {
                 codeController.dispose();
@@ -525,22 +503,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       await authRepository.disableMfa();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('MFA disabled'),
-            backgroundColor: AppColors.success,
-          ),
+        SuccessSnackbar.show(
+          context,
+          message: 'MFA disabled',
         );
       }
 
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to disable MFA: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
+        ErrorSnackbar.show(
+          context,
+          message: 'Failed to disable MFA: ${e.toString()}',
         );
       }
     } finally {

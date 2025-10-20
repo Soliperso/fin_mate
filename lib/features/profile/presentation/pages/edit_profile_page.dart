@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/profile_providers.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
@@ -369,21 +370,17 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully'),
-              backgroundColor: AppColors.success,
-            ),
+          SuccessSnackbar.show(
+            context,
+            message: 'Profile updated successfully',
           );
           context.pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to update profile: $e'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: 'Failed to update profile: $e',
           );
         }
       }
@@ -418,20 +415,16 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         await ref.read(currentUserProfileProvider.notifier).deleteAvatar();
         setState(() => _selectedAvatarPath = null);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile photo removed'),
-              backgroundColor: AppColors.success,
-            ),
+          SuccessSnackbar.show(
+            context,
+            message: 'Profile photo removed',
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to remove photo: $e'),
-              backgroundColor: AppColors.error,
-            ),
+          ErrorSnackbar.show(
+            context,
+            message: 'Failed to remove photo: $e',
           );
         }
       }

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/document_providers.dart';
 import '../widgets/upload_document_bottom_sheet.dart';
 import '../../domain/entities/document_entity.dart';
@@ -208,15 +209,11 @@ class DocumentsPage extends ConsumerWidget {
           .exportToCsv(taxYear: DateTime.now().year);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Exported to: ${file.path}')),
-        );
+        SuccessSnackbar.show(context, message: 'Exported to: ${file.path}');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to export: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Failed to export: $e');
       }
     }
   }
@@ -227,15 +224,11 @@ class DocumentsPage extends ConsumerWidget {
       ref.invalidate(documentsProvider);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document deleted')),
-        );
+        SuccessSnackbar.show(context, message: 'Document deleted');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e')),
-        );
+        ErrorSnackbar.show(context, message: 'Failed to delete: $e');
       }
     }
   }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
 
 class AddContributionBottomSheet extends ConsumerStatefulWidget {
@@ -66,19 +67,13 @@ class _AddContributionBottomSheetState
 
       if (contribution != null && mounted) {
         Navigator.pop(context, true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contribution added successfully!')),
-        );
+        SuccessSnackbar.show(context, message: 'Contribution added successfully!');
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add contribution')),
-        );
+        ErrorSnackbar.show(context, message: 'Failed to add contribution');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ErrorSnackbar.show(context, message: 'Error: ${e.toString()}');
       }
     } finally {
       if (mounted) {

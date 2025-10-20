@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/group_member_entity.dart';
 import '../providers/bill_splitting_providers.dart';
 
@@ -48,9 +49,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
         ref.invalidate(groupBalancesProvider(widget.groupId));
 
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Member added successfully')),
-        );
+        SuccessSnackbar.show(context, message: 'Member added successfully');
       }
     } catch (e) {
       if (mounted) {
@@ -69,13 +68,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
           errorMessage = 'Failed to add member. Please try again.';
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        ErrorSnackbar.show(context, message: errorMessage);
       }
     }
   }

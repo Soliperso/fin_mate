@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
 
 class VerifyEmailPage extends ConsumerStatefulWidget {
@@ -19,7 +20,6 @@ class VerifyEmailPage extends ConsumerStatefulWidget {
 }
 
 class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
-  bool _isVerifying = false;
   bool _isResending = false;
   String? _errorMessage;
 
@@ -27,13 +27,6 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -41,12 +34,30 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: AppSizes.xl),
-              Icon(
-                Icons.mark_email_read_outlined,
-                size: 80,
-                color: AppColors.primaryTeal,
+              Center(
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primaryTeal.withValues(alpha: 0.15),
+                        AppColors.primaryTeal.withValues(alpha: 0.08),
+                      ],
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.mark_email_read_outlined,
+                    size: 58,
+                    color: AppColors.primaryTeal.withValues(alpha: 0.7),
+                    weight: 210,
+                  ),
+                ),
               ),
-              const SizedBox(height: AppSizes.xl),
+              const SizedBox(height: AppSizes.lg),
               Text(
                 'Verify Your Email',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
@@ -96,7 +107,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     ),
                     const SizedBox(height: AppSizes.sm),
                     Text(
-                      'Click the "Confirm Email" button in the email we sent you. After confirming, return here and tap "I\'ve Confirmed My Email" below.',
+                      'We sent a confirmation link to your email. Click the link in the email to verify your account, then return to the app and log in.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textPrimary,
                       ),
@@ -128,23 +139,16 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 ),
                 const SizedBox(height: AppSizes.md),
               ],
-              ElevatedButton.icon(
-                onPressed: _isVerifying ? null : _handleCheckVerification,
-                icon: _isVerifying
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Icon(Icons.check_circle_outline),
-                label: const Text('I\'ve Confirmed My Email'),
+              ElevatedButton(
+                onPressed: () => context.go('/login'),
+                child: const Text('Go to Login'),
               ),
               const SizedBox(height: AppSizes.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Didn\'t receive the code? ',
+                    'Didn\'t receive the email? ',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   TextButton(
@@ -166,42 +170,6 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     );
   }
 
-  Future<void> _handleCheckVerification() async {
-    setState(() {
-      _isVerifying = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // Refresh the current session to check if email is verified
-      final supabase = Supabase.instance.client;
-      final response = await supabase.auth.refreshSession();
-
-      if (response.user != null && response.user!.emailConfirmedAt != null) {
-        // Email is confirmed, redirect to login to properly authenticate
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Email confirmed! Please log in with your credentials.'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-          context.go('/login');
-        }
-      } else {
-        setState(() {
-          _isVerifying = false;
-          _errorMessage = 'Email not confirmed yet. Please click the link in your email first.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isVerifying = false;
-        _errorMessage = 'Please confirm your email by clicking the link we sent you, then try again.';
-      });
-    }
-  }
-
   Future<void> _handleResend() async {
     setState(() {
       _isResending = true;
@@ -211,24 +179,27 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     try {
       await ref.read(authNotifierProvider.notifier).resendOTP(widget.email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('New code sent to ${widget.email}'),
-            backgroundColor: AppColors.success,
-          ),
+        SuccessSnackbar.show(
+          context,
+          message: 'Confirmation email sent to ${widget.email}',
+          duration: const Duration(seconds: 4),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to resend code. Please try again.'),
-            backgroundColor: AppColors.error,
-          ),
+        final errorMsg = e.toString().replaceAll('Exception: ', '');
+        ErrorSnackbar.show(
+          context,
+          message: errorMsg.contains('Failed to resend')
+              ? 'Failed to resend confirmation email. Please check your email address or try again later.'
+              : errorMsg,
+          duration: const Duration(seconds: 5),
         );
       }
     } finally {
-      setState(() => _isResending = false);
+      if (mounted) {
+        setState(() => _isResending = false);
+      }
     }
   }
 }
