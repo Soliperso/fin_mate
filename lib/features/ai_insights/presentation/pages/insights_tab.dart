@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../providers/insights_providers.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
