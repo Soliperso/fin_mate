@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/insights_service.dart';
+import '../../domain/entities/recurring_expense_pattern.dart';
+import '../../domain/entities/spending_anomaly.dart';
+import '../../domain/entities/merchant_insight.dart';
 
 // Service provider
 final insightsServiceProvider = Provider<InsightsService>((ref) {
@@ -52,4 +55,30 @@ final proactiveAlertsProvider = FutureProvider<List<Map<String, dynamic>>>((ref)
 final subscriptionChangesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.detectSubscriptionChanges();
+});
+
+// Pattern Recognition Providers (Phase 1)
+
+/// Recurring expenses provider
+final recurringExpensesProvider = FutureProvider<List<RecurringExpensePattern>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.detectRecurringExpenses(daysToAnalyze: 180);
+});
+
+/// Spending anomalies provider
+final spendingAnomaliesProvider = FutureProvider<List<SpendingAnomaly>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.detectSpendingAnomalies(daysToAnalyze: 90);
+});
+
+/// Merchant frequency insights provider
+final merchantInsightsProvider = FutureProvider<List<MerchantInsight>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.analyzeMerchantFrequency(daysToAnalyze: 90);
+});
+
+/// Weekend vs weekday spending provider
+final weekendVsWeekdayProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.getWeekendVsWeekdaySpending(daysToAnalyze: 90);
 });

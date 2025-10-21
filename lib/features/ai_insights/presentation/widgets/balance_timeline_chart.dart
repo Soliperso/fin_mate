@@ -154,12 +154,16 @@ class _BalanceChartPainter extends CustomPainter {
     // Draw grid lines
     _drawGridLines(canvas, size);
 
+    // Guard against division by zero
+    final lengthDivisor = dailyForecasts.length > 1 ? dailyForecasts.length - 1 : 1;
+    final valueDivisor = (maxValue - minValue).abs() > 0.01 ? (maxValue - minValue) : 1.0;
+
     // Draw balance line
     final path = Path();
     for (int i = 0; i < dailyForecasts.length; i++) {
       final forecast = dailyForecasts[i];
-      final x = (i / (dailyForecasts.length - 1)) * size.width;
-      final normalizedY = (forecast.projectedBalance - minValue) / (maxValue - minValue);
+      final x = (i / lengthDivisor) * size.width;
+      final normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
       final y = size.height - (normalizedY * size.height);
 
       if (i == 0) {
@@ -196,8 +200,8 @@ class _BalanceChartPainter extends CustomPainter {
     for (int i = 0; i < dailyForecasts.length; i += 3) {
       // Show every 3rd point to avoid clutter
       final forecast = dailyForecasts[i];
-      final x = (i / (dailyForecasts.length - 1)) * size.width;
-      final normalizedY = (forecast.projectedBalance - minValue) / (maxValue - minValue);
+      final x = (i / lengthDivisor) * size.width;
+      final normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
       final y = size.height - (normalizedY * size.height);
 
       final pointColor = _getStatusColor(forecast.status);

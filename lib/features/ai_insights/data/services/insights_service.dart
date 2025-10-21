@@ -1,5 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../domain/entities/recurring_expense_pattern.dart';
+import '../../domain/entities/spending_anomaly.dart';
+import '../../domain/entities/merchant_insight.dart';
 
 class InsightsService {
   final SupabaseClient _supabase;
@@ -435,5 +438,369 @@ class InsightsService {
     } catch (e) {
       return [];
     }
+  }
+
+  /// Detect recurring expenses (subscriptions, regular bills)
+  Future<List<RecurringExpensePattern>> detectRecurringExpenses({int daysToAnalyze = 180}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
+      final transactions = await _supabase
+          .from('transactions')
+          .select('amount, description, date, categories(name)')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', startDate.toIso8601String().split('T')[0])
+          .order('date', ascending: true);
+
+      if ((transactions as List).isEmpty) return [];
+
+      // Group transactions by normalized merchant name
+      final merchantGroups = <String, List<Map<String, dynamic>>>{};
+
+      for (final tx in transactions) {
+        final merchant = _normalizeMerchantName(tx['description'] as String? ?? 'Unknown');
+        merchantGroups[merchant] ??= [];
+        merchantGroups[merchant]!.add(tx);
+      }
+
+      final patterns = <RecurringExpensePattern>[];
+
+      // Analyze each merchant group
+      for (final entry in merchantGroups.entries) {
+        final merchant = entry.key;
+        final txs = entry.value;
+
+        // Only consider merchants with 2+ transactions
+        if (txs.length < 2) continue;
+
+        final pattern = _analyzeRecurringPattern(merchant, txs);
+        if (pattern != null) {
+          patterns.add(pattern);
+        }
+      }
+
+      // Sort by average amount (highest first)
+      patterns.sort((a, b) => b.averageAmount.compareTo(a.averageAmount));
+
+      return patterns;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Detect spending anomalies
+  Future<List<SpendingAnomaly>> detectSpendingAnomalies({int daysToAnalyze = 90}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
+      final transactions = await _supabase
+          .from('transactions')
+          .select('id, amount, description, date, categories(name)')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', startDate.toIso8601String().split('T')[0])
+          .order('date', ascending: true);
+
+      if ((transactions as List).isEmpty) return [];
+
+      // Calculate category averages
+      final categoryStats = <String, Map<String, dynamic>>{};
+
+      for (final tx in transactions) {
+        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final amount = (tx['amount'] as num).toDouble();
+
+        categoryStats[category] ??= {
+          'amounts': <double>[],
+          'total': 0.0,
+          'count': 0,
+        };
+
+        categoryStats[category]!['amounts'].add(amount);
+        categoryStats[category]!['total'] += amount;
+        categoryStats[category]!['count'] += 1;
+      }
+
+      // Calculate averages and detect anomalies
+      final anomalies = <SpendingAnomaly>[];
+
+      for (final tx in transactions) {
+        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final amount = (tx['amount'] as num).toDouble();
+        final stats = categoryStats[category]!;
+        final average = (stats['total'] as double) / (stats['count'] as int);
+
+        final deviation = ((amount - average) / average * 100).abs();
+
+        // Flag transactions 2x+ the average
+        if (amount > average * 2) {
+          anomalies.add(SpendingAnomaly(
+            id: '${tx['id']}_anomaly',
+            transactionId: tx['id'] as String,
+            type: AnomalyType.unusualAmount,
+            severity: deviation > 300 ? AnomalySeverity.high : AnomalySeverity.medium,
+            title: 'Unusual $category Spending',
+            description: 'You spent \$${amount.toStringAsFixed(2)}, which is ${deviation.toStringAsFixed(0)}% higher than your average of \$${average.toStringAsFixed(2)}',
+            transactionAmount: amount,
+            categoryAverage: average,
+            deviationPercentage: deviation,
+            category: category,
+            merchant: tx['description'] as String? ?? 'Unknown',
+            transactionDate: DateTime.parse(tx['date'] as String),
+          ));
+        }
+      }
+
+      return anomalies;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Analyze merchant frequency and spending
+  Future<List<MerchantInsight>> analyzeMerchantFrequency({int daysToAnalyze = 90}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
+      final transactions = await _supabase
+          .from('transactions')
+          .select('amount, description, date, categories(name)')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', startDate.toIso8601String().split('T')[0])
+          .order('date', ascending: true);
+
+      if ((transactions as List).isEmpty) return [];
+
+      // Group by merchant
+      final merchantData = <String, Map<String, dynamic>>{};
+
+      for (final tx in transactions) {
+        final merchant = tx['description'] as String? ?? 'Unknown';
+        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final amount = (tx['amount'] as num).toDouble();
+        final date = DateTime.parse(tx['date'] as String);
+
+        merchantData[merchant] ??= {
+          'category': category,
+          'amounts': <double>[],
+          'dates': <DateTime>[],
+          'total': 0.0,
+        };
+
+        merchantData[merchant]!['amounts'].add(amount);
+        merchantData[merchant]!['dates'].add(date);
+        merchantData[merchant]!['total'] += amount;
+      }
+
+      // Calculate category totals for percentage
+      final categoryTotals = <String, double>{};
+      for (final stat in merchantData.values) {
+        final category = stat['category'] as String;
+        categoryTotals[category] = (categoryTotals[category] ?? 0) + (stat['total'] as double);
+      }
+
+      // Create insights
+      final insights = <MerchantInsight>[];
+
+      for (final entry in merchantData.entries) {
+        final merchant = entry.key;
+        final data = entry.value;
+        final category = data['category'] as String;
+        final amounts = data['amounts'] as List<double>;
+        final dates = data['dates'] as List<DateTime>;
+        final total = data['total'] as double;
+
+        final daysDiff = DateTime.now().difference(dates.first).inDays;
+        final monthlyFreq = (amounts.length / (daysDiff / 30)).toDouble();
+
+        final categoryTotal = categoryTotals[category] ?? 1;
+        final percentage = (total / categoryTotal * 100);
+
+        insights.add(MerchantInsight(
+          id: merchant.hashCode.toString(),
+          merchantName: merchant,
+          category: category,
+          visitCount: amounts.length,
+          totalSpent: total,
+          averagePerVisit: total / amounts.length,
+          firstTransaction: dates.first,
+          lastTransaction: dates.last,
+          monthlyFrequency: monthlyFreq,
+          transactionDates: dates,
+          percentageOfCategorySpending: percentage,
+        ));
+      }
+
+      // Sort by visit count and mark top merchants
+      insights.sort((a, b) => b.visitCount.compareTo(a.visitCount));
+      for (int i = 0; i < 5 && i < insights.length; i++) {
+        insights[i] = insights[i].copyWith(isTopMerchant: true);
+      }
+
+      return insights;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Analyze weekend vs weekday spending
+  Future<Map<String, dynamic>> getWeekendVsWeekdaySpending({int daysToAnalyze = 90}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
+      final transactions = await _supabase
+          .from('transactions')
+          .select('amount, date, type')
+          .eq('user_id', userId)
+          .gte('date', startDate.toIso8601String().split('T')[0])
+          .order('date', ascending: true);
+
+      double weekdayExpense = 0;
+      double weekendExpense = 0;
+      int weekdayCount = 0;
+      int weekendCount = 0;
+
+      for (final tx in transactions as List) {
+        if (tx['type'] != 'expense') continue;
+
+        final date = DateTime.parse(tx['date'] as String);
+        final amount = (tx['amount'] as num).toDouble();
+
+        // weekday = 1-5 (Mon-Fri), weekend = 6-7 (Sat-Sun)
+        if (date.weekday >= 1 && date.weekday <= 5) {
+          weekdayExpense += amount;
+          weekdayCount++;
+        } else {
+          weekendExpense += amount;
+          weekendCount++;
+        }
+      }
+
+      final weekdayAvg = weekdayCount > 0 ? weekdayExpense / weekdayCount : 0;
+      final weekendAvg = weekendCount > 0 ? weekendExpense / weekendCount : 0;
+
+      final difference = ((weekendAvg - weekdayAvg) / weekdayAvg * 100).abs();
+      final isWeekendHigher = weekendAvg > weekdayAvg;
+
+      return {
+        'weekday_total': weekdayExpense,
+        'weekend_total': weekendExpense,
+        'weekday_average': weekdayAvg,
+        'weekend_average': weekendAvg,
+        'difference_percentage': difference,
+        'is_weekend_higher': isWeekendHigher,
+        'insight': isWeekendHigher
+            ? 'Weekend spending is ${difference.toStringAsFixed(0)}% higher than weekdays'
+            : 'Weekday spending is ${difference.toStringAsFixed(0)}% higher than weekends',
+      };
+    } catch (e) {
+      return {
+        'weekday_total': 0,
+        'weekend_total': 0,
+        'weekday_average': 0,
+        'weekend_average': 0,
+        'difference_percentage': 0,
+        'is_weekend_higher': false,
+        'insight': 'Unable to analyze patterns',
+      };
+    }
+  }
+
+  // Helper methods
+
+  String _normalizeMerchantName(String name) {
+    // Remove common suffixes and normalize
+    var normalized = name.toLowerCase().trim();
+    const suffixes = [' inc', ' ltd', ' co', ' corp', ' llc', ' store', ' shop'];
+    for (final suffix in suffixes) {
+      if (normalized.endsWith(suffix)) {
+        normalized = normalized.substring(0, normalized.length - suffix.length).trim();
+      }
+    }
+    return normalized;
+  }
+
+  RecurringExpensePattern? _analyzeRecurringPattern(String merchant, List<Map<String, dynamic>> transactions) {
+    if (transactions.length < 2) return null;
+
+    // Extract amounts and dates
+    final amounts = <double>[];
+    final dates = <DateTime>[];
+
+    for (final tx in transactions) {
+      amounts.add((tx['amount'] as num).toDouble());
+      dates.add(DateTime.parse(tx['date'] as String));
+    }
+
+    // Check amount consistency (±5%)
+    final avgAmount = amounts.fold<double>(0, (a, b) => a + b) / amounts.length;
+    final variance = amounts.where((a) => (a - avgAmount).abs() / avgAmount <= 0.05).length;
+
+    if (variance < amounts.length * 0.7) return null; // Less than 70% consistent
+
+    // Detect interval pattern
+    final intervals = <int>[];
+    for (int i = 1; i < dates.length; i++) {
+      intervals.add(dates[i].difference(dates[i - 1]).inDays);
+    }
+
+    if (intervals.isEmpty) return null;
+
+    final avgInterval = intervals.fold<int>(0, (a, b) => a + b) ~/ intervals.length;
+    final interval = _detectInterval(avgInterval);
+
+    if (interval == RecurringInterval.unknown) return null;
+
+    // Check for price changes
+    bool isPriceIncreased = false;
+    double? priceChangePercent;
+
+    if (amounts.length >= 2) {
+      final recentAvg = amounts.sublist((amounts.length / 2).toInt()).fold<double>(0, (a, b) => a + b) / (amounts.length / 2).toInt();
+      final oldAvg = amounts.sublist(0, (amounts.length / 2).toInt()).fold<double>(0, (a, b) => a + b) / (amounts.length / 2).toInt();
+
+      priceChangePercent = ((recentAvg - oldAvg) / oldAvg * 100).abs();
+      isPriceIncreased = recentAvg > oldAvg && priceChangePercent > 5;
+    }
+
+    // Calculate next expected date
+    final lastDate = dates.last;
+    final nextExpectedDate = lastDate.add(Duration(days: avgInterval));
+
+    final category = transactions.first['categories']?['name'] as String? ?? 'Uncategorized';
+
+    return RecurringExpensePattern(
+      id: merchant.hashCode.toString(),
+      merchantName: merchant,
+      averageAmount: avgAmount,
+      previousAmount: amounts.length >= 2 ? amounts[amounts.length - 2] : null,
+      interval: interval,
+      lastOccurrence: lastDate,
+      nextExpectedDate: nextExpectedDate,
+      occurrenceCount: amounts.length,
+      category: category,
+      isPriceIncreased: isPriceIncreased,
+      priceChangePercentage: priceChangePercent,
+      transactionDates: dates,
+    );
+  }
+
+  RecurringInterval _detectInterval(int avgDays) {
+    if (avgDays >= 6 && avgDays <= 8) return RecurringInterval.weekly;
+    if (avgDays >= 13 && avgDays <= 15) return RecurringInterval.biweekly;
+    if (avgDays >= 28 && avgDays <= 31) return RecurringInterval.monthly;
+    if (avgDays >= 88 && avgDays <= 92) return RecurringInterval.quarterly;
+    if (avgDays >= 360 && avgDays <= 370) return RecurringInterval.yearly;
+    return RecurringInterval.unknown;
   }
 }

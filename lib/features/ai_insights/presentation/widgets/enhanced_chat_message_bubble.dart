@@ -166,12 +166,28 @@ class EnhancedChatMessageBubble extends StatelessWidget {
     final chartType = metadata['chartType'] as String?;
 
     if (chartType == 'category') {
-      final categoryData = metadata['categoryData'] as List<Map<String, dynamic>>?;
-      if (categoryData != null && categoryData.isNotEmpty) {
-        return CategoryBreakdownChart(
-          categoryData: categoryData,
-          maxHeight: 180,
-        );
+      try {
+        final rawData = metadata['categoryData'];
+        if (rawData is List) {
+          // Convert each item to Map<String, dynamic> if needed
+          final categoryData = rawData.map((item) {
+            if (item is Map<String, dynamic>) {
+              return item;
+            } else if (item is Map) {
+              return Map<String, dynamic>.from(item);
+            }
+            return null;
+          }).whereType<Map<String, dynamic>>().toList();
+
+          if (categoryData.isNotEmpty) {
+            return CategoryBreakdownChart(
+              categoryData: categoryData,
+              maxHeight: 180,
+            );
+          }
+        }
+      } catch (e) {
+        // Silently fail and return empty
       }
     }
 
