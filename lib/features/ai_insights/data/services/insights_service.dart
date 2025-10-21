@@ -811,5 +811,4 @@ class InsightsService {
 
   Future<List<CashFlowWarning>> detectCashFlowWarnings({int daysToAnalyze = 90}) async => [];
   Future<List<BillCollision>> detectBillCollisions({int daysToLook = 60}) async => [];
-  Future<List<ProactiveAlert>> getProactiveAlerts() async => [];
 }
