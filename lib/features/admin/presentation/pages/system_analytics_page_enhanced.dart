@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/analytics_line_chart.dart';
 import '../widgets/analytics_bar_chart.dart';
@@ -152,11 +153,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
             userGrowthAsync.when(
               data: (trends) {
                 if (trends.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSizes.lg),
-                      child: Center(child: Text('No user growth data available')),
-                    ),
+                  return EmptyStateCard(
+                    icon: Icons.trending_up_outlined,
+                    title: 'No User Growth Data',
+                    message: 'User growth trends will appear once data is available',
+                    backgroundColor: AppColors.primaryTeal,
                   );
                 }
                 return Card(
@@ -171,17 +172,17 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                   ),
                 );
               },
-              loading: () => const Card(
+              loading: () => Card(
                 child: Padding(
-                  padding: EdgeInsets.all(AppSizes.lg),
+                  padding: const EdgeInsets.all(AppSizes.lg),
                   child: Center(child: CircularProgressIndicator()),
                 ),
               ),
-              error: (error, stack) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.lg),
-                  child: Center(child: Text('Error: $error')),
-                ),
+              error: (error, stack) => EmptyStateCard(
+                icon: Icons.error_outline,
+                title: 'Error Loading User Growth',
+                message: 'Failed to load user growth data: $error',
+                backgroundColor: AppColors.error,
               ),
             ),
             const SizedBox(height: AppSizes.lg),
@@ -190,11 +191,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
             financialTrendsAsync.when(
               data: (trends) {
                 if (trends.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSizes.lg),
-                      child: Center(child: Text('No financial data available')),
-                    ),
+                  return EmptyStateCard(
+                    icon: Icons.show_chart_outlined,
+                    title: 'No Financial Data Available',
+                    message: 'Financial trends will appear as users make transactions',
+                    backgroundColor: AppColors.success,
                   );
                 }
                 return Column(
@@ -245,11 +246,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                   child: Center(child: CircularProgressIndicator()),
                 ),
               ),
-              error: (error, stack) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.lg),
-                  child: Center(child: Text('Error: $error')),
-                ),
+              error: (error, stack) => EmptyStateCard(
+                icon: Icons.error_outline,
+                title: 'Error Loading Financial Data',
+                message: 'Failed to load financial trends: $error',
+                backgroundColor: AppColors.error,
               ),
             ),
           ],
@@ -314,11 +315,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
             categoryBreakdownAsync.when(
               data: (categories) {
                 if (categories.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSizes.lg),
-                      child: Center(child: Text('No category data available')),
-                    ),
+                  return EmptyStateCard(
+                    icon: Icons.category_outlined,
+                    title: 'No Category Data Available',
+                    message: 'Category spending data will appear once transactions are created',
+                    backgroundColor: AppColors.tealBlue,
                   );
                 }
                 final top5 = categories.take(5).toList();
@@ -339,11 +340,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                   child: Center(child: CircularProgressIndicator()),
                 ),
               ),
-              error: (error, stack) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.lg),
-                  child: Center(child: Text('Error: $error')),
-                ),
+              error: (error, stack) => EmptyStateCard(
+                icon: Icons.error_outline,
+                title: 'Error Loading Category Data',
+                message: 'Failed to load category breakdown: $error',
+                backgroundColor: AppColors.error,
               ),
             ),
           ],
@@ -366,7 +367,16 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
       child: featuresAsync.when(
         data: (features) {
           if (features.isEmpty) {
-            return const Center(child: Text('No feature adoption data available'));
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: EmptyStateCard(
+                icon: Icons.apps_outlined,
+                title: 'No Feature Adoption Data',
+                message: 'Feature adoption metrics will appear once users start using features',
+                backgroundColor: AppColors.tealBlue,
+              ),
+            );
           }
 
           return SingleChildScrollView(
@@ -434,17 +444,14 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Error: $error'),
-              const SizedBox(height: AppSizes.md),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(featureAdoptionStatsProvider),
-                child: const Text('Retry'),
-              ),
-            ],
+        error: (error, stack) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: EmptyStateCard(
+            icon: Icons.error_outline,
+            title: 'Error Loading Features',
+            message: 'Failed to load feature adoption data: $error',
+            backgroundColor: AppColors.error,
           ),
         ),
       ),
@@ -478,11 +485,11 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
             percentilesAsync.when(
               data: (percentiles) {
                 if (percentiles.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSizes.lg),
-                      child: Center(child: Text('No percentile data available')),
-                    ),
+                  return EmptyStateCard(
+                    icon: Icons.info_outline,
+                    title: 'No Percentile Data Available',
+                    message: 'Net worth distribution data will appear once users create accounts',
+                    backgroundColor: AppColors.primaryTeal,
                   );
                 }
                 return Column(
@@ -517,7 +524,12 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+              error: (error, stack) => EmptyStateCard(
+                icon: Icons.error_outline,
+                title: 'Error Loading Percentile Data',
+                message: 'Failed to load net worth distribution: $error',
+                backgroundColor: AppColors.error,
+              ),
             ),
           ],
         ),
