@@ -162,9 +162,15 @@ class _BalanceChartPainter extends CustomPainter {
     final path = Path();
     for (int i = 0; i < dailyForecasts.length; i++) {
       final forecast = dailyForecasts[i];
-      final x = (i / lengthDivisor) * size.width;
-      final normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
-      final y = size.height - (normalizedY * size.height);
+      var x = (i / lengthDivisor) * size.width;
+      var normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
+      var y = size.height - (normalizedY * size.height);
+
+      // Sanitize values to prevent NaN
+      if (!x.isFinite) x = 0;
+      if (!y.isFinite) y = size.height / 2;
+      x = x.clamp(0, size.width);
+      y = y.clamp(0, size.height);
 
       if (i == 0) {
         path.moveTo(x, y);
@@ -200,9 +206,15 @@ class _BalanceChartPainter extends CustomPainter {
     for (int i = 0; i < dailyForecasts.length; i += 3) {
       // Show every 3rd point to avoid clutter
       final forecast = dailyForecasts[i];
-      final x = (i / lengthDivisor) * size.width;
-      final normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
-      final y = size.height - (normalizedY * size.height);
+      var x = (i / lengthDivisor) * size.width;
+      var normalizedY = (forecast.projectedBalance - minValue) / valueDivisor;
+      var y = size.height - (normalizedY * size.height);
+
+      // Sanitize values to prevent NaN
+      if (!x.isFinite) x = 0;
+      if (!y.isFinite) y = size.height / 2;
+      x = x.clamp(0, size.width);
+      y = y.clamp(0, size.height);
 
       final pointColor = _getStatusColor(forecast.status);
 
