@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/budget_entity.dart';
 import '../providers/budget_providers.dart';
@@ -94,29 +95,12 @@ class BudgetsPage extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSizes.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.savings_outlined,
-              size: 120,
-              color: AppColors.textTertiary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: AppSizes.lg),
-            Text(
-              'No Budgets Yet',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              'Create budgets to track your spending by category',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: EmptyStateCard(
+          icon: Icons.savings_outlined,
+          title: 'No Budgets Yet',
+          message: 'Create budgets to track your spending by category',
+          backgroundColor: AppColors.primaryTeal,
         ),
       ),
     );
