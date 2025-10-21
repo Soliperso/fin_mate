@@ -49,11 +49,12 @@ class InsightsTab extends ConsumerWidget {
             insightsAsync.when(
               data: (insights) {
                 if (insights.isEmpty) {
-                  return const EmptyState(
-                    icon: Icons.insights,
+                  return _buildEmptyStateCard(
+                    context,
+                    icon: Icons.lightbulb_outline,
                     title: 'No Insights Yet',
-                    message: 'Start adding transactions to get personalized financial insights',
-                    animated: false,
+                    message: 'Start adding transactions to unlock personalized financial insights and smart recommendations.',
+                    backgroundColor: AppColors.primaryTeal,
                   );
                 }
                 return Column(
@@ -85,11 +86,12 @@ class InsightsTab extends ConsumerWidget {
             categoryBreakdownAsync.when(
               data: (categories) {
                 if (categories.isEmpty) {
-                  return const EmptyState(
-                    icon: Icons.pie_chart,
+                  return _buildEmptyStateCard(
+                    context,
+                    icon: Icons.pie_chart_outline,
                     title: 'No Spending Data',
-                    message: 'Add some expenses to see your category breakdown',
-                    animated: false,
+                    message: 'Add some expenses to see your category breakdown and track where your money goes.',
+                    backgroundColor: AppColors.primaryTeal,
                   );
                 }
                 return _buildCategoryBreakdown(context, categories);
@@ -113,11 +115,12 @@ class InsightsTab extends ConsumerWidget {
             forecastAsync.when(
               data: (forecast) {
                 if (forecast.isEmpty) {
-                  return const EmptyState(
-                    icon: Icons.trending_up,
-                    title: 'No Forecast Available',
-                    message: 'Need more transaction history to generate forecasts',
-                    animated: false,
+                  return _buildEmptyStateCard(
+                    context,
+                    icon: Icons.trending_up_outlined,
+                    title: 'No Forecast Yet',
+                    message: 'Build up your transaction history to generate accurate cashflow forecasts for the next 3 months.',
+                    backgroundColor: AppColors.primaryTeal,
                   );
                 }
                 return _buildForecastSection(context, forecast);
