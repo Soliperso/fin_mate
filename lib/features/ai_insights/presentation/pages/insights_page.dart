@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../providers/insights_providers.dart';
 
@@ -53,11 +53,11 @@ class InsightsPage extends ConsumerWidget {
               insightsAsync.when(
                 data: (insights) {
                   if (insights.isEmpty) {
-                    return const EmptyState(
+                    return EmptyStateCard(
                       icon: Icons.insights,
                       title: 'No Insights Yet',
                       message: 'Start adding transactions to get personalized financial insights',
-                      animated: false,
+                      backgroundColor: AppColors.primaryTeal,
                     );
                   }
                   return Column(
@@ -89,11 +89,11 @@ class InsightsPage extends ConsumerWidget {
               categoryBreakdownAsync.when(
                 data: (categories) {
                   if (categories.isEmpty) {
-                    return const EmptyState(
+                    return EmptyStateCard(
                       icon: Icons.pie_chart,
                       title: 'No Spending Data',
                       message: 'Add some expenses to see your category breakdown',
-                      animated: false,
+                      backgroundColor: AppColors.primaryTeal,
                     );
                   }
                   return _buildCategoryBreakdown(context, categories);
@@ -117,11 +117,11 @@ class InsightsPage extends ConsumerWidget {
               forecastAsync.when(
                 data: (forecast) {
                   if (forecast.isEmpty) {
-                    return const EmptyState(
+                    return EmptyStateCard(
                       icon: Icons.trending_up,
                       title: 'No Forecast Available',
                       message: 'Need more transaction history to generate forecasts',
-                      animated: false,
+                      backgroundColor: AppColors.primaryTeal,
                     );
                   }
                   return _buildForecastSection(context, forecast);

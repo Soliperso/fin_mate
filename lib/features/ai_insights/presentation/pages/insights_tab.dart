@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../providers/insights_providers.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
@@ -315,6 +316,7 @@ class InsightsTab extends ConsumerWidget {
                     insight['title'] as String,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
                         ),
                   ),
                   const SizedBox(height: AppSizes.xs),
@@ -527,6 +529,7 @@ class InsightsTab extends ConsumerWidget {
                             pattern.merchantName,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
                                 ),
                           ),
                           Text(
@@ -598,6 +601,7 @@ class InsightsTab extends ConsumerWidget {
                         anomaly.title,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
                             ),
                       ),
                       const SizedBox(height: AppSizes.xs),
@@ -641,6 +645,7 @@ class InsightsTab extends ConsumerWidget {
                             merchant.merchantName,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -658,6 +663,7 @@ class InsightsTab extends ConsumerWidget {
                       currencyFormat.format(merchant.totalSpent),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
                           ),
                     ),
                   ],
@@ -692,103 +698,6 @@ class InsightsTab extends ConsumerWidget {
     final insight = data['insight'] as String;
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: AppColors.primaryTeal,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Weekend vs Weekday',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      Text(
-                        insight,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      'Weekday Avg',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    const SizedBox(height: AppSizes.xs),
-                    Text(
-                      '\$${(data['weekday_average'] as num).toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Weekend Avg',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    const SizedBox(height: AppSizes.xs),
-                    Text(
-                      '\$${(data['weekend_average'] as num).toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Empty State Builder - Consistent with app design
-
-  Widget _buildEmptyStateCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String message,
-    required Color backgroundColor,
-  }) {
-    return Card(
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -796,8 +705,8 @@ class InsightsTab extends ConsumerWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              backgroundColor.withValues(alpha: 0.08),
-              backgroundColor.withValues(alpha: 0.04),
+              AppColors.primaryTeal.withValues(alpha: 0.06),
+              AppColors.primaryTeal.withValues(alpha: 0.02),
             ],
           ),
         ),
@@ -807,71 +716,122 @@ class InsightsTab extends ConsumerWidget {
             vertical: AppSizes.xl,
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Animated icon with background circle
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 600),
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: 0.8 + (value * 0.2),
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSizes.lg),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: backgroundColor.withValues(alpha: 0.15),
-                        border: Border.all(
-                          color: backgroundColor.withValues(alpha: 0.2),
-                          width: 2,
-                        ),
-                      ),
-                      child: Icon(
-                        icon,
-                        size: 48,
-                        color: backgroundColor,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: AppSizes.xl),
-
-              // Title
+              // Title and Description
               Text(
-                title,
+                'Weekend vs Weekday',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textSecondary,
                     ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.sm),
-
-              // Message
               Text(
-                message,
+                insight,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                       height: 1.5,
                     ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSizes.lg),
+              const SizedBox(height: AppSizes.xl),
+
+              // Spending Comparison
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: _buildSpendingComparisonCard(
+                      context,
+                      label: 'Weekday Avg',
+                      amount: data['weekday_average'] as num,
+                      color: AppColors.primaryTeal,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.lg),
+                  Expanded(
+                    child: _buildSpendingComparisonCard(
+                      context,
+                      label: 'Weekend Avg',
+                      amount: data['weekend_average'] as num,
+                      color: AppColors.warning,
+                    ),
+                  ),
+                ],
+              ),
 
               // Subtle accent line
+              const SizedBox(height: AppSizes.lg),
               Container(
-                height: 2,
-                width: 40,
+                height: 1,
                 decoration: BoxDecoration(
-                  color: backgroundColor.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(1),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryTeal.withValues(alpha: 0.3),
+                      AppColors.primaryTeal.withValues(alpha: 0),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSpendingComparisonCard(
+    BuildContext context, {
+    required String label,
+    required num amount,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+        border: Border.all(
+          color: color.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          Text(
+            '\$${amount.toStringAsFixed(2)}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build empty state cards using the shared component
+  Widget _buildEmptyStateCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String message,
+    required Color backgroundColor,
+  }) {
+    return EmptyStateCard(
+      icon: icon,
+      title: title,
+      message: message,
+      backgroundColor: backgroundColor,
     );
   }
 }

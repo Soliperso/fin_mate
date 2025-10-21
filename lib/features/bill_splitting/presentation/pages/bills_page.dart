@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../providers/bill_splitting_providers.dart';
 import '../widgets/create_group_bottom_sheet.dart';
 
@@ -197,28 +198,11 @@ class BillsPage extends ConsumerWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.groups_outlined,
-              size: 120,
-              color: AppColors.textTertiary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: AppSizes.lg),
-            Text(
-              'No Groups Yet',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              'Create a group to start splitting bills with friends',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        child: EmptyStateCard(
+          icon: Icons.groups_outlined,
+          title: 'No Groups Yet',
+          message: 'Create a group to start splitting expenses and settling payments with friends.',
+          backgroundColor: AppColors.primaryTeal,
         ),
       ),
     );

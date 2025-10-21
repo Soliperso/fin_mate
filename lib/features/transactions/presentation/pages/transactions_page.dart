@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/success_animation.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
@@ -192,35 +193,37 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     if (state.filteredTransactions.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 80,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: AppSizes.md),
-            Text(
-              state.transactions.isEmpty
-                  ? 'No transactions yet'
-                  : 'No transactions found',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            if (state.hasActiveFilters || state.searchQuery.isNotEmpty) ...[
-              const SizedBox(height: AppSizes.sm),
-              TextButton(
-                onPressed: () {
-                  notifier.clearFilters();
-                  notifier.setSearchQuery('');
-                  _searchController.clear();
-                },
-                child: const Text('Clear filters'),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateCard(
+                icon: Icons.receipt_long_outlined,
+                title: state.transactions.isEmpty
+                    ? 'No Transactions Yet'
+                    : 'No Transactions Found',
+                message: state.transactions.isEmpty
+                    ? 'Start by adding your first transaction to begin tracking your finances.'
+                    : state.hasActiveFilters || state.searchQuery.isNotEmpty
+                        ? 'Try adjusting your filters or search query to find transactions.'
+                        : 'No transactions found.',
+                backgroundColor: AppColors.primaryTeal,
               ),
+              if (state.hasActiveFilters || state.searchQuery.isNotEmpty) ...[
+                const SizedBox(height: AppSizes.lg),
+                FilledButton.icon(
+                  onPressed: () {
+                    notifier.clearFilters();
+                    notifier.setSearchQuery('');
+                    _searchController.clear();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Clear Filters'),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       );
     }
