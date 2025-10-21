@@ -3,6 +3,9 @@ import '../../../../core/config/supabase_client.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
+import '../../domain/entities/proactive_alert.dart';
+import '../../domain/entities/cash_flow_warning.dart';
+import '../../domain/entities/bill_collision.dart';
 
 class InsightsService {
   final SupabaseClient _supabase;
@@ -803,4 +806,10 @@ class InsightsService {
     if (avgDays >= 360 && avgDays <= 370) return RecurringInterval.yearly;
     return RecurringInterval.unknown;
   }
+
+  // Phase 3: Proactive Alerts
+
+  Future<List<CashFlowWarning>> detectCashFlowWarnings({int daysToAnalyze = 90}) async => [];
+  Future<List<BillCollision>> detectBillCollisions({int daysToLook = 60}) async => [];
+  Future<List<ProactiveAlert>> getProactiveAlerts() async => [];
 }
