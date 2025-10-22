@@ -286,16 +286,9 @@ class ProfilePage extends ConsumerWidget {
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.privacy_tip_outlined,
-                                  title: 'Privacy Policy',
-                                  subtitle: 'Read our privacy policy',
-                                  onTap: () {},
-                                ),
-                                _buildDivider(),
-                                _buildSettingsTile(
-                                  icon: Icons.description_outlined,
-                                  title: 'Terms of Service',
-                                  subtitle: 'Read our terms',
-                                  onTap: () {},
+                                  title: 'Legal & Compliance',
+                                  subtitle: 'View privacy policy and terms',
+                                  onTap: () => context.push('/profile/legal'),
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(

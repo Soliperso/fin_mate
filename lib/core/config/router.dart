@@ -25,6 +25,7 @@ import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
+import '../../features/profile/presentation/pages/legal_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/notification_settings_page.dart';
 import '../../features/settings/presentation/pages/display_settings_page.dart';
@@ -237,6 +238,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'security',
                 name: 'security-settings',
                 builder: (context, state) => const SecuritySettingsPage(),
+              ),
+              GoRoute(
+                path: 'legal',
+                name: 'legal',
+                builder: (context, state) => const LegalPage(),
               ),
             ],
           ),

@@ -9,6 +9,7 @@ import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
 import 'core/services/analytics_service.dart';
+import 'core/services/theme_provider.dart';
 import 'core/error/global_error_handler.dart';
 import 'shared/widgets/offline_indicator.dart';
 
@@ -17,6 +18,12 @@ void main() async {
   await runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Lock app to portrait mode
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
 
       // Load environment variables
       await dotenv.load(fileName: '.env');
@@ -40,7 +47,6 @@ void main() async {
         final event = data.event;
         if (event == AuthChangeEvent.signedIn) {
           // User authenticated via deep link
-          print('User signed in via deep link');
         }
       });
 
@@ -80,6 +86,7 @@ class FinMateApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return OfflineIndicator(
       child: MaterialApp.router(
@@ -87,7 +94,7 @@ class FinMateApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.system,
+        themeMode: themeMode,
         routerConfig: router,
       ),
     );

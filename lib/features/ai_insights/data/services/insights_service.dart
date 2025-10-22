@@ -3,7 +3,6 @@ import '../../../../core/config/supabase_client.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
-import '../../domain/entities/proactive_alert.dart';
 import '../../domain/entities/cash_flow_warning.dart';
 import '../../domain/entities/bill_collision.dart';
 

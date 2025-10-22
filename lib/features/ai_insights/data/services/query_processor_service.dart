@@ -830,7 +830,7 @@ class QueryProcessorService {
       buffer.writeln('Per transaction: ${currencyFormat.format(average)}');
       buffer.writeln('Daily average: ${currencyFormat.format(daily)}');
       buffer.writeln('Monthly average: ${currencyFormat.format(monthly)}');
-      buffer.writeln('Total: ${currencyFormat.format(total)} (${count} transactions)');
+      buffer.writeln('Total: ${currencyFormat.format(total)} ($count transactions)');
 
       return QueryResponse(
         content: buffer.toString().trim(),
@@ -879,7 +879,7 @@ class QueryProcessorService {
       final periodLabel = period['label'] as String;
       final average = total / transactions.length;
 
-      final buffer = StringBuffer('Your income ${periodLabel}:\n\n');
+      final buffer = StringBuffer('Your income $periodLabel:\n\n');
       buffer.writeln('Total: ${currencyFormat.format(total)}');
       buffer.writeln('Transactions: ${transactions.length}');
       buffer.writeln('Average per transaction: ${currencyFormat.format(average)}');

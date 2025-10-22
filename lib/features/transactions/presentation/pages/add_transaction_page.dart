@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -448,8 +449,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
         if (mounted) {
           _logger.d('Closing loading dialog...');
-          // Use the loading dialog context to pop the loading dialog
-          if (mounted) Navigator.pop(loadingDialogContext);
+          // Use the loading dialog context to pop the loading dialog - do this in a safe context
+          unawaited(
+            Future.microtask(() {
+              if (loadingDialogContext.mounted) {
+                Navigator.pop(loadingDialogContext);
+              }
+            }),
+          );
 
           // Small delay to ensure loading dialog is closed
           await Future.delayed(const Duration(milliseconds: 100));
@@ -467,24 +474,28 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             autoDismissDuration: const Duration(milliseconds: 1500),
           );
 
+          if (!mounted) return;
+
           _logger.d('Success dialog closed, popping page...');
-          if (mounted) {
-            // Pop the transaction page
-            context.pop(true); // Return true to indicate success
-          }
+          // Pop the transaction page
+          context.pop(true); // Return true to indicate success
         }
       } catch (e, stackTrace) {
         _logger.e('Failed to save transaction', error: e, stackTrace: stackTrace);
 
         if (mounted) {
-          // Use the loading dialog context to pop the loading dialog
-          if (mounted) Navigator.pop(loadingDialogContext);
-          if (mounted) {
-            ErrorSnackbar.show(
-              context,
-              message: 'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',
-            );
-          }
+          // Use the loading dialog context to pop the loading dialog - do this in a safe context
+          unawaited(
+            Future.microtask(() {
+              if (loadingDialogContext.mounted) {
+                Navigator.pop(loadingDialogContext);
+              }
+            }),
+          );
+          ErrorSnackbar.show(
+            context,
+            message: 'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',
+          );
         }
       }
     }
