@@ -142,7 +142,6 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   hintText: 'e.g., Dinner at restaurant',
-                  prefixIcon: Icon(Icons.description),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -160,7 +159,6 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Amount',
                   hintText: '0.00',
-                  prefixIcon: Icon(Icons.attach_money),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
@@ -200,7 +198,6 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(Icons.category),
                 ),
                 items: _categories.map((category) {
                   return DropdownMenuItem(
@@ -222,7 +219,6 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                 initialValue: _splitType,
                 decoration: const InputDecoration(
                   labelText: 'Split Type',
-                  prefixIcon: Icon(Icons.pie_chart),
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -280,7 +276,6 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Notes (Optional)',
                   hintText: 'Add any additional details',
-                  prefixIcon: Icon(Icons.note),
                 ),
                 maxLines: 3,
                 enabled: !isLoading,
