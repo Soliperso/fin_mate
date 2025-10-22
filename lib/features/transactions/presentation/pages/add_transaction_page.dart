@@ -10,6 +10,7 @@ import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
 import '../providers/transaction_providers.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -38,20 +39,82 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   final List<String> _expenseCategories = [
     'Food & Dining',
+    'Groceries',
+    'Restaurants',
     'Transportation',
+    'Gas',
+    'Car Maintenance',
+    'Public Transit',
+    'Ride Share',
+    'Housing',
+    'Rent',
+    'Mortgage',
+    'Home Maintenance',
+    'Utilities',
+    'Electricity',
+    'Water',
+    'Internet',
+    'Phone',
+    'Car Payment',
+    'Insurance',
+    'Car Insurance',
+    'Health Insurance',
+    'Home Insurance',
     'Shopping',
+    'Clothing',
+    'Personal Care',
+    'Electronics',
     'Entertainment',
-    'Bills & Utilities',
+    'Streaming Services',
+    'Movies & Events',
+    'Hobbies',
     'Healthcare',
+    'Medical Expenses',
+    'Medications',
+    'Fitness',
     'Education',
+    'Tuition',
+    'Books & Courses',
+    'Childcare',
+    'Pets',
+    'Pet Food',
+    'Vet Expenses',
+    'Travel',
+    'Vacation',
+    'Flights',
+    'Hotels',
+    'Subscriptions',
+    'Gifts & Donations',
+    'Debt Payments',
+    'Loan Payments',
     'Other',
   ];
 
   final List<String> _incomeCategories = [
     'Salary',
+    'Hourly Wage',
+    'Bonus',
     'Freelance',
+    'Contract Work',
+    'Side Gig',
+    'Side Hustle',
     'Investment',
+    'Stock Dividends',
+    'Interest Income',
+    'Rental Income',
+    'Capital Gains',
+    'Business Income',
+    'Self-Employment',
+    'Passive Income',
+    'Refund',
+    'Tax Refund',
     'Gift',
+    'Inheritance',
+    'Reimbursement',
+    'Scholarship',
+    'Government Benefits',
+    'Unemployment',
+    'Disability',
     'Other',
   ];
 
@@ -159,8 +222,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 style: Theme.of(context).textTheme.bodyLarge,
                 decoration: InputDecoration(
                   labelText: 'Title',
-                  hintText: 'e.g., Grocery shopping, Salary',
-                  prefixIcon: const Icon(Icons.title),
+                  hintText: _selectedType == 'expense'
+                      ? 'e.g., Grocery shopping, Gas'
+                      : 'e.g., Salary, Freelance work',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
@@ -214,7 +278,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 initialValue: _categories.contains(_selectedCategory) ? _selectedCategory : _categories.first,
                 decoration: InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: const Icon(Icons.category_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
@@ -242,7 +305,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 decoration: InputDecoration(
                   labelText: 'Notes (Optional)',
                   hintText: 'Add additional details...',
-                  prefixIcon: const Icon(Icons.note_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
@@ -446,6 +508,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           await repository.createTransaction(transaction);
           _logger.d('Transaction created successfully!');
         }
+
+        // Invalidate dashboard and related providers to refresh cached data
+        _logger.d('Invalidating providers to refresh dashboard...');
+        ref.invalidate(dashboardNotifierProvider);
+        ref.invalidate(transactionListProvider);
+        ref.invalidate(recentTransactionsProvider);
+        ref.invalidate(monthlyFlowDataProvider);
+        ref.invalidate(netWorthSnapshotsProvider);
 
         if (mounted) {
           _logger.d('Closing loading dialog...');

@@ -10,6 +10,7 @@ class ProfileEntity extends Equatable {
   final DateTime? dateOfBirth;
   final String currency;
   final String role;
+  final double? emergencyFundTarget;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,6 +23,7 @@ class ProfileEntity extends Equatable {
     this.dateOfBirth,
     this.currency = 'USD',
     this.role = 'user',
+    this.emergencyFundTarget,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -36,6 +38,7 @@ class ProfileEntity extends Equatable {
         dateOfBirth,
         currency,
         role,
+        emergencyFundTarget,
         createdAt,
         updatedAt,
       ];
@@ -49,6 +52,7 @@ class ProfileEntity extends Equatable {
     DateTime? dateOfBirth,
     String? currency,
     String? role,
+    double? emergencyFundTarget,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -61,6 +65,7 @@ class ProfileEntity extends Equatable {
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       currency: currency ?? this.currency,
       role: role ?? this.role,
+      emergencyFundTarget: emergencyFundTarget ?? this.emergencyFundTarget,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

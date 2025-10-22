@@ -6,6 +6,38 @@ class EmergencyFundService {
 
   EmergencyFundService(this._supabase);
 
+  Future<double?> getUserEmergencyFundTarget(String userId) async {
+    try {
+      final response = await _supabase
+          .from('emergency_fund_settings')
+          .select('target_amount')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (response != null) {
+        return (response['target_amount'] as num).toDouble();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> saveEmergencyFundTarget(String userId, double targetAmount) async {
+    try {
+      await _supabase.from('emergency_fund_settings').upsert(
+        {
+          'user_id': userId,
+          'target_amount': targetAmount,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        onConflict: 'user_id',
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<EmergencyFundStatus> calculateEmergencyFundStatus(String userId) async {
     try {
       // 1. Calculate average monthly expenses (last 3 months)
@@ -64,9 +96,12 @@ class EmergencyFundService {
       // (assuming not all liquid cash should be counted as emergency fund)
       final currentAmount = emergencyFundFromGoals + (liquidCash * 0.3);
 
-      // 3. Calculate recommendations
-      final minimumRecommended = averageMonthlyExpenses * 3; // 3 months
-      final targetRecommended = averageMonthlyExpenses * 6; // 6 months
+      // 3. Get user's target or calculate default
+      final userTarget = await getUserEmergencyFundTarget(userId);
+      final targetRecommended = userTarget ?? (averageMonthlyExpenses * 6); // 6 months if not set
+      final minimumRecommended = userTarget != null
+          ? (userTarget * 0.5) // 50% of user target as minimum
+          : (averageMonthlyExpenses * 3); // 3 months if auto-calculated
 
       // 4. Calculate metrics
       final double monthsCovered = averageMonthlyExpenses > 0

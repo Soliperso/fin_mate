@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/emergency_fund_status.dart';
+import '../../data/services/emergency_fund_service.dart';
+import '../providers/emergency_fund_provider.dart';
 
-class EmergencyFundCard extends StatelessWidget {
+class EmergencyFundCard extends ConsumerWidget {
   final EmergencyFundStatus status;
 
   const EmergencyFundCard({
@@ -44,7 +49,7 @@ class EmergencyFundCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
     final levelColor = _getLevelColor();
 
@@ -67,7 +72,7 @@ class EmergencyFundCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            _showEmergencyFundDetails(context);
+            _showEmergencyFundDetails(context, ref);
           },
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           child: Padding(
@@ -239,12 +244,7 @@ class EmergencyFundCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // Savings Goals feature coming in Phase 2
-                      SuccessSnackbar.show(
-                        context,
-                        message: 'Savings Goals feature coming soon!',
-                        duration: const Duration(seconds: 2),
-                      );
+                      context.pushNamed('emergency-fund');
                     },
                     icon: const Icon(Icons.add_circle_outline),
                     label: const Text('Add to Emergency Fund'),
@@ -266,23 +266,42 @@ class EmergencyFundCard extends StatelessWidget {
     );
   }
 
-  void _showEmergencyFundDetails(BuildContext context) {
+  void _showEmergencyFundDetails(BuildContext context, WidgetRef ref) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      enableDrag: true,
       builder: (context) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
         ),
-        padding: const EdgeInsets.all(AppSizes.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Draggable Handle
+              Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.textTertiary.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.md),
+
             // Header
             Row(
               children: [
@@ -318,52 +337,212 @@ class EmergencyFundCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, size: 20),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showSetTargetDialog(context, ref, currencyFormat);
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Set target amount',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 24),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Close',
+                ),
               ],
             ),
             const SizedBox(height: AppSizes.xl),
 
-            // Breakdown
-            _buildDetailRow(
+            // Circular Progress Indicator
+            Center(
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Background circle
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.lightGray,
+                              width: 8,
+                            ),
+                          ),
+                        ),
+                        // Progress circle
+                        SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: CircularProgressIndicator(
+                            value: (status.readinessScore / 100).clamp(0, 1),
+                            strokeWidth: 8,
+                            valueColor: AlwaysStoppedAnimation<Color>(_getLevelColor()),
+                            backgroundColor: AppColors.lightGray,
+                          ),
+                        ),
+                        // Center text
+                        Text(
+                          '${status.readinessScore.toStringAsFixed(0)}%',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: _getLevelColor(),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  Text(
+                    '${status.monthsCovered.toStringAsFixed(1)} months covered',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSizes.xl),
+
+            // Your Fund Status Section
+            Text(
+              'YOUR FUND STATUS',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                  ),
+            ),
+            const SizedBox(height: AppSizes.md),
+
+            // Fund Status Card
+            Container(
+              padding: const EdgeInsets.all(AppSizes.lg),
+              decoration: BoxDecoration(
+                color: AppColors.lightGray,
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                border: Border.all(
+                  color: AppColors.borderLight,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Current Emergency Fund
+                  _buildMetricRowWithIcon(
+                    context,
+                    Icons.account_balance_wallet_outlined,
+                    'Current Emergency Fund',
+                    currencyFormat.format(status.currentAmount),
+                    _getLevelColor(),
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Your Target
+                  _buildMetricRowWithIcon(
+                    context,
+                    Icons.flag_outlined,
+                    'Your Target',
+                    currencyFormat.format(status.targetRecommended),
+                    AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+
+                  // Progress Bar
+                  Text(
+                    'Progress',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    child: LinearProgressIndicator(
+                      value: (status.readinessScore / 100).clamp(0, 1),
+                      minHeight: 8,
+                      backgroundColor: AppColors.lightGray,
+                      valueColor: AlwaysStoppedAnimation<Color>(_getLevelColor()),
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${status.readinessScore.toStringAsFixed(0)}% Ready',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: _getLevelColor(),
+                            ),
+                      ),
+                      Text(
+                        '${status.monthsCovered.toStringAsFixed(1)} months',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSizes.xl),
+
+            // Breakdown Section
+            Text(
+              'BREAKDOWN',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                  ),
+            ),
+            const SizedBox(height: AppSizes.md),
+
+            // Breakdown Metrics
+            _buildMetricRowWithIcon(
               context,
-              'Current Emergency Fund',
-              currencyFormat.format(status.currentAmount),
+              Icons.calendar_today_outlined,
+              'Months Covered',
+              '${status.monthsCovered.toStringAsFixed(1)} months',
               _getLevelColor(),
             ),
-            const Divider(height: AppSizes.lg),
-            _buildDetailRow(
+            const SizedBox(height: AppSizes.md),
+
+            _buildMetricRowWithIcon(
               context,
-              'Minimum Goal (3 months)',
-              currencyFormat.format(status.minimumRecommended),
-              AppColors.textSecondary,
-            ),
-            const Divider(height: AppSizes.lg),
-            _buildDetailRow(
-              context,
-              'Target Goal (6 months)',
-              currencyFormat.format(status.targetRecommended),
-              AppColors.textSecondary,
-            ),
-            const Divider(height: AppSizes.lg),
-            _buildDetailRow(
-              context,
+              Icons.receipt_long_outlined,
               'Monthly Expenses (avg)',
               currencyFormat.format(status.averageMonthlyExpenses),
               AppColors.textSecondary,
             ),
-            const Divider(height: AppSizes.lg),
-            _buildDetailRow(
+            const SizedBox(height: AppSizes.md),
+
+            _buildMetricRowWithIcon(
               context,
-              'Months Covered',
-              '${status.monthsCovered.toStringAsFixed(1)} months',
-              _getLevelColor(),
+              Icons.check_circle_outline,
+              'Minimum Goal (3 months)',
+              currencyFormat.format(status.minimumRecommended),
+              AppColors.textSecondary,
             ),
             const SizedBox(height: AppSizes.xl),
 
             // Recommendations
             Text(
-              'Recommendations',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+              'RECOMMENDATIONS',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
                   ),
             ),
             const SizedBox(height: AppSizes.md),
@@ -405,26 +584,136 @@ class EmergencyFundCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(BuildContext context, String label, String value, Color valueColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: valueColor,
+  void _showSetTargetDialog(BuildContext context, WidgetRef ref, NumberFormat currencyFormat) {
+    final targetController = TextEditingController(
+      text: status.targetRecommended.toStringAsFixed(0),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Emergency Fund Target'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your desired emergency fund target amount.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSizes.md),
+            TextField(
+              controller: targetController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: 'Target Amount',
+                prefixText: '\$ ',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                filled: true,
               ),
+            ),
+            const SizedBox(height: AppSizes.md),
+            Text(
+              'Recommended: 3-6 months of expenses',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final target = double.tryParse(targetController.text);
+              if (target != null && target > 0) {
+                try {
+                  final userId = supabase.auth.currentUser?.id;
+                  if (userId != null) {
+                    final service = EmergencyFundService(supabase);
+                    await service.saveEmergencyFundTarget(userId, target);
+
+                    // Refresh the emergency fund status
+                    ref.invalidate(emergencyFundStatusProvider);
+
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      SuccessSnackbar.show(
+                        context,
+                        message: 'Emergency fund target updated!',
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ErrorSnackbar.show(
+                      context,
+                      message: 'Failed to save target. Please try again.',
+                    );
+                  }
+                }
+              } else {
+                if (context.mounted) {
+                  ErrorSnackbar.show(
+                    context,
+                    message: 'Please enter a valid amount.',
+                  );
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricRowWithIcon(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: AppSizes.md),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: valueColor,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );

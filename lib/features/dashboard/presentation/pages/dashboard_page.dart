@@ -128,6 +128,8 @@ class DashboardPage extends ConsumerWidget {
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
             ref.invalidate(emergencyFundStatusProvider);
+            ref.invalidate(monthlyFlowDataProvider);
+            ref.invalidate(netWorthSnapshotsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -369,6 +371,9 @@ class DashboardPage extends ConsumerWidget {
         error: (error, stack) => RefreshIndicator(
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
+            ref.invalidate(emergencyFundStatusProvider);
+            ref.invalidate(monthlyFlowDataProvider);
+            ref.invalidate(netWorthSnapshotsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

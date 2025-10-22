@@ -52,9 +52,22 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                    ),
+                decoration: InputDecoration(
                   hintText: 'Search transactions...',
-                  border: InputBorder.none,
+                  hintStyle: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary.withValues(alpha: 0.5),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.lightGray.withValues(alpha: 0.5),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 onChanged: (value) {
                   notifier.setSearchQuery(value);
@@ -299,14 +312,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 fontSize: 11,
               ),
             ),
-            if (transaction.accountName != null)
-              Text(
-                transaction.accountName!,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                ),
-              ),
           ],
         ),
         trailing: Text(
@@ -503,6 +508,55 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
+  Widget _buildCategoryFilter(
+    StateSetter setModalState,
+    String? selectedCategory,
+    Function(String?) onCategoryChanged,
+  ) {
+    // Combine all unique categories from transactions
+    final allCategories = <String>{};
+    final state = ref.read(transactionListProvider);
+    for (final transaction in state.transactions) {
+      if (transaction.categoryName != null) {
+        allCategories.add(transaction.categoryName!);
+      }
+    }
+
+    if (allCategories.isEmpty) {
+      return Text(
+        'No categories available',
+        style: TextStyle(color: AppColors.textSecondary),
+      );
+    }
+
+    final sortedCategories = allCategories.toList()..sort();
+    return Wrap(
+      spacing: AppSizes.sm,
+      children: sortedCategories.map((category) {
+        final isSelected = selectedCategory == category;
+        return FilterChip(
+          label: Text(category),
+          selected: isSelected,
+          onSelected: (selected) {
+            setModalState(() {
+              onCategoryChanged(selected ? category : null);
+            });
+          },
+          backgroundColor: Colors.transparent,
+          selectedColor: AppColors.primaryTeal.withValues(alpha: 0.2),
+          checkmarkColor: AppColors.primaryTeal,
+          labelStyle: TextStyle(
+            color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+          side: BorderSide(
+            color: isSelected ? AppColors.primaryTeal : AppColors.borderLight,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   void _confirmDelete(
     BuildContext context,
     TransactionEntity transaction,
@@ -525,9 +579,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               Navigator.pop(dialogContext);
               final success = await notifier.deleteTransaction(transaction.id);
 
-              // Invalidate dashboard provider to refresh dashboard data
+              // Invalidate dashboard and related providers to refresh cached data
               if (success) {
                 ref.invalidate(dashboardNotifierProvider);
+                ref.invalidate(recentTransactionsProvider);
+                ref.invalidate(monthlyFlowDataProvider);
+                ref.invalidate(netWorthSnapshotsProvider);
               }
 
               if (context.mounted) {
@@ -557,7 +614,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   void _showFilterBottomSheet(BuildContext context) {
     final state = ref.read(transactionListProvider);
     final notifier = ref.read(transactionListProvider.notifier);
-    final categoriesAsync = ref.read(categoriesProvider(null));
 
     // Local state for the modal
     String? selectedCategory = state.selectedCategory;
@@ -621,43 +677,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           ),
                     ),
                     const SizedBox(height: AppSizes.sm),
-                    categoriesAsync.when(
-                      data: (categories) {
-                        return Wrap(
-                          spacing: AppSizes.sm,
-                          children: categories.map((category) {
-                            final isSelected = selectedCategory == category.name;
-                            return FilterChip(
-                              label: Text(category.name),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setModalState(() {
-                                  selectedCategory = selected ? category.name : null;
-                                });
-                              },
-                              backgroundColor: Colors.transparent,
-                              selectedColor: AppColors.primaryTeal.withValues(alpha: 0.2),
-                              checkmarkColor: AppColors.primaryTeal,
-                              labelStyle: TextStyle(
-                                color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              ),
-                              side: BorderSide(
-                                color: isSelected ? AppColors.primaryTeal : AppColors.borderLight,
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                      loading: () => const Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      error: (_, stack) => const Text('Failed to load categories'),
-                    ),
+                    _buildCategoryFilter(setModalState, selectedCategory, (category) {
+                      selectedCategory = category;
+                    }),
                     const SizedBox(height: AppSizes.lg),
 
                     // Date Range Filter
