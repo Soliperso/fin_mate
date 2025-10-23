@@ -36,6 +36,38 @@ class MembersSection extends ConsumerWidget {
     }
   }
 
+  Widget _buildAvatar(GroupMember member, bool isCurrentUser) {
+    if (member.avatarUrl != null && member.avatarUrl!.isNotEmpty) {
+      return CircleAvatar(
+        backgroundImage: NetworkImage(member.avatarUrl!),
+        backgroundColor: isCurrentUser
+            ? AppColors.slateBlue.withValues(alpha: 0.2)
+            : AppColors.lightGray,
+        child: member.avatarUrl == null || member.avatarUrl!.isEmpty
+            ? Text(
+                _getInitials(member.fullName),
+                style: TextStyle(
+                  color: isCurrentUser ? AppColors.slateBlue : AppColors.textSecondary,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            : null,
+      );
+    }
+    return CircleAvatar(
+      backgroundColor: isCurrentUser
+          ? AppColors.slateBlue.withValues(alpha: 0.2)
+          : AppColors.lightGray,
+      child: Text(
+        _getInitials(member.fullName),
+        style: TextStyle(
+          color: isCurrentUser ? AppColors.slateBlue : AppColors.textSecondary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Sort members: current user first, then admins, then members
@@ -80,18 +112,7 @@ class MembersSection extends ConsumerWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: AppSizes.sm),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isCurrentUser
-                        ? AppColors.slateBlue.withValues(alpha: 0.2)
-                        : AppColors.lightGray,
-                    child: Text(
-                      _getInitials(member.fullName),
-                      style: TextStyle(
-                        color: isCurrentUser ? AppColors.slateBlue : AppColors.textSecondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  leading: _buildAvatar(member, isCurrentUser),
                   title: Row(
                     children: [
                       Expanded(

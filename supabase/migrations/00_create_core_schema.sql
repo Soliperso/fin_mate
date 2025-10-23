@@ -310,6 +310,7 @@ CREATE TRIGGER on_user_financial_init
 
 -- DASHBOARD FUNCTIONS
 CREATE OR REPLACE FUNCTION get_total_by_type(
+  p_user_id UUID,
   start_date DATE,
   end_date DATE,
   transaction_type TEXT
@@ -317,7 +318,7 @@ CREATE OR REPLACE FUNCTION get_total_by_type(
 RETURNS DECIMAL AS $$
   SELECT COALESCE(SUM(amount), 0)
   FROM transactions
-  WHERE user_id = auth.uid()
+  WHERE user_id = p_user_id
     AND date >= start_date
     AND date <= end_date
     AND type = transaction_type;
@@ -329,7 +330,7 @@ DECLARE
   income DECIMAL;
   expense DECIMAL;
   savings_rate DECIMAL;
-  score INTEGER := 50;
+  score INTEGER := 0;
 BEGIN
   SELECT COALESCE(SUM(amount), 0) INTO income
   FROM transactions
@@ -339,15 +340,19 @@ BEGIN
   FROM transactions
   WHERE user_id = auth.uid() AND type = 'expense' AND date >= CURRENT_DATE - INTERVAL '30 days';
 
-  IF income > 0 THEN
-    savings_rate := ((income - expense) / income) * 100;
-    IF savings_rate >= 20 THEN score := 100;
-    ELSIF savings_rate >= 15 THEN score := 85;
-    ELSIF savings_rate >= 10 THEN score := 70;
-    ELSIF savings_rate >= 5 THEN score := 55;
-    ELSIF savings_rate >= 0 THEN score := 40;
-    ELSE score := 20;
-    END IF;
+  -- If no income, return 0 (user hasn't started tracking finances)
+  IF income = 0 THEN
+    RETURN 0;
+  END IF;
+
+  -- Calculate savings rate and score based on income
+  savings_rate := ((income - expense) / income) * 100;
+  IF savings_rate >= 20 THEN score := 100;
+  ELSIF savings_rate >= 15 THEN score := 85;
+  ELSIF savings_rate >= 10 THEN score := 70;
+  ELSIF savings_rate >= 5 THEN score := 55;
+  ELSIF savings_rate >= 0 THEN score := 40;
+  ELSE score := 20;
   END IF;
 
   RETURN score;

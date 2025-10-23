@@ -167,12 +167,7 @@ class NotificationService {
   /// Get unread notification count
   Future<int> getUnreadCount() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return 0;
-
-      final result = await _supabase.rpc('get_unread_notification_count', params: {
-        'p_user_id': userId,
-      });
+      final result = await _supabase.rpc('get_unread_notification_count');
       return result as int? ?? 0;
     } catch (e) {
       return 0;
@@ -182,13 +177,10 @@ class NotificationService {
   /// Mark a notification as read
   Future<bool> markAsRead(String notificationId) async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return false;
-
       final result = await _supabase.rpc('mark_notification_read', params: {
-        'p_user_id': userId,
         'p_notification_id': notificationId,
       });
+
       return result as bool? ?? false;
     } catch (e) {
       return false;
@@ -198,12 +190,7 @@ class NotificationService {
   /// Mark all notifications as read
   Future<int> markAllAsRead() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return 0;
-
-      final result = await _supabase.rpc('mark_all_notifications_read', params: {
-        'p_user_id': userId,
-      });
+      final result = await _supabase.rpc('mark_all_notifications_read');
       return result as int? ?? 0;
     } catch (e) {
       return 0;
@@ -213,13 +200,10 @@ class NotificationService {
   /// Archive a notification
   Future<bool> archiveNotification(String notificationId) async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return false;
-
       final result = await _supabase.rpc('archive_notification', params: {
-        'p_user_id': userId,
         'p_notification_id': notificationId,
       });
+
       return result as bool? ?? false;
     } catch (e) {
       return false;

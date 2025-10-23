@@ -192,12 +192,7 @@ class SavingsGoalRemoteDatasource {
   // Summary
   Future<Map<String, dynamic>> getGoalsSummary() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) throw Exception('User not authenticated');
-
-      final response = await _supabase.rpc('get_goals_summary', params: {
-        'p_user_id': userId,
-      });
+      final response = await _supabase.rpc('get_goals_summary');
       return response as Map<String, dynamic>;
     } catch (e) {
       throw Exception('Failed to fetch goals summary: $e');

@@ -5,19 +5,23 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/group_expense_entity.dart';
+import '../../domain/entities/group_member_entity.dart';
 import '../providers/bill_splitting_providers.dart';
 import 'edit_expense_bottom_sheet.dart';
+import 'edit_splits_bottom_sheet.dart';
 
 class ExpenseDetailBottomSheet extends ConsumerWidget {
   final GroupExpense expense;
   final String groupId;
   final String currentUserId;
+  final List<GroupMember>? members;
 
   const ExpenseDetailBottomSheet({
     super.key,
     required this.expense,
     required this.groupId,
     required this.currentUserId,
+    this.members,
   });
 
   @override
@@ -141,6 +145,14 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
 
           const SizedBox(height: AppSizes.xl),
 
+          // Split Configuration Section (for custom/percentage splits)
+          if ((expense.splitType == SplitType.custom || expense.splitType == SplitType.percentage) &&
+              members != null &&
+              members!.isNotEmpty) ...[
+            _buildSplitConfigurationSection(context, ref),
+            const SizedBox(height: AppSizes.xl),
+          ],
+
           // Action Buttons
           if (canEdit) ...[
             Row(
@@ -191,6 +203,61 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
           const SizedBox(height: AppSizes.md),
         ],
       ),
+    );
+  }
+
+  Widget _buildSplitConfigurationSection(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Split Configuration',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: AppSizes.md),
+        Container(
+          padding: const EdgeInsets.all(AppSizes.md),
+          decoration: BoxDecoration(
+            color: AppColors.primaryTeal.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            border: Border.all(
+              color: AppColors.primaryTeal.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.info_outline, size: 18, color: AppColors.primaryTeal),
+                  const SizedBox(width: AppSizes.sm),
+                  Expanded(
+                    child: Text(
+                      'Configure how this ${expense.splitType.value} expense is split',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.primaryTeal,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSizes.md),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: members != null && members!.isNotEmpty
+                      ? () => _showEditSplitsSheet(context)
+                      : null,
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Configure Splits'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -245,6 +312,24 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
         // Data will refresh automatically via provider invalidation
       }
     });
+  }
+
+  void _showEditSplitsSheet(BuildContext context) {
+    if (members == null || members!.isEmpty) return;
+
+    Navigator.pop(context); // Close detail sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => EditSplitsBottomSheet(
+        expenseId: expense.id,
+        expenseAmount: expense.amount,
+        expenseDescription: expense.description,
+        splitType: expense.splitType,
+        groupId: groupId,
+        groupMembers: members!,
+      ),
+    );
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {

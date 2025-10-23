@@ -7,6 +7,7 @@ import '../../domain/entities/group_member_entity.dart';
 import '../../domain/entities/group_expense_entity.dart';
 import '../../domain/entities/settlement_entity.dart';
 import '../../domain/entities/group_balance_entity.dart';
+import '../../domain/entities/expense_split_entity.dart';
 
 // Repository Provider
 final billSplittingRepositoryProvider = Provider<BillSplittingRepository>((ref) {
@@ -49,6 +50,12 @@ final groupBalancesProvider = FutureProvider.family<List<GroupBalance>, String>(
 final groupSettlementsProvider = FutureProvider.family<List<Settlement>, String>((ref, groupId) async {
   final repository = ref.watch(billSplittingRepositoryProvider);
   return await repository.getGroupSettlements(groupId);
+});
+
+// Expense Splits Provider
+final expenseSplitsProvider = FutureProvider.family<List<ExpenseSplit>, String>((ref, expenseId) async {
+  final repository = ref.watch(billSplittingRepositoryProvider);
+  return await repository.getExpenseSplits(expenseId);
 });
 
 // State Notifier for Group Operations
@@ -217,6 +224,24 @@ class ExpenseOperationsNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       await _repository.deleteExpense(expenseId);
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      return false;
+    }
+  }
+
+  Future<bool> createCustomSplits({
+    required String expenseId,
+    required Map<String, double> splits,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.createCustomSplits(
+        expenseId: expenseId,
+        splits: splits,
+      );
       state = const AsyncValue.data(null);
       return true;
     } catch (e, stackTrace) {

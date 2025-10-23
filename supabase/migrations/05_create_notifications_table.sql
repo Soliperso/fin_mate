@@ -110,7 +110,7 @@ END;
 $$;
 
 -- Function to mark notification as read
-CREATE OR REPLACE FUNCTION mark_notification_read(p_notification_id UUID)
+CREATE OR REPLACE FUNCTION mark_notification_read(p_user_id UUID, p_notification_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -120,14 +120,14 @@ BEGIN
     SET is_read = TRUE,
         read_at = CURRENT_TIMESTAMP
     WHERE id = p_notification_id
-        AND user_id = auth.uid();
+        AND user_id = p_user_id;
 
     RETURN FOUND;
 END;
 $$;
 
 -- Function to mark all notifications as read
-CREATE OR REPLACE FUNCTION mark_all_notifications_read()
+CREATE OR REPLACE FUNCTION mark_all_notifications_read(p_user_id UUID)
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -138,7 +138,7 @@ BEGIN
     UPDATE notifications
     SET is_read = TRUE,
         read_at = CURRENT_TIMESTAMP
-    WHERE user_id = auth.uid()
+    WHERE user_id = p_user_id
         AND is_read = FALSE;
 
     GET DIAGNOSTICS v_count = ROW_COUNT;
@@ -147,7 +147,7 @@ END;
 $$;
 
 -- Function to archive notification
-CREATE OR REPLACE FUNCTION archive_notification(p_notification_id UUID)
+CREATE OR REPLACE FUNCTION archive_notification(p_user_id UUID, p_notification_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -157,14 +157,14 @@ BEGIN
     SET is_archived = TRUE,
         archived_at = CURRENT_TIMESTAMP
     WHERE id = p_notification_id
-        AND user_id = auth.uid();
+        AND user_id = p_user_id;
 
     RETURN FOUND;
 END;
 $$;
 
 -- Function to get unread notification count
-CREATE OR REPLACE FUNCTION get_unread_notification_count()
+CREATE OR REPLACE FUNCTION get_unread_notification_count(p_user_id UUID)
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -175,7 +175,7 @@ BEGIN
     SELECT COUNT(*)
     INTO v_count
     FROM notifications
-    WHERE user_id = auth.uid()
+    WHERE user_id = p_user_id
         AND is_read = FALSE
         AND is_archived = FALSE;
 

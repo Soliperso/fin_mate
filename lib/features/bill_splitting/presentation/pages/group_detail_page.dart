@@ -12,6 +12,7 @@ import '../widgets/members_section.dart';
 import '../widgets/settlement_history_section.dart';
 import '../widgets/add_member_bottom_sheet.dart';
 import '../widgets/expense_detail_bottom_sheet.dart';
+import 'group_settings_page.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final String groupId;
@@ -37,7 +38,15 @@ class GroupDetailPage extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () {
-                  // TODO: Group settings
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GroupSettingsPage(
+                        group: group,
+                        groupId: groupId,
+                      ),
+                    ),
+                  );
                 },
               ),
             ],
@@ -418,20 +427,24 @@ class GroupDetailPage extends ConsumerWidget {
     final dateFormat = DateFormat('MMM d, yyyy');
     final isCurrentUser = expense.paidBy == currentUserId;
     final paidByName = isCurrentUser ? 'You' : expense.paidByName;
+    final membersAsync = ref.watch(groupMembersProvider(groupId));
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSizes.sm),
       child: ListTile(
         onTap: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => ExpenseDetailBottomSheet(
-              expense: expense,
-              groupId: groupId,
-              currentUserId: currentUserId,
-            ),
-          );
+          membersAsync.whenData((members) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) => ExpenseDetailBottomSheet(
+                expense: expense,
+                groupId: groupId,
+                currentUserId: currentUserId,
+                members: members,
+              ),
+            );
+          });
         },
         leading: Container(
           padding: const EdgeInsets.all(AppSizes.sm),

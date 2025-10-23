@@ -106,13 +106,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total income for a date range
   Future<double> _getMonthlyIncome(DateTime startDate, DateTime endDate) async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        return 0.0;
-      }
-
       final result = await _supabase.rpc('get_total_by_type', params: {
-        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'income',
@@ -127,13 +121,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total expenses for a date range
   Future<double> _getMonthlyExpenses(DateTime startDate, DateTime endDate) async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        return 0.0;
-      }
-
       final result = await _supabase.rpc('get_total_by_type', params: {
-        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'expense',
@@ -148,14 +136,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get money health score
   Future<int> _getMoneyHealthScore() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        return 50;
-      }
-
-      final result = await _supabase.rpc('calculate_money_health_score', params: {
-        'p_user_id': userId,
-      });
+      final result = await _supabase.rpc('calculate_money_health_score');
       return result as int? ?? 50;
     } catch (e) {
       return 50;

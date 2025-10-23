@@ -7,6 +7,7 @@ class GroupMemberModel extends GroupMember {
     required super.userId,
     super.fullName,
     super.email,
+    super.avatarUrl,
     required super.role,
     required super.joinedAt,
   });
@@ -18,6 +19,7 @@ class GroupMemberModel extends GroupMember {
       userId: json['user_id'] as String,
       fullName: json['full_name'] as String?,
       email: json['email'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       role: MemberRole.fromString(json['role'] as String),
       joinedAt: DateTime.parse(json['joined_at'] as String),
     );
@@ -30,6 +32,7 @@ class GroupMemberModel extends GroupMember {
       'user_id': userId,
       'full_name': fullName,
       'email': email,
+      'avatar_url': avatarUrl,
       'role': role.value,
       'joined_at': joinedAt.toIso8601String(),
     };

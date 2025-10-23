@@ -493,7 +493,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Get goals summary
-CREATE OR REPLACE FUNCTION get_goals_summary()
+CREATE OR REPLACE FUNCTION get_goals_summary(p_user_id UUID)
 RETURNS TABLE (
   total_goals INTEGER,
   completed_goals INTEGER,
@@ -516,7 +516,7 @@ BEGIN
       ELSE 0::DECIMAL
     END as overall_progress
   FROM public.savings_goals
-  WHERE user_id = auth.uid();
+  WHERE user_id = p_user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
