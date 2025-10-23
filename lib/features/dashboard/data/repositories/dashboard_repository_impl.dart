@@ -70,27 +70,20 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   /// Get total net worth across all accounts
+  /// Calculated as: Total Income - Total Expenses (current month)
   Future<double> _getNetWorth() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        return 0;
-      }
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
 
-      final response = await _supabase
-          .from('accounts')
-          .select('balance')
-          .eq('user_id', userId)
-          .eq('is_active', true);
+      // Get total income for current month
+      final totalIncome = await _getMonthlyIncome(startOfMonth, now);
 
-      if (response.isEmpty) {
-        return 0;
-      }
+      // Get total expenses for current month
+      final totalExpenses = await _getMonthlyExpenses(startOfMonth, now);
 
-      return (response as List).fold<double>(
-        0,
-        (sum, account) => sum + ((account['balance'] as num?)?.toDouble() ?? 0),
-      );
+      // Net worth = Income - Expenses
+      return totalIncome - totalExpenses;
     } catch (e) {
       return 0;
     }
