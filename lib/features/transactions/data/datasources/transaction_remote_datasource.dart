@@ -18,12 +18,18 @@ class TransactionRemoteDataSource {
     String? type,
     int? limit,
   }) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     var query = _supabase.from('transactions').select('''
           *,
           categories(name),
           accounts!transactions_account_id_fkey(name),
           to_account:accounts!transactions_to_account_id_fkey(name)
-        ''');
+        ''')
+        .eq('user_id', userId);
 
     if (startDate != null) {
       query = query.gte('date', startDate.toIso8601String().split('T')[0]);
@@ -66,10 +72,16 @@ class TransactionRemoteDataSource {
 
   /// Update transaction
   Future<TransactionModel> updateTransaction(String id, TransactionModel transaction) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('transactions')
         .update(transaction.toJson())
         .eq('id', id)
+        .eq('user_id', userId)
         .select()
         .single();
 
@@ -78,14 +90,25 @@ class TransactionRemoteDataSource {
 
   /// Delete transaction
   Future<void> deleteTransaction(String id) async {
-    await _supabase.from('transactions').delete().eq('id', id);
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    await _supabase.from('transactions').delete().eq('id', id).eq('user_id', userId);
   }
 
   /// Get all accounts
   Future<List<AccountModel>> getAccounts() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('accounts')
         .select()
+        .eq('user_id', userId)
         .eq('is_active', true)
         .order('created_at');
 
@@ -121,8 +144,14 @@ class TransactionRemoteDataSource {
     required DateTime endDate,
   }) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
       // Get total income
       final incomeResult = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'income',
@@ -130,6 +159,7 @@ class TransactionRemoteDataSource {
 
       // Get total expenses
       final expenseResult = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'expense',
@@ -145,7 +175,9 @@ class TransactionRemoteDataSource {
       // Get money health score
       int healthScore = 50;
       try {
-        healthScore = await _supabase.rpc('calculate_money_health_score');
+        healthScore = await _supabase.rpc('calculate_money_health_score', params: {
+          'p_user_id': userId,
+        });
       } catch (e) {
         // Use default score if function not available
         healthScore = 50;
@@ -179,9 +211,15 @@ class TransactionRemoteDataSource {
     required DateTime endDate,
     required String type,
   }) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('transactions')
         .select('category_id, categories(name, color), amount')
+        .eq('user_id', userId)
         .gte('date', startDate.toIso8601String().split('T')[0])
         .lte('date', endDate.toIso8601String().split('T')[0])
         .eq('type', type);
@@ -215,6 +253,11 @@ class TransactionRemoteDataSource {
 
   /// Search transactions
   Future<List<TransactionModel>> searchTransactions(String query) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('transactions')
         .select('''
@@ -222,6 +265,7 @@ class TransactionRemoteDataSource {
           categories(name),
           accounts!transactions_account_id_fkey(name)
         ''')
+        .eq('user_id', userId)
         .or('description.ilike.%$query%,notes.ilike.%$query%')
         .order('date', ascending: false)
         .limit(50);

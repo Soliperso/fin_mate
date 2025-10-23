@@ -38,6 +38,11 @@ class BudgetRemoteDataSource {
 
   /// Get a specific budget by ID
   Future<BudgetModel> getBudgetById(String id) async {
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('budgets')
         .select('''
@@ -45,6 +50,7 @@ class BudgetRemoteDataSource {
           categories(name, icon, color)
         ''')
         .eq('id', id)
+        .eq('user_id', currentUserId)
         .single();
 
     final data = Map<String, dynamic>.from(response);
@@ -86,10 +92,16 @@ class BudgetRemoteDataSource {
 
   /// Update budget
   Future<BudgetModel> updateBudget(String id, BudgetModel budget) async {
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('budgets')
         .update(budget.toJson())
         .eq('id', id)
+        .eq('user_id', currentUserId)
         .select('''
           *,
           categories(name, icon, color)
@@ -106,17 +118,28 @@ class BudgetRemoteDataSource {
 
   /// Delete budget
   Future<void> deleteBudget(String id) async {
-    await _supabase.from('budgets').delete().eq('id', id);
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    await _supabase.from('budgets').delete().eq('id', id).eq('user_id', currentUserId);
   }
 
   /// Get budgets for a specific category
   Future<List<BudgetModel>> getBudgetsByCategory(String categoryId) async {
+    final currentUserId = _supabase.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _supabase
         .from('budgets')
         .select('''
           *,
           categories(name, icon, color)
         ''')
+        .eq('user_id', currentUserId)
         .eq('category_id', categoryId)
         .order('created_at', ascending: false);
 

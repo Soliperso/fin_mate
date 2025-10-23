@@ -18,9 +18,25 @@ class BillSplittingRemoteDatasource {
   // Groups
   Future<List<BillGroupModel>> getUserGroups() async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Get groups where user is a member
+      final memberResponse = await _supabase
+          .from('group_members')
+          .select('group_id')
+          .eq('user_id', userId);
+
+      final groupIds = (memberResponse as List).map((m) => m['group_id'] as String).toList();
+
+      if (groupIds.isEmpty) {
+        return [];
+      }
+
       final response = await _supabase
           .from('bill_groups')
           .select()
+          .inFilter('id', groupIds)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -33,6 +49,21 @@ class BillSplittingRemoteDatasource {
 
   Future<BillGroupModel> getGroupById(String groupId) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Verify user is a member of this group
+      final memberCheck = await _supabase
+          .from('group_members')
+          .select('id')
+          .eq('group_id', groupId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (memberCheck == null) {
+        throw Exception('Access denied: You are not a member of this group');
+      }
+
       final response = await _supabase
           .from('bill_groups')
           .select()
@@ -77,6 +108,21 @@ class BillSplittingRemoteDatasource {
     String? description,
   }) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Verify user is a member of this group (admin check can be added later)
+      final memberCheck = await _supabase
+          .from('group_members')
+          .select('id')
+          .eq('group_id', groupId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (memberCheck == null) {
+        throw Exception('Access denied: You are not a member of this group');
+      }
+
       final updateData = <String, dynamic>{};
       if (name != null) updateData['name'] = name;
       if (description != null) updateData['description'] = description;
@@ -92,6 +138,20 @@ class BillSplittingRemoteDatasource {
 
   Future<void> deleteGroup(String groupId) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Verify user is the creator of this group
+      final group = await _supabase
+          .from('bill_groups')
+          .select('created_by')
+          .eq('id', groupId)
+          .maybeSingle();
+
+      if (group == null || group['created_by'] != userId) {
+        throw Exception('Access denied: Only the group creator can delete this group');
+      }
+
       await _supabase.from('bill_groups').delete().eq('id', groupId);
     } catch (e) {
       throw Exception('Failed to delete group: $e');
@@ -105,7 +165,7 @@ class BillSplittingRemoteDatasource {
           .from('group_members')
           .select('''
             *,
-            user_profiles!inner(full_name, email)
+            user_profiles!inner(full_name, email, avatar_url)
           ''')
           .eq('group_id', groupId)
           .order('joined_at', ascending: true);
@@ -115,6 +175,7 @@ class BillSplittingRemoteDatasource {
           ...json,
           'full_name': json['user_profiles']['full_name'],
           'email': json['user_profiles']['email'],
+          'avatar_url': json['user_profiles']['avatar_url'],
         });
       }).toList();
     } catch (e) {

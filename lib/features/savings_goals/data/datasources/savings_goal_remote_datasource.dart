@@ -12,9 +12,13 @@ class SavingsGoalRemoteDatasource {
   // Goals
   Future<List<SavingsGoalModel>> getGoals() async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
       final response = await _supabase
           .from('savings_goals')
           .select()
+          .eq('user_id', userId)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -27,10 +31,14 @@ class SavingsGoalRemoteDatasource {
 
   Future<SavingsGoalModel> getGoalById(String goalId) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
       final response = await _supabase
           .from('savings_goals')
           .select()
           .eq('id', goalId)
+          .eq('user_id', userId)
           .single();
 
       return SavingsGoalModel.fromJson(response);
@@ -84,6 +92,9 @@ class SavingsGoalRemoteDatasource {
     String? color,
   }) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
       final updateData = <String, dynamic>{};
       if (name != null) updateData['name'] = name;
       if (description != null) updateData['description'] = description;
@@ -96,7 +107,8 @@ class SavingsGoalRemoteDatasource {
       await _supabase
           .from('savings_goals')
           .update(updateData)
-          .eq('id', goalId);
+          .eq('id', goalId)
+          .eq('user_id', userId);
     } catch (e) {
       throw Exception('Failed to update goal: $e');
     }
@@ -104,7 +116,10 @@ class SavingsGoalRemoteDatasource {
 
   Future<void> deleteGoal(String goalId) async {
     try {
-      await _supabase.from('savings_goals').delete().eq('id', goalId);
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      await _supabase.from('savings_goals').delete().eq('id', goalId).eq('user_id', userId);
     } catch (e) {
       throw Exception('Failed to delete goal: $e');
     }
@@ -112,10 +127,13 @@ class SavingsGoalRemoteDatasource {
 
   Future<void> markGoalAsCompleted(String goalId) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
       await _supabase.from('savings_goals').update({
         'is_completed': true,
         'completed_at': DateTime.now().toIso8601String(),
-      }).eq('id', goalId);
+      }).eq('id', goalId).eq('user_id', userId);
     } catch (e) {
       throw Exception('Failed to mark goal as completed: $e');
     }
@@ -174,7 +192,12 @@ class SavingsGoalRemoteDatasource {
   // Summary
   Future<Map<String, dynamic>> getGoalsSummary() async {
     try {
-      final response = await _supabase.rpc('get_goals_summary');
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final response = await _supabase.rpc('get_goals_summary', params: {
+        'p_user_id': userId,
+      });
       return response as Map<String, dynamic>;
     } catch (e) {
       throw Exception('Failed to fetch goals summary: $e');

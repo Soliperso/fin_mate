@@ -72,9 +72,15 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total net worth across all accounts
   Future<double> _getNetWorth() async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return 0;
+      }
+
       final response = await _supabase
           .from('accounts')
           .select('balance')
+          .eq('user_id', userId)
           .eq('is_active', true);
 
       if (response.isEmpty) {
@@ -100,7 +106,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total income for a date range
   Future<double> _getMonthlyIncome(DateTime startDate, DateTime endDate) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return 0.0;
+      }
+
       final result = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'income',
@@ -115,7 +127,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total expenses for a date range
   Future<double> _getMonthlyExpenses(DateTime startDate, DateTime endDate) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return 0.0;
+      }
+
       final result = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'expense',
@@ -130,7 +148,14 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get money health score
   Future<int> _getMoneyHealthScore() async {
     try {
-      final result = await _supabase.rpc('calculate_money_health_score');
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return 50;
+      }
+
+      final result = await _supabase.rpc('calculate_money_health_score', params: {
+        'p_user_id': userId,
+      });
       return result as int? ?? 50;
     } catch (e) {
       return 50;
@@ -140,12 +165,20 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get recent transactions
   Future<List<TransactionModel>> _getRecentTransactions({int limit = 5}) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return [];
+      }
+
       final response = await _supabase.from('transactions').select('''
         *,
         categories(name),
         accounts!transactions_account_id_fkey(name),
         to_account:accounts!transactions_to_account_id_fkey(name)
-      ''').order('date', ascending: false).limit(limit);
+      ''')
+          .eq('user_id', userId)
+          .order('date', ascending: false)
+          .limit(limit);
 
       return (response as List).map((json) {
         final data = Map<String, dynamic>.from(json);
@@ -162,6 +195,11 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get upcoming bills from recurring transactions
   Future<List<UpcomingBill>> _getUpcomingBills({int limit = 3}) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return [];
+      }
+
       final now = DateTime.now();
       final thirtyDaysFromNow = now.add(const Duration(days: 30));
 
@@ -175,6 +213,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
             category_id,
             categories(name)
           ''')
+          .eq('user_id', userId)
           .eq('is_active', true)
           .gte('next_occurrence', now.toIso8601String().split('T')[0])
           .lte('next_occurrence', thirtyDaysFromNow.toIso8601String().split('T')[0])
