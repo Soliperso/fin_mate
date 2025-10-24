@@ -34,6 +34,7 @@ import '../../features/settings/presentation/pages/data_privacy_page.dart';
 import '../../features/admin/presentation/pages/user_management_page.dart';
 import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
 import '../../features/admin/presentation/pages/system_settings_page.dart';
+import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -186,6 +187,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/budgets',
             name: 'budgets',
             builder: (context, state) => const BudgetsPage(),
+          ),
+          GoRoute(
+            path: '/recurring-transactions',
+            name: 'recurring-transactions',
+            builder: (context, state) => const RecurringTransactionsPage(),
           ),
           GoRoute(
             path: '/transactions',

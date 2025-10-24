@@ -8,6 +8,7 @@ class AppColors {
   static const primaryTeal = Color(0xFF20808D); // Perplexity's turquoise
   static const tealLight = Color(0xFF2D9DA9); // Lighter teal accent
   static const tealDark = Color(0xFF176673); // Darker teal for depth
+  static const splashTeal = Color(0xFF143F48); // Icon background teal
 
   // Secondary Colors
   static const slateBlue = Color(0xFF2C5F8D); // Professional slate blue

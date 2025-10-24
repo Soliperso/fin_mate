@@ -73,14 +73,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.deepNavy,
-              AppColors.primaryTeal,
-            ],
-          ),
+          color: AppColors.splashTeal,
         ),
         child: Center(
           child: AnimatedBuilder(
@@ -94,25 +87,10 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // App Icon/Logo
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(AppSizes.radiusXl),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          size: 60,
-                          color: AppColors.primaryTeal,
-                        ),
+                      Image.asset(
+                        'assets/images/app_icon.png',
+                        width: 140,
+                        height: 140,
                       ),
                       const SizedBox(height: AppSizes.xl),
                       // App Name

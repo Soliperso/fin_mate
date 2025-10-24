@@ -31,7 +31,7 @@ class UpcomingBillsCard extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    context.go('/bills');
+                    context.go('/recurring-transactions');
                   },
                   child: const Text('View All'),
                 ),
