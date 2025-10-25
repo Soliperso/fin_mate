@@ -88,14 +88,14 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                     children: [
                       // App Icon/Logo
                       Image.asset(
-                        'assets/images/app_icon.png',
-                        width: 140,
-                        height: 140,
+                        'assets/images/robot.png',
+                        width: 180,
+                        height: 180,
                       ),
                       const SizedBox(height: AppSizes.xl),
                       // App Name
                       Text(
-                        'FinMate',
+                        'Finmate',
                         style: Theme.of(context).textTheme.displayMedium?.copyWith(
                               color: AppColors.white,
                               fontWeight: FontWeight.bold,
