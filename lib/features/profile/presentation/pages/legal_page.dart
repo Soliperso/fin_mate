@@ -1,25 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../widgets/legal_document_view.dart';
 
-// Legal document content provider
-final privacyPolicyProvider = FutureProvider<String>((ref) async {
-  // In production, load from assets or remote server
-  return _getPrivacyPolicyContent();
-});
-
-final termsOfServiceProvider = FutureProvider<String>((ref) async {
-  // In production, load from assets or remote server
-  return _getTermsOfServiceContent();
-});
-
-class LegalPage extends ConsumerWidget {
+class LegalPage extends StatelessWidget {
   const LegalPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Legal & Compliance'),
@@ -55,7 +44,7 @@ class LegalPage extends ConsumerWidget {
                 description: 'How we collect, use, and protect your data',
                 icon: Icons.privacy_tip_outlined,
                 onTap: () {
-                  _showPrivacyPolicy(context, ref);
+                  _showPrivacyPolicy(context);
                 },
               ),
               const SizedBox(height: AppSizes.md),
@@ -67,7 +56,7 @@ class LegalPage extends ConsumerWidget {
                 description: 'Our terms and conditions for using FinMate',
                 icon: Icons.description_outlined,
                 onTap: () {
-                  _showTermsOfService(context, ref);
+                  _showTermsOfService(context);
                 },
               ),
               const SizedBox(height: AppSizes.md),
@@ -237,67 +226,64 @@ class LegalPage extends ConsumerWidget {
     );
   }
 
-  void _showPrivacyPolicy(BuildContext context, WidgetRef ref) {
-    final privacyPolicy = ref.watch(privacyPolicyProvider);
-
-    if (privacyPolicy.isLoading) {
-      _showLoadingDialog(context);
-    } else if (privacyPolicy.hasError) {
-      _showErrorDialog(context, 'Failed to load Privacy Policy');
-    } else if (privacyPolicy.hasValue) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => LegalDocumentView(
-            title: 'Privacy Policy',
-            content: privacyPolicy.value!,
+  Future<void> _showPrivacyPolicy(BuildContext context) async {
+    try {
+      final content = await rootBundle.loadString('assets/legal/privacy_policy.md');
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LegalDocumentView(
+              title: 'Privacy Policy',
+              content: content,
+            ),
           ),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showErrorDialog(context, 'Failed to load Privacy Policy: ${e.toString()}');
+      }
     }
   }
 
-  void _showTermsOfService(BuildContext context, WidgetRef ref) {
-    final termsOfService = ref.watch(termsOfServiceProvider);
-
-    if (termsOfService.isLoading) {
-      _showLoadingDialog(context);
-    } else if (termsOfService.hasError) {
-      _showErrorDialog(context, 'Failed to load Terms of Service');
-    } else if (termsOfService.hasValue) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => LegalDocumentView(
-            title: 'Terms of Service',
-            content: termsOfService.value!,
+  Future<void> _showTermsOfService(BuildContext context) async {
+    try {
+      final content = await rootBundle.loadString('assets/legal/terms_of_service.md');
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LegalDocumentView(
+              title: 'Terms of Service',
+              content: content,
+            ),
           ),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showErrorDialog(context, 'Failed to load Terms of Service: ${e.toString()}');
+      }
     }
   }
 
-  void _showAppPrivacyDetails(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => LegalDocumentView(
-          title: 'App Privacy Details',
-          content: _getAppPrivacyDetailsContent(),
-        ),
-      ),
-    );
-  }
-
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const AlertDialog(
-        content: SizedBox(
-          height: 100,
-          child: Center(
-            child: CircularProgressIndicator(),
+  Future<void> _showAppPrivacyDetails(BuildContext context) async {
+    try {
+      final content = await rootBundle.loadString('assets/legal/app_privacy_details.md');
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LegalDocumentView(
+              title: 'App Privacy Details',
+              content: content,
+            ),
           ),
-        ),
-      ),
-    );
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showErrorDialog(context, 'Failed to load App Privacy Details: ${e.toString()}');
+      }
+    }
   }
 
   void _showErrorDialog(BuildContext context, String message) {
@@ -317,46 +303,3 @@ class LegalPage extends ConsumerWidget {
   }
 }
 
-// Content loading functions - in production, load from assets or API
-String _getPrivacyPolicyContent() {
-  // This will be loaded from the markdown file in assets
-  return '''# Privacy Policy
-
-**Last Updated:** October 21, 2025
-
-## 1. Introduction
-
-FinMate is committed to protecting your privacy...
-
-[Privacy Policy Content - Full text would be loaded here]
-''';
-}
-
-String _getTermsOfServiceContent() {
-  // This will be loaded from the markdown file in assets
-  return '''# Terms of Service
-
-**Last Updated:** October 21, 2025
-
-## 1. Agreement to Terms
-
-By accessing and using FinMate, you agree to be bound by these Terms...
-
-[Terms of Service Content - Full text would be loaded here]
-''';
-}
-
-String _getAppPrivacyDetailsContent() {
-  // This will be loaded from the markdown file in assets
-  return '''# App Store Connect - App Privacy Details
-
-**Document Version:** 1.0
-**Last Updated:** October 21, 2025
-
-## Overview
-
-This document provides the comprehensive privacy details required for App Store Connect submission...
-
-[App Privacy Details Content - Full text would be loaded here]
-''';
-}

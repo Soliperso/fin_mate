@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finmate - Personal Finance Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .content h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .link-card:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .link-icon {
+            font-size: 2em;
+            margin-right: 20px;
+            min-width: 50px;
+        }
+
+        .link-content h3 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .link-content p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Finmate</h1>
+            <p>Smart Personal Finance Management</p>
+        </header>
+
+        <div class="content">
+            <h2>Legal & Compliance</h2>
+            <div class="links-grid">
+                <a href="/fin_mate/privacy.html" class="link-card">
+                    <div class="link-icon">📋</div>
+                    <div class="link-content">
+                        <h3>Privacy Policy</h3>
+                        <p>Learn how we protect your data and privacy</p>
+                    </div>
+                </a>
+
+                <a href="/fin_mate/terms.html" class="link-card">
+                    <div class="link-icon">📜</div>
+                    <div class="link-content">
+                        <h3>Terms of Service</h3>
+                        <p>Review our terms and conditions</p>
+                    </div>
+                </a>
+
+                <a href="/fin_mate/app-privacy-details.html" class="link-card">
+                    <div class="link-icon">🔐</div>
+                    <div class="link-content">
+                        <h3>App Privacy Details</h3>
+                        <p>App Store privacy information</p>
+                    </div>
+                </a>
+            </div>
+
+            <div style="margin-top: 40px; padding: 20px; background: #f5f5f5; border-radius: 8px; text-align: center;">
+                <p style="color: #666; margin-bottom: 15px;">Download Finmate from the App Store:</p>
+                <a href="https://apps.apple.com" style="display: inline-block; margin: 10px 5px;">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store" height="40">
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Finmate. All rights reserved.</p>
+            <p style="margin-top: 10px; color: #999;">Version 1.0.0</p>
+        </footer>
+    </div>
+</body>
+</html>

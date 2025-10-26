@@ -208,7 +208,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       const Text('I agree to the '),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Show terms
+                          context.push('/profile/legal');
                         },
                         child: const Text(
                           'Terms of Service',
@@ -221,7 +221,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       const Text(' and '),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Show privacy policy
+                          context.push('/profile/legal');
                         },
                         child: const Text(
                           'Privacy Policy',

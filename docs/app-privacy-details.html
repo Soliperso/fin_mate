@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Privacy Details - Finmate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .content h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .content h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .content li {
+            margin-bottom: 8px;
+        }
+
+        .content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+
+        table td, table th {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table th {
+            background: #f0f0f0;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .metadata {
+            background: #f5f5f5;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin: 0 5px;
+        }
+
+        .badge.yes {
+            background: #2ecc71;
+        }
+
+        .badge.no {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 App Privacy Details</h1>
+            <p>Data collection and privacy practices</p>
+        </header>
+
+        <div class="content">
+            <p><strong>Document Version:</strong> 1.0</p>
+            <p><strong>Last Updated:</strong> October 21, 2025</p>
+            <p><strong>App Name:</strong> Finmate</p>
+            <p><strong>Bundle ID:</strong> com.finmate.finmate</p>
+            <p><strong>Platform:</strong> iOS</p>
+
+            <h2>Overview</h2>
+            <p>This document provides comprehensive privacy details required for App Store submission and compliance with Apple's App Privacy Policy requirements.</p>
+
+            <h2>Privacy Policy Link</h2>
+            <p><strong>Privacy Policy URL:</strong> <a href="/fin_mate/privacy.html">https://ahmedchebli.github.io/fin_mate/privacy.html</a></p>
+            <p><strong>Availability:</strong> Published on official website, linked in-app, and available during onboarding.</p>
+
+            <h2>Data Collection Summary</h2>
+            <table>
+                <tr>
+                    <th>Data Category</th>
+                    <th>Collected?</th>
+                    <th>Used for Tracking?</th>
+                    <th>Linked to User?</th>
+                </tr>
+                <tr>
+                    <td>Contact Info (Email, Name)</td>
+                    <td><span class="badge yes">YES</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge yes">YES</span></td>
+                </tr>
+                <tr>
+                    <td>Financial Info (Transactions)</td>
+                    <td><span class="badge yes">YES</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge yes">YES</span></td>
+                </tr>
+                <tr>
+                    <td>App Activity</td>
+                    <td><span class="badge yes">YES</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge yes">YES</span></td>
+                </tr>
+                <tr>
+                    <td>Crash Data</td>
+                    <td><span class="badge yes">YES</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge yes">YES</span></td>
+                </tr>
+                <tr>
+                    <td>Browsing History</td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                </tr>
+                <tr>
+                    <td>Search History</td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                </tr>
+                <tr>
+                    <td>Location</td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                    <td><span class="badge no">NO</span></td>
+                </tr>
+            </table>
+
+            <h2>Data Practices</h2>
+            <h3>Data Collection</h3>
+            <ul>
+                <li><strong>Contact Information:</strong> Email address, full name, phone number (optional)</li>
+                <li><strong>Financial Data:</strong> Transactions, accounts, budgets, savings goals, bill splitting data</li>
+                <li><strong>Device Information:</strong> Device model, OS version, IP address</li>
+                <li><strong>Usage Data:</strong> Features accessed, actions performed, crash reports</li>
+                <li><strong>Authentication:</strong> Passwords (encrypted), MFA secrets (encrypted), biometric data</li>
+            </ul>
+
+            <h3>Data Usage</h3>
+            <ul>
+                <li>Providing and improving the Application</li>
+                <li>Authentication and security</li>
+                <li>Fraud detection and prevention</li>
+                <li>Customer support and technical assistance</li>
+                <li>Analytics and performance monitoring</li>
+                <li>Legal and regulatory compliance</li>
+            </ul>
+
+            <h3>Tracking & Identifiers</h3>
+            <p><span class="badge no">NO TRACKING</span></p>
+            <p>Finmate <strong>does NOT engage in tracking</strong> as defined by Apple's privacy standards. We do not use advertising identifiers, IDFA, or other identifiers for cross-app or cross-website tracking.</p>
+
+            <h2>Third-Party Services</h2>
+            <h3>Service Providers</h3>
+            <ul>
+                <li><strong>Supabase:</strong> Cloud database and authentication services</li>
+                <li><strong>Sentry:</strong> Error tracking and crash reporting</li>
+                <li><strong>Apple Services:</strong> Authentication, push notifications</li>
+            </ul>
+
+            <h3>Data Sharing</h3>
+            <p>We only share personal data with third-party service providers necessary to operate the Application. All third parties are contractually obligated to maintain data confidentiality and security.</p>
+
+            <h2>Data Security</h2>
+            <ul>
+                <li><strong>Encryption in Transit:</strong> TLS 1.3 / HTTPS for all connections</li>
+                <li><strong>Encryption at Rest:</strong> AES-256 encryption for sensitive data</li>
+                <li><strong>Authentication:</strong> bcrypt password hashing, JWT tokens, biometric support</li>
+                <li><strong>Database:</strong> Row-level security policies, encrypted storage</li>
+                <li><strong>Access Control:</strong> Role-based access control, limited employee access</li>
+            </ul>
+
+            <h2>User Rights & Controls</h2>
+            <ul>
+                <li><strong>Data Access:</strong> Users can export their data in JSON/CSV format</li>
+                <li><strong>Data Deletion:</strong> Users can permanently delete their account and all associated data</li>
+                <li><strong>Preferences:</strong> Users control notification, theme, and privacy settings</li>
+                <li><strong>Consent:</strong> Clear consent required during signup and for new features</li>
+            </ul>
+
+            <h2>Data Retention</h2>
+            <ul>
+                <li><strong>Active Users:</strong> Data retained while account is active</li>
+                <li><strong>Account Deletion:</strong> Personal data deleted within 30 days of deletion request</li>
+                <li><strong>Transaction History:</strong> May be retained for 7 years for legal/tax purposes</li>
+                <li><strong>Crash Reports:</strong> Retained for 90 days for analysis</li>
+            </ul>
+
+            <h2>Regulatory Compliance</h2>
+            <h3>GDPR (EU/UK Users)</h3>
+            <p>Legal basis for processing: Contract, Consent, Legal Obligation, Legitimate Interests. Users have rights to access, rectification, erasure, and data portability.</p>
+
+            <h3>CCPA (California Users)</h3>
+            <p>Users have rights to know what data is collected, delete their information, and opt-out of any potential sales/sharing.</p>
+
+            <h3>COPPA (Children's Privacy)</h3>
+            <p>Finmate is not intended for individuals under 18 years of age. We do not knowingly collect information from children.</p>
+
+            <h2>Contact Information</h2>
+            <p><strong>Privacy Inquiries:</strong> <a href="mailto:privacy@finmate.app">privacy@finmate.app</a></p>
+            <p><strong>Support Requests:</strong> <a href="mailto:support@finmate.app">support@finmate.app</a></p>
+
+            <p style="margin-top: 30px; font-size: 0.9em; color: #666;">For the complete privacy policy, visit the main <a href="/fin_mate/privacy.html">Privacy Policy</a> page or view it within the Finmate mobile application.</p>
+        </div>
+
+        <div class="metadata">
+            <p><strong>Document Version:</strong> 1.0</p>
+            <p><strong>Last Updated:</strong> October 21, 2025</p>
+            <p><strong>Application:</strong> Finmate - Personal Finance Management</p>
+            <p><strong>Bundle ID:</strong> com.finmate.finmate</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Finmate. All rights reserved. <a href="/">Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>
