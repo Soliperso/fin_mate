@@ -73,7 +73,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: AppColors.splashTeal,
+          color: AppColors.tealLight,
         ),
         child: Center(
           child: AnimatedBuilder(
@@ -88,7 +88,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                     children: [
                       // App Icon/Logo
                       Image.asset(
-                        'assets/images/robot.png',
+                        'assets/images/updated_icon.png',
                         width: 180,
                         height: 180,
                       ),

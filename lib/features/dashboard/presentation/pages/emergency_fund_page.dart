@@ -49,44 +49,64 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
         throw Exception('User not authenticated');
       }
 
-      // Get the first account for the user (default account for contribution)
-      final accountResponse = await supabase
-          .from('accounts')
+      // 1. Get or create Emergency Fund savings goal
+      final goalsResponse = await supabase
+          .from('savings_goals')
           .select('id')
           .eq('user_id', userId)
+          .eq('category', 'Emergency Fund')
           .limit(1);
 
-      if (accountResponse.isEmpty) {
-        throw Exception('No accounts found. Please create an account first.');
+      String goalId;
+      if (goalsResponse.isNotEmpty) {
+        goalId = goalsResponse[0]['id'];
+      } else {
+        // Create default Emergency Fund goal if it doesn't exist
+        final createGoalResponse = await supabase
+            .from('savings_goals')
+            .insert({
+              'user_id': userId,
+              'name': 'Emergency Fund',
+              'description': 'Emergency fund for unexpected expenses',
+              'target_amount': 6000, // Default 6 months
+              'category': 'Emergency Fund',
+              'current_amount': 0,
+            })
+            .select('id')
+            .single();
+        goalId = createGoalResponse['id'];
       }
 
-      final accountId = accountResponse[0]['id'];
-
-      // Get the Savings category (or create a default one)
-      final categoryResponse = await supabase
-          .from('categories')
+      // 2. Add contribution to the savings goal
+      final transactionResponse = await supabase
+          .from('transactions')
+          .insert({
+            'user_id': userId,
+            'type': 'income',
+            'amount': amount,
+            'description': _descriptionController.text.isEmpty
+                ? 'Emergency Fund Contribution'
+                : _descriptionController.text,
+            'account_id': (await supabase
+                    .from('accounts')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .limit(1))[0]['id'],
+            'date': DateTime.now().toIso8601String(),
+            'is_recurring': false,
+          })
           .select('id')
-          .eq('user_id', userId)
-          .ilike('name', '%savings%')
-          .limit(1);
+          .single();
 
-      String? categoryId;
-      if (categoryResponse.isNotEmpty) {
-        categoryId = categoryResponse[0]['id'];
-      }
-
-      // Create a transaction to add funds to emergency fund account
-      await supabase.from('transactions').insert({
-        'user_id': userId,
-        'type': 'income',
+      // 3. Create goal contribution (this triggers the database update)
+      await supabase.from('goal_contributions').insert({
+        'goal_id': goalId,
         'amount': amount,
-        'description': _descriptionController.text.isEmpty
-            ? 'Emergency Fund Contribution'
+        'notes': _descriptionController.text.isEmpty
+            ? 'Added via emergency fund page'
             : _descriptionController.text,
-        'category_id': categoryId,
-        'account_id': accountId,
-        'date': DateTime.now().toIso8601String(),
-        'is_recurring': false,
+        'transaction_id': transactionResponse['id'],
+        'contributed_at': DateTime.now().toIso8601String().split('T')[0],
       });
 
       // Refresh the emergency fund status

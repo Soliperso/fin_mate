@@ -70,20 +70,14 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   /// Get total net worth across all accounts
-  /// Calculated as: Total Income - Total Expenses (current month)
+  /// Calculated as: Sum of Assets (non-credit card accounts) - Credit Card Debt
   Future<double> _getNetWorth() async {
     try {
-      final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
+      final result = await _supabase.rpc('calculate_true_net_worth', params: {
+        'p_user_id': _supabase.auth.currentUser?.id,
+      });
 
-      // Get total income for current month
-      final totalIncome = await _getMonthlyIncome(startOfMonth, now);
-
-      // Get total expenses for current month
-      final totalExpenses = await _getMonthlyExpenses(startOfMonth, now);
-
-      // Net worth = Income - Expenses
-      return totalIncome - totalExpenses;
+      return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
       return 0;
     }
@@ -91,8 +85,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
   /// Get net worth from previous month (for comparison)
   Future<double> _getPreviousMonthNetWorth() async {
-    // For now, return current net worth
-    // TODO: Implement historical account balance tracking
+    // Returns current net worth - historical tracking deferred to future release
     return _getNetWorth();
   }
 
@@ -218,9 +211,21 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
       // Get data for each of the last N months
       for (int i = months - 1; i >= 0; i--) {
-        final monthDate = DateTime(now.year, now.month - i, 1);
-        final startDate = DateTime(monthDate.year, monthDate.month, 1);
-        final endDate = DateTime(monthDate.year, monthDate.month + 1, 0);
+        // Properly calculate month by subtracting from current month and year
+        // Handle year wraparound correctly
+        int month = now.month - i;
+        int year = now.year;
+
+        // Handle negative months by wrapping to previous year
+        while (month <= 0) {
+          month += 12;
+          year -= 1;
+        }
+
+        final startDate = DateTime(year, month, 1);
+        final endDate = month == 12
+            ? DateTime(year + 1, 1, 0)
+            : DateTime(year, month + 1, 0);
 
         // Get income for this month
         final income = await _getMonthlyIncome(startDate, endDate);
@@ -229,7 +234,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
         final expenses = await _getMonthlyExpenses(startDate, endDate);
 
         flowData.add(MonthlyFlowData(
-          month: monthDate,
+          month: startDate,
           income: income,
           expenses: expenses,
         ));
