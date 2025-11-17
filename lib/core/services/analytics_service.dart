@@ -72,12 +72,18 @@ class AnalyticsService {
       });
     } catch (e, stackTrace) {
       // Silently fail - don't break user experience for analytics
-      await GlobalErrorHandler.handleError(
-        e,
-        stackTrace,
-        context: 'Analytics log event: $eventName',
-        extra: {'event_name': eventName, 'properties': properties},
-      );
+      // Only report if it's not a table-not-found error (which happens during development)
+      final errorMessage = e.toString();
+      if (!errorMessage.contains('analytics_events') &&
+          !errorMessage.contains('Could not find the table')) {
+        await GlobalErrorHandler.handleError(
+          e,
+          stackTrace,
+          context: 'Analytics log event: $eventName',
+          extra: {'event_name': eventName, 'properties': properties},
+        );
+      }
+      // Otherwise silently ignore - table will be created during migration
     }
   }
 

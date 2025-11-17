@@ -92,14 +92,23 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total income for a date range
   Future<double> _getMonthlyIncome(DateTime startDate, DateTime endDate) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        print('DEBUG: User not authenticated when fetching monthly income');
+        return 0.0;
+      }
+
       final result = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'income',
       });
 
+      print('DEBUG: Monthly income result = $result');
       return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
+      print('DEBUG: Error fetching monthly income: $e');
       return 0.0;
     }
   }
@@ -107,14 +116,23 @@ class DashboardRepositoryImpl implements DashboardRepository {
   /// Get total expenses for a date range
   Future<double> _getMonthlyExpenses(DateTime startDate, DateTime endDate) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        print('DEBUG: User not authenticated when fetching monthly expenses');
+        return 0.0;
+      }
+
       final result = await _supabase.rpc('get_total_by_type', params: {
+        'p_user_id': userId,
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
         'transaction_type': 'expense',
       });
 
+      print('DEBUG: Monthly expenses result = $result');
       return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
+      print('DEBUG: Error fetching monthly expenses: $e');
       return 0.0;
     }
   }

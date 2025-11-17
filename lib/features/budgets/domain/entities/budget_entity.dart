@@ -76,31 +76,55 @@ class BudgetEntity extends Equatable {
   }
 
   /// Get the current period end date based on period and start date
+  /// For recurring budgets (weekly, monthly, yearly), ignores stored endDate
+  /// and always calculates the CURRENT period based on today's date
   DateTime get currentPeriodEnd {
-    if (endDate != null && endDate!.isBefore(DateTime.now())) {
-      return endDate!;
-    }
-
     final now = DateTime.now();
+
+    // For recurring budgets, always calculate based on current date, not stored endDate
     switch (period) {
       case BudgetPeriod.weekly:
-        return DateTime(
-          startDate.year,
-          startDate.month,
-          startDate.day + 7,
-        );
+        // End of current week (7 days from start of week)
+        final dayOfWeek = now.weekday;
+        final daysUntilEndOfWeek = 7 - dayOfWeek;
+        return now.add(Duration(days: daysUntilEndOfWeek));
+
       case BudgetPeriod.monthly:
+        // Last day of current month
         return DateTime(
           now.year,
           now.month + 1,
           0,
         );
+
       case BudgetPeriod.yearly:
+        // Last day of current year
         return DateTime(
           now.year,
           12,
           31,
         );
+    }
+  }
+
+  /// Get the current period start date based on period and start date
+  /// For recurring budgets, this aligns to the current period
+  DateTime get currentPeriodStart {
+    final now = DateTime.now();
+
+    switch (period) {
+      case BudgetPeriod.weekly:
+        // Start of current week (previous Sunday or same day)
+        final dayOfWeek = now.weekday;
+        return now.subtract(Duration(days: dayOfWeek - 1));
+
+      case BudgetPeriod.monthly:
+        // First day of current month
+        return DateTime(now.year, now.month, 1);
+
+      case BudgetPeriod.yearly:
+        // First day of current year
+        return DateTime(now.year, 1, 1);
     }
   }
 

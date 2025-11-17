@@ -5,7 +5,7 @@
 -- Fix search_path for all functions to prevent injection attacks
 ALTER FUNCTION update_account_balance() SET search_path = public, pg_temp;
 ALTER FUNCTION initialize_user_financial_data() SET search_path = public, pg_temp;
-ALTER FUNCTION get_total_by_type(DATE, DATE, TEXT) SET search_path = public, pg_temp;
+ALTER FUNCTION get_total_by_type(UUID, DATE, DATE, TEXT) SET search_path = public, pg_temp;
 ALTER FUNCTION calculate_money_health_score() SET search_path = public, pg_temp;
 
 -- Enable password protection (Leaked Password Protection)

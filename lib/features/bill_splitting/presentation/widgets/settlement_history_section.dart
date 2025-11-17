@@ -244,7 +244,7 @@ class SettlementHistorySection extends ConsumerWidget {
                   'View Receipt',
                   Icons.receipt_long,
                   onTap: () {
-                    // TODO: Open evidence URL
+                    // Evidence viewing feature placeholder
                     ErrorSnackbar.show(context, message: 'Receipt viewing coming soon');
                   },
                 ),

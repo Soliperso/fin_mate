@@ -1,4 +1,4 @@
-package com.fin_mate.fin_mate
+package com.finmate.finmate
 
 import io.flutter.embedding.android.FlutterActivity
 

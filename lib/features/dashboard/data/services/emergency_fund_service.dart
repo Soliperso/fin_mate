@@ -40,6 +40,17 @@ class EmergencyFundService {
 
   Future<EmergencyFundStatus> calculateEmergencyFundStatus(String userId) async {
     try {
+      // 0. Get net worth
+      double netWorth = 0;
+      try {
+        final result = await _supabase.rpc('calculate_true_net_worth', params: {
+          'p_user_id': userId,
+        });
+        netWorth = (result as num?)?.toDouble() ?? 0.0;
+      } catch (e) {
+        netWorth = 0;
+      }
+
       // 1. Calculate average monthly expenses (last 3 months)
       final threeMonthsAgo = DateTime.now().subtract(const Duration(days: 90));
 
@@ -78,23 +89,8 @@ class EmergencyFundService {
         }
       }
 
-      // Get liquid cash from checking and savings accounts
-      final accountsResponse = await _supabase
-          .from('accounts')
-          .select('balance, type')
-          .eq('user_id', userId)
-          .inFilter('type', ['checking', 'savings', 'cash']);
-
-      double liquidCash = 0;
-      if (accountsResponse.isNotEmpty) {
-        for (var account in accountsResponse) {
-          liquidCash += (account['balance'] as num).toDouble();
-        }
-      }
-
-      // Current emergency fund = savings goals + 30% of liquid cash
-      // (assuming not all liquid cash should be counted as emergency fund)
-      final currentAmount = emergencyFundFromGoals + (liquidCash * 0.3);
+      // Current emergency fund = only the explicit emergency fund savings
+      final currentAmount = emergencyFundFromGoals;
 
       // 3. Get user's target or calculate default
       final userTarget = await getUserEmergencyFundTarget(userId);
@@ -110,6 +106,11 @@ class EmergencyFundService {
 
       final double readinessScore = targetRecommended > 0
           ? ((currentAmount / targetRecommended) * 100).clamp(0.0, 100.0)
+          : 0.0;
+
+      // 4b. Calculate percentage of net worth
+      final double percentageOfNetWorth = netWorth > 0
+          ? ((currentAmount / netWorth) * 100).clamp(0.0, 100.0)
           : 0.0;
 
       // 5. Determine level
@@ -134,6 +135,8 @@ class EmergencyFundService {
         monthsCovered: monthsCovered,
         level: level,
         recommendations: recommendations,
+        netWorth: netWorth,
+        percentageOfNetWorth: percentageOfNetWorth,
       );
     } catch (e) {
       // Return default status on error
@@ -146,6 +149,8 @@ class EmergencyFundService {
         monthsCovered: 0,
         level: EmergencyFundLevel.critical,
         recommendations: ['Unable to calculate emergency fund status'],
+        netWorth: 0,
+        percentageOfNetWorth: 0,
       );
     }
   }

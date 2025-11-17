@@ -9,6 +9,7 @@ import '../../../../shared/widgets/empty_state_card.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../../../budgets/presentation/providers/budget_providers.dart';
 
 class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
@@ -113,7 +114,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 const SizedBox(width: AppSizes.sm),
                 _buildFilterChip(context, 'Expense', state.selectedFilter, notifier),
                 const SizedBox(width: AppSizes.sm),
-                _buildFilterChip(context, 'Transfer', state.selectedFilter, notifier),
+                // _buildFilterChip(context, 'Transfer', state.selectedFilter, notifier),
               ],
             ),
           ),
@@ -585,6 +586,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ref.invalidate(recentTransactionsProvider);
                 ref.invalidate(monthlyFlowDataProvider);
                 ref.invalidate(netWorthSnapshotsProvider);
+                ref.invalidate(budgetNotifierProvider); // Refresh budget spending calculations
               }
 
               if (context.mounted) {

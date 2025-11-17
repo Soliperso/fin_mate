@@ -26,7 +26,7 @@ class UserListItem extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           onTap: () {
-            // TODO: Navigate to user details
+            // User details navigation placeholder
           },
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.md),

@@ -23,7 +23,7 @@ class ProfilePage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // TODO: Navigate to settings page
+              context.push('/settings');
             },
           ),
         ],

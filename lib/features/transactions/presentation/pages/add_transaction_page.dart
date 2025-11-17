@@ -11,6 +11,7 @@ import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../../../budgets/presentation/providers/budget_providers.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -34,89 +35,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   final _descriptionController = TextEditingController();
 
   String _selectedType = 'expense';
-  String _selectedCategory = 'Food & Dining';
+  String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
-
-  final List<String> _expenseCategories = [
-    'Food & Dining',
-    'Groceries',
-    'Restaurants',
-    'Transportation',
-    'Gas',
-    'Car Maintenance',
-    'Public Transit',
-    'Ride Share',
-    'Housing',
-    'Rent',
-    'Mortgage',
-    'Home Maintenance',
-    'Utilities',
-    'Electricity',
-    'Water',
-    'Internet',
-    'Phone',
-    'Car Payment',
-    'Insurance',
-    'Car Insurance',
-    'Health Insurance',
-    'Home Insurance',
-    'Shopping',
-    'Clothing',
-    'Personal Care',
-    'Electronics',
-    'Entertainment',
-    'Streaming Services',
-    'Movies & Events',
-    'Hobbies',
-    'Healthcare',
-    'Medical Expenses',
-    'Medications',
-    'Fitness',
-    'Education',
-    'Tuition',
-    'Books & Courses',
-    'Childcare',
-    'Pets',
-    'Pet Food',
-    'Vet Expenses',
-    'Travel',
-    'Vacation',
-    'Flights',
-    'Hotels',
-    'Subscriptions',
-    'Gifts & Donations',
-    'Debt Payments',
-    'Loan Payments',
-    'Other',
-  ];
-
-  final List<String> _incomeCategories = [
-    'Salary',
-    'Hourly Wage',
-    'Bonus',
-    'Freelance',
-    'Contract Work',
-    'Side Gig',
-    'Side Hustle',
-    'Investment',
-    'Stock Dividends',
-    'Interest Income',
-    'Rental Income',
-    'Capital Gains',
-    'Business Income',
-    'Self-Employment',
-    'Passive Income',
-    'Refund',
-    'Tax Refund',
-    'Gift',
-    'Inheritance',
-    'Reimbursement',
-    'Scholarship',
-    'Government Benefits',
-    'Unemployment',
-    'Disability',
-    'Other',
-  ];
 
   @override
   void initState() {
@@ -171,9 +91,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     super.dispose();
   }
 
-  List<String> get _categories {
-    return _selectedType == 'expense' ? _expenseCategories : _incomeCategories;
-  }
+  // Categories are now loaded from database in the build method via Consumer widget
 
   bool get _isEditing => widget.transactionId != null;
 
@@ -274,26 +192,55 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               const SizedBox(height: AppSizes.md),
 
               // Category Selection
-              DropdownButtonFormField<String>(
-                initialValue: _categories.contains(_selectedCategory) ? _selectedCategory : _categories.first,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                ),
-                items: _categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
+              FutureBuilder(
+                future: ref.watch(categoriesProvider(_selectedType).future),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 60,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error loading categories: ${snapshot.error}');
+                  }
+
+                  final categories = snapshot.data ?? [];
+                  if (categories.isEmpty) {
+                    return const Text('No categories available');
+                  }
+
+                  // Set initial category if not set
+                  if (_selectedCategory == null && categories.isNotEmpty) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      setState(() {
+                        _selectedCategory = categories.first.name;
+                      });
+                    });
+                  }
+
+                  return DropdownButtonFormField<String>(
+                    value: _selectedCategory ?? categories.first.name,
+                    decoration: InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                    ),
+                    items: categories.map((category) {
+                      return DropdownMenuItem(
+                        value: category.name,
+                        child: Text('${category.icon} ${category.name}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value!;
+                      });
+                    },
                   );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value!;
-                  });
                 },
               ),
               const SizedBox(height: AppSizes.md),
@@ -386,7 +333,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       onTap: () {
         setState(() {
           _selectedType = type;
-          _selectedCategory = type == 'expense' ? _expenseCategories.first : _incomeCategories.first;
+          _selectedCategory = null; // Reset category when type changes, will be set by FutureBuilder
         });
       },
       child: Container(
@@ -470,10 +417,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ).future);
         _logger.d('Found ${categoriesAsync.length} categories');
 
-        // Find category ID by name
+        // Find category ID by name - should always find a match since categories are loaded from DB
         final category = categoriesAsync.firstWhere(
           (c) => c.name == _selectedCategory,
-          orElse: () => categoriesAsync.first,
+          orElse: () {
+            _logger.w('Category "$_selectedCategory" not found in database! Using first available category.');
+            return categoriesAsync.first;
+          },
         );
         _logger.d('Using category: ${category.name} (${category.id})');
 
@@ -516,6 +466,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ref.invalidate(recentTransactionsProvider);
         ref.invalidate(monthlyFlowDataProvider);
         ref.invalidate(netWorthSnapshotsProvider);
+        ref.invalidate(budgetNotifierProvider); // Refresh budget spending calculations
 
         if (mounted) {
           _logger.d('Closing loading dialog...');
@@ -533,20 +484,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
           if (!mounted) return;
 
-          _logger.d('Showing success dialog...');
-          // Show success animation dialog
-          await SuccessDialog.show(
+          _logger.d('Showing success snackbar...');
+          // Show success snackbar
+          SuccessSnackbar.show(
             context,
-            title: _isEditing ? 'Transaction Updated!' : 'Transaction Added!',
             message: _isEditing
-                ? 'Your transaction has been updated successfully.'
-                : '${_selectedType == 'expense' ? 'Expense' : 'Income'} has been added successfully!',
-            autoDismissDuration: const Duration(milliseconds: 1500),
+                ? 'Transaction updated successfully'
+                : '${_selectedType == 'expense' ? 'Expense' : 'Income'} added successfully',
           );
 
-          if (!mounted) return;
-
-          _logger.d('Success dialog closed, popping page...');
+          _logger.d('Popping page...');
           // Pop the transaction page
           context.pop(true); // Return true to indicate success
         }

@@ -16,10 +16,13 @@ import '../widgets/cash_flow_card.dart';
 import '../widgets/cash_flow_chart.dart';
 import '../widgets/net_worth_trend_chart.dart';
 import '../widgets/money_health_score.dart';
-import '../widgets/upcoming_bills_card.dart';
-import '../widgets/quick_action_button.dart';
-import '../widgets/emergency_fund_card.dart';
-import '../providers/emergency_fund_provider.dart';
+// [V1.1: Upcoming Bills - Commented out]
+// import '../widgets/upcoming_bills_card.dart';
+// [V1.1: Quick Actions - Commented out]
+// import '../widgets/quick_action_button.dart';
+// [V1.1: Emergency Fund - Commented out]
+// import '../widgets/emergency_fund_card.dart';
+// import '../providers/emergency_fund_provider.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -64,7 +67,7 @@ class DashboardPage extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: () {
-                  // TODO: Navigate to notifications page
+                  // Notifications feature placeholder
                 },
               ),
               if (unreadCount > 0)
@@ -127,7 +130,7 @@ class DashboardPage extends ConsumerWidget {
         data: (stats) => RefreshIndicator(
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
-            ref.invalidate(emergencyFundStatusProvider);
+            // ref.invalidate(emergencyFundStatusProvider); // [V1.1: Emergency Fund disabled]
             ref.invalidate(monthlyFlowDataProvider);
             ref.invalidate(netWorthSnapshotsProvider);
           },
@@ -149,62 +152,64 @@ class DashboardPage extends ConsumerWidget {
                 MoneyHealthScore(score: stats.moneyHealthScore),
                 const SizedBox(height: AppSizes.md),
 
+                // [V1.1: Emergency Fund - Commented out - Dashboard widget, not critical]
                 // Emergency Fund Status
-                Consumer(
-                  builder: (context, ref, _) {
-                    final statusAsync = ref.watch(emergencyFundStatusProvider);
-                    return statusAsync.when(
-                      data: (status) => EmergencyFundCard(status: status),
-                      loading: () => const SkeletonCard(height: 240),
-                      error: (error, stack) => const SizedBox.shrink(),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSizes.lg),
+                // Consumer(
+                //   builder: (context, ref, _) {
+                //     final statusAsync = ref.watch(emergencyFundStatusProvider);
+                //     return statusAsync.when(
+                //       data: (status) => EmergencyFundCard(status: status),
+                //       loading: () => const SkeletonCard(height: 240),
+                //       error: (error, stack) => const SizedBox.shrink(),
+                //     );
+                //   },
+                // ),
+                // const SizedBox(height: AppSizes.lg),
 
+                // [V1.1: Quick Actions - Commented out - Streamline MVP UI]
                 // Quick Actions
-                Text(
-                  'Quick Actions',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSizes.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: QuickActionButton(
-                        icon: Icons.add,
-                        label: 'Add Expense',
-                        color: AppColors.error,
-                        onTap: () {
-                          context.go('/transactions/add?type=expense');
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: QuickActionButton(
-                        icon: Icons.arrow_upward,
-                        label: 'Add Income',
-                        color: AppColors.success,
-                        onTap: () {
-                          context.go('/transactions/add?type=income');
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: QuickActionButton(
-                        icon: Icons.receipt,
-                        label: 'Split Bill',
-                        color: AppColors.slateBlue,
-                        onTap: () {
-                          context.go('/bills');
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
+                // Text(
+                //   'Quick Actions',
+                //   style: Theme.of(context).textTheme.titleLarge,
+                // ),
+                // const SizedBox(height: AppSizes.md),
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       child: QuickActionButton(
+                //         icon: Icons.add,
+                //         label: 'Add Expense',
+                //         color: AppColors.error,
+                //         onTap: () {
+                //           context.go('/transactions/add?type=expense');
+                //         },
+                //       ),
+                //     ),
+                //     const SizedBox(width: AppSizes.md),
+                //     Expanded(
+                //       child: QuickActionButton(
+                //         icon: Icons.arrow_upward,
+                //         label: 'Add Income',
+                //         color: AppColors.success,
+                //         onTap: () {
+                //           context.go('/transactions/add?type=income');
+                //         },
+                //       ),
+                //     ),
+                //     const SizedBox(width: AppSizes.md),
+                //     Expanded(
+                //       child: QuickActionButton(
+                //         icon: Icons.receipt,
+                //         label: 'Split Bill',
+                //         color: AppColors.slateBlue,
+                //         onTap: () {
+                //           context.go('/bills');
+                //         },
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(height: AppSizes.lg),
 
                 // Cash Flow Card
                 CashFlowCard(
@@ -253,17 +258,18 @@ class DashboardPage extends ConsumerWidget {
                   },
                 ),
 
+                // [V1.1: Upcoming Bills - Commented out - Not critical for MVP]
                 // Upcoming Bills
-                UpcomingBillsCard(
-                  bills: stats.upcomingBills
-                      .map((bill) => {
-                            'name': bill.name,
-                            'amount': bill.amount,
-                            'dueDate': bill.dueDate.toIso8601String().split('T')[0],
-                          })
-                      .toList(),
-                ),
-                const SizedBox(height: AppSizes.md),
+                // UpcomingBillsCard(
+                //   bills: stats.upcomingBills
+                //       .map((bill) => {
+                //             'name': bill.name,
+                //             'amount': bill.amount,
+                //             'dueDate': bill.dueDate.toIso8601String().split('T')[0],
+                //           })
+                //       .toList(),
+                // ),
+                // const SizedBox(height: AppSizes.md),
 
                 // Recent Transactions
                 Card(
@@ -371,7 +377,7 @@ class DashboardPage extends ConsumerWidget {
         error: (error, stack) => RefreshIndicator(
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
-            ref.invalidate(emergencyFundStatusProvider);
+            // ref.invalidate(emergencyFundStatusProvider); // [V1.1: Emergency Fund disabled]
             ref.invalidate(monthlyFlowDataProvider);
             ref.invalidate(netWorthSnapshotsProvider);
           },

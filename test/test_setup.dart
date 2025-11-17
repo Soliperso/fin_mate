@@ -33,9 +33,9 @@ extension WidgetTesterX on WidgetTester {
     await pumpAndSettle();
   }
 
-  /// Enters text into a field
-  Future<void> enterText(String value) async {
-    await typeText(find.byType(TextField), value);
+  /// Enters text into a TextFormField
+  Future<void> enterTextField(String value) async {
+    await enterText(find.byType(TextFormField), value);
     await pumpAndSettle();
   }
 

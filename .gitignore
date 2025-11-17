@@ -67,3 +67,6 @@ GoogleService-Info.plist
 *.g.dart
 *.freezed.dart
 *.config.dart
+
+# Supabase temp files
+supabase/.temp/

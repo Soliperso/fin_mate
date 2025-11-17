@@ -168,11 +168,28 @@ final profileNotifierProvider =
 final currentUserProfileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   final authState = ref.watch(authNotifierProvider);
+
+  // Return a notifier with empty state when user is not authenticated
   if (authState.user == null) {
-    throw Exception('User not authenticated');
+    return _UnauthenticatedProfileNotifier(
+      ref.watch(profileRepositoryProvider),
+    );
   }
+
   return ProfileNotifier(
     ref.watch(profileRepositoryProvider),
     authState.user!.id,
   );
 });
+
+/// Notifier that handles the unauthenticated state
+/// Extends ProfileNotifier but prevents loading profile data
+class _UnauthenticatedProfileNotifier extends ProfileNotifier {
+  _UnauthenticatedProfileNotifier(ProfileRepository repository)
+      : super(repository, '');
+
+  @override
+  Future<void> loadProfile() async {
+    // No-op: don't load profile when unauthenticated
+  }
+}

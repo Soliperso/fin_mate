@@ -168,13 +168,16 @@ class BudgetRemoteDataSource {
         return 0.0;
       }
 
+      final startDateStr = startDate.toIso8601String().split('T')[0];
+      final endDateStr = endDate.toIso8601String().split('T')[0];
+
       var query = _supabase
           .from('transactions')
           .select('amount')
           .eq('user_id', currentUserId)
           .eq('type', 'expense')
-          .gte('date', startDate.toIso8601String().split('T')[0])
-          .lte('date', endDate.toIso8601String().split('T')[0]);
+          .gte('date', startDateStr)
+          .lte('date', endDateStr);
 
       if (categoryId != null) {
         query = query.eq('category_id', categoryId);

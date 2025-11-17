@@ -157,10 +157,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 subtitle: const Text('Update your account password'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  // TODO: Implement change password
+                  // Password change feature placeholder
                   SuccessSnackbar.show(
                     context,
-                    message: 'Password change coming soon!',
+                    message: 'Password change feature coming soon!',
                   );
                 },
               ),

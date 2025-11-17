@@ -175,9 +175,7 @@ class TransactionRemoteDataSource {
       // Get money health score
       int healthScore = 50;
       try {
-        healthScore = await _supabase.rpc('calculate_money_health_score', params: {
-          'p_user_id': userId,
-        });
+        healthScore = await _supabase.rpc('calculate_money_health_score');
       } catch (e) {
         // Use default score if function not available
         healthScore = 50;

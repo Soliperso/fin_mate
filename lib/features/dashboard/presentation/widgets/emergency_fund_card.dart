@@ -534,6 +534,15 @@ class EmergencyFundCard extends ConsumerWidget {
               currencyFormat.format(status.minimumRecommended),
               AppColors.textSecondary,
             ),
+            const SizedBox(height: AppSizes.md),
+
+            _buildMetricRowWithIcon(
+              context,
+              Icons.pie_chart_outline,
+              'Percentage of Net Worth',
+              '${status.percentageOfNetWorth.toStringAsFixed(1)}%',
+              AppColors.textSecondary,
+            ),
             const SizedBox(height: AppSizes.xl),
 
             // Recommendations

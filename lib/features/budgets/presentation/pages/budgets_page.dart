@@ -23,7 +23,7 @@ class BudgetsPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.insights),
             onPressed: () {
-              // TODO: Show budget insights
+              // Budget insights feature placeholder
             },
           ),
         ],

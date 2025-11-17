@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fin_mate/shared/widgets/password_strength_indicator.dart';
+import 'package:finmate/shared/widgets/password_strength_indicator.dart';
 
 void main() {
   group('PasswordStrengthIndicator Widget', () {

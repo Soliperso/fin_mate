@@ -88,7 +88,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with SingleTickerProvid
                     children: [
                       // App Icon/Logo
                       Image.asset(
-                        'assets/images/updated_icon.png',
+                        'assets/images/dollar_symbol.png',
                         width: 180,
                         height: 180,
                       ),

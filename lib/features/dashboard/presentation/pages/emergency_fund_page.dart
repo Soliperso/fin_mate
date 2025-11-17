@@ -5,8 +5,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../shared/widgets/success_animation.dart';
-import '../../domain/entities/emergency_fund_status.dart';
-import '../../data/services/emergency_fund_service.dart';
 import '../providers/emergency_fund_provider.dart';
 
 class EmergencyFundPage extends ConsumerStatefulWidget {

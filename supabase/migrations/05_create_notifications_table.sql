@@ -313,10 +313,10 @@ $$;
 
 -- Grant execute permissions
 GRANT EXECUTE ON FUNCTION create_notification(UUID, notification_type, VARCHAR, TEXT, notification_priority, VARCHAR, VARCHAR, JSONB) TO authenticated;
-GRANT EXECUTE ON FUNCTION mark_notification_read(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION mark_all_notifications_read() TO authenticated;
-GRANT EXECUTE ON FUNCTION archive_notification(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_unread_notification_count() TO authenticated;
+GRANT EXECUTE ON FUNCTION mark_notification_read(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION mark_all_notifications_read(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION archive_notification(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_unread_notification_count(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_budget_alerts() TO authenticated;
 GRANT EXECUTE ON FUNCTION create_bill_reminders() TO authenticated;
 

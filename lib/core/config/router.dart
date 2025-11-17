@@ -13,16 +13,19 @@ import '../../features/auth/presentation/pages/auth_callback_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/emergency_fund_page.dart';
-import '../../features/bill_splitting/presentation/pages/bills_page.dart';
-import '../../features/bill_splitting/presentation/pages/group_detail_page.dart';
+// [V1.1: Bill Splitting - Commented out]
+// import '../../features/bill_splitting/presentation/pages/bills_page.dart';
+// import '../../features/bill_splitting/presentation/pages/group_detail_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
-import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+// [V1.1: AI Insights - Commented out]
+// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 // COMMENTED OUT - Savings Goals not in MVP Phase 1
 // import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 // import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
-import '../../features/documents/presentation/pages/documents_page.dart';
+// [V1.1: Documents - Commented out]
+// import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
@@ -34,7 +37,8 @@ import '../../features/settings/presentation/pages/data_privacy_page.dart';
 import '../../features/admin/presentation/pages/user_management_page.dart';
 import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
 import '../../features/admin/presentation/pages/system_settings_page.dart';
-import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
+// [V1.1: Recurring Transactions - Commented out]
+// import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -168,31 +172,33 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(
-            path: '/bills',
-            name: 'bills',
-            builder: (context, state) => const BillsPage(),
-            routes: [
-              GoRoute(
-                path: 'group/:groupId',
-                name: 'group-detail',
-                builder: (context, state) {
-                  final groupId = state.pathParameters['groupId']!;
-                  return GroupDetailPage(groupId: groupId);
-                },
-              ),
-            ],
-          ),
+          // [V1.1: Bill Splitting - Commented out - Complex group feature, niche audience]
+          // GoRoute(
+          //   path: '/bills',
+          //   name: 'bills',
+          //   builder: (context, state) => const BillsPage(),
+          //   routes: [
+          //     GoRoute(
+          //       path: 'group/:groupId',
+          //       name: 'group-detail',
+          //       builder: (context, state) {
+          //         final groupId = state.pathParameters['groupId']!;
+          //         return GroupDetailPage(groupId: groupId);
+          //       },
+          //     ),
+          //   ],
+          // ),
           GoRoute(
             path: '/budgets',
             name: 'budgets',
             builder: (context, state) => const BudgetsPage(),
           ),
-          GoRoute(
-            path: '/recurring-transactions',
-            name: 'recurring-transactions',
-            builder: (context, state) => const RecurringTransactionsPage(),
-          ),
+          // [V1.1: Recurring Transactions - Commented out - Complex automation, defer for now]
+          // GoRoute(
+          //   path: '/recurring-transactions',
+          //   name: 'recurring-transactions',
+          //   builder: (context, state) => const RecurringTransactionsPage(),
+          // ),
           GoRoute(
             path: '/transactions',
             name: 'transactions',
@@ -212,11 +218,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(
-            path: '/insights',
-            name: 'insights',
-            builder: (context, state) => const AiInsightsPage(),
-          ),
+          // [V1.1: AI Insights - Commented out - Resource-intensive]
+          // GoRoute(
+          //   path: '/insights',
+          //   name: 'insights',
+          //   builder: (context, state) => const AiInsightsPage(),
+          // ),
           // COMMENTED OUT - Savings Goals not in MVP Phase 1
           // GoRoute(
           //   path: '/goals',
@@ -233,11 +240,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           //     ),
           //   ],
           // ),
-          GoRoute(
-            path: '/documents',
-            name: 'documents',
-            builder: (context, state) => const DocumentsPage(),
-          ),
+          // [V1.1: Documents - Commented out - Nice-to-have, not critical]
+          // GoRoute(
+          //   path: '/documents',
+          //   name: 'documents',
+          //   builder: (context, state) => const DocumentsPage(),
+          // ),
           GoRoute(
             path: '/profile',
             name: 'profile',
@@ -327,25 +335,27 @@ class MainShell extends StatelessWidget {
             label: 'Dashboard',
           ),
           NavigationDestination(
+            icon: Icon(Icons.swap_horiz_outlined),
+            selectedIcon: Icon(Icons.swap_horiz),
+            label: 'Transactions',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_outlined),
             selectedIcon: Icon(Icons.account_balance_wallet),
             label: 'Budgets',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Bills',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_horiz_outlined),
-            selectedIcon: Icon(Icons.swap_horiz),
-            label: 'Activities',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.lightbulb_outline),
-            selectedIcon: Icon(Icons.lightbulb),
-            label: 'Insights',
-          ),
+          // [V1.1: Bills - Commented out]
+          // NavigationDestination(
+          //   icon: Icon(Icons.receipt_long_outlined),
+          //   selectedIcon: Icon(Icons.receipt_long),
+          //   label: 'Bills',
+          // ),
+          // [V1.1: AI Insights - Commented out]
+          // NavigationDestination(
+          //   icon: Icon(Icons.lightbulb_outline),
+          //   selectedIcon: Icon(Icons.lightbulb),
+          //   label: 'Insights',
+          // ),
         ],
       ),
     );
@@ -354,10 +364,10 @@ class MainShell extends StatelessWidget {
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/dashboard')) return 0;
-    if (location.startsWith('/budgets')) return 1;
-    if (location.startsWith('/bills')) return 2;
-    if (location.startsWith('/transactions')) return 3;
-    if (location.startsWith('/insights')) return 4;
+    if (location.startsWith('/transactions')) return 1;
+    if (location.startsWith('/budgets')) return 2;
+    // if (location.startsWith('/bills')) return 3; // [V1.1: Bills not in bottom nav]
+    // if (location.startsWith('/insights')) return 4; // [V1.1: AI Insights disabled]
     return 0;
   }
 
@@ -367,17 +377,17 @@ class MainShell extends StatelessWidget {
         context.go('/dashboard');
         break;
       case 1:
-        context.go('/budgets');
-        break;
-      case 2:
-        context.go('/bills');
-        break;
-      case 3:
         context.go('/transactions');
         break;
-      case 4:
-        context.go('/insights');
+      case 2:
+        context.go('/budgets');
         break;
+      // case 3: // [V1.1: Bills not in bottom nav]
+      //   context.go('/bills');
+      //   break;
+      // case 4: // [V1.1: AI Insights disabled]
+      //   context.go('/insights');
+      //   break;
     }
   }
 }

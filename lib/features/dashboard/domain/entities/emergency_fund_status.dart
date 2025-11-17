@@ -17,6 +17,8 @@ class EmergencyFundStatus extends Equatable {
   final double monthsCovered;
   final EmergencyFundLevel level;
   final List<String> recommendations;
+  final double netWorth;
+  final double percentageOfNetWorth; // Emergency fund as % of net worth
 
   const EmergencyFundStatus({
     required this.currentAmount,
@@ -27,6 +29,8 @@ class EmergencyFundStatus extends Equatable {
     required this.monthsCovered,
     required this.level,
     required this.recommendations,
+    required this.netWorth,
+    required this.percentageOfNetWorth,
   });
 
   bool get isHealthy => level == EmergencyFundLevel.good || level == EmergencyFundLevel.excellent;
@@ -60,5 +64,7 @@ class EmergencyFundStatus extends Equatable {
         monthsCovered,
         level,
         recommendations,
+        netWorth,
+        percentageOfNetWorth,
       ];
 }

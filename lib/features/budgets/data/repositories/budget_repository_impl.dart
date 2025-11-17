@@ -76,7 +76,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     try {
       return await _remoteDataSource.calculateSpending(
         categoryId: budget.categoryId,
-        startDate: budget.startDate,
+        startDate: budget.currentPeriodStart,
         endDate: budget.currentPeriodEnd,
       );
     } catch (e) {

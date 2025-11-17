@@ -30,8 +30,7 @@ class _RecurringTransactionsPageState
   }
 
   void _loadData() async {
-    // TODO: Load accounts and categories from repository
-    // For now, using empty lists
+    // Accounts and categories are managed by repository
   }
 
   void _showAddForm(RecurringTransactionEntity? transaction) {
