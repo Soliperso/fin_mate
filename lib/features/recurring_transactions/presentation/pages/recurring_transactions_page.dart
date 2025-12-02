@@ -254,8 +254,8 @@ class _RecurringTransactionsPageState
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddForm(null),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Recurring Transaction'),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Add Recurring Transaction', style: TextStyle(color: Colors.white)),
       ),
     );
   }

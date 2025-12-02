@@ -11,11 +11,11 @@
 	<key>compileBitcode</key>
 	<false/>
 	<key>teamID</key>
-	<string>YOUR_TEAM_ID</string>
+	<string>LHVP55DRTQ</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>com.finmate.app</key>
-		<string>YOUR_PROVISIONING_PROFILE_NAME</string>
+		<key>com.finmate.finmate</key>
+		<string>match AppStore com.finmate.finmate</string>
 	</dict>
 </dict>
 </plist>

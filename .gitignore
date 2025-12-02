@@ -70,3 +70,4 @@ GoogleService-Info.plist
 
 # Supabase temp files
 supabase/.temp/
+supabase/supabase/

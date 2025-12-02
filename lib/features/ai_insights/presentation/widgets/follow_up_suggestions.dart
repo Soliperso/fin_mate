@@ -76,9 +76,8 @@ class _SuggestionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? AppColors.cardBackground,
       borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-      elevation: 1,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.radiusLg),

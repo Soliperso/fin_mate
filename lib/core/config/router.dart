@@ -19,24 +19,33 @@ import '../../features/dashboard/presentation/pages/emergency_fund_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
-// [V1.1: AI Insights - Commented out]
+import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
+// [MVP: AI Insights - Commented out for initial launch]
 // import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 // COMMENTED OUT - Savings Goals not in MVP Phase 1
 // import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 // import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
-// [V1.1: Documents - Commented out]
+// [MVP: Documents - Commented out for initial launch]
 // import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+// [MVP: Pricing/Subscription - Commented out for initial launch]
+// import '../../features/profile/presentation/pages/pricing_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
 import '../../features/profile/presentation/pages/legal_page.dart';
+// [MVP: Subscription Management - Commented out for initial launch]
+// import '../../features/subscription/presentation/pages/subscription_page.dart';
+// import '../../features/subscription/presentation/pages/payment_methods_page.dart';
+// import '../../features/subscription/presentation/pages/billing_history_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/notification_settings_page.dart';
 import '../../features/settings/presentation/pages/display_settings_page.dart';
 import '../../features/settings/presentation/pages/data_privacy_page.dart';
-import '../../features/admin/presentation/pages/user_management_page.dart';
-import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
-import '../../features/admin/presentation/pages/system_settings_page.dart';
+// [MVP: Admin Panel - Commented out for initial launch]
+// import '../../features/admin/presentation/pages/user_management_page.dart';
+// import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
+// import '../../features/admin/presentation/pages/system_settings_page.dart';
 // [V1.1: Recurring Transactions - Commented out]
 // import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 
@@ -216,14 +225,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                   );
                 },
               ),
+              GoRoute(
+                path: 'scan-receipt',
+                name: 'scan-receipt',
+                builder: (context, state) => const ScanReceiptPage(),
+              ),
             ],
           ),
-          // [V1.1: AI Insights - Commented out - Resource-intensive]
+          // [MVP: AI Insights - Commented out for initial launch]
           // GoRoute(
           //   path: '/insights',
           //   name: 'insights',
           //   builder: (context, state) => const AiInsightsPage(),
           // ),
+          GoRoute(
+            path: '/notifications',
+            name: 'notifications',
+            builder: (context, state) => const NotificationsPage(),
+          ),
           // COMMENTED OUT - Savings Goals not in MVP Phase 1
           // GoRoute(
           //   path: '/goals',
@@ -240,11 +259,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           //     ),
           //   ],
           // ),
-          // [V1.1: Documents - Commented out - Nice-to-have, not critical]
+          // [MVP: Documents - Commented out for initial launch]
           // GoRoute(
           //   path: '/documents',
           //   name: 'documents',
           //   builder: (context, state) => const DocumentsPage(),
+          // ),
+          // [MVP: Pricing - Commented out for initial launch]
+          // GoRoute(
+          //   path: '/pricing',
+          //   name: 'pricing',
+          //   builder: (context, state) => const PricingPage(),
           // ),
           GoRoute(
             path: '/profile',
@@ -261,6 +286,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'security-settings',
                 builder: (context, state) => const SecuritySettingsPage(),
               ),
+              // [MVP: Subscription Management - Commented out for initial launch]
+              // GoRoute(
+              //   path: 'subscription',
+              //   name: 'subscription',
+              //   builder: (context, state) => const SubscriptionPage(),
+              //   routes: [
+              //     GoRoute(
+              //       path: 'payment-methods',
+              //       name: 'payment-methods',
+              //       builder: (context, state) => const PaymentMethodsPage(),
+              //     ),
+              //     GoRoute(
+              //       path: 'billing-history',
+              //       name: 'billing-history',
+              //       builder: (context, state) => const BillingHistoryPage(),
+              //     ),
+              //   ],
+              // ),
               GoRoute(
                 path: 'legal',
                 name: 'legal',
@@ -293,22 +336,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Admin routes
-      GoRoute(
-        path: '/admin/users',
-        name: 'admin-users',
-        builder: (context, state) => const UserManagementPage(),
-      ),
-      GoRoute(
-        path: '/admin/analytics',
-        name: 'admin-analytics',
-        builder: (context, state) => const SystemAnalyticsPageEnhanced(),
-      ),
-      GoRoute(
-        path: '/admin/settings',
-        name: 'admin-settings',
-        builder: (context, state) => const SystemSettingsPage(),
-      ),
+      // [MVP: Admin Panel - Commented out for initial launch]
+      // GoRoute(
+      //   path: '/admin/users',
+      //   name: 'admin-users',
+      //   builder: (context, state) => const UserManagementPage(),
+      // ),
+      // GoRoute(
+      //   path: '/admin/analytics',
+      //   name: 'admin-analytics',
+      //   builder: (context, state) => const SystemAnalyticsPageEnhanced(),
+      // ),
+      // GoRoute(
+      //   path: '/admin/settings',
+      //   name: 'admin-settings',
+      //   builder: (context, state) => const SystemSettingsPage(),
+      // ),
     ],
   );
 });
@@ -344,13 +387,13 @@ class MainShell extends StatelessWidget {
             selectedIcon: Icon(Icons.account_balance_wallet),
             label: 'Budgets',
           ),
-          // [V1.1: Bills - Commented out]
+          // [MVP: Bills - Commented out for initial launch]
           // NavigationDestination(
           //   icon: Icon(Icons.receipt_long_outlined),
           //   selectedIcon: Icon(Icons.receipt_long),
           //   label: 'Bills',
           // ),
-          // [V1.1: AI Insights - Commented out]
+          // [MVP: Insights - Commented out for initial launch]
           // NavigationDestination(
           //   icon: Icon(Icons.lightbulb_outline),
           //   selectedIcon: Icon(Icons.lightbulb),
@@ -366,8 +409,9 @@ class MainShell extends StatelessWidget {
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
-    // if (location.startsWith('/bills')) return 3; // [V1.1: Bills not in bottom nav]
-    // if (location.startsWith('/insights')) return 4; // [V1.1: AI Insights disabled]
+    // [MVP: Only 3 tabs in bottom nav - Dashboard, Transactions, Budgets]
+    // if (location.startsWith('/insights')) return 3;
+    // if (location.startsWith('/bills')) return 4;
     return 0;
   }
 
@@ -382,11 +426,12 @@ class MainShell extends StatelessWidget {
       case 2:
         context.go('/budgets');
         break;
-      // case 3: // [V1.1: Bills not in bottom nav]
-      //   context.go('/bills');
-      //   break;
-      // case 4: // [V1.1: AI Insights disabled]
+      // [MVP: Only 3 tabs - Insights and Bills removed]
+      // case 3:
       //   context.go('/insights');
+      //   break;
+      // case 4:
+      //   context.go('/bills');
       //   break;
     }
   }

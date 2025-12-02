@@ -52,7 +52,9 @@ class _ChatInputFieldState extends State<ChatInputField> {
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
-            color: AppColors.borderLight,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.borderDark
+                : AppColors.borderLight,
             width: 1,
           ),
         ),
@@ -66,9 +68,13 @@ class _ChatInputFieldState extends State<ChatInputField> {
                 enabled: !widget.isLoading,
                 decoration: InputDecoration(
                   hintText: 'Ask about your finances...',
-                  hintStyle: TextStyle(color: AppColors.textTertiary),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.textTertiary.withValues(alpha: 0.5)
+                        : AppColors.textTertiary,
+                  ),
                   filled: true,
-                  fillColor: AppColors.lightGray,
+                  fillColor: Theme.of(context).cardTheme.color ?? AppColors.cardBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     borderSide: BorderSide.none,
@@ -87,7 +93,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
             Material(
               color: _hasText && !widget.isLoading
                   ? AppColors.primaryTeal
-                  : AppColors.lightGray,
+                  : (Theme.of(context).cardTheme.color ?? AppColors.cardBackground),
               borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               child: InkWell(
                 onTap: _handleSend,

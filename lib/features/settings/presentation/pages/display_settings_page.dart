@@ -187,12 +187,6 @@ class DisplaySettingsPage extends ConsumerWidget {
             color: isSelected ? AppColors.primaryTeal : Colors.transparent,
             width: 2,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -259,12 +253,6 @@ class DisplaySettingsPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

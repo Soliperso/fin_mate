@@ -66,9 +66,7 @@ class DashboardPage extends ConsumerWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // Notifications feature placeholder
-                },
+                onPressed: () => context.push('/notifications'),
               ),
               if (unreadCount > 0)
                 Positioned(

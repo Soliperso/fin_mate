@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/config/payment_config.dart';
 import '../../../../core/providers/subscription_provider.dart';
+import '../../../../core/services/payment_service.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../providers/profile_providers.dart';
 
 /// Pricing page showing freemium and premium plans
 class PricingPage extends ConsumerWidget {
@@ -39,15 +44,12 @@ class PricingPage extends ConsumerWidget {
               'Choose Your Plan',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
                   ),
             ),
             const SizedBox(height: AppSizes.sm),
             Text(
               'Unlock powerful features to manage your finances better',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: AppSizes.lg),
 
@@ -74,19 +76,19 @@ class PricingPage extends ConsumerWidget {
             _buildPlanCard(
               context,
               title: 'Premium',
-              price: '\$4.99',
+              price: '\$9.99',
               priceSubtitle: '/month',
               description: 'Everything you need to master finances',
               features: const [
                 'All Freemium features',
-                '📱 Receipt scanning & organization',
-                '🤖 AI-powered expense insights',
-                '📊 Advanced analytics & forecasting',
+                'Receipt scanning & organization',
+                'AI-powered expense insights',
+                'Advanced analytics & forecasting',
                 'Unlimited transaction categories',
                 'Priority support',
               ],
               isSelected: isPremium,
-              onTap: isPremium ? null : () => _showUpgradeDialog(context),
+              onTap: isPremium ? null : () => _handleUpgrade(context, ref),
               buttonLabel: isPremium ? 'Your Plan' : 'Upgrade Now',
               buttonEnabled: !isPremium,
               isPremium: true,
@@ -98,7 +100,6 @@ class PricingPage extends ConsumerWidget {
               'Frequently Asked Questions',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
                   ),
             ),
             const SizedBox(height: AppSizes.md),
@@ -138,16 +139,22 @@ class PricingPage extends ConsumerWidget {
     required bool buttonEnabled,
     bool isPremium = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? AppColors.cardBackgroundDark : AppColors.white;
+    final borderColor = isSelected
+        ? AppColors.primaryTeal
+        : (isDark ? AppColors.borderDark : AppColors.borderMedium);
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: isSelected ? AppColors.primaryTeal : AppColors.textTertiary.withValues(alpha: 0.2),
+          color: borderColor,
           width: isSelected ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         color: isSelected
-            ? AppColors.primaryTeal.withValues(alpha: 0.05)
-            : AppColors.white,
+            ? AppColors.primaryTeal.withValues(alpha: 0.12)
+            : cardColor,
       ),
       child: Stack(
         children: [
@@ -167,15 +174,12 @@ class PricingPage extends ConsumerWidget {
                           title,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
                               ),
                         ),
                         const SizedBox(height: AppSizes.xs),
                         Text(
                           description,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
@@ -186,7 +190,7 @@ class PricingPage extends ConsumerWidget {
                           vertical: AppSizes.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryTeal,
+                          color: AppColors.tealDark,
                           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                         ),
                         child: const Text(
@@ -211,16 +215,13 @@ class PricingPage extends ConsumerWidget {
                       price,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
                           ),
                     ),
                     if (priceSubtitle != null) ...[
                       const SizedBox(width: AppSizes.xs),
                       Text(
                         priceSubtitle,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ],
@@ -239,15 +240,13 @@ class PricingPage extends ConsumerWidget {
                               Icon(
                                 Icons.check_circle_rounded,
                                 size: 20,
-                                color: AppColors.primaryTeal,
+                                color: AppColors.iconTeal,
                               ),
                               const SizedBox(width: AppSizes.md),
                               Expanded(
                                 child: Text(
                                   feature,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.textPrimary,
-                                      ),
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
                             ],
@@ -264,13 +263,20 @@ class PricingPage extends ConsumerWidget {
                   child: ElevatedButton(
                     onPressed: buttonEnabled ? onTap : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isSelected ? AppColors.primaryTeal : AppColors.white,
-                      foregroundColor: isSelected ? Colors.white : AppColors.textPrimary,
+                      backgroundColor: isSelected
+                          ? AppColors.primaryTeal
+                          : (isDark ? AppColors.cardBackgroundDark : AppColors.white),
+                      foregroundColor: isSelected
+                          ? Colors.white
+                          : (isDark ? AppColors.white : AppColors.textPrimary),
                       side: BorderSide(
                         color: isSelected ? AppColors.primaryTeal : AppColors.textTertiary,
                       ),
-                      disabledBackgroundColor: isSelected ? AppColors.primaryTeal : AppColors.lightGray,
-                      disabledForegroundColor: AppColors.textSecondary,
+                      disabledBackgroundColor: isSelected
+                          ? AppColors.primaryTeal
+                          : const Color(0xFFE0E0E0),
+                      disabledForegroundColor:
+                          isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                     child: Text(buttonLabel),
                   ),
@@ -284,7 +290,7 @@ class PricingPage extends ConsumerWidget {
               right: 0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primaryTeal,
+                  color: AppColors.tealDark,
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(AppSizes.radiusMd),
                     bottomLeft: Radius.circular(AppSizes.radiusMd),
@@ -322,7 +328,6 @@ class PricingPage extends ConsumerWidget {
           question,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
               ),
         ),
         children: [
@@ -330,9 +335,7 @@ class PricingPage extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSizes.md),
             child: Text(
               answer,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
         ],
@@ -340,20 +343,71 @@ class PricingPage extends ConsumerWidget {
     );
   }
 
-  void _showUpgradeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Upgrade Coming Soon'),
-        content: const Text(
-          'Payment integration is coming soon. For now, please contact our support team to upgrade to Premium.',
+  Future<void> _handleUpgrade(BuildContext context, WidgetRef ref) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      );
+
+      final user = ref.read(authNotifierProvider).user;
+      if (user == null) {
+        if (context.mounted) Navigator.pop(context);
+        _showError(context, 'Please log in to upgrade');
+        return;
+      }
+
+      // Create subscription with Payment Sheet (in-app)
+      final paymentService = PaymentService();
+      final success = await paymentService.createSubscriptionWithPaymentSheet(
+        priceId: PaymentConfig.monthlyPriceId,
+      );
+
+      if (context.mounted) Navigator.pop(context);
+
+      if (success) {
+        // Subscription created successfully
+        if (context.mounted) {
+          // Refresh subscription status
+          ref.invalidate(subscriptionStatusProvider);
+          // Also refresh profile provider to get updated subscription data
+          ref.invalidate(currentUserProfileProvider);
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Welcome to FinMate Premium!'),
+              backgroundColor: AppColors.success,
+              duration: Duration(seconds: 3),
+            ),
+          );
+
+          // Navigate to dashboard instead of popping back
+          // This ensures clean state and avoids stuck loading indicators
+          context.go('/');
+        }
+      } else {
+        if (context.mounted) {
+          _showError(context, 'Failed to complete subscription. Please try again.');
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        _showError(context, 'An error occurred: ${e.toString()}');
+      }
+    }
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error,
       ),
     );
   }

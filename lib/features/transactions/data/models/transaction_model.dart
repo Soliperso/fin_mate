@@ -72,15 +72,12 @@ class TransactionModel {
       'type': type,
       'amount': amount,
       'description': description,
+      'notes': notes,
       'date': date.toIso8601String().split('T')[0],
       'is_recurring': isRecurring,
       'to_account_id': toAccountId,
       'tags': tags,
     };
-
-    // These columns don't exist in the current database schema
-    // 'notes' field doesn't exist - using 'description' instead
-    // 'recurring_interval' doesn't exist in transactions table (only in recurring_transactions)
 
     return json;
   }

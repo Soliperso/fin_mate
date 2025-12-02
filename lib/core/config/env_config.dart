@@ -1,59 +1,100 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 /// Environment configuration for FinMate
 ///
 /// This file manages environment-specific settings like API keys,
 /// Supabase URLs, and feature flags.
 ///
-/// SECURITY NOTE: Never commit actual API keys to version control.
-/// Use .env file for local development (excluded from git).
+/// SECURITY NOTE: Values are injected at build time using --dart-define flags.
+/// Never commit actual API keys to version control.
 class EnvConfig {
   // Environment type
-  static String get environment =>
-      dotenv.get('ENVIRONMENT', fallback: 'development');
+  static const String environment = String.fromEnvironment(
+    'ENVIRONMENT',
+    defaultValue: 'development',
+  );
 
   // Supabase Configuration
-  static String get supabaseUrl =>
-      dotenv.get('SUPABASE_URL', fallback: 'https://your-project.supabase.co');
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://your-project.supabase.co',
+  );
 
-  static String get supabaseAnonKey =>
-      dotenv.get('SUPABASE_ANON_KEY', fallback: 'your-anon-key-here');
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'your-anon-key-here',
+  );
 
   // API Endpoints (for future use)
-  static String get plaidClientId =>
-      dotenv.get('PLAID_CLIENT_ID', fallback: '');
+  static const String plaidClientId = String.fromEnvironment(
+    'PLAID_CLIENT_ID',
+    defaultValue: '',
+  );
 
-  static String get plaidSecret =>
-      dotenv.get('PLAID_SECRET', fallback: '');
+  static const String plaidSecret = String.fromEnvironment(
+    'PLAID_SECRET',
+    defaultValue: '',
+  );
 
-  static String get plaidEnv =>
-      dotenv.get('PLAID_ENV', fallback: 'sandbox');
+  static const String plaidEnv = String.fromEnvironment(
+    'PLAID_ENV',
+    defaultValue: 'sandbox',
+  );
 
-  static String get openAiApiKey =>
-      dotenv.get('OPENAI_API_KEY', fallback: '');
+  static const String openAiApiKey = String.fromEnvironment(
+    'OPENAI_API_KEY',
+    defaultValue: '',
+  );
 
-  static String get stripePublishableKey =>
-      dotenv.get('STRIPE_PUBLISHABLE_KEY', fallback: '');
+  static const String stripePublishableKey = String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+    defaultValue: '',
+  );
 
-  static String get paypalClientId =>
-      dotenv.get('PAYPAL_CLIENT_ID', fallback: '');
+  static const String stripeMonthlyPriceId = String.fromEnvironment(
+    'STRIPE_MONTHLY_PRICE_ID',
+    defaultValue: '',
+  );
+
+  static const String stripeAnnualPriceId = String.fromEnvironment(
+    'STRIPE_ANNUAL_PRICE_ID',
+    defaultValue: '',
+  );
+
+  static const String paypalClientId = String.fromEnvironment(
+    'PAYPAL_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
 
   // Feature Flags
-  static bool get enableBiometricAuth =>
-      dotenv.get('ENABLE_BIOMETRIC_AUTH', fallback: 'true') == 'true';
+  static const bool enableBiometricAuth = bool.fromEnvironment(
+    'ENABLE_BIOMETRIC_AUTH',
+    defaultValue: true,
+  );
 
-  static bool get enableAiInsights =>
-      dotenv.get('ENABLE_AI_INSIGHTS', fallback: 'true') == 'true';
+  static const bool enableAiInsights = bool.fromEnvironment(
+    'ENABLE_AI_INSIGHTS',
+    defaultValue: true,
+  );
 
-  static bool get enableBankSync =>
-      dotenv.get('ENABLE_BANK_SYNC', fallback: 'false') == 'true';
+  static const bool enableBankSync = bool.fromEnvironment(
+    'ENABLE_BANK_SYNC',
+    defaultValue: false,
+  );
 
   // Analytics (Optional)
-  static String get posthogApiKey =>
-      dotenv.get('POSTHOG_API_KEY', fallback: '');
+  static const String posthogApiKey = String.fromEnvironment(
+    'POSTHOG_API_KEY',
+    defaultValue: '',
+  );
 
-  static String get amplitudeApiKey =>
-      dotenv.get('AMPLITUDE_API_KEY', fallback: '');
+  static const String amplitudeApiKey = String.fromEnvironment(
+    'AMPLITUDE_API_KEY',
+    defaultValue: '',
+  );
 
   // Environment checks
   static bool get isDevelopment => environment == 'development';

@@ -32,9 +32,7 @@ class BalanceForecastCard extends StatelessWidget {
                 const SizedBox(width: AppSizes.sm),
                 Text(
                   'Balance Overview',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),

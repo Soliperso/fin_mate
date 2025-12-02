@@ -88,59 +88,49 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
   }
 
   Widget _buildOfflineBanner(BuildContext context) {
-    return Material(
-      elevation: 4,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.warning,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.wifi_off,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSizes.sm),
-                const Expanded(
-                  child: Text(
-                    'No internet connection',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: AppSizes.sm,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.warning,
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.wifi_off,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: AppSizes.sm),
+              const Expanded(
+                child: Text(
+                  'No internet connection',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
-                TextButton(
-                  onPressed: _checkConnectivity,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.sm,
-                      vertical: 4,
-                    ),
+              ),
+              TextButton(
+                onPressed: _checkConnectivity,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.sm,
+                    vertical: 4,
                   ),
-                  child: const Text('Retry'),
                 ),
-              ],
-            ),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       ),

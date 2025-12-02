@@ -179,8 +179,8 @@ class GroupDetailPage extends ConsumerWidget {
           floatingActionButton: balancesAsync.maybeWhen(
             data: (balances) => FloatingActionButton.extended(
               onPressed: () => _showSettleUpSheet(context, balances),
-              icon: const Icon(Icons.done_all),
-              label: const Text('Settle Up'),
+              icon: const Icon(Icons.done_all, color: Colors.white),
+              label: const Text('Settle Up', style: TextStyle(color: Colors.white)),
             ),
             orElse: () => null,
           ),

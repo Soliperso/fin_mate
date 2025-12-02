@@ -108,7 +108,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     Text(
                       'We sent a confirmation link to your email. Click the link in the email to verify your account, then return to the app and log in.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],

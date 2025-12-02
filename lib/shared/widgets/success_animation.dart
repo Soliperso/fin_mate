@@ -93,13 +93,6 @@ class _TopSnackBarState extends State<_TopSnackBar>
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -226,13 +219,6 @@ class _TopErrorSnackBarState extends State<_TopErrorSnackBar>
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

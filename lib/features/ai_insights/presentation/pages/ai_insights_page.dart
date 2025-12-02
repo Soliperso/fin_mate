@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/balance_forecast_provider.dart';
 import '../providers/insights_providers.dart';
@@ -11,10 +13,10 @@ import '../widgets/chat_input_field.dart';
 import '../widgets/suggested_prompts.dart';
 import '../widgets/balance_forecast_card.dart';
 import '../widgets/balance_timeline_chart.dart';
+import '../widgets/query_limit_banner.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
-import '../../../../shared/widgets/success_animation.dart';
 import './insights_tab.dart';
 
 class AiInsightsPage extends ConsumerStatefulWidget {
@@ -56,8 +58,26 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
   }
 
   Future<void> _handleSendMessage(String text) async {
+    // Check if user can make a query
+    final canMakeQuery = await ref.read(canMakeQueryProvider.future);
+
+    if (!canMakeQuery) {
+      // Show limit reached dialog
+      if (!mounted) return;
+      _showQueryLimitDialog();
+      return;
+    }
+
     setState(() => _isProcessing = true);
     _scrollToBottom();
+
+    // Increment query count for freemium users
+    try {
+      await ref.read(aiQueryOperationsProvider).incrementQueryCount();
+    } catch (e) {
+      // Continue even if count increment fails
+      debugPrint('Failed to increment query count: $e');
+    }
 
     // Ensure typing indicator shows for at least 800ms for better UX
     final minDisplayTime = Future.delayed(const Duration(milliseconds: 800));
@@ -75,12 +95,12 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     // Handle action button taps
     switch (actionType) {
       case 'view_accounts':
-        // Navigate to accounts/dashboard
-        _tabController.animateTo(0);
+        // Navigate to transactions page to view all accounts
+        context.go('/transactions');
         break;
       case 'add_transaction':
-        // Show snackbar or navigate
-        SuccessSnackbar.show(context, message: 'Navigate to add transaction');
+        // Navigate to add transaction page
+        context.push('/transactions/add');
         break;
       case 'view_details':
         _handleSendMessage('Tell me more details');
@@ -167,15 +187,20 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
     return Column(
       children: [
+        // Query limit banner
+        const Padding(
+          padding: EdgeInsets.all(AppSizes.md),
+          child: QueryLimitBanner(),
+        ),
         Expanded(
           child: chatMessagesAsync.when(
             data: (messages) {
               if (messages.isEmpty) {
-                return const EmptyState(
+                return EmptyStateCard(
                   icon: Icons.chat_bubble_outline,
                   title: 'Start a Conversation',
-                  message: 'Ask me anything about your finances!',
-                  animated: false,
+                  message: 'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
+                  backgroundColor: AppColors.primaryTeal,
                 );
               }
 
@@ -285,7 +310,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
             Text(
               'Next 7 Days Details',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
             const SizedBox(height: AppSizes.md),
@@ -396,6 +421,105 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
               'Clear',
               style: TextStyle(color: AppColors.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showQueryLimitDialog() {
+    final operations = ref.read(aiQueryOperationsProvider);
+    final daysUntilReset = operations.getDaysUntilReset();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.block, color: AppColors.error),
+            const SizedBox(width: 8),
+            const Text('Query Limit Reached'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'You\'ve used all 10 free AI queries for this month.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Your limit resets in $daysUntilReset days.',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upgrade to Premium for:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle,
+                        color: AppColors.success, size: 16),
+                      SizedBox(width: 8),
+                      Text('Unlimited AI queries'),
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle,
+                        color: AppColors.success, size: 16),
+                      SizedBox(width: 8),
+                      Text('Advanced insights & forecasting'),
+                    ],
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle,
+                        color: AppColors.success, size: 16),
+                      SizedBox(width: 8),
+                      Text('Receipt scanning & more'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Maybe Later'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.push('/pricing');
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+            ),
+            child: const Text('Upgrade to Premium'),
           ),
         ],
       ),

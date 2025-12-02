@@ -94,7 +94,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
-        print('DEBUG: User not authenticated when fetching monthly income');
         return 0.0;
       }
 
@@ -105,10 +104,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         'transaction_type': 'income',
       });
 
-      print('DEBUG: Monthly income result = $result');
       return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
-      print('DEBUG: Error fetching monthly income: $e');
       return 0.0;
     }
   }
@@ -118,7 +115,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
-        print('DEBUG: User not authenticated when fetching monthly expenses');
         return 0.0;
       }
 
@@ -129,10 +125,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         'transaction_type': 'expense',
       });
 
-      print('DEBUG: Monthly expenses result = $result');
       return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
-      print('DEBUG: Error fetching monthly expenses: $e');
       return 0.0;
     }
   }

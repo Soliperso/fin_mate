@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// [MVP: go_router import removed - not navigating to pricing page]
+// import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 
@@ -113,15 +114,25 @@ class PremiumFeatureDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.lg),
 
-            // Upgrade button
+            // [MVP: Upgrade button - Modified for free beta launch]
+            // All features are free during MVP testing
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onUpgradePressed ??
-                    () {
-                      Navigator.pop(context);
-                      context.push('/pricing');
-                    },
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Show snackbar instead of navigating to pricing
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'This feature is free during beta! Coming soon...',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppColors.primaryTeal,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryTeal,
                   padding: const EdgeInsets.symmetric(
@@ -129,7 +140,7 @@ class PremiumFeatureDialog extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Upgrade to Premium',
+                  'Coming Soon',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

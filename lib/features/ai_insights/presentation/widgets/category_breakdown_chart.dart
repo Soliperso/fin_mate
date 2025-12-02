@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import 'package:intl/intl.dart';
 
-class CategoryBreakdownChart extends StatelessWidget {
+class CategoryBreakdownChart extends StatefulWidget {
   final List<Map<String, dynamic>> categoryData;
   final double maxHeight;
 
@@ -15,13 +15,24 @@ class CategoryBreakdownChart extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    if (categoryData.isEmpty) return const SizedBox.shrink();
+  State<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
+}
 
-    final total = categoryData.fold<double>(
+class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> {
+  int? _touchedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.categoryData.isEmpty) return const SizedBox.shrink();
+
+    final total = widget.categoryData.fold<double>(
       0,
       (sum, item) => sum + (item['amount'] as num).toDouble(),
     );
+
+    // Get screen width for responsive sizing
+    final screenWidth = MediaQuery.of(context).size.width;
+    final chartSize = (screenWidth * 0.6).clamp(240.0, 280.0);
 
     return Container(
       margin: const EdgeInsets.only(top: AppSizes.sm),
@@ -33,47 +44,47 @@ class CategoryBreakdownChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.pie_chart,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSizes.xs),
-              Text(
-                'Category Breakdown',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.md),
-          SizedBox(
-            height: maxHeight,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: PieChart(
-                    PieChartData(
-                      sections: _buildPieChartSections(total),
-                      centerSpaceRadius: 40,
-                      sectionsSpace: 2,
-                      borderData: FlBorderData(show: false),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+              child: SizedBox(
+                height: chartSize,
+                width: chartSize,
+                child: PieChart(
+                  PieChartData(
+                    sections: _buildPieChartSections(total),
+                    centerSpaceRadius: chartSize * 0.28, // Proportional to chart size
+                    sectionsSpace: 2,
+                    borderData: FlBorderData(show: false),
+                    pieTouchData: PieTouchData(
+                      enabled: true,
+                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                        setState(() {
+                          if (!event.isInterestedForInteractions ||
+                              pieTouchResponse == null ||
+                              pieTouchResponse.touchedSection == null) {
+                            _touchedIndex = null;
+                            return;
+                          }
+                          final index = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                          // Validate the index is within bounds
+                          if (index >= 0 && index < widget.categoryData.length) {
+                            _touchedIndex = index;
+                          } else {
+                            _touchedIndex = null;
+                          }
+                        });
+                      },
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  flex: 3,
-                  child: _buildLegend(context, total),
-                ),
-              ],
+              ),
             ),
           ),
+          if (_touchedIndex != null) ...[
+            const SizedBox(height: AppSizes.md),
+            _buildTouchedSectionDetails(context, total),
+          ],
         ],
       ),
     );
@@ -90,26 +101,41 @@ class CategoryBreakdownChart extends StatelessWidget {
       AppColors.tealDark.withValues(alpha: 0.6),
     ];
 
-    return List.generate(categoryData.length.clamp(0, 5), (index) {
-      final item = categoryData[index];
+    return List.generate(widget.categoryData.length.clamp(0, 5), (index) {
+      final item = widget.categoryData[index];
       final amount = (item['amount'] as num).toDouble();
       final percentage = (amount / total * 100);
+      final isTouched = index == _touchedIndex;
 
       return PieChartSectionData(
         value: amount,
         title: '${percentage.toStringAsFixed(0)}%',
         color: colors[index % colors.length],
-        radius: 50,
-        titleStyle: const TextStyle(
-          fontSize: 12,
+        radius: isTouched ? 75 : 65,
+        titleStyle: TextStyle(
+          fontSize: isTouched ? 18 : 16,
           fontWeight: FontWeight.bold,
           color: Colors.white,
+          shadows: [
+            Shadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              offset: const Offset(0, 1),
+              blurRadius: 2,
+            ),
+          ],
         ),
+        badgePositionPercentageOffset: 0.98,
       );
     });
   }
 
-  Widget _buildLegend(BuildContext context, double total) {
+  Widget _buildTouchedSectionDetails(BuildContext context, double total) {
+    if (_touchedIndex == null ||
+        _touchedIndex! < 0 ||
+        _touchedIndex! >= widget.categoryData.length) {
+      return const SizedBox.shrink();
+    }
+
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final colors = [
       AppColors.primaryTeal,
@@ -121,52 +147,54 @@ class CategoryBreakdownChart extends StatelessWidget {
       AppColors.tealDark.withValues(alpha: 0.6),
     ];
 
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: categoryData.length.clamp(0, 5),
-      separatorBuilder: (context, index) => const SizedBox(height: AppSizes.xs),
-      itemBuilder: (context, index) {
-        final item = categoryData[index];
-        final category = item['category'] as String;
-        final amount = (item['amount'] as num).toDouble();
-        final percentage = (amount / total * 100);
+    final item = widget.categoryData[_touchedIndex!];
+    final category = item['category'] as String;
+    final amount = (item['amount'] as num).toDouble();
+    final percentage = (amount / total * 100);
 
-        return Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: colors[index % colors.length],
-                shape: BoxShape.circle,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: colors[_touchedIndex! % colors.length].withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+        border: Border.all(
+          color: colors[_touchedIndex! % colors.length].withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              color: colors[_touchedIndex! % colors.length],
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: AppSizes.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    '${currencyFormat.format(amount)} (${percentage.toStringAsFixed(1)}%)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(width: AppSizes.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${currencyFormat.format(amount)} (${percentage.toStringAsFixed(1)}%)',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }

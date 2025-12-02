@@ -19,14 +19,6 @@ class BudgetsPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Budgets'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.insights),
-            onPressed: () {
-              // Budget insights feature placeholder
-            },
-          ),
-        ],
       ),
       body: budgetsState.when(
         data: (budgets) => budgets.isEmpty
@@ -86,8 +78,8 @@ class BudgetsPage extends ConsumerWidget {
         onPressed: () {
           _showCreateBudgetBottomSheet(context);
         },
-        icon: const Icon(Icons.add),
-        label: const Text('New Budget'),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('New Budget', style: TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -188,12 +180,8 @@ class BudgetsPage extends ConsumerWidget {
                   value: percentage,
                   minHeight: 8,
                   backgroundColor: AppColors.lightGray,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isOverBudget
-                        ? AppColors.error
-                        : isNearLimit
-                            ? AppColors.warning
-                            : categoryColor,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryTeal,
                   ),
                 ),
               ),

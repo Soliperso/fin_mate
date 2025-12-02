@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
 import 'core/services/analytics_service.dart';
+// [MVP: Payment Service - Commented out for initial launch]
+// import 'core/services/payment_service.dart';
 import 'core/services/theme_provider.dart';
 import 'core/error/global_error_handler.dart';
 import 'shared/widgets/offline_indicator.dart';
@@ -24,9 +25,6 @@ void main() async {
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
-
-      // Load environment variables
-      await dotenv.load(fileName: '.env');
 
       // Initialize Sentry error tracking
       await SentryService.initialize();
@@ -54,6 +52,13 @@ void main() async {
       final analytics = AnalyticsService(Supabase.instance.client);
       await analytics.initialize();
 
+      // [MVP: Payment Service - Commented out for initial launch]
+      // All features are free during MVP testing phase
+      // Stripe payment integration will be enabled post-beta
+      // Uncomment below to enable payments:
+      // final paymentService = PaymentService();
+      // await paymentService.initialize();
+
       // Set up Flutter error handling
       FlutterError.onError = (FlutterErrorDetails details) {
         FlutterError.presentError(details);
@@ -80,11 +85,27 @@ void main() async {
   );
 }
 
-class FinMateApp extends ConsumerWidget {
+class FinMateApp extends ConsumerStatefulWidget {
   const FinMateApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FinMateApp> createState() => _FinMateAppState();
+}
+
+class _FinMateAppState extends ConsumerState<FinMateApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize theme service and load saved theme mode
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final themeService = ref.read(themeServiceProvider);
+      await themeService.initialize();
+      await ref.read(themeModeProvider.notifier).initialize();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
 

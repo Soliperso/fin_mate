@@ -54,7 +54,6 @@ class EmergencyFundCard extends ConsumerWidget {
     final levelColor = _getLevelColor();
 
     return Card(
-      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
       ),

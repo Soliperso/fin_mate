@@ -431,8 +431,8 @@ class GoalDetailPage extends ConsumerWidget {
       floatingActionButton: goalAsync.value?.isCompleted == false
           ? FloatingActionButton.extended(
               onPressed: () => _showAddContributionSheet(context, ref),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Contribution'),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('Add Contribution', style: TextStyle(color: Colors.white)),
             )
           : null,
     );

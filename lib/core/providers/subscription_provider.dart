@@ -1,6 +1,53 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_client.dart';
+import '../services/payment_service.dart';
+
+// ============================================================================
+// Payment Service Provider
+// ============================================================================
+
+/// Provider for PaymentService singleton
+final paymentServiceProvider = Provider<PaymentService>((ref) {
+  return PaymentService();
+});
+
+// ============================================================================
+// Stripe Subscription Status Providers
+// ============================================================================
+
+/// FutureProvider that fetches subscription status from database
+final subscriptionStatusProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final auth = Supabase.instance.client.auth;
+  final userId = auth.currentUser?.id;
+
+  if (userId == null) return null;
+
+  final paymentService = ref.watch(paymentServiceProvider);
+  return await paymentService.getSubscriptionStatus(userId);
+});
+
+/// Provider that checks if user has active premium subscription
+final stripePremiumProvider = FutureProvider<bool>((ref) async {
+  final auth = Supabase.instance.client.auth;
+  final userId = auth.currentUser?.id;
+
+  if (userId == null) return false;
+
+  final paymentService = ref.watch(paymentServiceProvider);
+  return await paymentService.isPremiumActive(userId);
+});
+
+/// Provider for billing history
+final billingHistoryProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final auth = Supabase.instance.client.auth;
+  final userId = auth.currentUser?.id;
+
+  if (userId == null) return [];
+
+  final paymentService = ref.watch(paymentServiceProvider);
+  return await paymentService.getBillingHistory(userId);
+});
 
 // ============================================================================
 // Subscription Tier Provider

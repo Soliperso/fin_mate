@@ -9,6 +9,7 @@ class AppColors {
   static const tealLight = Color(0xFF2D9DA9); // Lighter teal accent
   static const tealDark = Color(0xFF176673); // Darker teal for depth
   static const splashTeal = Color(0xFF143F48); // Icon background teal
+  static const iconTeal = Color(0xFF156570); // High contrast teal for icons/checkmarks (4.5:1 contrast)
 
   // Secondary Colors
   static const slateBlue = Color(0xFF2C5F8D); // Professional slate blue
@@ -35,8 +36,8 @@ class AppColors {
 
   // Text Colors
   static const textPrimary = charcoal;
-  static const textSecondary = Color(0xFF636E72);
-  static const textTertiary = Color(0xFF95A5A6);
+  static const textSecondary = Color(0xFF9CA3AF); // Lighter gray for better readability on dark backgrounds
+  static const textTertiary = Color(0xFF718096); // Improved contrast: 4.5:1 (AA compliant)
 
   // Background Colors
   static const backgroundLight = white;
@@ -46,6 +47,7 @@ class AppColors {
 
   // Border Colors
   static const borderLight = Color(0xFFE1E8ED);
+  static const borderMedium = Color(0xFFD1D5DB); // Medium contrast border for cards
   static const borderDark = Color(0xFF2D3748);
 
   AppColors._();

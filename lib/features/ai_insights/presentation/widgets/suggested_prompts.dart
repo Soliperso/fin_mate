@@ -60,7 +60,7 @@ class _PromptChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.lightGray,
+      color: Theme.of(context).cardTheme.color ?? AppColors.cardBackground,
       borderRadius: BorderRadius.circular(AppSizes.radiusLg),
       child: InkWell(
         onTap: onTap,
@@ -72,7 +72,9 @@ class _PromptChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: AppColors.borderLight,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.borderDark
+                  : AppColors.borderLight,
               width: 1,
             ),
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
@@ -89,7 +91,6 @@ class _PromptChip extends StatelessWidget {
               Text(
                 prompt,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w500,
                     ),
               ),

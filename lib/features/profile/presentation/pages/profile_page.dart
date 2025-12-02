@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/services/theme_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
@@ -14,6 +15,7 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(currentUserProfileProvider);
     final profile = profileState.profile;
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,9 +30,9 @@ class ProfilePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: profileState.isLoading && profile == null
+      body: profile == null && profileState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : profileState.errorMessage != null && profile == null
+          : profile == null && profileState.errorMessage != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -205,13 +207,22 @@ class ProfilePage extends ConsumerWidget {
                                   subtitle: 'Password, biometric, 2FA',
                                   onTap: () => context.push('/profile/security'),
                                 ),
-                                _buildDivider(),
-                                _buildSettingsTile(
-                                  icon: Icons.credit_card,
-                                  title: 'Payment Methods',
-                                  subtitle: 'Manage your linked accounts',
-                                  onTap: () {},
-                                ),
+                                // [MVP: Subscription & Payment - Commented out for initial launch]
+                                // All features are free during beta testing
+                                // _buildDivider(),
+                                // _buildSettingsTile(
+                                //   icon: Icons.workspace_premium,
+                                //   title: 'Subscription',
+                                //   subtitle: 'Manage your premium subscription',
+                                //   onTap: () => context.push('/profile/subscription'),
+                                // ),
+                                // _buildDivider(),
+                                // _buildSettingsTile(
+                                //   icon: Icons.credit_card,
+                                //   title: 'Payment Methods',
+                                //   subtitle: 'Manage your linked accounts',
+                                //   onTap: () {},
+                                // ),
                               ],
                             ),
                             const SizedBox(height: AppSizes.lg),
@@ -239,10 +250,11 @@ class ProfilePage extends ConsumerWidget {
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
+                                  context: context,
                                   icon: Icons.dark_mode_outlined,
                                   title: 'Appearance',
-                                  subtitle: 'Light or dark theme',
-                                  onTap: () {},
+                                  subtitle: _getThemeModeLabel(themeMode),
+                                  onTap: () => _showThemeDialog(context, ref),
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
@@ -301,46 +313,48 @@ class ProfilePage extends ConsumerWidget {
                             ),
                             const SizedBox(height: AppSizes.lg),
 
-                            // Admin Section (only visible for admins)
-                            if (profile?.isAdmin == true) ...[
-                              Text(
-                                'Admin',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textSecondary,
-                                    ),
-                              ),
-                              const SizedBox(height: AppSizes.sm),
-                              _buildSettingsCard(
-                                context,
-                                children: [
-                                  _buildSettingsTile(
-                                    icon: Icons.people_outline,
-                                    title: 'User Management',
-                                    subtitle: 'View and manage all users',
-                                    onTap: () => context.push('/admin/users'),
-                                  ),
-                                  _buildDivider(),
-                                  _buildSettingsTile(
-                                    icon: Icons.analytics_outlined,
-                                    title: 'System Analytics',
-                                    subtitle: 'View system-wide statistics',
-                                    onTap: () => context.push('/admin/analytics'),
-                                  ),
-                                  _buildDivider(),
-                                  _buildSettingsTile(
-                                    icon: Icons.settings_outlined,
-                                    title: 'System Settings',
-                                    subtitle: 'Configure system parameters',
-                                    onTap: () => context.push('/admin/settings'),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSizes.lg),
-                            ],
+                            // [MVP: Admin Section - Commented out for initial launch]
+                            // Admin routes are disabled to prevent navigation errors
+                            // Uncomment after enabling admin routes in router.dart
+                            // if (profile?.isAdmin == true) ...[
+                            //   Text(
+                            //     'Admin',
+                            //     style: Theme.of(context)
+                            //         .textTheme
+                            //         .titleMedium
+                            //         ?.copyWith(
+                            //           fontWeight: FontWeight.w600,
+                            //           color: AppColors.textSecondary,
+                            //         ),
+                            //   ),
+                            //   const SizedBox(height: AppSizes.sm),
+                            //   _buildSettingsCard(
+                            //     context,
+                            //     children: [
+                            //       _buildSettingsTile(
+                            //         icon: Icons.people_outline,
+                            //         title: 'User Management',
+                            //         subtitle: 'View and manage all users',
+                            //         onTap: () => context.push('/admin/users'),
+                            //       ),
+                            //       _buildDivider(),
+                            //       _buildSettingsTile(
+                            //         icon: Icons.analytics_outlined,
+                            //         title: 'System Analytics',
+                            //         subtitle: 'View system-wide statistics',
+                            //         onTap: () => context.push('/admin/analytics'),
+                            //       ),
+                            //       _buildDivider(),
+                            //       _buildSettingsTile(
+                            //         icon: Icons.settings_outlined,
+                            //         title: 'System Settings',
+                            //         subtitle: 'Configure system parameters',
+                            //         onTap: () => context.push('/admin/settings'),
+                            //       ),
+                            //     ],
+                            //   ),
+                            //   const SizedBox(height: AppSizes.lg),
+                            // ],
 
                             // Logout Button
                             SizedBox(
@@ -385,14 +399,7 @@ class ProfilePage extends ConsumerWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.white,
-          border: Border.all(color: AppColors.white, width: 4),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          border: Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.2), width: 2),
           image: DecorationImage(
             image: NetworkImage(profile.avatarUrl!),
             fit: BoxFit.cover,
@@ -407,14 +414,7 @@ class ProfilePage extends ConsumerWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.white,
-        border: Border.all(color: AppColors.white, width: 4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        border: Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.2), width: 2),
       ),
       child: Center(
         child: Text(
@@ -435,19 +435,13 @@ class ProfilePage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(children: children),
     );
   }
 
   Widget _buildSettingsTile({
+    BuildContext? context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -489,6 +483,139 @@ class ProfilePage extends ConsumerWidget {
         horizontal: AppSizes.md,
         vertical: AppSizes.xs,
       ),
+    );
+  }
+
+  String _getThemeModeLabel(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System default';
+    }
+  }
+
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
+    final currentThemeMode = ref.read(themeModeProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(AppSizes.radiusXl),
+            topRight: Radius.circular(AppSizes.radiusXl),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.only(top: AppSizes.sm),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.white.withValues(alpha: 0.3)
+                    : AppColors.textTertiary.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSizes.md),
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: Row(
+                children: [
+                  Text(
+                    'Appearance',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSizes.sm),
+            // Options
+            _buildThemeOption(
+              context: context,
+              ref: ref,
+              themeMode: ThemeMode.light,
+              title: 'Light',
+              subtitle: 'Use light theme',
+              icon: Icons.light_mode,
+              isSelected: currentThemeMode == ThemeMode.light,
+            ),
+            _buildThemeOption(
+              context: context,
+              ref: ref,
+              themeMode: ThemeMode.dark,
+              title: 'Dark',
+              subtitle: 'Use dark theme',
+              icon: Icons.dark_mode,
+              isSelected: currentThemeMode == ThemeMode.dark,
+            ),
+            _buildThemeOption(
+              context: context,
+              ref: ref,
+              themeMode: ThemeMode.system,
+              title: 'System default',
+              subtitle: 'Follow system settings',
+              icon: Icons.settings_suggest,
+              isSelected: currentThemeMode == ThemeMode.system,
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + AppSizes.md),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption({
+    required BuildContext context,
+    required WidgetRef ref,
+    required ThemeMode themeMode,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppColors.tealLight : AppColors.primaryTeal;
+
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? primaryColor : (isDark ? AppColors.white.withValues(alpha: 0.6) : AppColors.textSecondary),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? primaryColor : null,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: isDark ? AppColors.white.withValues(alpha: 0.6) : AppColors.textSecondary,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: primaryColor)
+          : null,
+      onTap: () async {
+        await ref.read(themeModeProvider.notifier).setThemeMode(themeMode);
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      },
     );
   }
 

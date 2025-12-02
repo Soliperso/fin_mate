@@ -37,8 +37,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>FinMate needs camera access to scan receipts and extract transaction details for easier expense tracking.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>FinMate needs Face ID permission to enable biometric login for secure and convenient access to your account.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FinMate needs photo library access to select receipt images for transaction scanning and document uploads.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>FinMate needs permission to save receipts and financial documents to your photo library.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

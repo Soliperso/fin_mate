@@ -156,12 +156,6 @@ class DataPrivacyPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
-        ],
       ),
       child: ListTile(
         leading: Container(
@@ -219,12 +213,6 @@ class DataPrivacyPage extends ConsumerWidget {
           color: AppColors.error.withValues(alpha: 0.3),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
-        ],
       ),
       child: ListTile(
         leading: Container(

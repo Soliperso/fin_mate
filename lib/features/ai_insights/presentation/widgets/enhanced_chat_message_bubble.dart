@@ -25,32 +25,41 @@ class EnhancedChatMessageBubble extends StatelessWidget {
     final timeFormat = DateFormat('h:mm a');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.xs,
+      padding: EdgeInsets.only(
+        left: isUser ? AppSizes.md : 0,
+        right: isUser ? AppSizes.md : 0,
+        top: AppSizes.xs,
+        bottom: AppSizes.xs,
       ),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            _buildAvatar(false),
-            const SizedBox(width: AppSizes.sm),
+            Padding(
+              padding: const EdgeInsets.only(left: AppSizes.sm, right: AppSizes.xs),
+              child: _buildAvatar(false),
+            ),
           ],
           Flexible(
-            child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: [
+            child: Padding(
+              padding: EdgeInsets.only(right: isUser ? 0 : AppSizes.sm),
+              child: Column(
+                crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
                 Container(
+                  width: isUser ? null : double.infinity,
                   constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.75,
+                    maxWidth: isUser
+                        ? MediaQuery.of(context).size.width * 0.75
+                        : double.infinity,
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSizes.md,
                     vertical: AppSizes.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: _getBackgroundColor(isUser),
+                    color: _getBackgroundColor(isUser, context),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
                       topRight: Radius.circular(isUser ? AppSizes.radiusSm : AppSizes.radiusMd),
@@ -68,7 +77,7 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                       Text(
                         message.content,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: _getTextColor(isUser),
+                              color: _getTextColor(isUser, context),
                             ),
                       ),
 
@@ -83,35 +92,37 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                 ),
 
                 // Timestamp and status
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      timeFormat.format(message.timestamp),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textTertiary,
-                            fontSize: 11,
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSizes.xs),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        timeFormat.format(message.timestamp),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                      ),
+                      if (isUser && message.status == MessageStatus.sending) ...[
+                        const SizedBox(width: 4),
+                        SizedBox(
+                          width: 10,
+                          height: 10,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.textTertiary),
                           ),
-                    ),
-                    if (isUser && message.status == MessageStatus.sending) ...[
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        width: 10,
-                        height: 10,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textTertiary),
                         ),
-                      ),
-                    ] else if (isUser && message.status == MessageStatus.error) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.error_outline,
-                        size: 12,
-                        color: AppColors.error,
-                      ),
+                      ] else if (isUser && message.status == MessageStatus.error) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.error_outline,
+                          size: 12,
+                          color: AppColors.error,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
 
                 // Follow-up suggestions (only for assistant messages)
@@ -120,7 +131,8 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                     suggestions: message.followUpSuggestions!,
                     onSuggestionTap: onFollowUpTap ?? (_) {},
                   ),
-              ],
+                ],
+              ),
             ),
           ),
           if (isUser) ...[
@@ -148,18 +160,24 @@ class EnhancedChatMessageBubble extends StatelessWidget {
     );
   }
 
-  Color _getBackgroundColor(bool isUser) {
+  Color _getBackgroundColor(bool isUser, BuildContext context) {
     if (message.type == MessageType.error) {
       return AppColors.error.withValues(alpha: 0.1);
     }
-    return isUser ? AppColors.primaryTeal : AppColors.lightGray;
+    return isUser
+        ? AppColors.primaryTeal
+        : (Theme.of(context).cardTheme.color ?? AppColors.cardBackground);
   }
 
-  Color _getTextColor(bool isUser) {
+  Color _getTextColor(bool isUser, BuildContext context) {
     if (message.type == MessageType.error) {
       return AppColors.error;
     }
-    return isUser ? Colors.white : AppColors.textPrimary;
+    if (isUser) {
+      return Colors.white;
+    }
+    // Use theme's text color for proper dark mode support
+    return Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textPrimary;
   }
 
   Widget _buildChartContent(Map<String, dynamic> metadata) {

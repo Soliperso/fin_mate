@@ -60,14 +60,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   hintText: 'Search transactions...',
                   hintStyle: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary.withValues(alpha: 0.5),
+                    color: AppColors.textSecondary,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(6),
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: AppColors.lightGray.withValues(alpha: 0.5),
+                  fillColor: Theme.of(context).cardTheme.color ?? AppColors.cardBackground,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 onChanged: (value) {
@@ -138,8 +138,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ref.read(transactionListProvider.notifier).refresh();
           }
         },
-        icon: const Icon(Icons.add),
-        label: const Text('New Transaction'),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('New Transaction', style: TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -425,13 +425,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             const SizedBox(height: AppSizes.lg),
 
             // Details
-            _buildDetailRow('Description', transaction.description ?? 'N/A'),
+            _buildDetailRow('Title', transaction.description ?? 'N/A'),
             if (transaction.categoryName != null)
               _buildDetailRow('Category', transaction.categoryName!),
-            if (transaction.accountName != null)
-              _buildDetailRow('Account', transaction.accountName!),
-            if (transaction.toAccountName != null)
-              _buildDetailRow('To Account', transaction.toAccountName!),
             _buildDetailRow('Date', dateFormat.format(transaction.date)),
             if (transaction.notes != null && transaction.notes!.isNotEmpty)
               _buildDetailRow('Notes', transaction.notes!),

@@ -77,12 +77,13 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<void> loadProfile() async {
+    // Keep existing profile data while loading
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final profile = await _repository.getProfile(userId);
-      state = ProfileState(profile: profile, isLoading: false);
+      state = state.copyWith(profile: profile, isLoading: false);
     } catch (e) {
-      state = ProfileState(
+      state = state.copyWith(
         isLoading: false,
         errorMessage: 'Failed to load profile: ${e.toString()}',
       );
@@ -167,7 +168,7 @@ final profileNotifierProvider =
 
 final currentUserProfileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.read(authNotifierProvider); // Use read instead of watch
 
   // Return a notifier with empty state when user is not authenticated
   if (authState.user == null) {

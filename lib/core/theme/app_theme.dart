@@ -17,6 +17,8 @@ class AppTheme {
         onPrimary: AppColors.white,
         onSecondary: AppColors.white,
         onSurface: AppColors.textPrimary,
+        surfaceContainerHighest: AppColors.lightGray,
+        outline: AppColors.borderLight,
       ),
       scaffoldBackgroundColor: AppColors.lightGray,
       textTheme: _buildTextTheme(),
@@ -25,6 +27,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -32,7 +35,7 @@ class AppTheme {
         ),
       ),
       cardTheme: const CardThemeData(
-        elevation: AppSizes.elevationSm,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusMd)),
         ),
@@ -41,6 +44,8 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
+          backgroundColor: AppColors.primaryTeal,
+          foregroundColor: AppColors.white,
           minimumSize: const Size(0, AppSizes.buttonHeightMd),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -51,16 +56,20 @@ class AppTheme {
           ),
         ),
       ),
+      iconTheme: const IconThemeData(color: AppColors.textPrimary),
+      dividerColor: AppColors.borderLight,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.white,
+        hintStyle: TextStyle(color: AppColors.textTertiary.withValues(alpha: 0.6)),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: BorderSide(color: AppColors.textTertiary.withValues(alpha: 0.2)),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: BorderSide(color: AppColors.textTertiary.withValues(alpha: 0.2)),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -83,14 +92,16 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primaryTeal,
+        primary: AppColors.tealLight,
         secondary: AppColors.slateBlue,
         tertiary: AppColors.tealBlue,
         error: AppColors.error,
         surface: AppColors.cardBackgroundDark,
-        onPrimary: AppColors.white,
+        onPrimary: AppColors.backgroundDark,
         onSecondary: AppColors.white,
         onSurface: AppColors.white,
+        surfaceContainerHighest: AppColors.cardBackgroundDark,
+        outline: AppColors.borderDark,
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       textTheme: _buildTextTheme(isDark: true),
@@ -99,6 +110,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: AppColors.cardBackgroundDark,
         foregroundColor: AppColors.white,
+        iconTheme: const IconThemeData(color: AppColors.white),
         titleTextStyle: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -106,7 +118,7 @@ class AppTheme {
         ),
       ),
       cardTheme: const CardThemeData(
-        elevation: AppSizes.elevationSm,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusMd)),
         ),
@@ -115,6 +127,8 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
+          backgroundColor: AppColors.tealLight,
+          foregroundColor: AppColors.backgroundDark,
           minimumSize: const Size(0, AppSizes.buttonHeightMd),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -125,20 +139,24 @@ class AppTheme {
           ),
         ),
       ),
+      iconTheme: const IconThemeData(color: AppColors.white),
+      dividerColor: AppColors.borderDark,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.cardBackgroundDark,
+        hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.4)),
+        labelStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.7)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: BorderSide(color: AppColors.white.withValues(alpha: 0.2)),
+          borderSide: const BorderSide(color: AppColors.borderDark),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: BorderSide(color: AppColors.white.withValues(alpha: 0.2)),
+          borderSide: const BorderSide(color: AppColors.borderDark),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primaryTeal, width: 2),
+          borderSide: const BorderSide(color: AppColors.tealLight, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),

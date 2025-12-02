@@ -51,8 +51,8 @@ class BillsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateGroupDialog(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New Group'),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('New Group', style: TextStyle(color: Colors.white)),
       ),
     );
   }
