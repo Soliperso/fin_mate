@@ -21,9 +21,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       icon: Icons.account_balance_wallet,
     ),
     OnboardingSlide(
-      title: 'Split Bills Easily',
-      description: 'Share expenses with friends and roommates. Track who owes what with ease.',
-      icon: Icons.people,
+      title: 'Pay Off Debt Faster',
+      description: 'Track your debts, choose a payoff strategy, and watch your progress as you achieve financial freedom.',
+      icon: Icons.credit_card,
     ),
     OnboardingSlide(
       title: 'AI-Powered Insights',

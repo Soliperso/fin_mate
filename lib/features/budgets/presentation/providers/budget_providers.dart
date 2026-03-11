@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../data/repositories/budget_repository_impl.dart';
 import '../../domain/entities/budget_entity.dart';
 import '../../domain/repositories/budget_repository.dart';
@@ -20,8 +23,9 @@ final budgetsWithSpendingProvider = FutureProvider<List<BudgetEntity>>((ref) asy
 /// State notifier for budget management
 class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   final BudgetRepository _repository;
+  final AnalyticsService _analytics;
 
-  BudgetNotifier(this._repository) : super(const AsyncValue.loading()) {
+  BudgetNotifier(this._repository, this._analytics) : super(const AsyncValue.loading()) {
     loadBudgets();
   }
 
@@ -44,7 +48,12 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   /// Create a new budget
   Future<void> createBudget(BudgetEntity budget) async {
     try {
-      await _repository.createBudget(budget);
+      final created = await _repository.createBudget(budget);
+      unawaited(_analytics.trackBudgetCreated(
+        budgetId: created.id,
+        amount: created.amount,
+        category: created.categoryName,
+      ));
       await loadBudgets(); // Reload all budgets
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -56,6 +65,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   Future<void> updateBudget(String id, BudgetEntity budget) async {
     try {
       await _repository.updateBudget(id, budget);
+      unawaited(_analytics.trackBudgetUpdated(budgetId: id));
       await loadBudgets(); // Reload all budgets
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -67,6 +77,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   Future<void> deleteBudget(String id) async {
     try {
       await _repository.deleteBudget(id);
+      unawaited(_analytics.trackBudgetDeleted(budgetId: id));
       await loadBudgets(); // Reload all budgets
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -78,5 +89,6 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
 /// Provider for budget notifier
 final budgetNotifierProvider = StateNotifierProvider<BudgetNotifier, AsyncValue<List<BudgetEntity>>>((ref) {
   final repository = ref.watch(budgetRepositoryProvider);
-  return BudgetNotifier(repository);
+  final analytics = ref.watch(analyticsServiceProvider);
+  return BudgetNotifier(repository, analytics);
 });

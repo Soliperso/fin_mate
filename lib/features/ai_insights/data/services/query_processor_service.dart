@@ -2,18 +2,114 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/config/supabase_client.dart';
 import 'balance_forecast_service.dart';
+import 'openai_chat_service.dart';
 import '../../domain/entities/query_response.dart';
 import '../../domain/entities/chat_message.dart';
 
 class QueryProcessorService {
   final SupabaseClient _supabase;
   final BalanceForecastService _forecastService;
+  final OpenAiChatService _openAiService;
 
   QueryProcessorService({
     SupabaseClient? supabaseClient,
     BalanceForecastService? forecastService,
+    OpenAiChatService? openAiChatService,
   })  : _supabase = supabaseClient ?? supabase,
-        _forecastService = forecastService ?? BalanceForecastService();
+        _forecastService = forecastService ?? BalanceForecastService(),
+        _openAiService = openAiChatService ?? OpenAiChatService();
+
+  /// Clear OpenAI session (called when user clears chat history)
+  void clearOpenAiSession() => _openAiService.clearSession();
+
+  /// Context-aware suggested prompts based on user's live data
+  Future<List<String>> getDynamicSuggestedPrompts(String userId) async {
+    final prompts = <String>[];
+
+    try {
+      final now = DateTime.now();
+      final monthStart = DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+
+      // Check for budgets near limit (>80%)
+      final budgets = await _supabase
+          .from('budgets')
+          .select('category_id, amount, categories(name)')
+          .eq('user_id', userId);
+
+      if ((budgets as List).isNotEmpty) {
+        final categoryIds = budgets.map((b) => b['category_id']).toList();
+        final spent = await _supabase
+            .from('transactions')
+            .select('amount, category_id')
+            .eq('user_id', userId)
+            .eq('type', 'expense')
+            .gte('date', monthStart)
+            .inFilter('category_id', categoryIds);
+
+        final spentByCategory = <dynamic, double>{};
+        for (final tx in spent as List) {
+          final catId = tx['category_id'];
+          spentByCategory[catId] = (spentByCategory[catId] ?? 0) + (tx['amount'] as num).toDouble();
+        }
+
+        for (final budget in budgets) {
+          final catId = budget['category_id'];
+          final budgetAmount = (budget['amount'] as num).toDouble();
+          final spentAmount = spentByCategory[catId] ?? 0;
+          if (spentAmount > budgetAmount * 0.8) {
+            final catName = (budget['categories'] as Map<String, dynamic>?)?['name'] as String? ?? 'this category';
+            prompts.add("I'm close to my $catName budget — how can I cut back?");
+            break;
+          }
+        }
+      }
+    } catch (_) {}
+
+    try {
+      // Upcoming bills in next 7 days
+      final endDate = DateTime.now().add(const Duration(days: 7)).toIso8601String().split('T')[0];
+      final bills = await _supabase
+          .from('recurring_transactions')
+          .select('amount')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .eq('type', 'expense')
+          .lte('next_occurrence', endDate);
+
+      if ((bills as List).isNotEmpty) {
+        final total = bills.fold(0.0, (sum, b) => sum + (b['amount'] as num).toDouble());
+        prompts.add('I have \$${total.toStringAsFixed(0)} in bills due this week — can I afford them?');
+      }
+    } catch (_) {}
+
+    try {
+      // Largest recent transaction (last 7 days)
+      final since = DateTime.now().subtract(const Duration(days: 7)).toIso8601String().split('T')[0];
+      final recent = await _supabase
+          .from('transactions')
+          .select('amount, categories(name)')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', since)
+          .order('amount', ascending: false)
+          .limit(1);
+
+      if ((recent as List).isNotEmpty) {
+        final catName = (recent.first['categories'] as Map<String, dynamic>?)?['name'] as String?;
+        if (catName != null) {
+          prompts.add('I had a large $catName expense recently — is my budget on track?');
+        }
+      }
+    } catch (_) {}
+
+    // Fill remaining slots with static prompts
+    for (final p in getSuggestedPrompts()) {
+      if (prompts.length >= 4) break;
+      if (!prompts.contains(p)) prompts.add(p);
+    }
+
+    return prompts.take(4).toList();
+  }
 
   /// Process user query and generate rich response
   Future<QueryResponse> processQueryRich(String query) async {
@@ -24,6 +120,19 @@ class QueryProcessorService {
           content: 'Please log in to access your financial data.',
           type: MessageType.error,
         );
+      }
+
+      // Attempt OpenAI first if available
+      if (_openAiService.isAvailable) {
+        try {
+          await _openAiService.initSession(userId);
+          final aiResponse = await _openAiService
+              .sendMessage(query)
+              .timeout(const Duration(seconds: 30));
+          return aiResponse.copyWith(followUpSuggestions: getSuggestedPrompts());
+        } catch (_) {
+          // Fall through to keyword matching
+        }
       }
 
       final lowerQuery = query.toLowerCase().trim();

@@ -32,3 +32,23 @@ final safeToSpendProvider = Provider<double>((ref) {
     error: (error, stackTrace) => 0.0,
   );
 });
+
+// Multi-scenario forecast provider
+final multiScenarioForecastProvider = FutureProvider<List<ForecastScenario>>((ref) async {
+  final service = ref.watch(balanceForecastServiceProvider);
+  return await service.generateMultiScenarioForecast();
+});
+
+// Currently selected scenario type (UI state)
+final selectedForecastScenarioProvider =
+    StateProvider<ForecastScenarioType>((ref) => ForecastScenarioType.baseline);
+
+// Derived provider: currently active scenario's BalanceForecast
+final activeForecastProvider = Provider<AsyncValue<BalanceForecast>>((ref) {
+  final scenariosAsync = ref.watch(multiScenarioForecastProvider);
+  final selectedType = ref.watch(selectedForecastScenarioProvider);
+
+  return scenariosAsync.whenData(
+    (scenarios) => scenarios.firstWhere((s) => s.type == selectedType).forecast,
+  );
+});

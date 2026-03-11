@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../providers/bill_splitting_providers.dart';
 import '../widgets/create_group_bottom_sheet.dart';
 
@@ -33,8 +34,13 @@ class BillsPage extends ConsumerWidget {
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(AppSizes.md),
-              itemCount: groups.length,
+              itemCount: groups.length + 1, // +1 for ad banner
               itemBuilder: (context, index) {
+                // Show ad banner at the end
+                if (index == groups.length) {
+                  return const AdBannerWidget();
+                }
+
                 final group = groups[index];
                 return _buildGroupCardWithBalance(
                   context,

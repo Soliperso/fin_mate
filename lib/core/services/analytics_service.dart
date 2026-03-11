@@ -258,6 +258,33 @@ class AnalyticsService {
     );
   }
 
+  /// Track debt payoff events
+  Future<void> trackDebtCreated({
+    required String debtId,
+    required double balance,
+  }) async {
+    await logEvent(
+      eventName: 'debt_created',
+      properties: {
+        'debt_id': debtId,
+        'balance': balance,
+      },
+    );
+  }
+
+  Future<void> trackDebtPaymentLogged({
+    required String debtId,
+    required double amount,
+  }) async {
+    await logEvent(
+      eventName: 'debt_payment_logged',
+      properties: {
+        'debt_id': debtId,
+        'amount': amount,
+      },
+    );
+  }
+
   /// Track AI insights usage
   Future<void> trackAIQuery({
     required String queryType,

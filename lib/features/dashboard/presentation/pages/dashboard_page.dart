@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
@@ -16,13 +18,7 @@ import '../widgets/cash_flow_card.dart';
 import '../widgets/cash_flow_chart.dart';
 import '../widgets/net_worth_trend_chart.dart';
 import '../widgets/money_health_score.dart';
-// [V1.1: Upcoming Bills - Commented out]
-// import '../widgets/upcoming_bills_card.dart';
-// [V1.1: Quick Actions - Commented out]
-// import '../widgets/quick_action_button.dart';
-// [V1.1: Emergency Fund - Commented out]
-// import '../widgets/emergency_fund_card.dart';
-// import '../providers/emergency_fund_provider.dart';
+import '../widgets/dti_widget.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -34,38 +30,45 @@ class DashboardPage extends ConsumerWidget {
     final dashboardState = ref.watch(dashboardNotifierProvider);
     final unreadCount = ref.watch(unreadNotificationCountProvider);
     final profileState = ref.watch(currentUserProfileProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Extract initials from user's full name
     String getInitials() {
-      if (user?.fullName == null || user?.fullName?.isEmpty == true) {
-        return 'U';
-      }
+      if (user?.fullName == null || user?.fullName?.isEmpty == true) return 'U';
       final names = user!.fullName!.trim().split(' ');
-      if (names.length == 1) {
-        return names[0][0].toUpperCase();
-      }
+      if (names.length == 1) return names[0][0].toUpperCase();
       return '${names.first[0]}${names.last[0]}'.toUpperCase();
     }
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        titleSpacing: AppSizes.md,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Dashboard'),
+            Text(
+              'Dashboard',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             Text(
               DateFormat('MMMM d, yyyy').format(DateTime.now()),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.systemGray,
+                  ),
             ),
           ],
         ),
         actions: [
+          // Notification bell
           Stack(
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined),
+                icon: Icon(
+                  unreadCount > 0
+                      ? CupertinoIcons.bell_fill
+                      : CupertinoIcons.bell,
+                  size: 22,
+                ),
                 onPressed: () => context.push('/notifications'),
               ),
               if (unreadCount > 0)
@@ -73,50 +76,38 @@ class DashboardPage extends ConsumerWidget {
                   right: 8,
                   top: 8,
                   child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.systemRed,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      unreadCount > 99 ? '99+' : unreadCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
             ],
           ),
+          // Avatar
           Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: InkWell(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: GestureDetector(
               onTap: () => context.go('/profile'),
-              borderRadius: BorderRadius.circular(20),
               child: profileState.profile?.avatarUrl != null &&
                       profileState.profile!.avatarUrl!.isNotEmpty
                   ? CircleAvatar(
-                      radius: 18,
+                      radius: 17,
                       backgroundImage:
                           NetworkImage(profileState.profile!.avatarUrl!),
                     )
                   : CircleAvatar(
-                      backgroundColor: AppColors.primaryTeal,
-                      radius: 18,
+                      radius: 17,
+                      backgroundColor: AppColors.brandTeal,
                       child: Text(
                         getInitials(),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          letterSpacing: -0.08,
                         ),
                       ),
                     ),
@@ -126,19 +117,22 @@ class DashboardPage extends ConsumerWidget {
       ),
       body: dashboardState.when(
         data: (stats) => RefreshIndicator(
+          color: AppColors.brandTeal,
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
-            // ref.invalidate(emergencyFundStatusProvider); // [V1.1: Emergency Fund disabled]
             ref.invalidate(monthlyFlowDataProvider);
             ref.invalidate(netWorthSnapshotsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppSizes.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.pagePadding,
+              vertical: AppSizes.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Net Worth Card
+                // ── Hero card ─────────────────────────────────────────────
                 NetWorthCard(
                   netWorth: stats.netWorth,
                   changePercentage: stats.netWorthChangePercentage,
@@ -146,77 +140,22 @@ class DashboardPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSizes.md),
 
-                // Money Health Score
+                // ── Money health ──────────────────────────────────────────
                 MoneyHealthScore(score: stats.moneyHealthScore),
                 const SizedBox(height: AppSizes.md),
 
-                // [V1.1: Emergency Fund - Commented out - Dashboard widget, not critical]
-                // Emergency Fund Status
-                // Consumer(
-                //   builder: (context, ref, _) {
-                //     final statusAsync = ref.watch(emergencyFundStatusProvider);
-                //     return statusAsync.when(
-                //       data: (status) => EmergencyFundCard(status: status),
-                //       loading: () => const SkeletonCard(height: 240),
-                //       error: (error, stack) => const SizedBox.shrink(),
-                //     );
-                //   },
-                // ),
-                // const SizedBox(height: AppSizes.lg),
+                // ── DTI ratio ─────────────────────────────────────────────
+                const DtiWidget(),
+                const SizedBox(height: AppSizes.md),
 
-                // [V1.1: Quick Actions - Commented out - Streamline MVP UI]
-                // Quick Actions
-                // Text(
-                //   'Quick Actions',
-                //   style: Theme.of(context).textTheme.titleLarge,
-                // ),
-                // const SizedBox(height: AppSizes.md),
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       child: QuickActionButton(
-                //         icon: Icons.add,
-                //         label: 'Add Expense',
-                //         color: AppColors.error,
-                //         onTap: () {
-                //           context.go('/transactions/add?type=expense');
-                //         },
-                //       ),
-                //     ),
-                //     const SizedBox(width: AppSizes.md),
-                //     Expanded(
-                //       child: QuickActionButton(
-                //         icon: Icons.arrow_upward,
-                //         label: 'Add Income',
-                //         color: AppColors.success,
-                //         onTap: () {
-                //           context.go('/transactions/add?type=income');
-                //         },
-                //       ),
-                //     ),
-                //     const SizedBox(width: AppSizes.md),
-                //     Expanded(
-                //       child: QuickActionButton(
-                //         icon: Icons.receipt,
-                //         label: 'Split Bill',
-                //         color: AppColors.slateBlue,
-                //         onTap: () {
-                //           context.go('/bills');
-                //         },
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // const SizedBox(height: AppSizes.lg),
-
-                // Cash Flow Card
+                // ── Cash flow ─────────────────────────────────────────────
                 CashFlowCard(
                   income: stats.monthlyIncome,
                   expenses: stats.monthlyExpenses,
                 ),
                 const SizedBox(height: AppSizes.md),
 
-                // Cash Flow Chart
+                // ── Charts ────────────────────────────────────────────────
                 Consumer(
                   builder: (context, ref, _) {
                     final flowDataAsync = ref.watch(monthlyFlowDataProvider);
@@ -236,7 +175,6 @@ class DashboardPage extends ConsumerWidget {
                   },
                 ),
 
-                // Net Worth Trend Chart
                 Consumer(
                   builder: (context, ref, _) {
                     final snapshotsAsync = ref.watch(netWorthSnapshotsProvider);
@@ -256,96 +194,22 @@ class DashboardPage extends ConsumerWidget {
                   },
                 ),
 
-                // [V1.1: Upcoming Bills - Commented out - Not critical for MVP]
-                // Upcoming Bills
-                // UpcomingBillsCard(
-                //   bills: stats.upcomingBills
-                //       .map((bill) => {
-                //             'name': bill.name,
-                //             'amount': bill.amount,
-                //             'dueDate': bill.dueDate.toIso8601String().split('T')[0],
-                //           })
-                //       .toList(),
-                // ),
-                // const SizedBox(height: AppSizes.md),
-
-                // Recent Transactions
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSizes.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recent Transactions',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.go('/transactions');
-                              },
-                              child: const Text('View All'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSizes.sm),
-                        if (stats.recentTransactions.isEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(AppSizes.lg),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.receipt_long_outlined,
-                                    size: 48,
-                                    color: AppColors.textSecondary.withValues(alpha: 0.5),
-                                  ),
-                                  const SizedBox(height: AppSizes.sm),
-                                  Text(
-                                    'No recent transactions',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
-                                  ),
-                                  const SizedBox(height: AppSizes.md),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      context.go('/transactions/add?type=expense');
-                                    },
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('Add Transaction'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryTeal,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        else
-                          ...stats.recentTransactions.map((transaction) {
-                            final isIncome = transaction.type == TransactionType.income;
-                            final amount = isIncome ? transaction.amount : -transaction.amount;
-                            return _buildTransactionItem(
-                              context,
-                              icon: _getIconForTransaction(transaction),
-                              title: transaction.description ?? 'No description',
-                              subtitle: transaction.categoryName ?? 'Uncategorized',
-                              amount: amount,
-                              date: transaction.date,
-                              onTap: () {
-                                context.go('/transactions/add?type=${transaction.type.name}&id=${transaction.id}');
-                              },
-                            );
-                          }),
-                      ],
-                    ),
-                  ),
+                // ── Recent Transactions ───────────────────────────────────
+                _SectionHeader(
+                  title: 'Recent Transactions',
+                  action: 'See All',
+                  onAction: () => context.go('/transactions'),
                 ),
+                const SizedBox(height: AppSizes.xs),
+                _RecentTransactionsCard(
+                  transactions: stats.recentTransactions,
+                  isDark: isDark,
+                ),
+
+                // Ad banner
+                const SizedBox(height: AppSizes.md),
+                const AdBannerWidget(),
+                const SizedBox(height: AppSizes.md),
               ],
             ),
           ),
@@ -354,28 +218,19 @@ class DashboardPage extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSizes.md),
           child: Column(
             children: [
-              const SkeletonCard(height: 150),
+              const SkeletonCard(height: 160),
+              const SizedBox(height: AppSizes.md),
               const SkeletonCard(height: 100),
-              const SizedBox(height: AppSizes.lg),
-              Row(
-                children: [
-                  Expanded(child: const SkeletonCard(height: 80)),
-                  const SizedBox(width: AppSizes.md),
-                  Expanded(child: const SkeletonCard(height: 80)),
-                  const SizedBox(width: AppSizes.md),
-                  Expanded(child: const SkeletonCard(height: 80)),
-                ],
-              ),
-              const SkeletonCard(height: 120),
+              const SizedBox(height: AppSizes.md),
+              const SkeletonCard(height: 140),
+              const SizedBox(height: AppSizes.md),
               const SkeletonChart(height: 200),
-              const SkeletonCard(height: 150),
             ],
           ),
         ),
         error: (error, stack) => RefreshIndicator(
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
-            // ref.invalidate(emergencyFundStatusProvider); // [V1.1: Emergency Fund disabled]
             ref.invalidate(monthlyFlowDataProvider);
             ref.invalidate(netWorthSnapshotsProvider);
           },
@@ -386,10 +241,13 @@ class DashboardPage extends ConsumerWidget {
               child: EmptyState(
                 icon: Icons.error_outline,
                 title: 'Failed to load dashboard',
-                message: 'Unable to fetch your financial data. Please check your connection and try again.',
+                message:
+                    'Unable to fetch your financial data. Please check your connection and try again.',
                 actionLabel: 'Retry',
                 onAction: () {
-                  ref.read(dashboardNotifierProvider.notifier).loadDashboard();
+                  ref
+                      .read(dashboardNotifierProvider.notifier)
+                      .loadDashboard();
                 },
               ),
             ),
@@ -398,131 +256,257 @@ class DashboardPage extends ConsumerWidget {
       ),
     );
   }
+}
 
-  IconData _getIconForTransaction(TransactionEntity transaction) {
-    // Map category names to icons based on database categories
-    final categoryName = transaction.categoryName?.toLowerCase() ?? '';
+// ── Section header ────────────────────────────────────────────────────────────
 
-    // Income categories
-    if (transaction.type == TransactionType.income) {
-      if (categoryName.contains('salary')) {
-        return Icons.work_outline;
-      } else if (categoryName.contains('freelance')) {
-        return Icons.laptop_mac;
-      } else if (categoryName.contains('investment')) {
-        return Icons.trending_up;
-      } else if (categoryName.contains('gift')) {
-        return Icons.card_giftcard;
-      } else {
-        return Icons.attach_money;
-      }
-    }
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String? action;
+  final VoidCallback? onAction;
 
-    // Expense categories
-    if (categoryName.contains('food') || categoryName.contains('dining')) {
-      return Icons.restaurant;
-    } else if (categoryName.contains('transportation')) {
-      return Icons.directions_car;
-    } else if (categoryName.contains('shopping')) {
-      return Icons.shopping_bag;
-    } else if (categoryName.contains('entertainment')) {
-      return Icons.movie;
-    } else if (categoryName.contains('bills') || categoryName.contains('utilities')) {
-      return Icons.receipt_long;
-    } else if (categoryName.contains('healthcare') || categoryName.contains('health')) {
-      return Icons.local_hospital;
-    } else if (categoryName.contains('education')) {
-      return Icons.school;
-    } else if (categoryName.contains('housing')) {
-      return Icons.home;
-    } else if (categoryName.contains('personal care')) {
-      return Icons.spa;
-    } else {
-      return Icons.payment;
-    }
-  }
+  const _SectionHeader({required this.title, this.action, this.onAction});
 
-  Widget _buildTransactionItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required double amount,
-    required DateTime date,
-    VoidCallback? onTap,
-  }) {
-    final isPositive = amount >= 0;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-
-    // Calculate relative date
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final transactionDate = DateTime(date.year, date.month, date.day);
-    final difference = today.difference(transactionDate).inDays;
-
-    String dateText;
-    if (difference == 0) {
-      dateText = 'Today';
-    } else if (difference == 1) {
-      dateText = 'Yesterday';
-    } else if (difference < 7) {
-      dateText = '$difference days ago';
-    } else {
-      dateText = DateFormat('MMM d').format(date);
-    }
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(AppSizes.sm),
-        decoration: BoxDecoration(
-          color: isPositive
-              ? AppColors.success.withValues(alpha: 0.1)
-              : AppColors.error.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-        child: Icon(
-          icon,
-          color: isPositive ? AppColors.success : AppColors.error,
-        ),
-      ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
-          fontSize: 14,
-        ),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            '${isPositive ? '+' : ''}${currencyFormat.format(amount)}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: isPositive ? AppColors.success : AppColors.error,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            dateText,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 12,
+        if (action != null)
+          GestureDetector(
+            onTap: onAction,
+            child: Text(
+              action!,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                color: AppColors.brandTeal,
+                letterSpacing: -0.24,
+              ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+// ── Recent transactions card ──────────────────────────────────────────────────
+
+class _RecentTransactionsCard extends StatelessWidget {
+  final List<TransactionEntity> transactions;
+  final bool isDark;
+
+  const _RecentTransactionsCard({
+    required this.transactions,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    if (transactions.isEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.all(AppSizes.xl),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(
+                CupertinoIcons.doc_text,
+                size: 40,
+                color: AppColors.systemGray3,
+              ),
+              const SizedBox(height: AppSizes.sm),
+              Text(
+                'No recent transactions',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.systemGray,
+                    ),
+              ),
+              const SizedBox(height: AppSizes.md),
+              ElevatedButton.icon(
+                onPressed: () =>
+                    context.go('/transactions/add?type=expense'),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Transaction'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (int i = 0; i < transactions.length; i++) ...[
+            _TransactionRow(
+              transaction: transactions[i],
+              isDark: isDark,
+            ),
+            if (i < transactions.length - 1)
+              Divider(
+                height: 0,
+                thickness: 0.5,
+                indent: 60,
+                color: isDark ? AppColors.separatorDark : AppColors.separator,
+              ),
+          ],
         ],
       ),
-      onTap: onTap,
     );
+  }
+}
+
+class _TransactionRow extends StatelessWidget {
+  final TransactionEntity transaction;
+  final bool isDark;
+
+  const _TransactionRow({required this.transaction, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final isIncome = transaction.type == TransactionType.income;
+    final amount = isIncome ? transaction.amount : -transaction.amount;
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final txDate = DateTime(
+        transaction.date.year, transaction.date.month, transaction.date.day);
+    final diff = today.difference(txDate).inDays;
+    final dateText = diff == 0
+        ? 'Today'
+        : diff == 1
+            ? 'Yesterday'
+            : diff < 7
+                ? '$diff days ago'
+                : DateFormat('MMM d').format(transaction.date);
+
+    final iconData = _iconForTransaction(transaction);
+    final iconColor = isIncome ? AppColors.systemGreen : AppColors.systemRed;
+    final iconBg = iconColor.withValues(alpha: 0.12);
+
+    return InkWell(
+      onTap: () => context.go(
+          '/transactions/add?type=${transaction.type.name}&id=${transaction.id}'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md,
+          vertical: 12,
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(iconData, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: AppSizes.sm + 4),
+            // Title + category
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.description ?? 'No description',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    transaction.categoryName ?? 'Uncategorized',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSizes.sm),
+            // Amount + date
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${amount >= 0 ? '+' : ''}${currencyFormat.format(amount)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: amount >= 0
+                            ? AppColors.systemGreen
+                            : AppColors.systemRed,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  dateText,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _iconForTransaction(TransactionEntity tx) {
+    final cat = tx.categoryName?.toLowerCase() ?? '';
+    if (tx.type == TransactionType.income) {
+      if (cat.contains('salary')) return CupertinoIcons.briefcase;
+      if (cat.contains('freelance')) return CupertinoIcons.desktopcomputer;
+      if (cat.contains('investment')) return CupertinoIcons.graph_circle;
+      if (cat.contains('gift')) return CupertinoIcons.gift;
+      return CupertinoIcons.money_dollar_circle;
+    }
+    if (cat.contains('food') || cat.contains('dining')) return CupertinoIcons.cart;
+    if (cat.contains('transport')) return CupertinoIcons.car;
+    if (cat.contains('shopping')) return CupertinoIcons.bag;
+    if (cat.contains('entertainment')) return CupertinoIcons.film;
+    if (cat.contains('bills') || cat.contains('utilities')) return CupertinoIcons.doc_text;
+    if (cat.contains('health')) return CupertinoIcons.heart;
+    if (cat.contains('education')) return CupertinoIcons.book;
+    if (cat.contains('housing')) return CupertinoIcons.house;
+    return CupertinoIcons.creditcard;
   }
 }

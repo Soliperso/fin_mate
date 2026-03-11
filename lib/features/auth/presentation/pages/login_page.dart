@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/secure_storage_provider.dart';
@@ -17,7 +17,6 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _logger = Logger();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -34,23 +33,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _emailFocusNode.requestFocus();
     });
+
+    // Clear errors when user types
+    _emailController.addListener(_clearError);
+    _passwordController.addListener(_clearError);
+  }
+
+  void _clearError() {
+    final authState = ref.read(authNotifierProvider);
+    if (authState.errorMessage != null) {
+      ref.read(authNotifierProvider.notifier).clearError();
+    }
   }
 
   Future<void> _loadSavedCredentials() async {
     final storageService = ref.read(secureStorageServiceProvider);
-    final rememberMe = await storageService.isRememberMeEnabled();
+    final email = await storageService.getSavedEmail();
 
-    if (rememberMe) {
-      final email = await storageService.getSavedEmail();
-      final password = await storageService.getSavedPassword();
-
-      if (email != null && password != null) {
-        setState(() {
-          _emailController.text = email;
-          _passwordController.text = password;
-          _rememberMe = true;
-        });
-      }
+    if (email != null) {
+      setState(() {
+        _emailController.text = email;
+        _rememberMe = true;
+      });
     }
   }
 
@@ -70,24 +74,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: AppSizes.xl),
                 Center(
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primaryTeal.withValues(alpha: 0.15),
-                          AppColors.primaryTeal.withValues(alpha: 0.08),
-                        ],
-                      ),
+                      color: AppColors.systemGray6,
                     ),
-                    child: Icon(
-                      Icons.lock_person_outlined,
-                      size: 58,
-                      color: AppColors.primaryTeal.withValues(alpha: 0.7),
-                      weight: 210,
+                    child: const Icon(
+                      CupertinoIcons.lock_shield_fill,
+                      size: 44,
+                      color: AppColors.label,
                     ),
                   ),
                 ),
@@ -118,7 +114,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: AppColors.error),
+                        Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
                         const SizedBox(width: AppSizes.sm),
                         Expanded(
                           child: Text(
@@ -139,7 +135,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   decoration: const InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
+                    prefixIcon: Icon(CupertinoIcons.mail),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -160,10 +156,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onFieldSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outlined),
+                    prefixIcon: const Icon(CupertinoIcons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? CupertinoIcons.eye_slash
+                            : CupertinoIcons.eye,
                       ),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
@@ -252,18 +250,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       data: (isAvailable) {
                         if (!isAvailable) return const SizedBox.shrink();
 
-                        // Check if credentials are saved
-                        return FutureBuilder<bool>(
-                          future: ref.read(secureStorageServiceProvider).isRememberMeEnabled(),
+                        // Check if email is saved
+                        return FutureBuilder<String?>(
+                          future: ref.read(secureStorageServiceProvider).getSavedEmail(),
                           builder: (context, snapshot) {
-                            // Only show if user has saved credentials
-                            if (!snapshot.hasData || !snapshot.data!) {
+                            // Only show if user has saved email
+                            if (!snapshot.hasData || snapshot.data == null) {
                               return const SizedBox.shrink();
                             }
 
                             return OutlinedButton.icon(
                               onPressed: authState.isLoading ? null : _handleBiometricLogin,
-                              icon: const Icon(Icons.fingerprint),
+                              icon: const Icon(CupertinoIcons.lock_circle),
                               label: const Text('Use Biometric Login'),
                             );
                           },
@@ -291,10 +289,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         // Save or clear credentials based on remember me
         if (_rememberMe) {
-          await storageService.saveCredentials(
-            email: email,
-            password: password,
-          );
+          await storageService.saveEmail(email);
 
           // Check if biometric is available and enable it
           final biometricService = ref.read(biometricServiceProvider);
@@ -303,7 +298,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             await storageService.setBiometricEnabled(true);
           }
         } else {
-          await storageService.clearCredentials();
+          await storageService.clearEmail();
           await storageService.setBiometricEnabled(false);
         }
 
@@ -313,86 +308,63 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             );
         // Router will automatically redirect to dashboard via redirect logic
       } catch (e) {
-        if (mounted) {
-          ErrorSnackbar.show(
-            context,
-            message: ref.read(authNotifierProvider).errorMessage ??
-                'Failed to sign in. Please try again.',
-          );
-        }
+        // Error is shown via the inline error box (authState.errorMessage)
       }
     }
   }
 
   Future<void> _handleBiometricLogin() async {
-    _logger.d('Biometric login button pressed');
-
     try {
       final biometricService = ref.read(biometricServiceProvider);
       final storageService = ref.read(secureStorageServiceProvider);
 
-      _logger.d('Checking biometric availability...');
       final isAvailable = await biometricService.isBiometricAvailable();
-      _logger.d('Biometric available: $isAvailable');
 
       if (!isAvailable) {
         if (mounted) {
-          ErrorSnackbar.show(
+          showErrorDialog(
             context,
-            message: 'Biometric authentication is not available on this device',
+            'Biometric authentication is not available on this device',
           );
         }
         return;
       }
 
-      _logger.d('Getting saved credentials...');
       final email = await storageService.getSavedEmail();
-      final password = await storageService.getSavedPassword();
-      _logger.d('Email found: ${email != null}, Password found: ${password != null}');
 
-      if (email == null || password == null) {
+      if (email == null) {
         if (mounted) {
-          ErrorSnackbar.show(
+          showErrorDialog(
             context,
-            message: 'No saved credentials found. Please login with "Remember me" enabled first.',
-            duration: const Duration(seconds: 4),
+            'No saved email found. Please log in first.',
           );
         }
         return;
       }
 
-      _logger.d('Starting biometric authentication...');
-      // Authenticate with biometrics
+      // Authenticate with biometrics first
       final result = await biometricService.authenticate(
         localizedReason: 'Authenticate to access FinMate',
       );
 
-      _logger.d('Biometric result: ${result.success}');
       if (!result.success) {
         if (mounted) {
-          ErrorSnackbar.show(
+          showErrorDialog(
             context,
-            message: result.errorMessage ?? 'Biometric authentication failed',
+            result.errorMessage ?? 'Biometric authentication failed',
           );
         }
         return;
       }
 
-      _logger.d('Biometric success, signing in...');
-      // Sign in with saved credentials
-      await ref.read(authNotifierProvider.notifier).signInWithEmail(
-            email: email,
-            password: password,
-          );
-      _logger.d('Sign in complete');
-    } catch (e, stackTrace) {
-      _logger.e('Biometric login error', error: e, stackTrace: stackTrace);
-
+      // Pre-fill email and focus password field
+      _emailController.text = email;
       if (mounted) {
-        ErrorSnackbar.show(
-          context,
-          message: 'Biometric login failed: ${e.toString()}',
-        );
+        _passwordFocusNode.requestFocus();
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorDialog(context, 'Biometric authentication failed');
       }
     }
   }

@@ -31,7 +31,11 @@ class _CashFlowChartState extends State<CashFlowChart> {
     final currencyFormat = NumberFormat.compactCurrency(symbol: '\$', decimalDigits: 0);
 
     return GlassContainer(
-      padding: const EdgeInsets.all(AppSizes.md),
+      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      border: Border.all(color: Colors.transparent, width: 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -140,7 +144,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
           horizontalInterval: _calculateInterval(),
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: AppColors.textTertiary.withValues(alpha: 0.1),
+              color: AppColors.textTertiary.withValues(alpha: 0.06),
               strokeWidth: 1,
             );
           },
@@ -149,7 +153,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 45,
+              reservedSize: 52,
               interval: _calculateInterval(),
               getTitlesWidget: (value, meta) {
                 return Text(
@@ -165,16 +169,16 @@ class _CashFlowChartState extends State<CashFlowChart> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 30,
+              reservedSize: 24,
               getTitlesWidget: (value, meta) {
                 if (value.toInt() >= 0 && value.toInt() < widget.flowData.length) {
                   final data = widget.flowData[value.toInt()];
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const EdgeInsets.only(top: 6.0),
                     child: Text(
                       DateFormat('MMM').format(data.month),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 10,
+                            fontSize: 9,
                             color: AppColors.textSecondary,
                           ),
                     ),
@@ -208,20 +212,11 @@ class _CashFlowChartState extends State<CashFlowChart> {
                     ))
                 .toList(),
             isCurved: true,
+            curveSmoothness: 0.3,
             color: AppColors.success,
-            barWidth: 3,
+            barWidth: 2.5,
             isStrokeCapRound: true,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: 4,
-                  color: AppColors.success,
-                  strokeWidth: 2,
-                  strokeColor: AppColors.white,
-                );
-              },
-            ),
+            dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(
@@ -245,20 +240,11 @@ class _CashFlowChartState extends State<CashFlowChart> {
                     ))
                 .toList(),
             isCurved: true,
+            curveSmoothness: 0.3,
             color: AppColors.error,
-            barWidth: 3,
+            barWidth: 2.5,
             isStrokeCapRound: true,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: 4,
-                  color: AppColors.error,
-                  strokeWidth: 2,
-                  strokeColor: AppColors.white,
-                );
-              },
-            ),
+            dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(
@@ -322,16 +308,16 @@ class _CashFlowChartState extends State<CashFlowChart> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 30,
+              reservedSize: 24,
               getTitlesWidget: (value, meta) {
                 if (value.toInt() >= 0 && value.toInt() < widget.flowData.length) {
                   final data = widget.flowData[value.toInt()];
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const EdgeInsets.only(top: 6.0),
                     child: Text(
                       DateFormat('MMM').format(data.month),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 10,
+                            fontSize: 9,
                             color: AppColors.textSecondary,
                           ),
                     ),
@@ -344,7 +330,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 45,
+              reservedSize: 52,
               interval: _calculateInterval(),
               getTitlesWidget: (value, meta) {
                 return Text(
@@ -370,7 +356,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
           horizontalInterval: _calculateInterval(),
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: AppColors.textTertiary.withValues(alpha: 0.1),
+              color: AppColors.textTertiary.withValues(alpha: 0.06),
               strokeWidth: 1,
             );
           },

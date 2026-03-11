@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/balance_forecast_provider.dart';
 import '../providers/insights_providers.dart';
+import '../../domain/entities/balance_forecast.dart';
 import '../widgets/enhanced_chat_message_bubble.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/chat_input_field.dart';
@@ -89,6 +91,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
     setState(() => _isProcessing = false);
     _scrollToBottom();
+    ref.invalidate(dynamicPromptsProvider);
   }
 
   void _handleActionTap(String actionType) {
@@ -119,7 +122,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         actions: [
           if (_tabController.index == 0)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
+              icon: const Icon(CupertinoIcons.ellipsis),
               onSelected: (value) {
                 if (value == 'clear') {
                   _showClearChatDialog();
@@ -130,7 +133,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   value: 'clear',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline, size: 20),
+                      Icon(CupertinoIcons.delete, size: 20),
                       SizedBox(width: 8),
                       Text('Clear chat history'),
                     ],
@@ -140,31 +143,33 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
             )
           else
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(CupertinoIcons.refresh),
               onPressed: () {
                 ref.invalidate(spendingInsightsProvider);
                 ref.invalidate(defaultCategoryBreakdownProvider);
                 ref.invalidate(defaultForecastProvider);
                 ref.invalidate(balanceForecastProvider);
+                ref.invalidate(multiScenarioForecastProvider);
+                ref.invalidate(typedProactiveAlertsProvider);
               },
             ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primaryTeal,
+          labelColor: AppColors.brandTeal,
           unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primaryTeal,
+          indicatorColor: AppColors.brandTeal,
           tabs: const [
             Tab(
-              icon: Icon(Icons.chat_bubble_outline, size: 20),
+              icon: Icon(CupertinoIcons.chat_bubble_text, size: 20),
               text: 'Chat',
             ),
             Tab(
-              icon: Icon(Icons.insights, size: 20),
+              icon: Icon(CupertinoIcons.chart_bar_alt_fill, size: 20),
               text: 'Insights',
             ),
             Tab(
-              icon: Icon(Icons.timeline, size: 20),
+              icon: Icon(CupertinoIcons.graph_circle, size: 20),
               text: 'Forecast',
             ),
           ],
@@ -183,7 +188,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
   Widget _buildChatTab() {
     final chatMessagesAsync = ref.watch(chatProvider);
-    final suggestedPrompts = ref.watch(suggestedPromptsProvider);
+    final List<String> suggestedPrompts = ref.watch(dynamicPromptsProvider).whenOrNull(data: (p) => p)
+        ?? ref.watch(suggestedPromptsProvider);
 
     return Column(
       children: [
@@ -200,7 +206,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   icon: Icons.chat_bubble_outline,
                   title: 'Start a Conversation',
                   message: 'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
-                  backgroundColor: AppColors.primaryTeal,
+                  backgroundColor: AppColors.brandTeal,
                 );
               }
 
@@ -255,11 +261,13 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
   }
 
   Widget _buildForecastTab() {
-    final forecastAsync = ref.watch(balanceForecastProvider);
+    final activeForecastAsync = ref.watch(activeForecastProvider);
+    final selectedScenario = ref.watch(selectedForecastScenarioProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(balanceForecastProvider);
+        ref.invalidate(multiScenarioForecastProvider);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -267,7 +275,30 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            forecastAsync.when(
+            // Scenario selector
+            SegmentedButton<ForecastScenarioType>(
+              segments: ForecastScenarioType.values
+                  .map((t) => ButtonSegment<ForecastScenarioType>(
+                        value: t,
+                        label: Text(
+                          t.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ))
+                  .toList(),
+              selected: {selectedScenario},
+              onSelectionChanged: (s) => ref
+                  .read(selectedForecastScenarioProvider.notifier)
+                  .state = s.first,
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              expandedInsets: EdgeInsets.zero,
+            ),
+            const SizedBox(height: AppSizes.md),
+            activeForecastAsync.when(
               data: (forecast) {
                 return Column(
                   children: [
@@ -289,7 +320,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
               error: (error, stack) => ErrorRetryWidget(
                 title: 'Failed to generate forecast',
                 message: 'Unable to predict future balance',
-                onRetry: () => ref.invalidate(balanceForecastProvider),
+                onRetry: () => ref.invalidate(multiScenarioForecastProvider),
               ),
             ),
           ],
@@ -301,7 +332,23 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
   Widget _buildForecastDetails(List forecast) {
     if (forecast.isEmpty) return const SizedBox.shrink();
 
-    return Card(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.md),
         child: Column(
@@ -436,7 +483,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.block, color: AppColors.error),
+            Icon(CupertinoIcons.xmark_circle, color: AppColors.error),
             const SizedBox(width: 8),
             const Text('Query Limit Reached'),
           ],
@@ -461,7 +508,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                color: AppColors.brandTeal.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Column(
@@ -517,7 +564,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
               context.push('/pricing');
             },
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryTeal,
+              backgroundColor: AppColors.brandTeal,
             ),
             child: const Text('Upgrade to Premium'),
           ),

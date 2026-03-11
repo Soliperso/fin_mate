@@ -20,7 +20,7 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
 // Transactions Provider (monthly)
 final transactionsProvider =
     FutureProvider.family<List<TransactionEntity>, DateTime>((ref, month) async {
-  final repository = ref.read(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProvider);
   final startDate = DateTime(month.year, month.month, 1);
   final endDate = DateTime(month.year, month.month + 1, 0);
 
@@ -32,25 +32,25 @@ final transactionsProvider =
 
 // Recent Transactions Provider
 final recentTransactionsProvider = FutureProvider<List<TransactionEntity>>((ref) async {
-  final repository = ref.read(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getRecentTransactions(limit: 10);
 });
 
 // Accounts Provider
 final accountsProvider = FutureProvider<List<AccountEntity>>((ref) async {
-  final repository = ref.read(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getAccounts();
 });
 
 // Categories Provider
 final categoriesProvider = FutureProvider.family<List<CategoryEntity>, String?>((ref, type) async {
-  final repository = ref.read(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getCategories(type: type);
 });
 
-// Dashboard Stats Provider
-final dashboardStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final repository = ref.read(transactionRepositoryProvider);
+// Transaction Monthly Stats Provider
+final transactionMonthlyStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final repository = ref.watch(transactionRepositoryProvider);
   final now = DateTime.now();
   final startDate = DateTime(now.year, now.month, 1);
   final endDate = DateTime(now.year, now.month + 1, 0);
@@ -64,7 +64,7 @@ final dashboardStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async 
 // Category Breakdown Provider (for charts)
 final categoryBreakdownProvider =
     FutureProvider.family<List<Map<String, dynamic>>, String>((ref, type) async {
-  final repository = ref.read(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProvider);
   final now = DateTime.now();
   final startDate = DateTime(now.year, now.month, 1);
   final endDate = DateTime(now.year, now.month + 1, 0);

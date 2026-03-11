@@ -14,9 +14,6 @@ class SentryService {
 
     // Skip initialization if DSN is not configured
     if (dsn.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️ Sentry DSN not configured. Error tracking disabled.');
-      }
       return;
     }
 
@@ -40,11 +37,11 @@ class SentryService {
           // Debug mode
           options.debug = kDebugMode;
 
-          // Attach screenshots on errors (helpful for debugging)
-          options.attachScreenshot = true;
+          // Disable screenshots in production for privacy
+          options.attachScreenshot = kDebugMode;
 
-          // Attach view hierarchy on errors
-          options.attachViewHierarchy = true;
+          // Disable view hierarchy in production for privacy
+          options.attachViewHierarchy = kDebugMode;
 
           // Send default PII (Personally Identifiable Information)
           // Set to false to comply with GDPR
@@ -64,7 +61,13 @@ class SentryService {
                   return !message.contains('password') &&
                       !message.contains('token') &&
                       !message.contains('secret') &&
-                      !message.contains('apikey');
+                      !message.contains('apikey') &&
+                      !message.contains('amount') &&
+                      !message.contains('balance') &&
+                      !message.contains('account_number') &&
+                      !message.contains('card') &&
+                      !message.contains('ssn') &&
+                      !message.contains('transaction');
                 }).toList(),
               );
             }
@@ -76,7 +79,11 @@ class SentryService {
                 data.removeWhere((key, value) =>
                     key.toLowerCase().contains('password') ||
                     key.toLowerCase().contains('token') ||
-                    key.toLowerCase().contains('secret'));
+                    key.toLowerCase().contains('secret') ||
+                    key.toLowerCase().contains('amount') ||
+                    key.toLowerCase().contains('balance') ||
+                    key.toLowerCase().contains('account') ||
+                    key.toLowerCase().contains('card'));
               }
             }
 
@@ -100,14 +107,8 @@ class SentryService {
       );
 
       _isInitialized = true;
-
-      if (kDebugMode) {
-        print('✅ Sentry initialized successfully');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Failed to initialize Sentry: $e');
-      }
+      // Sentry initialization failed silently
     }
   }
 

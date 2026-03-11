@@ -1,10 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
 import '../../domain/entities/cash_flow_warning.dart';
 import '../../domain/entities/bill_collision.dart';
+import '../../domain/entities/proactive_alert.dart';
+import 'balance_forecast_service.dart';
 
 class InsightsService {
   final SupabaseClient _supabase;
@@ -808,6 +811,232 @@ class InsightsService {
 
   // Phase 3: Proactive Alerts
 
-  Future<List<CashFlowWarning>> detectCashFlowWarnings({int daysToAnalyze = 90}) async => [];
-  Future<List<BillCollision>> detectBillCollisions({int daysToLook = 60}) async => [];
+  Future<List<CashFlowWarning>> detectCashFlowWarnings({int daysToAnalyze = 90}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return [];
+
+      // Get current total balance
+      final accounts = await _supabase
+          .from('accounts')
+          .select('balance')
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+      double currentBalance = 0;
+      for (final a in accounts as List) {
+        currentBalance += (a['balance'] as num).toDouble();
+      }
+
+      // Calculate average daily spending
+      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
+      final transactions = await _supabase
+          .from('transactions')
+          .select('amount')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', startDate.toIso8601String().split('T')[0]);
+
+      double totalSpend = 0;
+      for (final t in transactions as List) {
+        totalSpend += (t['amount'] as num).toDouble();
+      }
+
+      final dailyBurnRate = daysToAnalyze > 0 ? totalSpend / daysToAnalyze : 0.0;
+      if (dailyBurnRate <= 0) return [];
+
+      const safeThreshold = BalanceForecastService.warningThreshold;
+      final daysUntilLow = ((currentBalance - safeThreshold) / dailyBurnRate).floor();
+
+      // Only warn if low balance within 30 days
+      if (daysUntilLow > 30) return [];
+
+      final daysUntilClamped = daysUntilLow.clamp(0, 30);
+      final projectedBalance = currentBalance - (dailyBurnRate * 30);
+      final projectedDate = DateTime.now().add(Duration(days: daysUntilClamped));
+
+      final recommendation = daysUntilClamped <= 3
+          ? 'Your balance will drop critically low in $daysUntilClamped days. Reduce non-essential spending immediately.'
+          : 'At current spending, your balance reaches the safety threshold in $daysUntilClamped days.';
+
+      return [
+        CashFlowWarning(
+          id: 'cf_warning_${DateTime.now().millisecondsSinceEpoch}',
+          currentBalance: currentBalance,
+          projectedBalance: projectedBalance,
+          dailyBurnRate: dailyBurnRate,
+          daysUntilLowBalance: daysUntilClamped,
+          safeThreshold: safeThreshold,
+          projectedDate: projectedDate,
+          recommendation: recommendation,
+          suggestions: [
+            'Review upcoming bills in the Forecast tab',
+            'Check your largest spending categories',
+            if (daysUntilClamped <= 7) 'Consider delaying non-essential purchases',
+          ],
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<BillCollision>> detectBillCollisions({int daysToLook = 60}) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return [];
+
+      final endDate = DateTime.now().add(Duration(days: daysToLook));
+
+      final recurringTxns = await _supabase
+          .from('recurring_transactions')
+          .select('id, description, amount, type, frequency, next_occurrence, categories(name)')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .eq('type', 'expense')
+          .lte('next_occurrence', endDate.toIso8601String().split('T')[0]);
+
+      // Group bill occurrences by date
+      final billsByDate = <String, List<BillItem>>{};
+
+      for (final rt in recurringTxns as List) {
+        final occurrences = _expandRecurringOccurrences(rt as Map<String, dynamic>, daysToLook);
+        for (final occ in occurrences) {
+          final dateKey = occ['date'] as String;
+          billsByDate[dateKey] ??= [];
+          billsByDate[dateKey]!.add(BillItem(
+            name: (rt['description'] as String?) ?? 'Unknown',
+            amount: (rt['amount'] as num).toDouble(),
+            category: (rt['categories'] as Map<String, dynamic>?)?['name'] as String? ?? 'Uncategorized',
+            dueDate: DateTime.parse(dateKey),
+          ));
+        }
+      }
+
+      // Find dates with 2+ bills
+      final collisions = <BillCollision>[];
+      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+      for (final entry in billsByDate.entries) {
+        if (entry.value.length < 2) continue;
+
+        final dueDate = DateTime.parse(entry.key);
+        final total = entry.value.fold(0.0, (sum, b) => sum + b.amount);
+
+        collisions.add(BillCollision(
+          id: 'collision_${entry.key}',
+          dueDate: dueDate,
+          bills: entry.value,
+          totalAmount: total,
+          recommendation:
+              '${entry.value.length} bills totaling ${currencyFormat.format(total)} are due on the same day.',
+          alternativeDates: [
+            dueDate.subtract(const Duration(days: 1)),
+            dueDate.add(const Duration(days: 1)),
+          ],
+        ));
+      }
+
+      collisions.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      return collisions;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Aggregate all alert types into typed ProactiveAlert list
+  Future<List<ProactiveAlert>> getTypedProactiveAlerts() async {
+    final alerts = <ProactiveAlert>[];
+    final now = DateTime.now();
+
+    try {
+      final collisions = await detectBillCollisions(daysToLook: 30);
+      for (final collision in collisions.where((c) => c.isImminent)) {
+        final dateStr = DateFormat('MMM d').format(collision.dueDate);
+        alerts.add(ProactiveAlert(
+          id: collision.id,
+          type: AlertType.billCollision,
+          severity: AlertSeverity.high,
+          title: 'Bills Colliding on $dateStr',
+          message: collision.recommendation,
+          createdAt: now,
+        ));
+      }
+    } catch (_) {}
+
+    try {
+      final warnings = await detectCashFlowWarnings();
+      for (final warning in warnings) {
+        alerts.add(ProactiveAlert(
+          id: warning.id,
+          type: warning.isCritical ? AlertType.lowBalance : AlertType.cashFlowWarning,
+          severity: warning.isCritical ? AlertSeverity.critical : AlertSeverity.high,
+          title: warning.isCritical ? 'Low Balance Alert' : 'Cash Flow Warning',
+          message: warning.recommendation,
+          createdAt: now,
+        ));
+      }
+    } catch (_) {}
+
+    try {
+      final anomalies = await detectSpendingAnomalies(daysToAnalyze: 14);
+      final highAnomalies = anomalies.where((a) =>
+          a.severity == AnomalySeverity.high || a.severity == AnomalySeverity.critical);
+      if (highAnomalies.isNotEmpty) {
+        alerts.add(ProactiveAlert(
+          id: 'unusual_${now.millisecondsSinceEpoch}',
+          type: AlertType.unusualSpending,
+          severity: AlertSeverity.medium,
+          title: 'Unusual Spending Detected',
+          message: '${highAnomalies.length} unusual transaction${highAnomalies.length == 1 ? '' : 's'} in the past 2 weeks.',
+          createdAt: now,
+        ));
+      }
+    } catch (_) {}
+
+    // Sort: critical first, then by creation time
+    alerts.sort((a, b) => b.severity.index.compareTo(a.severity.index));
+    return alerts;
+  }
+
+  /// Expand a recurring transaction into individual occurrences within [days]
+  List<Map<String, dynamic>> _expandRecurringOccurrences(
+    Map<String, dynamic> recurring,
+    int days,
+  ) {
+    try {
+      final frequency = recurring['frequency'] as String?;
+      final nextOccurrence = recurring['next_occurrence'] as String?;
+      if (frequency == null || nextOccurrence == null) return [];
+
+      final occurrences = <Map<String, dynamic>>[];
+      DateTime nextDate = DateTime.parse(nextOccurrence);
+      final endDate = DateTime.now().add(Duration(days: days));
+
+      while (nextDate.isBefore(endDate)) {
+        occurrences.add({'date': nextDate.toIso8601String().split('T')[0]});
+        // Advance to next occurrence
+        switch (frequency) {
+          case 'daily':
+            nextDate = nextDate.add(const Duration(days: 1));
+            break;
+          case 'weekly':
+            nextDate = nextDate.add(const Duration(days: 7));
+            break;
+          case 'monthly':
+            nextDate = DateTime(nextDate.year, nextDate.month + 1, nextDate.day);
+            break;
+          case 'yearly':
+            nextDate = DateTime(nextDate.year + 1, nextDate.month, nextDate.day);
+            break;
+          default:
+            nextDate = nextDate.add(const Duration(days: 30));
+        }
+      }
+
+      return occurrences;
+    } catch (e) {
+      return [];
+    }
+  }
 }

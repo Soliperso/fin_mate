@@ -57,16 +57,16 @@ class EmptyStateCard extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSizes.lg),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: backgroundColor.withValues(alpha: 0.15),
+                        color: backgroundColor.withValues(alpha: 0.08),
                         border: Border.all(
-                          color: backgroundColor.withValues(alpha: 0.2),
-                          width: 2,
+                          color: backgroundColor.withValues(alpha: 0.15),
+                          width: 1.5,
                         ),
                       ),
                       child: Icon(
                         icon,
-                        size: 48,
-                        color: backgroundColor,
+                        size: 40,
+                        color: backgroundColor.withValues(alpha: 0.55),
                       ),
                     ),
                   );
@@ -101,7 +101,7 @@ class EmptyStateCard extends StatelessWidget {
                 height: 2,
                 width: 40,
                 decoration: BoxDecoration(
-                  color: backgroundColor.withValues(alpha: 0.4),
+                  color: backgroundColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(1),
                 ),
               ),

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/analytics_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
@@ -77,7 +81,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             : const Text('Transactions'),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(
+              _isSearching ? CupertinoIcons.xmark : CupertinoIcons.search,
+              size: 22,
+            ),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
@@ -92,54 +99,88 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
           IconButton(
             icon: Icon(
-              Icons.filter_list,
+              CupertinoIcons.slider_horizontal_3,
+              size: 22,
               color: state.hasActiveFilters ? AppColors.primaryTeal : null,
             ),
             onPressed: () => _showFilterBottomSheet(context),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Filter chips
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildFilterChip(context, 'All', state.selectedFilter, notifier),
-                const SizedBox(width: AppSizes.sm),
-                _buildFilterChip(context, 'Income', state.selectedFilter, notifier),
-                const SizedBox(width: AppSizes.sm),
-                _buildFilterChip(context, 'Expense', state.selectedFilter, notifier),
-                const SizedBox(width: AppSizes.sm),
-                // _buildFilterChip(context, 'Transfer', state.selectedFilter, notifier),
-              ],
+      body: state.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : state.transactions.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    child: EmptyStateCard(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'No Transactions Yet',
+                      message:
+                          'Start by adding your first transaction to begin tracking your finances.',
+                      backgroundColor: AppColors.primaryTeal,
+                    ),
+                  ),
+                )
+              : Column(
+                  children: [
+                    // Filter chips
+                    Container(
+                      height: 60,
+                      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _buildFilterChip(context, 'All', state.selectedFilter, notifier),
+                          const SizedBox(width: AppSizes.sm),
+                          _buildFilterChip(context, 'Income', state.selectedFilter, notifier),
+                          const SizedBox(width: AppSizes.sm),
+                          _buildFilterChip(context, 'Expense', state.selectedFilter, notifier),
+                          const SizedBox(width: AppSizes.sm),
+                        ],
+                      ),
+                    ),
+
+                    Divider(
+                      height: 1,
+                      color: AppColors.borderLight.withValues(alpha: 0.3),
+                    ),
+
+                    // Transactions list
+                    Expanded(
+                      child: _buildTransactionsList(state, notifier),
+                    ),
+                  ],
+                ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              await context.push('/transactions/add');
+              if (mounted) {
+                ref.read(transactionListProvider.notifier).refresh();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+            ),
+            icon: const Icon(CupertinoIcons.add, size: 20),
+            label: const Text(
+              'New Transaction',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
           ),
-
-          Divider(
-            height: 1,
-            color: AppColors.borderLight.withValues(alpha: 0.3),
-          ),
-
-          // Transactions list
-          Expanded(
-            child: _buildTransactionsList(state, notifier),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await context.push('/transactions/add');
-          // Refresh transactions after returning from add page
-          if (mounted) {
-            ref.read(transactionListProvider.notifier).refresh();
-          }
-        },
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Transaction', style: TextStyle(color: Colors.white)),
+        ),
       ),
     );
   }
@@ -208,9 +249,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     if (state.filteredTransactions.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.xl),
+          padding: const EdgeInsets.all(AppSizes.md),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               EmptyStateCard(
                 icon: Icons.receipt_long_outlined,
@@ -242,15 +283,90 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Group transactions by date
+    final grouped = <String, List<TransactionEntity>>{};
+    for (final tx in state.filteredTransactions) {
+      final key = DateFormat('MMMM d, yyyy').format(tx.date);
+      grouped.putIfAbsent(key, () => []).add(tx);
+    }
+    final groups = grouped.entries.toList();
+
     return RefreshIndicator(
+      color: AppColors.brandTeal,
       onRefresh: () => notifier.refresh(),
-      child: ListView.separated(
-        padding: const EdgeInsets.all(AppSizes.md),
-        itemCount: state.filteredTransactions.length,
-        separatorBuilder: (context, index) => const SizedBox(height: AppSizes.sm),
-        itemBuilder: (context, index) {
-          final transaction = state.filteredTransactions[index];
-          return _buildTransactionCard(context, transaction, notifier);
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.pagePadding,
+          vertical: AppSizes.md,
+        ),
+        itemCount: groups.length + 1, // +1 for ad banner
+        itemBuilder: (context, groupIndex) {
+          if (groupIndex == groups.length) {
+            return const Padding(
+              padding: EdgeInsets.only(top: AppSizes.md),
+              child: AdBannerWidget(),
+            );
+          }
+          final entry = groups[groupIndex];
+          final txList = entry.value;
+          final cardBg = isDark
+              ? AppColors.secondarySystemBackgroundDark
+              : AppColors.systemBackground;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: AppSizes.sm,
+                  bottom: AppSizes.xs,
+                ),
+                child: Text(
+                  entry.key,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: AppColors.systemGray,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                  boxShadow: isDark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    for (int i = 0; i < txList.length; i++) ...[
+                      _buildTransactionCard(context, txList[i], notifier),
+                      if (i < txList.length - 1)
+                        Divider(
+                          height: 0,
+                          thickness: 0.5,
+                          indent: 60,
+                          color: isDark
+                              ? AppColors.separatorDark
+                              : AppColors.separator,
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSizes.sm),
+            ],
+          );
         },
       ),
     );
@@ -264,104 +380,91 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final isIncome = transaction.type == TransactionType.income;
     final isTransfer = transaction.type == TransactionType.transfer;
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-    final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
 
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
+    final iconColor = isIncome
+        ? AppColors.systemGreen
+        : isTransfer
+            ? AppColors.systemBlue
+            : AppColors.systemRed;
+    final amountPrefix = isIncome ? '+' : isTransfer ? '' : '-';
+
+    return InkWell(
+      onTap: () => _showTransactionDetails(context, transaction, notifier),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.md,
-          vertical: AppSizes.xs,
+          vertical: 12,
         ),
-        leading: CircleAvatar(
-          backgroundColor: isIncome
-              ? AppColors.success.withValues(alpha: 0.2)
-              : isTransfer
-                  ? AppColors.slateBlue.withValues(alpha: 0.2)
-                  : AppColors.error.withValues(alpha: 0.2),
-          child: Icon(
-            _getTransactionIcon(transaction),
-            color: isIncome
-                ? AppColors.success
-                : isTransfer
-                    ? AppColors.slateBlue
-                    : AppColors.error,
-          ),
-        ),
-        title: Text(
-          transaction.description ?? 'Transaction',
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            const SizedBox(height: 4),
-            if (transaction.categoryName != null)
-              Text(
-                transaction.categoryName!,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
               ),
-            const SizedBox(height: 2),
+              child: Icon(_getTransactionIcon(transaction), color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.description ?? 'Transaction',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (transaction.categoryName != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      transaction.categoryName!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSizes.sm),
             Text(
-              dateFormat.format(transaction.date),
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 11,
-              ),
+              '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: iconColor,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
-        trailing: Text(
-          '${isIncome ? '+' : isTransfer ? '' : '-'}${currencyFormat.format(transaction.amount.abs())}',
-          style: TextStyle(
-            color: isIncome
-                ? AppColors.success
-                : isTransfer
-                    ? AppColors.slateBlue
-                    : AppColors.error,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        onTap: () => _showTransactionDetails(context, transaction, notifier),
       ),
     );
   }
 
   IconData _getTransactionIcon(TransactionEntity transaction) {
-    // Use category-based icons if available
-    if (transaction.categoryName != null) {
-      final category = transaction.categoryName!.toLowerCase();
-      if (category.contains('food') || category.contains('dining')) {
-        return Icons.restaurant;
-      } else if (category.contains('transport') || category.contains('gas')) {
-        return Icons.directions_car;
-      } else if (category.contains('shopping')) {
-        return Icons.shopping_bag;
-      } else if (category.contains('entertainment')) {
-        return Icons.movie;
-      } else if (category.contains('utilities') || category.contains('bill')) {
-        return Icons.bolt;
-      } else if (category.contains('health')) {
-        return Icons.local_hospital;
-      } else if (category.contains('salary') || category.contains('income')) {
-        return Icons.attach_money;
-      }
+    final cat = transaction.categoryName?.toLowerCase() ?? '';
+    if (transaction.type == TransactionType.income) {
+      if (cat.contains('salary')) return CupertinoIcons.briefcase;
+      if (cat.contains('freelance')) return CupertinoIcons.desktopcomputer;
+      if (cat.contains('investment')) return CupertinoIcons.graph_circle;
+      if (cat.contains('gift')) return CupertinoIcons.gift;
+      return CupertinoIcons.money_dollar_circle;
     }
-
-    // Default icons based on type
-    switch (transaction.type) {
-      case TransactionType.income:
-        return Icons.arrow_downward;
-      case TransactionType.expense:
-        return Icons.arrow_upward;
-      case TransactionType.transfer:
-        return Icons.swap_horiz;
+    if (transaction.type == TransactionType.transfer) {
+      return CupertinoIcons.arrow_right_arrow_left;
     }
+    if (cat.contains('food') || cat.contains('dining')) return CupertinoIcons.cart;
+    if (cat.contains('transport') || cat.contains('gas')) return CupertinoIcons.car;
+    if (cat.contains('shopping')) return CupertinoIcons.bag;
+    if (cat.contains('entertainment')) return CupertinoIcons.film;
+    if (cat.contains('utilities') || cat.contains('bill')) return CupertinoIcons.doc_text;
+    if (cat.contains('health')) return CupertinoIcons.heart;
+    if (cat.contains('education')) return CupertinoIcons.book;
+    if (cat.contains('housing')) return CupertinoIcons.house;
+    return CupertinoIcons.creditcard;
   }
 
   void _showTransactionDetails(
@@ -578,6 +681,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
               // Invalidate dashboard and related providers to refresh cached data
               if (success) {
+                unawaited(ref.read(analyticsServiceProvider).trackTransactionDeleted(
+                  transactionId: transaction.id,
+                ));
                 ref.invalidate(dashboardNotifierProvider);
                 ref.invalidate(recentTransactionsProvider);
                 ref.invalidate(monthlyFlowDataProvider);
@@ -587,15 +693,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
               if (context.mounted) {
                 if (success) {
-                  SuccessSnackbar.show(
+                  SuccessDialog.show(
                     context,
+                    title: 'Deleted',
                     message: 'Transaction deleted successfully',
+                    autoDismissDuration: const Duration(milliseconds: 800),
                   );
                 } else {
-                  ErrorSnackbar.show(
-                    context,
-                    message: 'Failed to delete transaction',
-                  );
+                  showErrorDialog(context, 'Failed to delete transaction');
                 }
               }
             },

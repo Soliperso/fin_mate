@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import '../services/sentry_service.dart';
 
@@ -13,15 +12,6 @@ class GlobalErrorHandler {
     String? context,
     Map<String, dynamic>? extra,
   }) async {
-    // Log to console in debug mode
-    if (kDebugMode) {
-      print('❌ Error ${fatal ? '(FATAL)' : ''}: $error');
-      print('Stack trace: $stackTrace');
-      if (context != null) {
-        print('Context: $context');
-      }
-    }
-
     // Determine severity level
     final level = fatal
         ? SentryLevel.fatal
@@ -49,13 +39,6 @@ class GlobalErrorHandler {
     String? context,
     Map<String, dynamic>? extra,
   }) async {
-    if (kDebugMode) {
-      print('⚠️ Warning: $message');
-      if (context != null) {
-        print('Context: $context');
-      }
-    }
-
     await SentryService.captureMessage(
       message,
       level: SentryLevel.warning,
@@ -72,10 +55,6 @@ class GlobalErrorHandler {
     String? context,
     Map<String, dynamic>? extra,
   }) async {
-    if (kDebugMode) {
-      print('ℹ️ Info: $message');
-    }
-
     await SentryService.captureMessage(
       message,
       level: SentryLevel.info,

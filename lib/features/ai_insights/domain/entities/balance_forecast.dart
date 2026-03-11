@@ -1,5 +1,46 @@
 import 'package:equatable/equatable.dart';
 
+enum ForecastScenarioType {
+  baseline,
+  optimistic,
+  conservative;
+
+  String get label {
+    switch (this) {
+      case ForecastScenarioType.baseline:
+        return 'Baseline';
+      case ForecastScenarioType.optimistic:
+        return 'Optimistic';
+      case ForecastScenarioType.conservative:
+        return 'Cautious';
+    }
+  }
+
+  double get spendingMultiplier {
+    switch (this) {
+      case ForecastScenarioType.baseline:
+        return 1.0;
+      case ForecastScenarioType.optimistic:
+        return 0.8;
+      case ForecastScenarioType.conservative:
+        return 1.2;
+    }
+  }
+}
+
+class ForecastScenario extends Equatable {
+  final ForecastScenarioType type;
+  final BalanceForecast forecast;
+
+  const ForecastScenario({
+    required this.type,
+    required this.forecast,
+  });
+
+  @override
+  List<Object?> get props => [type, forecast];
+}
+
 enum BalanceStatus {
   healthy, // Balance is comfortably above threshold
   warning, // Balance is approaching threshold

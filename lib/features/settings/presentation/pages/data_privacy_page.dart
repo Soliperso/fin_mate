@@ -257,23 +257,23 @@ class DataPrivacyPage extends ConsumerWidget {
 
   void _exportAllData(BuildContext context, WidgetRef ref) async {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preparing export...')),
-      );
-
       final jsonData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportDataAsJson();
-
-      // Share the data
-      await Share.share(
-        jsonData,
-        subject: 'FinMate Data Export',
-      );
+      await Share.share(jsonData, subject: 'FinMate Data Export');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Export Failed'),
+            content: Text('Export failed: $e'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK')),
+            ],
+          ),
         );
       }
     }
@@ -281,23 +281,23 @@ class DataPrivacyPage extends ConsumerWidget {
 
   void _exportTransactions(BuildContext context, WidgetRef ref) async {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preparing CSV export...')),
-      );
-
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportTransactionsAsCsv();
-
-      // Share the data
-      await Share.share(
-        csvData,
-        subject: 'FinMate Transactions Export',
-      );
+      await Share.share(csvData, subject: 'FinMate Transactions Export');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Export Failed'),
+            content: Text('Export failed: $e'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK')),
+            ],
+          ),
         );
       }
     }
@@ -305,23 +305,23 @@ class DataPrivacyPage extends ConsumerWidget {
 
   void _exportBudgets(BuildContext context, WidgetRef ref) async {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preparing CSV export...')),
-      );
-
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportBudgetsAsCsv();
-
-      // Share the data
-      await Share.share(
-        csvData,
-        subject: 'FinMate Budgets Export',
-      );
+      await Share.share(csvData, subject: 'FinMate Budgets Export');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Export Failed'),
+            content: Text('Export failed: $e'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK')),
+            ],
+          ),
         );
       }
     }
@@ -432,16 +432,8 @@ class DataPrivacyPage extends ConsumerWidget {
 
   Future<void> _performAccountDeletion(BuildContext context, WidgetRef ref) async {
     try {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Deleting account...')),
-        );
-      }
-
-      // Delete account
       await ref.read(settingsOperationsProvider.notifier).deleteAccount();
 
-      // Sign out
       if (context.mounted) {
         await ref.read(authNotifierProvider.notifier).signOut();
         if (context.mounted) {
@@ -450,10 +442,16 @@ class DataPrivacyPage extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Deletion Failed'),
             content: Text('Failed to delete account: $e'),
-            backgroundColor: AppColors.error,
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK')),
+            ],
           ),
         );
       }

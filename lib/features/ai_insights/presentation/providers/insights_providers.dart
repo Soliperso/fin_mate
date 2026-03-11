@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/services/insights_service.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
+import '../../domain/entities/proactive_alert.dart';
+import 'chat_provider.dart';
 
 // Service provider
 final insightsServiceProvider = Provider<InsightsService>((ref) {
@@ -81,4 +84,23 @@ final merchantInsightsProvider = FutureProvider<List<MerchantInsight>>((ref) asy
 final weekendVsWeekdayProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getWeekendVsWeekdaySpending(daysToAnalyze: 90);
+});
+
+// Phase 3: Proactive Alerts
+
+/// Typed proactive alerts provider
+final typedProactiveAlertsProvider = FutureProvider<List<ProactiveAlert>>((ref) async {
+  final service = ref.watch(insightsServiceProvider);
+  return await service.getTypedProactiveAlerts();
+});
+
+/// Dismissed alert IDs (session-local, not persisted)
+final dismissedAlertIdsProvider = StateProvider<Set<String>>((_) => {});
+
+/// Dynamic context-aware suggested prompts
+final dynamicPromptsProvider = FutureProvider<List<String>>((ref) async {
+  final queryProcessor = ref.watch(queryProcessorProvider);
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return queryProcessor.getSuggestedPrompts();
+  return await queryProcessor.getDynamicSuggestedPrompts(userId);
 });

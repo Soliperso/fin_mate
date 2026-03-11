@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -74,12 +75,30 @@ class BudgetsPage extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _showCreateBudgetBottomSheet(context);
-        },
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Budget', style: TextStyle(color: Colors.white)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () => _showCreateBudgetBottomSheet(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+            ),
+            icon: const Icon(CupertinoIcons.add, size: 20),
+            label: const Text(
+              'New Budget',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -107,14 +126,29 @@ class BudgetsPage extends ConsumerWidget {
 
     // Get color for the category icon
     final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.primaryTeal;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.md),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          _showBudgetOptions(context, ref, budget);
-        },
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        onTap: () => _showBudgetOptions(context, ref, budget),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.md),
           child: Column(
@@ -123,14 +157,16 @@ class BudgetsPage extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(AppSizes.sm),
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: categoryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      color: categoryColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       _getIconFromName(budget.categoryIcon),
                       color: categoryColor,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -140,36 +176,38 @@ class BudgetsPage extends ConsumerWidget {
                       children: [
                         Text(
                           budget.categoryName ?? 'Uncategorized',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                         Text(
                           budget.period.displayName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
                   Icon(
                     isOverBudget
-                        ? Icons.warning
+                        ? CupertinoIcons.exclamationmark_circle_fill
                         : isNearLimit
-                            ? Icons.warning_amber
-                            : Icons.check_circle,
+                            ? CupertinoIcons.exclamationmark_triangle_fill
+                            : CupertinoIcons.checkmark_circle_fill,
                     color: isOverBudget
-                        ? AppColors.error
+                        ? AppColors.systemRed
                         : isNearLimit
-                            ? AppColors.warning
-                            : AppColors.success,
-                    size: AppSizes.iconSm,
+                            ? AppColors.systemOrange
+                            : AppColors.systemGreen,
+                    size: 20,
                   ),
                   const SizedBox(width: AppSizes.xs),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      _showBudgetOptions(context, ref, budget);
-                    },
+                  GestureDetector(
+                    onTap: () => _showBudgetOptions(context, ref, budget),
+                    child: const Icon(
+                      CupertinoIcons.ellipsis,
+                      size: 20,
+                      color: AppColors.systemGray,
+                    ),
                   ),
                 ],
               ),
@@ -178,11 +216,18 @@ class BudgetsPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 child: LinearProgressIndicator(
                   value: percentage,
-                  minHeight: 8,
-                  backgroundColor: AppColors.lightGray,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryTeal,
+                  minHeight: 6,
+                  backgroundColor: isDark
+                      ? AppColors.tertiarySystemBackgroundDark
+                      : AppColors.systemGray5,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isOverBudget
+                        ? AppColors.systemRed
+                        : isNearLimit
+                            ? AppColors.systemOrange
+                            : AppColors.primaryTeal,
                   ),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
               ),
               const SizedBox(height: AppSizes.md),
@@ -299,17 +344,16 @@ class BudgetsPage extends ConsumerWidget {
                     try {
                       await ref.read(budgetNotifierProvider.notifier).deleteBudget(budget.id);
                       if (context.mounted) {
-                        SuccessSnackbar.show(
+                        SuccessDialog.show(
                           context,
+                          title: 'Deleted',
                           message: 'Budget deleted successfully',
+                          autoDismissDuration: const Duration(milliseconds: 800),
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ErrorSnackbar.show(
-                          context,
-                          message: 'Failed to delete budget: $e',
-                        );
+                        showErrorDialog(context, 'Failed to delete budget: $e');
                       }
                     }
                   }

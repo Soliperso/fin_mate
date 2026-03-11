@@ -8,11 +8,11 @@
 ## 1. Vision & Goals
 
 ### Vision
-Deliver an intelligent, secure, and visually delightful financial platform—empowering individuals, families, and groups to effortlessly manage, split, and forecast their finances, while fostering trust, engagement, and financial growth.
+Deliver an intelligent, secure, and visually delightful financial platform—empowering individuals and families to effortlessly manage, eliminate debt, and forecast their finances, while fostering trust, engagement, and lasting financial freedom.
 
 ### Goals
 - Launch a multi-platform app (iOS, Android, Web — Flutter).
-- Unite personal finance, bill-splitting, collaborative AI forecasting, and proactive money wellness.
+- Unite personal finance, debt payoff planning, collaborative AI forecasting, and proactive money wellness.
 - Build enduring trust through security, privacy-compliance, and transparency.
 - Ensure exceptional visual polish, accessible UX, and gamified user journeys.
 
@@ -42,19 +42,23 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 - **Dashboard**: net worth, cash flow, upcoming bills, "money health" gauge
 - **Budgets**: category-based, smart alerts
 - **Savings goals**: individual/shared, progress visuals, actionable recommendations
-- **Transactions**: bank import, manual entry, smart categorization
+- **Transactions**: manual entry, smart categorization, CSV import
 - **Emergency Fund Tracker** — widget monitoring readiness for unforeseen expenses, with nudges about financial resilience
 - **Personalized goal suggestions from AI** ("Cut coffee spend for $XX savings")
 - **Document assistant** with secure receipt/tax record storage and export tools
 - **Community benchmarks** — privacy-friendly comparisons motivating better habits
 - **Customizable insights frequency** — users choose daily, weekly, or monthly reports
 
-### 3.3 Bill Splitting
-- Create groups (roommates, trips, families), invite by email/SMS
-- Add expenses/custom splits, track balances, settlement flows
-- **Manual settlement with evidence upload** (receipt/bank shot), Stripe/PayPal integration (Phase 2)
-- Notifications and calendar integration
-- **Recurring payments and smart scheduling** — seamless future splits, AI-suggested timing for payments
+### 3.3 Debt Payoff
+- **Debt accounts**: add credit cards, loans, student debt, and any custom liability with balance, interest rate, and minimum payment
+- **Payoff strategies**: Avalanche (highest interest first), Snowball (smallest balance first), and custom ordering — with projected payoff dates and total interest saved per strategy
+- **Payment plan calendar**: visualize scheduled payments month-by-month, synced with the cash flow dashboard
+- **Net worth integration**: debts automatically reflected as liabilities in the net worth tracker, updated in real time as payments are logged
+- **Income-to-debt ratio widget**: displayed on the dashboard alongside cash flow — shows DTI (Debt-to-Income ratio) with healthy/warning/critical thresholds
+- **Extra payment simulator**: users input a one-time or recurring extra payment and instantly see the impact on payoff date and total interest
+- **Progress milestones & gamification**: celebrate debt payoff milestones with animated cues, streak tracking, and badges
+- **AI-powered payoff recommendations**: personalized suggestions based on spending patterns, surplus cash flow, and income — e.g., "Apply $120 surplus to your Visa to save $340 in interest"
+- **Notifications & reminders**: smart alerts for upcoming payments, missed payments, and payoff milestone projections
 
 ### 3.4 AI Insights & Forecasting
 - Weekly digest: "Where your money went"
@@ -105,8 +109,7 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 
 ### Backend
 - **Supabase** (auth, DB, storage, KMS)
-- **Plaid/TrueLayer** (plus support for Salt Edge, Finicity)
-- **Stripe/PayPal**; OpenAI (with fallback), Amplitude/PostHog
+- **OpenAI** (with fallback), Amplitude/PostHog
 
 ### Local
 - **Hive/Isar** encrypted storage (offline enablement)
@@ -129,12 +132,12 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 
 ### MVP Activation
 - DAU/MAU ratio, 7/30/90-day retention
-- Time-to-first action (split, goal, etc)
-- Engagement: AI next-action rates, bill settlements, dashboard visits
+- Time-to-first action (debt entry, goal, etc)
+- Engagement: AI next-action rates, debt payments logged, dashboard visits
 
 ### Growth
 - NPS (in-app micro-surveys), conversion rates to premium
-- Settlement completion, document exports, goal milestones achieved
+- Debt payoff milestones achieved, document exports, goal completions
 
 ---
 
@@ -142,13 +145,14 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 
 ### Phase 1 (0–3 months)
 - Authentication/onboarding (smart flows)
-- Dashboard, budgeting, saving metrics, bill splitting (manual, evidence attach)
+- Dashboard, budgeting, saving metrics, debt payoff tracker (manual entry, strategy selection)
+- Net worth and cash flow integration with DTI ratio widget
 - Weekly AI digest, conversational assistant, document upload, tax export tools
-- Emergency fund, goal suggestion widgets
+- Emergency fund, goal suggestion widgets, debt payoff milestones
 - Customizable insights, community benchmarks
 
 ### Phase 2 (3–6 months)
-- Stripe/PayPal settlements
+- Extra payment simulator with AI-suggested surplus allocation
 - Shared/joint wallets, parental controls
 - Subscription manager, recurring charge cancellation
 - Multi-currency, FX rates
@@ -157,7 +161,7 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 
 ### Phase 3 (6–12 months)
 - Web app full release
-- API, plugin ecosystem, region-specific bank expansion
+- API, plugin ecosystem, region-specific expansion
 - Community feature voting, on-device analytics, rich integrations
 - Advanced smart notifications, automated recurring groups
 
@@ -166,7 +170,7 @@ Deliver an intelligent, secure, and visually delightful financial platform—emp
 ---
 
 ## 10. Risks & Mitigations
-- **Banking API limits/costs**: More providers, manual/offline support, edge caching
+- **Data accuracy**: No automatic bank sync — rely on manual entry and CSV import; guide users with clear input UX
 - **User trust in AI**: Transparent forecasts, explainability, opt-in actions
 - **Privacy concerns**: Nutrition labels, data controls, on-device analytics, consent flows
 - **Complex UX**: Persona-driven onboarding, max 3 steps per flow

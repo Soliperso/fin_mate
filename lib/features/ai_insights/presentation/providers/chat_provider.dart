@@ -2,11 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../data/services/query_processor_service.dart';
+import '../../data/services/openai_chat_service.dart';
 import '../../domain/entities/chat_message.dart';
 
 // Service provider
 final queryProcessorProvider = Provider<QueryProcessorService>((ref) {
-  return QueryProcessorService();
+  return QueryProcessorService(
+    openAiChatService: OpenAiChatService(),
+  );
 });
 
 // Chat history storage key
@@ -119,8 +122,9 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     }
   }
 
-  /// Clear chat history
+  /// Clear chat history and reset OpenAI session
   Future<void> clearHistory() async {
+    _queryProcessor.clearOpenAiSession();
     final welcomeMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       sender: MessageSender.assistant,

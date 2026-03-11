@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,7 +34,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Notifications'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -47,7 +48,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               child: const Text(
                 'Mark all read',
                 style: TextStyle(
-                  color: AppColors.primaryTeal,
+                  color: AppColors.brandTeal,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -67,11 +68,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     children: const [
                       SizedBox(height: 100),
                       EmptyStateCard(
-                        icon: Icons.notifications_none_outlined,
+                        icon: CupertinoIcons.bell,
                         title: 'No notifications',
                         message:
                             'You\'re all caught up! Notifications about budgets, bills, and financial insights will appear here.',
-                        backgroundColor: AppColors.primaryTeal,
+                        backgroundColor: AppColors.brandTeal,
                       ),
                     ],
                   )
@@ -86,12 +87,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                               const EdgeInsets.only(bottom: AppSizes.md),
                           child: Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Unread',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
                               const SizedBox(width: AppSizes.sm),
                               Container(
@@ -100,7 +98,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryTeal
+                                  color: AppColors.brandTeal
                                       .withValues(alpha: 0.2),
                                   borderRadius:
                                       BorderRadius.circular(AppSizes.radiusSm),
@@ -110,7 +108,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryTeal,
+                                    color: AppColors.brandTeal,
                                   ),
                                 ),
                               ),
@@ -130,14 +128,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
                       // Read section
                       if (readNotifications.isNotEmpty) ...[
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: AppSizes.md),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSizes.md),
                           child: Text(
                             'Earlier',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ),
                         ...readNotifications.map(
@@ -174,13 +169,5 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         .read(notificationsProvider.notifier)
         .deleteNotification(notificationId);
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Notification deleted'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
   }
 }

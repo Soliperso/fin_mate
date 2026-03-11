@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,12 +21,11 @@ import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
-// [MVP: AI Insights - Commented out for initial launch]
-// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
-// COMMENTED OUT - Savings Goals not in MVP Phase 1
-// import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
-// import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
+import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
+import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
+import '../../features/debt_payoff/presentation/pages/debt_page.dart';
 // [MVP: Documents - Commented out for initial launch]
 // import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -232,33 +232,36 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // [MVP: AI Insights - Commented out for initial launch]
-          // GoRoute(
-          //   path: '/insights',
-          //   name: 'insights',
-          //   builder: (context, state) => const AiInsightsPage(),
-          // ),
+          GoRoute(
+            path: '/debt',
+            name: 'debt',
+            builder: (context, state) => const DebtPage(),
+          ),
+          GoRoute(
+            path: '/insights',
+            name: 'insights',
+            builder: (context, state) => const AiInsightsPage(),
+          ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',
             builder: (context, state) => const NotificationsPage(),
           ),
-          // COMMENTED OUT - Savings Goals not in MVP Phase 1
-          // GoRoute(
-          //   path: '/goals',
-          //   name: 'goals',
-          //   builder: (context, state) => const SavingsGoalsPage(),
-          //   routes: [
-          //     GoRoute(
-          //       path: ':goalId',
-          //       name: 'goal-detail',
-          //       builder: (context, state) {
-          //         final goalId = state.pathParameters['goalId']!;
-          //         return GoalDetailPage(goalId: goalId);
-          //       },
-          //     ),
-          //   ],
-          // ),
+          GoRoute(
+            path: '/goals',
+            name: 'goals',
+            builder: (context, state) => const SavingsGoalsPage(),
+            routes: [
+              GoRoute(
+                path: ':goalId',
+                name: 'goal-detail',
+                builder: (context, state) {
+                  final goalId = state.pathParameters['goalId']!;
+                  return GoalDetailPage(goalId: goalId);
+                },
+              ),
+            ],
+          ),
           // [MVP: Documents - Commented out for initial launch]
           // GoRoute(
           //   path: '/documents',
@@ -356,7 +359,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Main shell with bottom navigation
+/// iOS-style tab bar shell — Apple Wallet / Pay aesthetic
 class MainShell extends StatelessWidget {
   final Widget child;
 
@@ -364,42 +367,70 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedIndex = _calculateSelectedIndex(context);
+
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        indicatorColor: Theme.of(context).colorScheme.primary,
-        selectedIndex: _calculateSelectedIndex(context),
-        onDestinationSelected: (index) => _onItemTapped(index, context),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF1C1C1E)
+              : const Color(0xFFFFFFFF),
+          border: Border(
+            top: BorderSide(
+              color: isDark
+                  ? const Color(0xFF38383A)
+                  : const Color(0xFFC6C6C8),
+              width: 0.5,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_horiz_outlined),
-            selectedIcon: Icon(Icons.swap_horiz),
-            label: 'Transactions',
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 49,
+            child: Row(
+              children: [
+                _TabItem(
+                  icon: CupertinoIcons.square_grid_2x2,
+                  activeIcon: CupertinoIcons.square_grid_2x2_fill,
+                  label: 'Dashboard',
+                  isSelected: selectedIndex == 0,
+                  onTap: () => context.go('/dashboard'),
+                ),
+                _TabItem(
+                  icon: CupertinoIcons.arrow_right_arrow_left,
+                  activeIcon: CupertinoIcons.arrow_right_arrow_left,
+                  label: 'Transactions',
+                  isSelected: selectedIndex == 1,
+                  onTap: () => context.go('/transactions'),
+                ),
+                _TabItem(
+                  icon: CupertinoIcons.chart_pie,
+                  activeIcon: CupertinoIcons.chart_pie_fill,
+                  label: 'Budgets',
+                  isSelected: selectedIndex == 2,
+                  onTap: () => context.go('/budgets'),
+                ),
+                _TabItem(
+                  icon: CupertinoIcons.creditcard,
+                  activeIcon: CupertinoIcons.creditcard_fill,
+                  label: 'Debt',
+                  isSelected: selectedIndex == 3,
+                  onTap: () => context.go('/debt'),
+                ),
+                _TabItem(
+                  icon: CupertinoIcons.lightbulb,
+                  activeIcon: CupertinoIcons.lightbulb_fill,
+                  label: 'Insights',
+                  isSelected: selectedIndex == 4,
+                  onTap: () => context.go('/insights'),
+                ),
+              ],
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet),
-            label: 'Budgets',
-          ),
-          // [MVP: Bills - Commented out for initial launch]
-          // NavigationDestination(
-          //   icon: Icon(Icons.receipt_long_outlined),
-          //   selectedIcon: Icon(Icons.receipt_long),
-          //   label: 'Bills',
-          // ),
-          // [MVP: Insights - Commented out for initial launch]
-          // NavigationDestination(
-          //   icon: Icon(Icons.lightbulb_outline),
-          //   selectedIcon: Icon(Icons.lightbulb),
-          //   label: 'Insights',
-          // ),
-        ],
+        ),
       ),
     );
   }
@@ -409,30 +440,58 @@ class MainShell extends StatelessWidget {
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
-    // [MVP: Only 3 tabs in bottom nav - Dashboard, Transactions, Budgets]
-    // if (location.startsWith('/insights')) return 3;
-    // if (location.startsWith('/bills')) return 4;
+    if (location.startsWith('/debt')) return 3;
+    if (location.startsWith('/insights')) return 4;
     return 0;
   }
+}
 
-  void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        context.go('/dashboard');
-        break;
-      case 1:
-        context.go('/transactions');
-        break;
-      case 2:
-        context.go('/budgets');
-        break;
-      // [MVP: Only 3 tabs - Insights and Bills removed]
-      // case 3:
-      //   context.go('/insights');
-      //   break;
-      // case 4:
-      //   context.go('/bills');
-      //   break;
-    }
+class _TabItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TabItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? const Color(0xFF2D9DA9) : const Color(0xFF20808D);
+    final inactive = const Color(0xFF8E8E93);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              size: 24,
+              color: isSelected ? accent : inactive,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? accent : inactive,
+                letterSpacing: -0.24,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

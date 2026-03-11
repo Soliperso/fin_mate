@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,13 +12,13 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsOperationsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Settings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -27,7 +28,8 @@ class SettingsPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+              const Icon(CupertinoIcons.exclamationmark_circle,
+                  size: 48, color: AppColors.error),
               const SizedBox(height: AppSizes.md),
               Text(
                 'Failed to load settings',
@@ -45,89 +47,84 @@ class SettingsPage extends ConsumerWidget {
           ),
         ),
         data: (settings) => SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.pagePadding, vertical: AppSizes.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Display Settings Section
-              _buildSectionTitle(context, 'Display'),
+              // ── Display ───────────────────────────────────────────────
+              _sectionLabel(context, 'Display'),
               const SizedBox(height: AppSizes.sm),
-              _buildSettingsCard(
-                context,
-                children: [
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.dark_mode_outlined,
-                    title: 'Theme',
-                    subtitle: 'Light or dark theme',
-                    onTap: () => context.push('/settings/display'),
-                    trailing: Text(
-                      settings?.themeMode ?? 'System',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  _buildDivider(context),
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.attach_money,
-                    title: 'Currency',
-                    subtitle: 'Default currency format',
-                    onTap: () => context.push('/settings/display'),
-                    trailing: const Text('USD'),
-                  ),
-                  _buildDivider(context),
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.calendar_today,
-                    title: 'Date Format',
-                    subtitle: 'How dates are displayed',
-                    onTap: () => context.push('/settings/display'),
-                    trailing: const Text('MM/DD/YYYY'),
-                  ),
-                ],
-              ),
+              _buildSettingsCard(context, isDark, children: [
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.moon,
+                  title: 'Theme',
+                  subtitle: 'Light or dark theme',
+                  onTap: () => context.push('/settings/display'),
+                  trailingText: settings?.themeMode ?? 'System',
+                ),
+                _buildDivider(isDark),
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.money_dollar,
+                  title: 'Currency',
+                  subtitle: 'Default currency format',
+                  onTap: () => context.push('/settings/display'),
+                  trailingText: 'USD',
+                ),
+                _buildDivider(isDark),
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.calendar,
+                  title: 'Date Format',
+                  subtitle: 'How dates are displayed',
+                  onTap: () => context.push('/settings/display'),
+                  trailingText: 'MM/DD/YYYY',
+                ),
+              ]),
               const SizedBox(height: AppSizes.lg),
 
-              // Notification Settings Section
-              _buildSectionTitle(context, 'Notifications'),
+              // ── Notifications ─────────────────────────────────────────
+              _sectionLabel(context, 'Notifications'),
               const SizedBox(height: AppSizes.sm),
-              _buildSettingsCard(
-                context,
-                children: [
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.notifications_none,
-                    title: 'Notification Preferences',
-                    subtitle: 'Manage what you get notified about',
-                    onTap: () => context.push('/settings/notifications'),
-                  ),
-                ],
-              ),
+              _buildSettingsCard(context, isDark, children: [
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.bell,
+                  title: 'Notification Preferences',
+                  subtitle: 'Manage what you get notified about',
+                  onTap: () => context.push('/settings/notifications'),
+                ),
+              ]),
               const SizedBox(height: AppSizes.lg),
 
-              // Data & Privacy Section
-              _buildSectionTitle(context, 'Data & Privacy'),
+              // ── Data & Privacy ────────────────────────────────────────
+              _sectionLabel(context, 'Data & Privacy'),
               const SizedBox(height: AppSizes.sm),
-              _buildSettingsCard(
-                context,
-                children: [
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.download,
-                    title: 'Export Data',
-                    subtitle: 'Download your financial data',
-                    onTap: () => context.push('/settings/data-privacy'),
-                  ),
-                  _buildDivider(context),
-                  _buildSettingsTile(
-                    context,
-                    icon: Icons.security,
-                    title: 'Privacy & Security',
-                    subtitle: 'Account deletion and data privacy',
-                    onTap: () => context.push('/settings/data-privacy'),
-                  ),
-                ],
-              ),
+              _buildSettingsCard(context, isDark, children: [
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.arrow_down_to_line,
+                  title: 'Export Data',
+                  subtitle: 'Download your financial data',
+                  onTap: () => context.push('/settings/data-privacy'),
+                ),
+                _buildDivider(isDark),
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.hand_raised,
+                  title: 'Privacy & Security',
+                  subtitle: 'Account deletion and data privacy',
+                  onTap: () => context.push('/settings/data-privacy'),
+                ),
+              ]),
               const SizedBox(height: AppSizes.xl),
             ],
           ),
@@ -136,85 +133,110 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
+  Widget _sectionLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+      ),
     );
   }
 
-  Widget _buildSettingsCard(
-    BuildContext context, {
-    required List<Widget> children,
-  }) {
+  Widget _buildSettingsCard(BuildContext context, bool isDark,
+      {required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
 
   Widget _buildSettingsTile(
     BuildContext context, {
+    required bool isDark,
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
-    Widget? trailing,
+    String? trailingText,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(AppSizes.sm),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTeal.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        ),
-        child: Icon(
-          icon,
-          color: AppColors.primaryTeal,
-          size: 24,
-        ),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 14,
-        ),
-      ),
-      trailing: trailing ??
-          const Icon(
-            Icons.chevron_right,
-            color: AppColors.textTertiary,
-          ),
+    return InkWell(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.xs,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.systemGray5,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: AppColors.secondaryLabel, size: 17),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            if (trailingText != null) ...[
+              Text(
+                trailingText,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.secondaryLabel,
+                    ),
+              ),
+              const SizedBox(width: AppSizes.xs),
+            ],
+            const Icon(CupertinoIcons.chevron_right,
+                size: 16, color: AppColors.systemGray3),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDivider(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md * 3),
-      child: Divider(
-        height: 1,
-        thickness: 0.5,
-        color: AppColors.lightGray.withValues(alpha: 0.5),
-      ),
+  Widget _buildDivider(bool isDark) {
+    return Divider(
+      height: 0,
+      thickness: 0.5,
+      indent: AppSizes.md + 32 + AppSizes.md,
+      color: isDark ? AppColors.separatorDark : AppColors.separator,
     );
   }
 }

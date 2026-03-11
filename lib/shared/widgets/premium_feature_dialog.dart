@@ -119,20 +119,7 @@ class PremiumFeatureDialog extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Show snackbar instead of navigating to pricing
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'This feature is free during beta! Coming soon...',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: AppColors.primaryTeal,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                },
+                onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryTeal,
                   padding: const EdgeInsets.symmetric(

@@ -2,12 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
 import 'core/services/analytics_service.dart';
+import 'core/services/ad_service.dart';
+import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
 // import 'core/services/payment_service.dart';
 import 'core/services/theme_provider.dart';
@@ -19,6 +22,9 @@ void main() async {
   await runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Load environment variables from .env file
+      await dotenv.load(fileName: ".env");
 
       // Lock app to portrait mode
       await SystemChrome.setPreferredOrientations([
@@ -51,6 +57,24 @@ void main() async {
       // Initialize Analytics
       final analytics = AnalyticsService(Supabase.instance.client);
       await analytics.initialize();
+
+      // Initialize Google Mobile Ads
+      await AdService.instance.initialize();
+
+      // Check device security (jailbreak/root detection)
+      final deviceSecurity = DeviceSecurityService();
+      final securityStatus = await deviceSecurity.getSecurityStatus();
+      if (!securityStatus.isSafe) {
+        // Log security warning
+        await GlobalErrorHandler.handleWarning(
+          'App running on compromised device',
+          context: 'Device Security',
+          extra: {
+            'isJailbroken': securityStatus.isJailbroken,
+            'isDeveloperMode': securityStatus.isDeveloperMode,
+          },
+        );
+      }
 
       // [MVP: Payment Service - Commented out for initial launch]
       // All features are free during MVP testing phase

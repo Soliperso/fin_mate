@@ -12,6 +12,42 @@ class BalanceForecastService {
   BalanceForecastService({SupabaseClient? supabaseClient})
       : _supabase = supabaseClient ?? supabase;
 
+  /// Generate 30-day forecast for all three scenarios (baseline, optimistic, conservative)
+  Future<List<ForecastScenario>> generateMultiScenarioForecast() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    final currentBalance = await _getCurrentBalance(userId);
+    final baselineAvgDailySpending = await _getAverageDailySpending(userId);
+    final scheduledTransactions = await _getScheduledTransactions(userId);
+
+    final scenarios = <ForecastScenario>[];
+
+    for (final scenarioType in ForecastScenarioType.values) {
+      final adjustedSpending = baselineAvgDailySpending * scenarioType.spendingMultiplier;
+      final dailyForecasts = _generateDailyForecasts(
+        currentBalance,
+        adjustedSpending,
+        scheduledTransactions,
+      );
+      final safeToSpend = _calculateSafeToSpend(currentBalance, dailyForecasts);
+      final warnings = _generateWarnings(dailyForecasts);
+
+      scenarios.add(ForecastScenario(
+        type: scenarioType,
+        forecast: BalanceForecast(
+          currentBalance: currentBalance,
+          safeToSpend: safeToSpend,
+          dailyForecasts: dailyForecasts,
+          generatedAt: DateTime.now(),
+          warnings: warnings,
+        ),
+      ));
+    }
+
+    return scenarios;
+  }
+
   /// Generate 30-day balance forecast
   Future<BalanceForecast> generate30DayForecast() async {
     try {

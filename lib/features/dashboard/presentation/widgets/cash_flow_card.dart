@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 
+/// Apple Wallet-style cash flow summary card
 class CashFlowCard extends StatelessWidget {
   final double income;
   final double expenses;
@@ -17,96 +18,165 @@ class CashFlowCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
     final balance = income - expenses;
+    final isPositive = balance >= 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Monthly Cash Flow',
-              style: Theme.of(context).textTheme.titleMedium,
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
             ),
-            const SizedBox(height: AppSizes.md),
-            Row(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Monthly Cash Flow',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  'This month',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+
+          // Income / Expenses row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+            child: Row(
               children: [
                 Expanded(
-                  child: _buildFlowItem(
-                    context,
-                    icon: Icons.arrow_downward,
+                  child: _FlowCell(
                     label: 'Income',
                     amount: income,
-                    color: AppColors.success,
+                    color: AppColors.systemGreen,
+                    icon: Icons.arrow_downward_rounded,
                     currencyFormat: currencyFormat,
                   ),
                 ),
                 Container(
-                  width: 1,
-                  height: 50,
-                  color: AppColors.textTertiary.withValues(alpha: 0.2),
+                  width: 0.5,
+                  height: 56,
+                  color: isDark ? AppColors.separatorDark : AppColors.separator,
                 ),
                 Expanded(
-                  child: _buildFlowItem(
-                    context,
-                    icon: Icons.arrow_upward,
+                  child: _FlowCell(
                     label: 'Expenses',
                     amount: expenses,
-                    color: AppColors.error,
+                    color: AppColors.systemRed,
+                    icon: Icons.arrow_upward_rounded,
                     currencyFormat: currencyFormat,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSizes.md),
-            Divider(color: AppColors.textTertiary.withValues(alpha: 0.2)),
-            const SizedBox(height: AppSizes.md),
-            Row(
+          ),
+
+          // Divider
+          Divider(
+            height: AppSizes.md + AppSizes.sm,
+            thickness: 0.5,
+            indent: AppSizes.md,
+            endIndent: AppSizes.md,
+            color: isDark ? AppColors.separatorDark : AppColors.separator,
+          ),
+
+          // Net balance row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.md, 0, AppSizes.md, AppSizes.md,
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Net Balance',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.secondaryLabel,
+                      ),
                 ),
                 Text(
-                  currencyFormat.format(balance),
+                  '${isPositive ? '+' : ''}${currencyFormat.format(balance)}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: balance >= 0 ? AppColors.success : AppColors.error,
-                        fontWeight: FontWeight.bold,
+                        color: isPositive
+                            ? AppColors.systemGreen
+                            : AppColors.systemRed,
+                        fontWeight: FontWeight.w700,
                       ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildFlowItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required double amount,
-    required Color color,
-    required NumberFormat currencyFormat,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: AppSizes.iconMd),
-        const SizedBox(height: AppSizes.xs),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: AppSizes.xs),
-        Text(
-          currencyFormat.format(amount),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
+class _FlowCell extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color color;
+  final IconData icon;
+  final NumberFormat currencyFormat;
+
+  const _FlowCell({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.icon,
+    required this.currencyFormat,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+      child: Column(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 16),
+          ),
+          const SizedBox(height: AppSizes.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            currencyFormat.format(amount),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

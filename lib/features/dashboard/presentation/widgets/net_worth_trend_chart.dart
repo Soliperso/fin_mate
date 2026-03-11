@@ -23,7 +23,11 @@ class NetWorthTrendChart extends StatelessWidget {
     final isGrowth = _isOverallGrowth();
 
     return GlassContainer(
-      padding: const EdgeInsets.all(AppSizes.md),
+      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      border: Border.all(color: Colors.transparent, width: 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,7 +54,7 @@ class NetWorthTrendChart extends StatelessWidget {
                   horizontalInterval: _calculateInterval(),
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: AppColors.textTertiary.withValues(alpha: 0.1),
+                      color: AppColors.textTertiary.withValues(alpha: 0.06),
                       strokeWidth: 1,
                     );
                   },
@@ -59,7 +63,7 @@ class NetWorthTrendChart extends StatelessWidget {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 45,
+                      reservedSize: 52,
                       interval: _calculateInterval(),
                       getTitlesWidget: (value, meta) {
                         return Text(
@@ -75,7 +79,7 @@ class NetWorthTrendChart extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 30,
+                      reservedSize: 24,
                       getTitlesWidget: (value, meta) {
                         if (value.toInt() >= 0 && value.toInt() < snapshots.length) {
                           final snapshot = snapshots[value.toInt()];
@@ -117,20 +121,11 @@ class NetWorthTrendChart extends StatelessWidget {
                             ))
                         .toList(),
                     isCurved: true,
+                    curveSmoothness: 0.3,
                     color: isGrowth ? AppColors.primaryTeal : AppColors.error,
-                    barWidth: 3,
+                    barWidth: 2.5,
                     isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 4,
-                          color: isGrowth ? AppColors.primaryTeal : AppColors.error,
-                          strokeWidth: 2,
-                          strokeColor: AppColors.white,
-                        );
-                      },
-                    ),
+                    dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(

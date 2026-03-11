@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
@@ -10,12 +12,20 @@ import '../providers/insights_providers.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
+import '../../domain/entities/proactive_alert.dart';
 
-class InsightsTab extends ConsumerWidget {
+class InsightsTab extends ConsumerStatefulWidget {
   const InsightsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InsightsTab> createState() => _InsightsTabState();
+}
+
+class _InsightsTabState extends ConsumerState<InsightsTab> {
+  final Set<String> _reviewedMerchants = {};
+
+  @override
+  Widget build(BuildContext context) {
     final insightsAsync = ref.watch(spendingInsightsProvider);
     final categoryBreakdownAsync = ref.watch(defaultCategoryBreakdownProvider);
     final forecastAsync = ref.watch(defaultForecastProvider);
@@ -23,9 +33,12 @@ class InsightsTab extends ConsumerWidget {
     final spendingAnomaliesAsync = ref.watch(spendingAnomaliesProvider);
     final merchantInsightsAsync = ref.watch(merchantInsightsProvider);
     final weekendVsWeekdayAsync = ref.watch(weekendVsWeekdayProvider);
+    final alertsAsync = ref.watch(typedProactiveAlertsProvider);
+    final dismissedIds = ref.watch(dismissedAlertIdsProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
+        ref.invalidate(typedProactiveAlertsProvider);
         ref.invalidate(spendingInsightsProvider);
         ref.invalidate(defaultCategoryBreakdownProvider);
         ref.invalidate(defaultForecastProvider);
@@ -40,34 +53,43 @@ class InsightsTab extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Insights Section
-            Text(
-              'Personalized Insights',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Proactive Alerts (top, only when active alerts exist)
+            alertsAsync.whenOrNull(
+              data: (alerts) {
+                final active = alerts.where((a) => !dismissedIds.contains(a.id)).toList();
+                if (active.isEmpty) return null;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Alerts', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: AppSizes.sm),
+                    ...active.map((alert) => _buildDismissibleAlertCard(alert)),
+                    const SizedBox(height: AppSizes.xl),
+                  ],
+                );
+              },
+            ) ?? const SizedBox.shrink(),
+
+            // Personalized Insights
+            Text('Personalized Insights', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             insightsAsync.when(
               data: (insights) {
                 if (insights.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.lightbulb_outline,
                     title: 'No Insights Yet',
                     message: 'Start adding transactions to unlock personalized financial insights and smart recommendations.',
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return Column(
-                  children: insights.map((insight) => _buildInsightCard(context, insight)).toList(),
-                );
+                return Column(children: insights.map(_buildInsightCard).toList());
               },
-              loading: () => Column(
-                children: const [
-                  SkeletonCard(height: 100),
-                  SkeletonCard(height: 100),
-                  SkeletonCard(height: 100),
-                ],
-              ),
+              loading: () => const Column(children: [
+                SkeletonCard(height: 100),
+                SkeletonCard(height: 100),
+                SkeletonCard(height: 100),
+              ]),
               error: (error, stack) => ErrorRetryWidget(
                 title: 'Failed to load insights',
                 message: 'Unable to analyze your spending patterns',
@@ -78,23 +100,19 @@ class InsightsTab extends ConsumerWidget {
             const SizedBox(height: AppSizes.xl),
 
             // Category Breakdown
-            Text(
-              'Spending by Category',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Spending by Category', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             categoryBreakdownAsync.when(
               data: (categories) {
                 if (categories.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.pie_chart_outline,
                     title: 'No Spending Data',
                     message: 'Add some expenses to see your category breakdown and track where your money goes.',
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildCategoryBreakdown(context, categories);
+                return _buildCategoryBreakdown(categories);
               },
               loading: () => const SkeletonCard(height: 300),
               error: (error, stack) => ErrorRetryWidget(
@@ -106,24 +124,20 @@ class InsightsTab extends ConsumerWidget {
 
             const SizedBox(height: AppSizes.xl),
 
-            // Forecast Section
-            Text(
-              'Cashflow Forecast (Next 3 Months)',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Cashflow Forecast
+            Text('Cashflow Forecast (Next 3 Months)', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             forecastAsync.when(
               data: (forecast) {
                 if (forecast.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.trending_up_outlined,
                     title: 'No Forecast Yet',
                     message: 'Build up your transaction history to generate accurate cashflow forecasts for the next 3 months.',
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildForecastSection(context, forecast);
+                return _buildForecastSection(forecast);
               },
               loading: () => const SkeletonCard(height: 250),
               error: (error, stack) => ErrorRetryWidget(
@@ -135,26 +149,20 @@ class InsightsTab extends ConsumerWidget {
 
             const SizedBox(height: AppSizes.xl),
 
-            // Phase 1: Pattern Recognition Insights
-
-            // Recurring Expenses Section
-            Text(
-              'Subscriptions & Recurring Bills',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Recurring Expenses
+            Text('Subscriptions & Recurring Bills', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             recurringExpensesAsync.when(
               data: (patterns) {
                 if (patterns.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.subscriptions_outlined,
                     title: 'No Subscriptions Yet',
                     message: 'Add recurring transactions to identify your subscriptions and track price changes.',
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildRecurringExpensesSection(context, patterns);
+                return _buildRecurringExpensesSection(patterns);
               },
               loading: () => const SkeletonCard(height: 200),
               error: (error, stack) => ErrorRetryWidget(
@@ -166,24 +174,20 @@ class InsightsTab extends ConsumerWidget {
 
             const SizedBox(height: AppSizes.xl),
 
-            // Spending Anomalies Section
-            Text(
-              'Unusual Spending',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Spending Anomalies
+            Text('Unusual Spending', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             spendingAnomaliesAsync.when(
               data: (anomalies) {
                 if (anomalies.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.trending_flat,
                     title: 'Spending on Track',
                     message: 'Great news! No unusual spending detected. Your spending patterns are consistent.',
                     backgroundColor: AppColors.success,
                   );
                 }
-                return _buildSpendingAnomaliesSection(context, anomalies.take(5).toList());
+                return _buildSpendingAnomaliesSection(anomalies.take(5).toList());
               },
               loading: () => const SkeletonCard(height: 200),
               error: (error, stack) => ErrorRetryWidget(
@@ -195,24 +199,20 @@ class InsightsTab extends ConsumerWidget {
 
             const SizedBox(height: AppSizes.xl),
 
-            // Top Merchants Section
-            Text(
-              'Top Merchants',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Top Merchants
+            Text('Top Merchants', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             merchantInsightsAsync.when(
               data: (merchants) {
                 if (merchants.isEmpty) {
                   return _buildEmptyStateCard(
-                    context,
                     icon: Icons.store_outlined,
                     title: 'No Merchant Data',
                     message: 'Start adding transactions to see your favorite merchants and spending patterns.',
                     backgroundColor: AppColors.warning,
                   );
                 }
-                return _buildTopMerchantsSection(context, merchants.where((m) => m.isTopMerchant).toList());
+                return _buildTopMerchantsSection(merchants.where((m) => m.isTopMerchant).toList());
               },
               loading: () => const SkeletonCard(height: 250),
               error: (error, stack) => ErrorRetryWidget(
@@ -224,16 +224,11 @@ class InsightsTab extends ConsumerWidget {
 
             const SizedBox(height: AppSizes.xl),
 
-            // Behavioral Insights Section
-            Text(
-              'Behavioral Patterns',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            // Behavioral Patterns
+            Text('Behavioral Patterns', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSizes.md),
             weekendVsWeekdayAsync.when(
-              data: (data) {
-                return _buildBehavioralInsightsSection(context, data);
-              },
+              data: _buildBehavioralInsightsSection,
               loading: () => const SkeletonCard(height: 150),
               error: (error, stack) => const Card(
                 child: Padding(
@@ -248,27 +243,93 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildInsightCard(BuildContext context, Map<String, dynamic> insight) {
+  // ─── Alert card ───────────────────────────────────────────────────────────
+
+  Widget _buildDismissibleAlertCard(ProactiveAlert alert) {
+    Color severityColor;
+    switch (alert.severity) {
+      case AlertSeverity.critical:
+        severityColor = AppColors.error;
+        break;
+      case AlertSeverity.high:
+        severityColor = AppColors.warning;
+        break;
+      default:
+        severityColor = AppColors.primaryTeal;
+    }
+
+    return Dismissible(
+      key: Key(alert.id),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) {
+        ref.read(dismissedAlertIdsProvider.notifier).update((s) => {...s, alert.id});
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: AppSizes.md),
+        margin: const EdgeInsets.only(bottom: AppSizes.sm),
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        ),
+        child: Icon(Icons.close, color: AppColors.error),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSizes.sm),
+        decoration: BoxDecoration(
+          color: severityColor.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          border: Border(left: BorderSide(color: severityColor, width: 4)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      alert.title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: AppSizes.xs),
+                    Text(
+                      alert.message,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_left, color: AppColors.textSecondary, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Insight card ─────────────────────────────────────────────────────────
+
+  Widget _buildInsightCard(Map<String, dynamic> insight) {
     final type = insight['color'] as String? ?? 'info';
     Color color;
-    Color bgColor;
-
     switch (type) {
       case 'warning':
         color = AppColors.warning;
-        bgColor = AppColors.warning.withValues(alpha: 0.1);
         break;
       case 'error':
         color = AppColors.error;
-        bgColor = AppColors.error.withValues(alpha: 0.1);
         break;
       case 'success':
         color = AppColors.success;
-        bgColor = AppColors.success.withValues(alpha: 0.1);
         break;
       default:
         color = AppColors.primaryTeal;
-        bgColor = AppColors.primaryTeal.withValues(alpha: 0.1);
     }
 
     IconData icon;
@@ -302,10 +363,10 @@ class InsightsTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppSizes.sm),
               decoration: BoxDecoration(
-                color: bgColor,
+                color: color.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color.withValues(alpha: 0.65), size: 20),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -314,16 +375,16 @@ class InsightsTab extends ConsumerWidget {
                 children: [
                   Text(
                     insight['title'] as String,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
                         ),
                   ),
                   const SizedBox(height: AppSizes.xs),
                   Text(
                     insight['message'] as String,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
+                          height: 1.4,
                         ),
                   ),
                 ],
@@ -335,7 +396,9 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryBreakdown(BuildContext context, List<Map<String, dynamic>> categories) {
+  // ─── Category breakdown ───────────────────────────────────────────────────
+
+  Widget _buildCategoryBreakdown(List<Map<String, dynamic>> categories) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final total = categories.fold(0.0, (sum, cat) => sum + (cat['total_amount'] as double));
 
@@ -346,7 +409,6 @@ class InsightsTab extends ConsumerWidget {
           children: categories.take(5).map((category) {
             final amount = category['total_amount'] as double;
             final percentage = total > 0 ? (amount / total * 100) : 0.0;
-
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSizes.md),
               child: Column(
@@ -355,16 +417,10 @@ class InsightsTab extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        category['category_name'] as String,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        currencyFormat.format(amount),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
+                      Text(category['category_name'] as String,
+                          style: Theme.of(context).textTheme.bodyMedium),
+                      Text(currencyFormat.format(amount),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: AppSizes.xs),
@@ -382,9 +438,7 @@ class InsightsTab extends ConsumerWidget {
                       const SizedBox(width: AppSizes.sm),
                       Text(
                         '${percentage.toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -397,7 +451,9 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildForecastSection(BuildContext context, List<Map<String, dynamic>> forecast) {
+  // ─── Forecast section ─────────────────────────────────────────────────────
+
+  Widget _buildForecastSection(List<Map<String, dynamic>> forecast) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     return Card(
@@ -405,52 +461,36 @@ class InsightsTab extends ConsumerWidget {
         padding: const EdgeInsets.all(AppSizes.md),
         child: Column(
           children: forecast.map((month) {
-            final monthStr = month['month'] as String;
             final income = month['income'] as double;
             final expense = month['expense'] as double;
             final net = month['net'] as double;
             final isPositive = net >= 0;
-
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSizes.md),
               child: Row(
                 children: [
                   Expanded(
                     flex: 2,
-                    child: Text(
-                      _formatMonthYear(monthStr),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    child: Text(_formatMonthYear(month['month'] as String),
+                        style: Theme.of(context).textTheme.bodyMedium),
                   ),
                   Expanded(
                     flex: 3,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          'In: ${currencyFormat.format(income)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.success,
-                              ),
-                        ),
-                        Text(
-                          'Out: ${currencyFormat.format(expense)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.error,
-                              ),
-                        ),
+                        Text('In: ${currencyFormat.format(income)}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.success)),
+                        Text('Out: ${currencyFormat.format(expense)}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.error)),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSizes.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.sm,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (isPositive ? AppColors.success : AppColors.error)
-                          .withValues(alpha: 0.1),
+                      color: (isPositive ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Text(
@@ -473,21 +513,14 @@ class InsightsTab extends ConsumerWidget {
   String _formatMonthYear(String monthStr) {
     final parts = monthStr.split('-');
     if (parts.length != 2) return monthStr;
-
-    final year = parts[0];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     final month = int.tryParse(parts[1]) ?? 1;
-
-    const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-
-    return '${monthNames[month - 1]} $year';
+    return '${monthNames[month - 1]} ${parts[0]}';
   }
 
-  // Phase 1: Pattern Recognition Builders
+  // ─── Recurring expenses ───────────────────────────────────────────────────
 
-  Widget _buildRecurringExpensesSection(BuildContext context, List<RecurringExpensePattern> patterns) {
+  Widget _buildRecurringExpensesSection(List<RecurringExpensePattern> patterns) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
     return Column(
@@ -496,6 +529,7 @@ class InsightsTab extends ConsumerWidget {
         final priceChangeInfo = pattern.isPriceIncreased
             ? ' (increased ${pattern.priceChangePercentage?.toStringAsFixed(1)}%)'
             : '';
+        final isReviewed = _reviewedMerchants.contains(pattern.merchantName);
 
         return Card(
           margin: const EdgeInsets.only(bottom: AppSizes.md),
@@ -534,9 +568,7 @@ class InsightsTab extends ConsumerWidget {
                           ),
                           Text(
                             subtitle + priceChangeInfo,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -546,10 +578,31 @@ class InsightsTab extends ConsumerWidget {
                 const SizedBox(height: AppSizes.sm),
                 Text(
                   'Next charge expected: ${pattern.nextExpectedDate != null ? DateFormat('MMM d, yyyy').format(pattern.nextExpectedDate!) : 'Unknown'}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                 ),
+                if (!isReviewed) ...[
+                  const SizedBox(height: AppSizes.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        pattern.isPriceIncreased ? Icons.edit_outlined : Icons.check_outlined,
+                        size: 16,
+                      ),
+                      label: Text(pattern.isPriceIncreased ? 'Update Amount' : 'Mark Reviewed'),
+                      onPressed: () => pattern.isPriceIncreased
+                          ? _showUpdateAmountDialog(pattern)
+                          : _markRecurringReviewed(pattern.merchantName),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
+                        side: BorderSide(
+                          color: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -558,7 +611,53 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildSpendingAnomaliesSection(BuildContext context, List<SpendingAnomaly> anomalies) {
+  void _markRecurringReviewed(String merchantName) {
+    setState(() => _reviewedMerchants.add(merchantName));
+  }
+
+  void _showUpdateAmountDialog(RecurringExpensePattern pattern) {
+    final controller = TextEditingController(text: pattern.averageAmount.toStringAsFixed(2));
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Update ${pattern.merchantName} Amount'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(labelText: 'New amount', prefixText: '\$'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              final newAmount = double.tryParse(controller.text);
+              if (newAmount != null && newAmount > 0) {
+                try {
+                  final userId = supabase.auth.currentUser?.id;
+                  if (userId != null) {
+                    await supabase
+                        .from('recurring_transactions')
+                        .update({'amount': newAmount})
+                        .eq('description', pattern.merchantName)
+                        .eq('user_id', userId);
+                    ref.invalidate(recurringExpensesProvider);
+                  }
+                } catch (_) {}
+              }
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.brandTeal),
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Spending anomalies ───────────────────────────────────────────────────
+
+  Widget _buildSpendingAnomaliesSection(List<SpendingAnomaly> anomalies) {
     return Column(
       children: anomalies.map((anomaly) {
         Color severityColor;
@@ -581,38 +680,70 @@ class InsightsTab extends ConsumerWidget {
           margin: const EdgeInsets.only(bottom: AppSizes.md),
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.md),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: severityColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Icon(Icons.warning, color: severityColor, size: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AppSizes.sm),
+                      decoration: BoxDecoration(
+                        color: severityColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      ),
+                      child: Icon(Icons.warning, color: severityColor, size: 24),
+                    ),
+                    const SizedBox(width: AppSizes.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            anomaly.title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                          const SizedBox(height: AppSizes.xs),
+                          Text(
+                            anomaly.description,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        anomaly.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
+                const SizedBox(height: AppSizes.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.list_alt_outlined, size: 16),
+                        label: const Text('View Transactions'),
+                        onPressed: () => context.go('/transactions'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryTeal,
+                          side: BorderSide(color: AppColors.primaryTeal),
+                          visualDensity: VisualDensity.compact,
+                        ),
                       ),
-                      const SizedBox(height: AppSizes.xs),
-                      Text(
-                        anomaly.description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                    ),
+                    const SizedBox(width: AppSizes.sm),
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.add_alert_outlined, size: 16),
+                        label: const Text('Set Budget Alert'),
+                        onPressed: () => context.go('/budgets'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.brandTeal,
+                          visualDensity: VisualDensity.compact,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -622,7 +753,9 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopMerchantsSection(BuildContext context, List<MerchantInsight> merchants) {
+  // ─── Top merchants ────────────────────────────────────────────────────────
+
+  Widget _buildTopMerchantsSection(List<MerchantInsight> merchants) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
     return Column(
@@ -650,12 +783,8 @@ class InsightsTab extends ConsumerWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            merchant.category,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
+                          Text(merchant.category,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
                         ],
                       ),
                     ),
@@ -672,18 +801,10 @@ class InsightsTab extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '${merchant.visitCount} visits',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    Text(
-                      '${merchant.percentageOfCategorySpending.toStringAsFixed(1)}% of category',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
+                    Text('${merchant.visitCount} visits',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                    Text('${merchant.percentageOfCategorySpending.toStringAsFixed(1)}% of category',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
                   ],
                 ),
               ],
@@ -694,7 +815,9 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildBehavioralInsightsSection(BuildContext context, Map<String, dynamic> data) {
+  // ─── Behavioral patterns ──────────────────────────────────────────────────
+
+  Widget _buildBehavioralInsightsSection(Map<String, dynamic> data) {
     final insight = data['insight'] as String;
 
     return Card(
@@ -711,14 +834,10 @@ class InsightsTab extends ConsumerWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.lg,
-            vertical: AppSizes.xl,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg, vertical: AppSizes.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title and Description
               Text(
                 'Weekend vs Weekday',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -729,20 +848,14 @@ class InsightsTab extends ConsumerWidget {
               const SizedBox(height: AppSizes.sm),
               Text(
                 insight,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, height: 1.5),
               ),
               const SizedBox(height: AppSizes.xl),
-
-              // Spending Comparison
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: _buildSpendingComparisonCard(
-                      context,
                       label: 'Weekday Avg',
                       amount: data['weekday_average'] as num,
                       color: AppColors.primaryTeal,
@@ -751,7 +864,6 @@ class InsightsTab extends ConsumerWidget {
                   const SizedBox(width: AppSizes.lg),
                   Expanded(
                     child: _buildSpendingComparisonCard(
-                      context,
                       label: 'Weekend Avg',
                       amount: data['weekend_average'] as num,
                       color: AppColors.warning,
@@ -759,17 +871,12 @@ class InsightsTab extends ConsumerWidget {
                   ),
                 ],
               ),
-
-              // Subtle accent line
               const SizedBox(height: AppSizes.lg),
               Container(
                 height: 1,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryTeal.withValues(alpha: 0.3),
-                      AppColors.primaryTeal.withValues(alpha: 0),
-                    ],
+                    colors: [AppColors.primaryTeal.withValues(alpha: 0.3), AppColors.primaryTeal.withValues(alpha: 0)],
                   ),
                 ),
               ),
@@ -780,8 +887,7 @@ class InsightsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildSpendingComparisonCard(
-    BuildContext context, {
+  Widget _buildSpendingComparisonCard({
     required String label,
     required num amount,
     required Color color,
@@ -791,37 +897,29 @@ class InsightsTab extends ConsumerWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        border: Border.all(
-          color: color.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
+          Text(label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  )),
           const SizedBox(height: AppSizes.sm),
           Text(
             '\$${amount.toStringAsFixed(2)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: color.withValues(alpha: 0.75)),
           ),
         ],
       ),
     );
   }
 
-  // Helper method to build empty state cards using the shared component
-  Widget _buildEmptyStateCard(
-    BuildContext context, {
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  Widget _buildEmptyStateCard({
     required IconData icon,
     required String title,
     required String message,

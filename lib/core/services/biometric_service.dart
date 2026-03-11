@@ -1,5 +1,4 @@
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:flutter/services.dart';
 
 /// Service for handling biometric authentication
@@ -66,11 +65,6 @@ class BiometricService {
 
       final authenticated = await _localAuth.authenticate(
         localizedReason: localizedReason,
-        options: AuthenticationOptions(
-          useErrorDialogs: useErrorDialogs,
-          stickyAuth: stickyAuth,
-          biometricOnly: true,
-        ),
       );
 
       if (authenticated) {
@@ -135,23 +129,24 @@ class BiometricService {
     String errorMessage;
 
     switch (e.code) {
-      case auth_error.notAvailable:
+      case 'NotAvailable':
         errorType = BiometricErrorType.notAvailable;
         errorMessage = 'Biometric authentication is not available';
         break;
-      case auth_error.notEnrolled:
+      case 'NotEnrolled':
         errorType = BiometricErrorType.notEnrolled;
         errorMessage = 'No biometrics enrolled. Please set up biometrics in device settings';
         break;
-      case auth_error.lockedOut:
-        errorType = BiometricErrorType.lockedOut;
-        errorMessage = 'Too many attempts. Biometric authentication is temporarily locked';
+      case 'LockedOut':
+      case 'PermanentlyLockedOut':
+        errorType = e.code == 'PermanentlyLockedOut'
+            ? BiometricErrorType.permanentlyLockedOut
+            : BiometricErrorType.lockedOut;
+        errorMessage = e.code == 'PermanentlyLockedOut'
+            ? 'Biometric authentication is permanently locked. Please use password'
+            : 'Too many attempts. Biometric authentication is temporarily locked';
         break;
-      case auth_error.permanentlyLockedOut:
-        errorType = BiometricErrorType.permanentlyLockedOut;
-        errorMessage = 'Biometric authentication is permanently locked. Please use password';
-        break;
-      case auth_error.passcodeNotSet:
+      case 'PasscodeNotSet':
         errorType = BiometricErrorType.passcodeNotSet;
         errorMessage = 'Device passcode is not set. Please set a passcode first';
         break;

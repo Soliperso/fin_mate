@@ -157,10 +157,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 subtitle: const Text('Update your account password'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  // Password change feature placeholder
-                  SuccessSnackbar.show(
-                    context,
-                    message: 'Password change feature coming soon!',
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Coming Soon'),
+                      content: const Text('Password change feature coming soon.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -186,24 +194,23 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
         if (!result.success) {
           if (mounted) {
-            ErrorSnackbar.show(
+            showErrorDialog(
               context,
-              message: result.errorMessage ?? 'Biometric authentication failed',
+              result.errorMessage ?? 'Biometric authentication failed',
             );
           }
           setState(() => _isLoadingBiometric = false);
           return;
         }
 
-        // Check if credentials are saved
+        // Check if email is saved (required for biometric login)
         final email = await storage.getSavedEmail();
-        final password = await storage.getSavedPassword();
 
-        if (email == null || password == null) {
+        if (email == null) {
           if (mounted) {
-            ErrorSnackbar.show(
+            showErrorDialog(
               context,
-              message: 'Please enable "Remember me" when logging in to use biometric authentication',
+              'Please enable "Remember me" when logging in to use biometric authentication',
             );
           }
           setState(() => _isLoadingBiometric = false);
@@ -213,18 +220,22 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         await storage.setBiometricEnabled(true);
 
         if (mounted) {
-          SuccessSnackbar.show(
+          SuccessDialog.show(
             context,
+            title: 'Enabled',
             message: 'Biometric login enabled',
+            autoDismissDuration: const Duration(milliseconds: 800),
           );
         }
       } else {
         await storage.setBiometricEnabled(false);
 
         if (mounted) {
-          SuccessSnackbar.show(
+          SuccessDialog.show(
             context,
+            title: 'Disabled',
             message: 'Biometric login disabled',
+            autoDismissDuration: const Duration(milliseconds: 800),
           );
         }
       }
@@ -232,9 +243,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ErrorSnackbar.show(
+        showErrorDialog(
           context,
-          message: 'Failed to update biometric setting: ${e.toString()}',
+          'Failed to update biometric setting: ${e.toString()}',
         );
       }
     } finally {
@@ -311,19 +322,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       await authRepository.enableEmailMfa();
 
       if (mounted) {
-        SuccessSnackbar.show(
+        SuccessDialog.show(
           context,
+          title: 'Enabled',
           message: 'Email MFA enabled successfully',
+          autoDismissDuration: const Duration(milliseconds: 800),
         );
       }
 
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ErrorSnackbar.show(
-          context,
-          message: 'Failed to enable email MFA: ${e.toString()}',
-        );
+        showErrorDialog(context, 'Failed to enable email MFA: ${e.toString()}');
       }
     } finally {
       setState(() => _isLoadingMfa = false);
@@ -354,10 +364,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       }
     } catch (e) {
       if (mounted) {
-        ErrorSnackbar.show(
-          context,
-          message: 'Failed to enable TOTP MFA: ${e.toString()}',
-        );
+        showErrorDialog(context, 'Failed to enable TOTP MFA: ${e.toString()}');
       }
     } finally {
       setState(() => _isLoadingMfa = false);
@@ -431,10 +438,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             onPressed: () async {
               final code = codeController.text.trim();
               if (code.length != 6) {
-                ErrorSnackbar.show(
-                  context,
-                  message: 'Please enter a 6-digit code',
-                );
+                showErrorDialog(context, 'Please enter a 6-digit code');
                 return;
               }
 
@@ -447,17 +451,16 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
                 if (!context.mounted) return;
                 Navigator.pop(context);
-                SuccessSnackbar.show(
+                SuccessDialog.show(
                   context,
+                  title: 'Enabled',
                   message: 'TOTP MFA enabled successfully',
+                  autoDismissDuration: const Duration(milliseconds: 800),
                 );
                 setState(() {});
               } catch (e) {
                 if (!context.mounted) return;
-                ErrorSnackbar.show(
-                  context,
-                  message: 'Invalid code: ${e.toString()}',
-                );
+                showErrorDialog(context, 'Invalid code: ${e.toString()}');
               } finally {
                 codeController.dispose();
               }
@@ -503,19 +506,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       await authRepository.disableMfa();
 
       if (mounted) {
-        SuccessSnackbar.show(
+        SuccessDialog.show(
           context,
-          message: 'MFA disabled',
+          title: 'Disabled',
+          message: 'MFA has been disabled',
+          autoDismissDuration: const Duration(milliseconds: 800),
         );
       }
 
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ErrorSnackbar.show(
-          context,
-          message: 'Failed to disable MFA: ${e.toString()}',
-        );
+        showErrorDialog(context, 'Failed to disable MFA: ${e.toString()}');
       }
     } finally {
       setState(() => _isLoadingMfa = false);

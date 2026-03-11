@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -34,9 +35,9 @@ class NotificationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         ),
         child: const Icon(
-          Icons.delete_outline,
+          CupertinoIcons.delete,
           color: Colors.white,
-          size: 28,
+          size: 24,
         ),
       ),
       child: Padding(
@@ -105,7 +106,7 @@ class NotificationCard extends StatelessWidget {
                                 width: 8,
                                 height: 8,
                                 decoration: const BoxDecoration(
-                                  color: AppColors.primaryTeal,
+                                  color: AppColors.brandTeal,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -144,7 +145,7 @@ class NotificationCard extends StatelessWidget {
                                 notification.actionLabel!,
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.primaryTeal,
+                                  color: AppColors.brandTeal,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -165,17 +166,17 @@ class NotificationCard extends StatelessWidget {
   IconData _getTypeIcon(NotificationType type) {
     switch (type) {
       case NotificationType.budgetAlert:
-        return Icons.account_balance_wallet_outlined;
+        return CupertinoIcons.chart_pie;
       case NotificationType.billReminder:
-        return Icons.event_outlined;
+        return CupertinoIcons.calendar;
       case NotificationType.transactionAlert:
-        return Icons.receipt_long_outlined;
+        return CupertinoIcons.doc_text;
       case NotificationType.moneyHealthUpdate:
-        return Icons.trending_up;
+        return CupertinoIcons.arrow_up_right;
       case NotificationType.goalProgress:
-        return Icons.savings_outlined;
+        return CupertinoIcons.money_dollar_circle;
       case NotificationType.systemMessage:
-        return Icons.info_outline;
+        return CupertinoIcons.info_circle;
     }
   }
 
@@ -184,13 +185,13 @@ class NotificationCard extends StatelessWidget {
       case NotificationType.budgetAlert:
         return AppColors.warning;
       case NotificationType.billReminder:
-        return AppColors.primaryTeal;
+        return AppColors.brandTeal;
       case NotificationType.transactionAlert:
         return AppColors.error;
       case NotificationType.moneyHealthUpdate:
         return AppColors.success;
       case NotificationType.goalProgress:
-        return AppColors.primaryTeal;
+        return AppColors.brandTeal;
       case NotificationType.systemMessage:
         return AppColors.textSecondary;
     }
@@ -203,7 +204,7 @@ class NotificationCard extends StatelessWidget {
       case NotificationPriority.high:
         return AppColors.warning;
       case NotificationPriority.medium:
-        return AppColors.primaryTeal;
+        return AppColors.brandTeal;
       case NotificationPriority.low:
         return AppColors.textSecondary;
     }
