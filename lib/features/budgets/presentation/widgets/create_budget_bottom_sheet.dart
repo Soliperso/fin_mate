@@ -180,27 +180,30 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   const SizedBox(height: AppSizes.sm),
-                  SegmentedButton<BudgetPeriod>(
-                    segments: const [
-                      ButtonSegment(
-                        value: BudgetPeriod.weekly,
-                        label: Text('Weekly'),
-                      ),
-                      ButtonSegment(
-                        value: BudgetPeriod.monthly,
-                        label: Text('Monthly'),
-                      ),
-                      ButtonSegment(
-                        value: BudgetPeriod.yearly,
-                        label: Text('Yearly'),
-                      ),
-                    ],
-                    selected: {_selectedPeriod},
-                    onSelectionChanged: (Set<BudgetPeriod> selection) {
-                      setState(() {
-                        _selectedPeriod = selection.first;
-                      });
-                    },
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<BudgetPeriod>(
+                      segments: const [
+                        ButtonSegment(
+                          value: BudgetPeriod.weekly,
+                          label: Text('Weekly', style: TextStyle(fontSize: 13)),
+                        ),
+                        ButtonSegment(
+                          value: BudgetPeriod.monthly,
+                          label: Text('Monthly', style: TextStyle(fontSize: 13)),
+                        ),
+                        ButtonSegment(
+                          value: BudgetPeriod.yearly,
+                          label: Text('Yearly', style: TextStyle(fontSize: 13)),
+                        ),
+                      ],
+                      selected: {_selectedPeriod},
+                      onSelectionChanged: (Set<BudgetPeriod> selection) {
+                        setState(() {
+                          _selectedPeriod = selection.first;
+                        });
+                      },
+                    ),
                   ),
                   const SizedBox(height: AppSizes.md),
 
@@ -301,16 +304,27 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       ),
                       const SizedBox(width: AppSizes.md),
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _saveBudget,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Text(widget.budget == null ? 'Create' : 'Update'),
-                        ),
+                        child: widget.budget == null
+                            ? ElevatedButton(
+                                onPressed: _isLoading ? null : _saveBudget,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Text('Create'),
+                              )
+                            : OutlinedButton(
+                                onPressed: _isLoading ? null : _saveBudget,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Text('Update'),
+                              ),
                       ),
                     ],
                   ),

@@ -16,9 +16,11 @@ import '../widgets/debt_hero_card.dart';
 import '../widgets/edit_debt_bottom_sheet.dart';
 import '../widgets/extra_payment_card.dart';
 import '../widgets/log_payment_bottom_sheet.dart';
+import '../widgets/monthly_funding_card.dart';
 import '../widgets/monthly_schedule_list.dart';
 import '../widgets/payment_history_sheet.dart';
 import '../widgets/payoff_timeline_chart.dart';
+import '../widgets/strategy_comparison_sheet.dart';
 
 export '../../domain/services/payoff_calculator.dart' show DebtStrategy;
 
@@ -98,11 +100,29 @@ class _DebtPageState extends ConsumerState<DebtPage>
     );
   }
 
+  void _showStrategyComparison() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSizes.radiusXl)),
+      ),
+      builder: (_) => const StrategyComparisonSheet(),
+    );
+  }
+
   void _showPaymentHistory(DebtEntity debt) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSizes.radiusXl)),
+      ),
       builder: (_) => PaymentHistorySheet(debt: debt),
     );
   }
@@ -130,6 +150,10 @@ class _DebtPageState extends ConsumerState<DebtPage>
     final debtsAsync = ref.watch(debtsProvider);
     final strategy = ref.watch(selectedStrategyProvider);
     final payoffResult = ref.watch(payoffResultProvider);
+    final extra = ref.watch(extraPaymentProvider);
+    final simResult = ref.watch(simulatedPayoffProvider);
+    final activeResult =
+        extra > 0 && simResult != null ? simResult : payoffResult;
 
     return Scaffold(
       appBar: AppBar(
@@ -151,50 +175,90 @@ class _DebtPageState extends ConsumerState<DebtPage>
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed: _showAddDebt,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryTeal,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+      floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _showAddDebt,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: const Text(
+                    'Add Debt',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
               ),
-            ),
-            icon: const Icon(CupertinoIcons.add, size: 20),
-            label: const Text(
-              'Add Debt',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-          ),
-        ),
-      ),
+            )
+          : null,
       body: debtsAsync.when(
         loading: () => _buildLoading(),
-        error: (e, _) => EmptyState(
-          icon: CupertinoIcons.exclamationmark_circle,
-          title: 'Could Not Load Debts',
-          message: 'Pull down to refresh.',
-          actionLabel: 'Retry',
-          onAction: _refresh,
+        error: (e, _) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            EmptyState(
+              icon: CupertinoIcons.exclamationmark_circle,
+              title: 'Could Not Load Debts',
+              message: 'Pull down to refresh.',
+            ),
+            Center(
+              child: FilledButton.icon(
+                onPressed: _refresh,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ),
+          ],
         ),
         data: (debts) {
           if (debts.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: EmptyStateCard(
-                  icon: CupertinoIcons.creditcard,
-                  title: 'No Debts Tracked',
-                  message: 'Add your debts to start your payoff journey.',
-                  backgroundColor: AppColors.primaryTeal,
-                ),
+            return Padding(
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  EmptyStateCard(
+                    icon: CupertinoIcons.creditcard,
+                    title: 'No Debts Tracked',
+                    message: 'Add your debts to start your payoff journey.',
+                    backgroundColor: AppColors.primaryTeal,
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _showAddDebt,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryTeal,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shadowColor:
+                            AppColors.primaryTeal.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
+                        ),
+                      ),
+                      icon: const Icon(CupertinoIcons.add, size: 20),
+                      label: const Text(
+                        'Add Debt',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -205,6 +269,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
 
           return TabBarView(
             controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               // ── Tab 0: Overview ───────────────────────────────────────
               RefreshIndicator(
@@ -224,31 +289,45 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     const SizedBox(height: AppSizes.md),
 
                     // Strategy picker
-                    SegmentedButton<DebtStrategy>(
-                      segments: const [
-                        ButtonSegment(
-                          value: DebtStrategy.avalanche,
-                          label: Text('Avalanche'),
-                          icon: Icon(CupertinoIcons.flame),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SegmentedButton<DebtStrategy>(
+                            segments: const [
+                              ButtonSegment(
+                                value: DebtStrategy.avalanche,
+                                label: Text('Avalanche'),
+                                icon: Icon(CupertinoIcons.flame),
+                              ),
+                              ButtonSegment(
+                                value: DebtStrategy.snowball,
+                                label: Text('Snowball'),
+                                icon: Icon(CupertinoIcons.snow),
+                              ),
+                            ],
+                            selected: {strategy},
+                            onSelectionChanged: (s) => ref
+                                .read(selectedStrategyProvider.notifier)
+                                .state = s.first,
+                            style: ButtonStyle(
+                              iconColor:
+                                  WidgetStateProperty.resolveWith((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return AppColors.primaryTeal;
+                                }
+                                return AppColors.textSecondary;
+                              }),
+                            ),
+                          ),
                         ),
-                        ButtonSegment(
-                          value: DebtStrategy.snowball,
-                          label: Text('Snowball'),
-                          icon: Icon(CupertinoIcons.snow),
+                        const SizedBox(width: AppSizes.xs),
+                        IconButton(
+                          icon: const Icon(CupertinoIcons.info_circle),
+                          color: AppColors.textSecondary,
+                          tooltip: 'Compare strategies',
+                          onPressed: _showStrategyComparison,
                         ),
                       ],
-                      selected: {strategy},
-                      onSelectionChanged: (s) => ref
-                          .read(selectedStrategyProvider.notifier)
-                          .state = s.first,
-                      style: ButtonStyle(
-                        iconColor: WidgetStateProperty.resolveWith((states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return AppColors.primaryTeal;
-                          }
-                          return AppColors.textSecondary;
-                        }),
-                      ),
                     ),
                     const SizedBox(height: AppSizes.xs),
                     Text(
@@ -275,6 +354,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             onDelete: () => _deleteDebt(debt),
                           ),
                         )),
+                    const SizedBox(height: AppSizes.sm),
+                    MonthlyFundingCard(debts: sorted),
                   ],
                 ),
               ),
@@ -292,10 +373,14 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         AppSizes.md, AppSizes.md, AppSizes.md, 100,
                       ),
                       children: [
-                        PayoffTimelineChart(result: payoffResult),
+                        PayoffTimelineChart(
+                          result: activeResult ?? payoffResult,
+                          debts: debts,
+                        ),
                         const SizedBox(height: AppSizes.lg),
                         MonthlyScheduleList(
-                          result: payoffResult,
+                          result: activeResult ?? payoffResult,
+                          debts: debts,
                           monthsToShow: 6,
                         ),
                         const SizedBox(height: AppSizes.lg),

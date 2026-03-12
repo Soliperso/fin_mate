@@ -69,7 +69,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage> {
             ),
             const SizedBox(height: AppSizes.md),
             Text(
-              'Receipt scanning with automatic data extraction will be available during beta testing. All features are free for now!',
+              'Receipt scanning with automatic data extraction is coming in a future update. Stay tuned!',
               style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,

@@ -8,8 +8,6 @@ class EmptyState extends StatefulWidget {
   final IconData icon;
   final String title;
   final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
   final bool enableGlass;
   final bool animated;
 
@@ -18,8 +16,6 @@ class EmptyState extends StatefulWidget {
     required this.icon,
     required this.title,
     required this.message,
-    this.actionLabel,
-    this.onAction,
     this.enableGlass = false,
     this.animated = true,
   });
@@ -99,20 +95,6 @@ class _EmptyStateState extends State<EmptyState>
               ),
           textAlign: TextAlign.center,
         ),
-        if (widget.actionLabel != null && widget.onAction != null) ...[
-          const SizedBox(height: AppSizes.xl),
-          FilledButton.icon(
-            onPressed: widget.onAction,
-            icon: const Icon(Icons.add),
-            label: Text(widget.actionLabel!),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.lg,
-                vertical: AppSizes.md,
-              ),
-            ),
-          ),
-        ],
       ],
     );
 

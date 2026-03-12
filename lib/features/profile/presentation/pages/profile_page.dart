@@ -358,10 +358,10 @@ class ProfilePage extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppColors.systemGray5,
+                color: const Color(0xFF2C2C2E),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.secondaryLabel, size: 17),
+              child: Icon(icon, color: AppColors.labelDark, size: 17),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -372,6 +372,7 @@ class ProfilePage extends ConsumerWidget {
                     title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
+                          color: const Color(0xFF9E9EA3),
                         ),
                   ),
                   const SizedBox(height: 2),

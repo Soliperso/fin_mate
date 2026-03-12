@@ -40,7 +40,7 @@ dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### Database Migrations
-New migrations go in `supabase/migrations/` with an incrementing numeric prefix (currently at `33_`).
+New migrations go in `supabase/migrations/` with an incrementing numeric prefix (currently at `34_`).
 ```bash
 # Apply via CLI (requires project linking)
 supabase db push
@@ -57,7 +57,7 @@ supabase db push
 - **State Management**: Riverpod (`StateNotifierProvider`, `FutureProvider`, `Provider`)
 - **Routing**: GoRouter with auth guard redirect
 - **Backend**: Supabase (Auth, Postgres, Storage, Realtime)
-- **AI**: Google Gemini (`google_generative_ai` package)
+- **AI**: OpenAI GPT-4o-mini (via `http` package, key via `EnvConfig.openAiApiKey`)
 - **Error Tracking**: Sentry (`sentry_flutter`)
 - **Ads**: Google Mobile Ads
 - **Secure Storage**: `flutter_secure_storage` via `SecureStorageService`
@@ -80,8 +80,8 @@ lib/
 │   ├── dashboard/     # Net worth card, cash flow chart, money health score, emergency fund
 │   ├── transactions/  # CRUD with accounts and categories, receipt scanner (ML Kit)
 │   ├── budgets/       # Category budgets with progress tracking
-│   ├── savings_goals/ # Goals + contributions (code complete, route commented out)
-│   ├── ai_insights/   # Gemini chat, balance forecast, spending alerts (code complete, route commented out)
+│   ├── savings_goals/ # Goals + contributions (active, accessible via Profile)
+│   ├── ai_insights/   # OpenAI GPT-4o-mini chat, balance forecast, spending alerts (active)
 │   ├── notifications/ # In-app notifications (active)
 │   ├── settings/      # Display, notification settings, data privacy (active)
 │   ├── profile/       # Profile edit, security settings, legal (active)
@@ -206,7 +206,7 @@ Financial amounts stored as `DECIMAL(15,2)`.
 
 ## AI Integration
 
-The app uses **Google Gemini** via the `google_generative_ai` package — not OpenAI. (`AppConfig.aiModel` references `'gpt-4'` but is stale/unused.)
+The app uses **OpenAI GPT-4o-mini** via direct HTTP calls (`openai_chat_service.dart`). The API key is loaded from `.env` via `EnvConfig.openAiApiKey`. (`AppConfig.aiModel` references `'gpt-4'` but is stale/unused — do not rely on it.)
 
 `BalanceForecastService` (`lib/features/ai_insights/data/services/balance_forecast_service.dart`) generates 30-day balance forecasts from spending history and recurring transactions — this runs locally without any AI API call.
 
@@ -217,20 +217,21 @@ The app uses **Google Gemini** via the `google_generative_ai` package — not Op
 ### Active (routed and working)
 - Auth (email/password, MFA TOTP + email OTP, biometric, OTP verify)
 - Dashboard, Transactions, Budgets, Emergency Fund
+- Debt Payoff (Avalanche/Snowball, payment plans, DTI widget)
+- AI Insights / OpenAI Chat (GPT-4o-mini, balance forecast, spending alerts)
+- Savings Goals (accessible via Profile page)
 - Notifications, Profile, Settings
 
 ### Code complete but commented out of routing
-- AI Insights / Gemini Chat (`[MVP: AI Insights]`)
-- Savings Goals (`COMMENTED OUT - Savings Goals not in MVP`)
 - Documents (`[MVP: Documents]`)
 - Admin Panel (`[MVP: Admin Panel]`)
 - Subscription / Pricing (`[MVP: Pricing/Subscription]`)
 - Recurring Transactions (`[V1.1: Recurring Transactions]`)
-- Bill Splitting (`[V1.1: Bill Splitting]`) — being replaced by Debt Payoff feature
+- Bill Splitting (`[V1.1: Bill Splitting]`) — replaced by Debt Payoff feature
 
 ### Planned / Not yet implemented
-- **Debt Payoff** (new core feature — see PRD section 3.3): debt accounts, Avalanche/Snowball strategies, payment plan calendar, DTI ratio widget, net worth integration, extra payment simulator
 - CSV import for transactions
+- Data export (CSV/PDF)
 
 ---
 

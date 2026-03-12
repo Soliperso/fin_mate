@@ -111,7 +111,7 @@ class AdService {
             );
           },
           onAdFailedToLoad: (error) {
-            onAdFailedToLoad?.call(interstitialAd!, error);
+            // interstitialAd is null when load fails — skip the callback
           },
         ),
       );

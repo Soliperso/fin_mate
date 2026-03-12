@@ -28,6 +28,10 @@ class MonthlySnapshot {
   final double interestThisMonth;
   final double totalPaymentThisMonth;
   final String focusDebtName;
+  /// Remaining balance per debt after this month's payments (id → balance).
+  final Map<String, double> debtBalancesAfter;
+  /// Payment applied to each debt this month (id → amount paid).
+  final Map<String, double> debtPayments;
 
   const MonthlySnapshot({
     required this.month,
@@ -36,6 +40,8 @@ class MonthlySnapshot {
     required this.interestThisMonth,
     required this.totalPaymentThisMonth,
     required this.focusDebtName,
+    required this.debtBalancesAfter,
+    required this.debtPayments,
   });
 }
 
@@ -79,6 +85,13 @@ class PayoffCalculator {
 
     final now = DateTime.now();
 
+    // Total monthly budget stays constant — freed minimums roll over to the
+    // focus debt when a debt is paid off (core avalanche/snowball mechanic).
+    final totalMonthlyBudget = debts.fold<double>(
+      extraMonthlyPayment,
+      (sum, d) => sum + d.minimumPayment,
+    );
+
     for (int month = 1; month <= _maxMonths; month++) {
       final activeIds = debts
           .map((d) => d.id)
@@ -103,6 +116,7 @@ class PayoffCalculator {
       final focusId = activeIds.first;
       double interestThisMonth = 0;
       double paymentThisMonth = 0;
+      final debtPaymentsThisMonth = <String, double>{};
 
       // --- Step 2: Accrue interest on all active debts ---
       for (final id in activeIds) {
@@ -113,14 +127,14 @@ class PayoffCalculator {
       }
 
       // --- Step 3: Pay minimums on non-focus debts ---
-      double budgetRemaining = activeIds.fold<double>(
-        extraMonthlyPayment,
-        (sum, id) => sum + minimums[id]!,
-      );
+      // Use the full constant budget so freed minimums from paid-off debts
+      // automatically roll over to the focus debt each month.
+      double budgetRemaining = totalMonthlyBudget;
 
       for (final id in activeIds.skip(1)) {
         final payment = min(minimums[id]!, balances[id]!);
         balances[id] = balances[id]! - payment;
+        debtPaymentsThisMonth[id] = payment;
         paymentThisMonth += payment;
         budgetRemaining -= payment;
         totalPaid += payment;
@@ -129,6 +143,7 @@ class PayoffCalculator {
       // --- Step 4: Apply remaining budget to focus debt ---
       final focusPayment = min(budgetRemaining, balances[focusId]!);
       balances[focusId] = balances[focusId]! - focusPayment;
+      debtPaymentsThisMonth[focusId] = focusPayment;
       paymentThisMonth += focusPayment;
       totalPaid += focusPayment;
 
@@ -146,6 +161,8 @@ class PayoffCalculator {
         interestThisMonth: interestThisMonth,
         totalPaymentThisMonth: paymentThisMonth,
         focusDebtName: nameMap[focusId]!,
+        debtBalancesAfter: Map.unmodifiable(balances),
+        debtPayments: Map.unmodifiable(debtPaymentsThisMonth),
       ));
     }
 

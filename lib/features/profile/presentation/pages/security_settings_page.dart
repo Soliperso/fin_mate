@@ -78,7 +78,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: AppSizes.md),
 

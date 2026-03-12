@@ -73,7 +73,7 @@ class _RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   _RouterNotifier(this._ref) {
-    _ref.listen(authNotifierProvider, (_, _) {
+    _ref.listen(authNotifierProvider, (previous, next) {
       notifyListeners();
     });
   }

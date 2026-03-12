@@ -60,6 +60,7 @@ class BalanceTimelineChart extends StatelessWidget {
             height: 200,
             child: LineChart(
               LineChartData(
+                clipData: const FlClipData.all(),
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
@@ -239,15 +240,19 @@ class BalanceTimelineChart extends StatelessWidget {
   }
 
   double _calculateMinY() {
-    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance);
+    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
     final min = balances.reduce((a, b) => a < b ? a : b);
-    return (min * 0.9).floorToDouble();
+    final max = balances.reduce((a, b) => a > b ? a : b);
+    if (min == max) return min - 100;
+    return (min * (min >= 0 ? 0.9 : 1.1)).floorToDouble();
   }
 
   double _calculateMaxY() {
-    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance);
+    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
+    final min = balances.reduce((a, b) => a < b ? a : b);
     final max = balances.reduce((a, b) => a > b ? a : b);
-    return (max * 1.1).ceilToDouble();
+    if (min == max) return max + 100;
+    return (max * (max >= 0 ? 1.1 : 0.9)).ceilToDouble();
   }
 
   double _calculateInterval() {

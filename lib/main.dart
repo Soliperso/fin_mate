@@ -8,8 +8,8 @@ import 'core/theme/app_theme.dart';
 import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
-import 'core/services/analytics_service.dart';
 import 'core/services/ad_service.dart';
+import 'core/services/analytics_service.dart';
 import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
 // import 'core/services/payment_service.dart';

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,8 +33,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.lg),
           child: Form(
@@ -44,31 +47,20 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 const SizedBox(height: AppSizes.xl),
                 Center(
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: _emailSent
-                            ? [
-                                AppColors.success.withValues(alpha: 0.15),
-                                AppColors.success.withValues(alpha: 0.08),
-                              ]
-                            : [
-                                AppColors.primaryTeal.withValues(alpha: 0.15),
-                                AppColors.primaryTeal.withValues(alpha: 0.08),
-                              ],
-                      ),
+                      color: _emailSent
+                          ? AppColors.success.withValues(alpha: 0.12)
+                          : AppColors.brandTeal.withValues(alpha: 0.12),
                     ),
                     child: Icon(
-                      _emailSent ? Icons.check_circle_outline : Icons.lock_reset,
-                      size: 58,
-                      color: _emailSent
-                          ? AppColors.success.withValues(alpha: 0.7)
-                          : AppColors.primaryTeal.withValues(alpha: 0.7),
-                      weight: 210,
+                      _emailSent
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.question_circle,
+                      size: 44,
+                      color: _emailSent ? AppColors.success : AppColors.brandTeal,
                     ),
                   ),
                 ),
@@ -95,10 +87,19 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
                       hintText: 'Enter your email address',
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2C2C2E),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: const Icon(CupertinoIcons.mail, size: 17, color: Colors.white),
+                        ),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -127,11 +128,16 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     children: [
                       Text(
                         'Remember your password? ',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
                       ),
                       TextButton(
                         onPressed: () => context.go('/login'),
-                        child: const Text('Log In'),
+                        child: const Text(
+                          'Log In',
+                          style: TextStyle(color: AppColors.brandTeal),
+                        ),
                       ),
                     ],
                   ),
@@ -147,7 +153,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.info_outline, color: AppColors.success),
+                            Icon(CupertinoIcons.info_circle, color: AppColors.success),
                             const SizedBox(width: AppSizes.sm),
                             Expanded(
                               child: Text(
@@ -173,7 +179,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   const SizedBox(height: AppSizes.lg),
                   OutlinedButton.icon(
                     onPressed: _isLoading ? null : _handleResendEmail,
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                     label: _isLoading
                         ? const SizedBox(
                             height: 20,
@@ -192,6 +198,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

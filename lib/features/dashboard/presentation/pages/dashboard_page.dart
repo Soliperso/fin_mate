@@ -170,7 +170,7 @@ class DashboardPage extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, _) => const SizedBox.shrink(),
+                      error: (e, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -189,7 +189,7 @@ class DashboardPage extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, _) => const SizedBox.shrink(),
+                      error: (e, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -238,17 +238,27 @@ class DashboardPage extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             child: SizedBox(
               height: MediaQuery.of(context).size.height - 200,
-              child: EmptyState(
-                icon: Icons.error_outline,
-                title: 'Failed to load dashboard',
-                message:
-                    'Unable to fetch your financial data. Please check your connection and try again.',
-                actionLabel: 'Retry',
-                onAction: () {
-                  ref
-                      .read(dashboardNotifierProvider.notifier)
-                      .loadDashboard();
-                },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  EmptyState(
+                    icon: Icons.error_outline,
+                    title: 'Failed to load dashboard',
+                    message:
+                        'Unable to fetch your financial data. Please check your connection and try again.',
+                  ),
+                  Center(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        ref
+                            .read(dashboardNotifierProvider.notifier)
+                            .loadDashboard();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -312,46 +322,66 @@ class _RecentTransactionsCard extends StatelessWidget {
         : AppColors.systemBackground;
 
     if (transactions.isEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 2),
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            padding: const EdgeInsets.all(AppSizes.xl),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(
+                    CupertinoIcons.doc_text,
+                    size: 40,
+                    color: AppColors.systemGray3,
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Text(
+                    'No recent transactions',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.systemGray,
+                        ),
                   ),
                 ],
-        ),
-        padding: const EdgeInsets.all(AppSizes.xl),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                CupertinoIcons.doc_text,
-                size: 40,
-                color: AppColors.systemGray3,
               ),
-              const SizedBox(height: AppSizes.sm),
-              Text(
-                'No recent transactions',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.systemGray,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.md),
-              ElevatedButton.icon(
-                onPressed: () =>
-                    context.go('/transactions/add?type=expense'),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Transaction'),
-              ),
-            ],
+            ),
           ),
-        ),
+          const SizedBox(height: AppSizes.md),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () => context.go('/transactions/add?type=expense'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryTeal,
+                foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                ),
+              ),
+              icon: const Icon(CupertinoIcons.add, size: 20),
+              label: const Text(
+                'Add Transaction',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
       );
     }
 

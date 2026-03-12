@@ -62,10 +62,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.lg),
           child: Form(
             key: _formKey,
             child: Column(
@@ -78,12 +80,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     height: 88,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.systemGray6,
+                      color: AppColors.brandTeal.withValues(alpha: 0.12),
                     ),
                     child: const Icon(
                       CupertinoIcons.lock_shield_fill,
                       size: 44,
-                      color: AppColors.label,
+                      color: AppColors.brandTeal,
                     ),
                   ),
                 ),
@@ -133,9 +135,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(CupertinoIcons.mail),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.mail, size: 17, color: Colors.white),
+                      ),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -156,14 +167,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onFieldSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(CupertinoIcons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? CupertinoIcons.eye_slash
-                            : CupertinoIcons.eye,
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.lock, size: 17, color: Colors.white),
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2C2C2E),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(
+                            _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                            size: 17,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -193,12 +222,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     Text(
                       'Remember me',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
                     ),
                     const Spacer(),
                     TextButton(
                       onPressed: authState.isLoading ? null : _handleForgotPassword,
-                      child: const Text('Forgot Password?'),
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: AppColors.brandTeal),
+                      ),
                     ),
                   ],
                 ),
@@ -219,11 +253,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   children: [
                     Text(
                       'Don\'t have an account? ',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/signup'),
-                      child: const Text('Sign Up'),
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(color: AppColors.brandTeal),
+                      ),
                     ),
                   ],
                 ),
@@ -268,7 +307,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, _) => const SizedBox.shrink(),
+                      error: (e, _) => const SizedBox.shrink(),
                     );
                   },
                 ),
@@ -276,6 +315,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

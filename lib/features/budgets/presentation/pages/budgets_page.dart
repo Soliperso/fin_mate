@@ -178,6 +178,7 @@ class BudgetsPage extends ConsumerWidget {
                           budget.categoryName ?? 'Uncategorized',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
                               ),
                         ),
                         Text(
@@ -246,6 +247,7 @@ class BudgetsPage extends ConsumerWidget {
                         '\$${spent.toStringAsFixed(0)}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
                             ),
                       ),
                     ],
@@ -279,6 +281,7 @@ class BudgetsPage extends ConsumerWidget {
                         '\$${budget.amount.toStringAsFixed(0)}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
                             ),
                       ),
                     ],
@@ -302,38 +305,172 @@ class BudgetsPage extends ConsumerWidget {
   }
 
   void _showBudgetOptions(BuildContext context, WidgetRef ref, BudgetEntity budget) {
+    final spent = budget.spent ?? 0.0;
+    final remaining = budget.remaining ?? budget.amount;
+    final percentage = (budget.spentPercentage.clamp(0.0, 100.0) / 100);
+    final isOverBudget = budget.isExceeded;
+    final isNearLimit = budget.isNearLimit;
+    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.primaryTeal;
+    final progressColor = isOverBudget
+        ? AppColors.systemRed
+        : isNearLimit
+            ? AppColors.systemOrange
+            : AppColors.primaryTeal;
+
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
+      ),
+      builder: (sheetContext) {
+        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Edit Budget'),
+              // Budget summary
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.lg, AppSizes.md, AppSizes.lg, AppSizes.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: categoryColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                          ),
+                          child: Icon(
+                            _getIconFromName(budget.categoryIcon),
+                            color: categoryColor,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                budget.categoryName ?? 'Uncategorized',
+                                style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              Text(
+                                budget.period.displayName,
+                                style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        minHeight: 6,
+                        backgroundColor: isDark
+                            ? AppColors.tertiarySystemBackgroundDark
+                            : AppColors.systemGray5,
+                        valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Spent',
+                              style: Theme.of(sheetContext).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                            ),
+                            Text(
+                              '\$${spent.toStringAsFixed(0)}',
+                              style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              isOverBudget ? 'Over by' : 'Remaining',
+                              style: Theme.of(sheetContext).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                            ),
+                            Text(
+                              '\$${remaining.abs().toStringAsFixed(0)}',
+                              style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isOverBudget
+                                        ? AppColors.systemRed
+                                        : AppColors.systemGreen,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              Divider(height: 1, thickness: 0.5, color: AppColors.borderLight.withValues(alpha: 0.5)),
+
+              // Edit action
+              _buildActionRow(
+                context: sheetContext,
+                icon: CupertinoIcons.pencil,
+                iconColor: AppColors.primaryTeal,
+                label: 'Edit Budget',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   _showCreateBudgetBottomSheet(context, budget: budget);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: AppColors.error),
-                title: const Text('Delete Budget', style: TextStyle(color: AppColors.error)),
+
+              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: AppColors.borderLight.withValues(alpha: 0.5)),
+
+              // Delete action
+              _buildActionRow(
+                context: sheetContext,
+                icon: CupertinoIcons.trash,
+                iconColor: AppColors.systemRed,
+                label: 'Delete Budget',
+                labelColor: AppColors.systemRed,
                 onTap: () async {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   final confirm = await showDialog<bool>(
                     context: context,
-                    builder: (context) => AlertDialog(
+                    builder: (dialogContext) => AlertDialog(
                       title: const Text('Delete Budget'),
                       content: const Text('Are you sure you want to delete this budget?'),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.pop(context, false),
+                          onPressed: () => Navigator.pop(dialogContext, false),
                           child: const Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.pop(context, true),
+                          onPressed: () => Navigator.pop(dialogContext, true),
                           child: const Text('Delete', style: TextStyle(color: AppColors.error)),
                         ),
                       ],
@@ -359,10 +496,59 @@ class BudgetsPage extends ConsumerWidget {
                   }
                 },
               ),
+
+              const SizedBox(height: AppSizes.sm),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildActionRow({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    Color? labelColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.lg,
+          vertical: 14,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: labelColor,
+                    ),
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: AppColors.systemGray3,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -27,9 +27,6 @@ class ExtraPaymentCard extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        side: BorderSide(
-          color: AppColors.separator.withValues(alpha: 0.5),
-        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.md),

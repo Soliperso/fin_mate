@@ -43,6 +43,20 @@ final payoffResultProvider = Provider<PayoffResult?>((ref) {
   return PayoffCalculator.compute(debts: debts, strategy: strategy);
 });
 
+/// Always-computed Avalanche result — used by strategy comparison sheet.
+final avalancheResultProvider = Provider<PayoffResult?>((ref) {
+  final debts = ref.watch(debtsProvider).valueOrNull;
+  if (debts == null || debts.isEmpty) return null;
+  return PayoffCalculator.compute(debts: debts, strategy: DebtStrategy.avalanche);
+});
+
+/// Always-computed Snowball result — used by strategy comparison sheet.
+final snowballResultProvider = Provider<PayoffResult?>((ref) {
+  final debts = ref.watch(debtsProvider).valueOrNull;
+  if (debts == null || debts.isEmpty) return null;
+  return PayoffCalculator.compute(debts: debts, strategy: DebtStrategy.snowball);
+});
+
 /// Payoff result with extra monthly payment applied — used by simulator.
 final simulatedPayoffProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;

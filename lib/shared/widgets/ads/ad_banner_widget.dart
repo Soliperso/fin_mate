@@ -141,7 +141,7 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (e, _) => const SizedBox.shrink(),
     );
   }
 }

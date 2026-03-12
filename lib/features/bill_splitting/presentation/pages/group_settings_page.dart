@@ -268,7 +268,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
                 return const SizedBox.shrink();
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => const SizedBox.shrink(),
             ),
 
             // Danger Zone

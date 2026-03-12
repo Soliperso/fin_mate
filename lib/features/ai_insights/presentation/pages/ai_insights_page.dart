@@ -294,6 +294,12 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
               style: ButtonStyle(
                 visualDensity: VisualDensity.compact,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.6);
+                  }
+                  return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
+                }),
               ),
               expandedInsets: EdgeInsets.zero,
             ),
@@ -386,6 +392,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                           _formatDate(date),
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                         ),
                         Row(
@@ -402,7 +409,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                             Text(
                               '\$${balance.toStringAsFixed(0)}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: statusColor,
+                                    color: statusColor.withValues(alpha: 0.6),
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -561,7 +568,12 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              context.push('/pricing');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Premium subscriptions coming soon. Stay tuned!'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
             },
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brandTeal,

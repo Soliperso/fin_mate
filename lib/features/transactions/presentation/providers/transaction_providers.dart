@@ -88,6 +88,7 @@ class TransactionListState {
   final DateTimeRange? dateRange;
   final double? minAmount;
   final double? maxAmount;
+  final String selectedPeriod; // 'All', 'Today', 'Week', 'Month', 'Year'
 
   const TransactionListState({
     this.transactions = const [],
@@ -100,6 +101,7 @@ class TransactionListState {
     this.dateRange,
     this.minAmount,
     this.maxAmount,
+    this.selectedPeriod = 'All',
   });
 
   TransactionListState copyWith({
@@ -113,6 +115,7 @@ class TransactionListState {
     DateTimeRange? dateRange,
     double? minAmount,
     double? maxAmount,
+    String? selectedPeriod,
     bool clearCategory = false,
     bool clearDateRange = false,
     bool clearMinAmount = false,
@@ -129,6 +132,7 @@ class TransactionListState {
       dateRange: clearDateRange ? null : (dateRange ?? this.dateRange),
       minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
       maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
+      selectedPeriod: selectedPeriod ?? this.selectedPeriod,
     );
   }
 
@@ -221,6 +225,46 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     _applyFilters();
   }
 
+  /// Set period filter and derive its date range
+  void setPeriod(String period) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    DateTimeRange? range;
+
+    switch (period) {
+      case 'Today':
+        range = DateTimeRange(start: today, end: today);
+        break;
+      case 'Week':
+        range = DateTimeRange(
+          start: today.subtract(Duration(days: today.weekday - 1)),
+          end: today,
+        );
+        break;
+      case 'Month':
+        range = DateTimeRange(
+          start: DateTime(now.year, now.month, 1),
+          end: today,
+        );
+        break;
+      case 'Year':
+        range = DateTimeRange(
+          start: DateTime(now.year, 1, 1),
+          end: today,
+        );
+        break;
+      default:
+        range = null;
+    }
+
+    state = state.copyWith(
+      selectedPeriod: period,
+      dateRange: range,
+      clearDateRange: range == null,
+    );
+    _applyFilters();
+  }
+
   /// Clear all filters
   void clearFilters() {
     state = state.copyWith(
@@ -228,6 +272,7 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       dateRange: null,
       minAmount: null,
       maxAmount: null,
+      selectedPeriod: 'All',
       clearCategory: true,
       clearDateRange: true,
       clearMinAmount: true,

@@ -1,8 +1,11 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'dart:io';
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
@@ -42,6 +45,17 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   DateTime _selectedDate = DateTime.now();
   AccountEntity? _selectedAccount;
 
+  // Tags
+  final List<String> _tags = [];
+  final _tagInputController = TextEditingController();
+
+  // Recurring
+  bool _isRecurring = false;
+  String _recurringInterval = 'monthly';
+
+  // Attachment
+  XFile? _attachmentFile;
+
   @override
   void initState() {
     super.initState();
@@ -55,31 +69,40 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   Future<void> _loadTransactionData() async {
     try {
-      final transactions = ref.read(transactionListProvider).transactions;
-      final transaction = transactions.firstWhere(
-        (t) => t.id == widget.transactionId,
-        orElse: () => throw Exception('Transaction not found'),
-      );
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('Not authenticated');
 
-      final type = transaction.type == TransactionType.income ? 'income' : 'expense';
+      final repository = ref.read(transactionRepositoryProvider);
+      final allTransactions = await repository.getTransactions();
+      final match = allTransactions.where((t) => t.id == widget.transactionId).toList();
+      if (match.isEmpty) throw Exception('Transaction not found');
+      final transaction = match.first;
+
+      final type = transaction.type == TransactionType.income
+          ? 'income'
+          : transaction.type == TransactionType.transfer
+              ? 'transfer'
+              : 'expense';
+
+      final categoryType = transaction.type == TransactionType.income ? 'income' : 'expense';
 
       final results = await Future.wait([
-        ref.read(categoriesProvider(type).future),
+        ref.read(categoriesProvider(categoryType).future),
         ref.read(accountsProvider.future),
       ]);
 
-      final categories = results[0] as List;
-      final accounts = results[1] as List;
+      final categories = results[0] as List<dynamic>;
+      final accounts = results[1] as List<dynamic>;
 
-      final category = categories.firstWhere(
-        (c) => c.id == transaction.categoryId,
-        orElse: () => categories.isNotEmpty ? categories.first : null,
-      );
+      final categoryMatches = categories.where((c) => (c as dynamic).id == transaction.categoryId);
+      final category = categoryMatches.isNotEmpty ? categoryMatches.first : null;
 
-      final account = accounts.firstWhere(
-        (a) => a.id == transaction.accountId,
-        orElse: () => accounts.isNotEmpty ? accounts.first : null,
-      );
+      final accountMatches = accounts.where((a) => (a as dynamic).id == transaction.accountId);
+      final account = accountMatches.isNotEmpty
+          ? accountMatches.first
+          : accounts.isNotEmpty
+              ? accounts.first
+              : null;
 
       if (mounted) {
         setState(() {
@@ -88,13 +111,22 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           _notesController.text = transaction.notes ?? '';
           _selectedType = type;
           _selectedDate = transaction.date;
-          if (category != null) _selectedCategory = category.name;
+          if (category != null) _selectedCategory = (category as dynamic).name as String?;
           if (account != null) _selectedAccount = account as AccountEntity;
+          if (transaction.tags != null) {
+            _tags
+              ..clear()
+              ..addAll(transaction.tags!);
+          }
+          _isRecurring = transaction.isRecurring;
+          if (transaction.recurringInterval != null) {
+            _recurringInterval = transaction.recurringInterval!;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
-        showErrorDialog(context, 'Could not load transaction data. Please try again.');
+        showErrorDialog(context, e.toString());
       }
     }
   }
@@ -104,6 +136,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     _titleController.dispose();
     _amountController.dispose();
     _notesController.dispose();
+    _tagInputController.dispose();
     super.dispose();
   }
 
@@ -211,7 +244,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                           )
                         : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
-                    error: (_, _) => const SizedBox.shrink(),
+                    error: (e, _) => const SizedBox.shrink(),
                   );
                 },
               ),
@@ -231,9 +264,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                           : 'Add Income'),
                 ),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryTeal,
                   foregroundColor: Colors.white,
+                  elevation: 4,
+                  shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
                   minimumSize:
                       const Size(double.infinity, AppSizes.buttonHeightMd),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusFull),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSizes.xl),
@@ -524,8 +564,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                 color: AppColors.tertiaryLabel,
                               ),
                       border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 14),
+                      contentPadding: const EdgeInsets.only(
+                          left: AppSizes.sm, top: 14, bottom: 14),
                       isDense: true,
                     ),
                     validator: (value) {
@@ -666,13 +706,261 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   );
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (e, _) => const SizedBox.shrink(),
               );
+            },
+          ),
+
+          _divider(isDark),
+          _buildTagsRow(context, isDark),
+
+          _divider(isDark),
+          _buildRecurringRow(context, isDark),
+
+          _divider(isDark),
+          _buildAttachmentRow(context, isDark),
+        ],
+      ),
+    );
+  }
+
+  // ── Tags row ──────────────────────────────────────────────────────────────
+
+  Widget _buildTagsRow(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md, vertical: AppSizes.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _rowIcon(CupertinoIcons.number, isDark),
+              const SizedBox(width: AppSizes.md),
+              Text(
+                'Tags',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.secondaryLabel,
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+            ],
+          ),
+          if (_tags.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.xs),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: _tags.map((tag) {
+                return Chip(
+                  label: Text(
+                    tag,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  deleteIcon: const Icon(CupertinoIcons.xmark, size: 12),
+                  onDeleted: () => setState(() => _tags.remove(tag)),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  labelPadding: const EdgeInsets.only(left: 4),
+                  backgroundColor: _typeColor.withValues(alpha: 0.1),
+                  deleteIconColor: _typeColor,
+                  side: BorderSide(color: _typeColor.withValues(alpha: 0.3)),
+                  labelStyle: TextStyle(color: _typeColor, fontWeight: FontWeight.w500),
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: AppSizes.xs),
+          TextField(
+            controller: _tagInputController,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textCapitalization: TextCapitalization.none,
+            decoration: InputDecoration(
+              hintText: 'Add tag, press Enter…',
+              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.tertiaryLabel,
+                  ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.only(
+                  left: AppSizes.sm, top: 6, bottom: 6),
+              isDense: true,
+            ),
+            onSubmitted: (value) {
+              final tag = value.trim().toLowerCase();
+              if (tag.isNotEmpty && !_tags.contains(tag)) {
+                setState(() => _tags.add(tag));
+              }
+              _tagInputController.clear();
             },
           ),
         ],
       ),
     );
+  }
+
+  // ── Recurring row ─────────────────────────────────────────────────────────
+
+  Widget _buildRecurringRow(BuildContext context, bool isDark) {
+    const intervals = ['daily', 'weekly', 'monthly', 'yearly'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md, vertical: AppSizes.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _rowIcon(CupertinoIcons.repeat, isDark),
+              const SizedBox(width: AppSizes.md),
+              Expanded(
+                child: Text(
+                  'Repeat',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ),
+              CupertinoSwitch(
+                value: _isRecurring,
+                activeTrackColor: AppColors.primaryTeal,
+                onChanged: (val) => setState(() => _isRecurring = val),
+              ),
+            ],
+          ),
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isRecurring
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(top: AppSizes.sm),
+              child: Row(
+                children: intervals.map((interval) {
+                  final isSelected = _recurringInterval == interval;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: AppSizes.sm),
+                    child: GestureDetector(
+                      onTap: () =>
+                          setState(() => _recurringInterval = interval),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primaryTeal.withValues(alpha: 0.12)
+                              : (isDark
+                                  ? AppColors.tertiarySystemBackgroundDark
+                                  : AppColors.systemGray5),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
+                          border: isSelected
+                              ? Border.all(
+                                  color: AppColors.primaryTeal, width: 1.5)
+                              : null,
+                        ),
+                        child: Text(
+                          '${interval[0].toUpperCase()}${interval.substring(1)}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.primaryTeal
+                                : AppColors.secondaryLabel,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Attachment row ────────────────────────────────────────────────────────
+
+  Widget _buildAttachmentRow(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md, vertical: AppSizes.sm),
+      child: Row(
+        children: [
+          _rowIcon(CupertinoIcons.paperclip, isDark),
+          const SizedBox(width: AppSizes.md),
+          Expanded(
+            child: _attachmentFile != null
+                ? Wrap(
+                    children: [
+                      Chip(
+                        label: Text(
+                          _attachmentFile!.name,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        deleteIcon:
+                            const Icon(CupertinoIcons.xmark, size: 12),
+                        onDeleted: () =>
+                            setState(() => _attachmentFile = null),
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 4),
+                        labelPadding: const EdgeInsets.only(left: 4),
+                      ),
+                    ],
+                  )
+                : GestureDetector(
+                    onTap: _pickAttachment,
+                    child: Text(
+                      'Attach receipt',
+                      style:
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.primaryTeal,
+                                fontWeight: FontWeight.w500,
+                              ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickAttachment() async {
+    final action = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(CupertinoIcons.photo),
+              title: const Text('Photo Library'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(CupertinoIcons.camera),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+    final file =
+        await ImagePicker().pickImage(source: action, imageQuality: 85);
+    if (file != null) setState(() => _attachmentFile = file);
   }
 
   Widget _buildCategoryChips(List<dynamic> categories, bool isDark) {
@@ -756,6 +1044,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final isYesterday = selDate == yesterdayDate;
     final isCustom = !isToday && !isYesterday;
 
+    Future<void> openPicker() async {
+      final date = await showDatePicker(
+        context: context,
+        initialDate: _selectedDate,
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now(),
+      );
+      if (date != null) setState(() => _selectedDate = date);
+    }
+
     return Row(
       children: [
         _datePill(
@@ -773,19 +1071,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ),
         const SizedBox(width: AppSizes.sm),
         _datePill(
-          label: isCustom ? _formatDate(_selectedDate) : 'Pick…',
+          label: _formatDateFull(_selectedDate),
           isSelected: isCustom,
           isDark: isDark,
           icon: CupertinoIcons.calendar,
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              initialDate: _selectedDate,
-              firstDate: DateTime(2020),
-              lastDate: DateTime.now(),
-            );
-            if (date != null) setState(() => _selectedDate = date);
-          },
+          onTap: openPicker,
         ),
       ],
     );
@@ -878,8 +1168,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             color: AppColors.tertiaryLabel,
                           ),
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.only(
+                      left: AppSizes.sm, top: 14, bottom: 14),
                   isDense: true,
                 ),
               ),
@@ -911,10 +1201,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: AppColors.systemGray5,
+        color: isDark ? const Color(0xFF48484A) : const Color(0xFF1C1C1E),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(icon, size: 16, color: AppColors.secondaryLabel),
+      child: Icon(icon, size: 16, color: Colors.white),
     );
   }
 
@@ -927,12 +1217,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDateFull(DateTime date) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
-    return '${months[date.month - 1]} ${date.day}';
+    return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }
 
   Future<void> _openScanReceipt() async {
@@ -973,7 +1264,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
     if (!_formKey.currentState!.validate()) return;
 
-    late BuildContext loadingDialogContext;
+    BuildContext? loadingDialogContext;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1035,23 +1326,59 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         date: _selectedDate,
         accountId: _selectedAccount?.id ?? accountsList.first.id,
         categoryId: category.id,
+        tags: _tags.isEmpty ? null : List.unmodifiable(_tags),
+        isRecurring: _isRecurring,
+        recurringInterval: _isRecurring ? _recurringInterval : null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       final analytics = ref.read(analyticsServiceProvider);
+      String savedTransactionId;
       if (_isEditing) {
         await repository.updateTransaction(widget.transactionId!, transaction);
+        savedTransactionId = widget.transactionId!;
         unawaited(analytics.trackTransactionUpdated(
             transactionId: widget.transactionId!));
       } else {
         final created = await repository.createTransaction(transaction);
+        savedTransactionId = created.id;
         unawaited(analytics.trackTransactionCreated(
           transactionId: created.id,
           amount: amount,
           type: _selectedType,
           category: _selectedCategory,
         ));
+      }
+
+      // Upload attachment if one was picked
+      if (_attachmentFile != null) {
+        try {
+          final file = File(_attachmentFile!.path);
+          final bytes = await file.readAsBytes();
+          final fileName = _attachmentFile!.name;
+          final mimeType = _attachmentFile!.mimeType ?? 'image/jpeg';
+          final storagePath =
+              'receipts/$currentUserId/$savedTransactionId/$fileName';
+
+          await supabase.storage.from('receipts').uploadBinary(
+                storagePath,
+                bytes,
+                fileOptions: FileOptions(contentType: mimeType),
+              );
+
+          await supabase.from('documents').insert({
+            'user_id': currentUserId,
+            'transaction_id': savedTransactionId,
+            'file_name': fileName,
+            'file_type': 'receipt',
+            'file_size': bytes.length,
+            'mime_type': mimeType,
+            'storage_path': storagePath,
+          });
+        } catch (_) {
+          // Attachment upload failure is non-fatal — transaction was saved
+        }
       }
 
       ref.invalidate(dashboardNotifierProvider);
@@ -1062,33 +1389,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       ref.invalidate(budgetNotifierProvider);
 
       if (mounted) {
-        unawaited(Future.microtask(() {
-          if (loadingDialogContext.mounted) {
-            Navigator.pop(loadingDialogContext);
-          }
-        }));
-
-        await Future.delayed(const Duration(milliseconds: 100));
-        if (!mounted) return;
-
-        await SuccessDialog.show(
-          context,
-          title: _isEditing ? 'Updated!' : 'Added!',
-          message: _isEditing
-              ? 'Transaction updated successfully'
-              : '${_selectedType == 'expense' ? 'Expense' : 'Income'} added successfully',
-          autoDismissDuration: const Duration(milliseconds: 800),
-        );
-
+        final ctx = loadingDialogContext;
+        if (ctx != null && ctx.mounted) Navigator.pop(ctx);
         if (mounted) context.pop(true);
       }
     } catch (e) {
       if (mounted) {
-        unawaited(Future.microtask(() {
-          if (loadingDialogContext.mounted) {
-            Navigator.pop(loadingDialogContext);
-          }
-        }));
+        final ctx = loadingDialogContext;
+        if (ctx != null && ctx.mounted) Navigator.pop(ctx);
         await showErrorDialog(
           context,
           'Failed to ${_isEditing ? 'update' : 'save'} transaction. Please try again.',

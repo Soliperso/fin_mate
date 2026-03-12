@@ -75,6 +75,7 @@ class TransactionModel {
       'notes': notes,
       'date': date.toIso8601String().split('T')[0],
       'is_recurring': isRecurring,
+      'recurring_interval': recurringInterval,
       'to_account_id': toAccountId,
       'tags': tags,
     };

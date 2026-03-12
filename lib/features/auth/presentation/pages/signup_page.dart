@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
 
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -44,24 +47,16 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 const SizedBox(height: AppSizes.xl),
                 Center(
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primaryTeal.withValues(alpha: 0.15),
-                          AppColors.primaryTeal.withValues(alpha: 0.08),
-                        ],
-                      ),
+                      color: AppColors.brandTeal.withValues(alpha: 0.12),
                     ),
-                    child: Icon(
-                      Icons.person_add_outlined,
-                      size: 58,
-                      color: AppColors.primaryTeal.withValues(alpha: 0.7),
-                      weight: 210,
+                    child: const Icon(
+                      CupertinoIcons.person_crop_circle,
+                      size: 44,
+                      color: AppColors.brandTeal,
                     ),
                   ),
                 ),
@@ -92,7 +87,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: AppColors.error),
+                        Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
                         const SizedBox(width: AppSizes.sm),
                         Expanded(
                           child: Text(
@@ -110,9 +105,18 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   focusNode: _nameFocusNode,
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outlined),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.person, size: 17, color: Colors.white),
+                      ),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -128,9 +132,18 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.mail, size: 17, color: Colors.white),
+                      ),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -152,12 +165,32 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   onChanged: (value) => setState(() {}), // Trigger rebuild for strength indicator
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.lock, size: 17, color: Colors.white),
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2C2C2E),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(
+                            _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                            size: 17,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -182,12 +215,32 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   },
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2C2C2E),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: const Icon(CupertinoIcons.lock, size: 17, color: Colors.white),
                       ),
-                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2C2C2E),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(
+                            _obscureConfirmPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                            size: 17,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -205,29 +258,33 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   contentPadding: EdgeInsets.zero,
                   title: Wrap(
                     children: [
-                      const Text('I agree to the '),
+                      const Text(
+                        'I agree to the ',
+                        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      ),
                       GestureDetector(
-                        onTap: () {
-                          context.push('/profile/legal');
-                        },
+                        onTap: () => context.push('/profile/legal'),
                         child: const Text(
                           'Terms of Service',
                           style: TextStyle(
-                            color: AppColors.primaryTeal,
-                            decoration: TextDecoration.underline,
+                            fontSize: 12,
+                            color: AppColors.brandTeal,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
-                      const Text(' and '),
+                      const Text(
+                        ' and ',
+                        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      ),
                       GestureDetector(
-                        onTap: () {
-                          context.push('/profile/legal');
-                        },
+                        onTap: () => context.push('/profile/legal'),
                         child: const Text(
                           'Privacy Policy',
                           style: TextStyle(
-                            color: AppColors.primaryTeal,
-                            decoration: TextDecoration.underline,
+                            fontSize: 12,
+                            color: AppColors.brandTeal,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
@@ -236,7 +293,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton(
-                  onPressed: authState.isLoading || !_acceptedTerms ? null : _handleSignup,
+                  onPressed: authState.isLoading ? null : _handleSignup,
                   child: authState.isLoading
                       ? const SizedBox(
                           height: 20,
@@ -251,11 +308,16 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   children: [
                     Text(
                       'Already have an account? ',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text('Log In'),
+                      child: const Text(
+                        'Log In',
+                        style: TextStyle(color: AppColors.brandTeal),
+                      ),
                     ),
                   ],
                 ),
@@ -264,10 +326,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           ),
         ),
       ),
+      ),
     );
   }
 
   Future<void> _handleSignup() async {
+    if (!_acceptedTerms) {
+      ErrorSnackbar.show(context, message: 'Please accept the Terms of Service and Privacy Policy to continue.');
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       try {
         await ref.read(authNotifierProvider.notifier).signUpWithEmail(

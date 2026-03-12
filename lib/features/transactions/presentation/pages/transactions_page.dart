@@ -110,33 +110,79 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.transactions.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSizes.md),
-                    child: EmptyStateCard(
-                      icon: Icons.receipt_long_outlined,
-                      title: 'No Transactions Yet',
-                      message:
-                          'Start by adding your first transaction to begin tracking your finances.',
-                      backgroundColor: AppColors.primaryTeal,
-                    ),
+              ? Padding(
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      EmptyStateCard(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'No Transactions Yet',
+                        message:
+                            'Start by adding your first transaction to begin tracking your finances.',
+                        backgroundColor: AppColors.primaryTeal,
+                      ),
+                      const SizedBox(height: AppSizes.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            await context.push('/transactions/add');
+                            if (mounted) {
+                              ref.read(transactionListProvider.notifier).refresh();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryTeal,
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                            ),
+                          ),
+                          icon: const Icon(CupertinoIcons.add, size: 20),
+                          label: const Text(
+                            'New Transaction',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               : Column(
                   children: [
-                    // Filter chips
-                    Container(
-                      height: 60,
-                      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-                      child: ListView(
+                    // Period selector
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSizes.md, AppSizes.sm, AppSizes.md, 0,
+                      ),
+                      child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: ['All', 'Today', 'Week', 'Month', 'Year']
+                              .map((period) => _buildPeriodChip(
+                                    context, period, state.selectedPeriod, notifier))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+
+                    // Type filter chips
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md,
+                        vertical: AppSizes.sm,
+                      ),
+                      child: Row(
                         children: [
-                          _buildFilterChip(context, 'All', state.selectedFilter, notifier),
+                          Expanded(child: _buildFilterChip(context, 'All', state.selectedFilter, notifier)),
                           const SizedBox(width: AppSizes.sm),
-                          _buildFilterChip(context, 'Income', state.selectedFilter, notifier),
+                          Expanded(child: _buildFilterChip(context, 'Income', state.selectedFilter, notifier)),
                           const SizedBox(width: AppSizes.sm),
-                          _buildFilterChip(context, 'Expense', state.selectedFilter, notifier),
-                          const SizedBox(width: AppSizes.sm),
+                          Expanded(child: _buildFilterChip(context, 'Expense', state.selectedFilter, notifier)),
                         ],
                       ),
                     ),
@@ -153,35 +199,37 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ],
                 ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              await context.push('/transactions/add');
-              if (mounted) {
-                ref.read(transactionListProvider.notifier).refresh();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryTeal,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+      floatingActionButton: state.transactions.isNotEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await context.push('/transactions/add');
+                    if (mounted) {
+                      ref.read(transactionListProvider.notifier).refresh();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: const Text(
+                    'New Transaction',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
               ),
-            ),
-            icon: const Icon(CupertinoIcons.add, size: 20),
-            label: const Text(
-              'New Transaction',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-          ),
-        ),
-      ),
+            )
+          : null,
     );
   }
 
@@ -193,20 +241,63 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   ) {
     final isSelected = filter == selectedFilter;
     return FilterChip(
-      label: Text(filter),
+      label: SizedBox(
+        width: double.infinity,
+        child: Text(filter, textAlign: TextAlign.center),
+      ),
       selected: isSelected,
       onSelected: (selected) {
         notifier.setFilter(filter);
       },
       backgroundColor: Colors.transparent,
       selectedColor: AppColors.primaryTeal.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.primaryTeal,
+      checkmarkColor: Colors.transparent,
+      showCheckmark: false,
       labelStyle: TextStyle(
         color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       side: BorderSide(
         color: isSelected ? AppColors.primaryTeal : Colors.transparent,
+      ),
+    );
+  }
+
+  Widget _buildPeriodChip(
+    BuildContext context,
+    String period,
+    String selectedPeriod,
+    TransactionListNotifier notifier,
+  ) {
+    final isSelected = period == selectedPeriod;
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSizes.sm),
+      child: GestureDetector(
+        onTap: () => notifier.setPeriod(period),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primaryTeal
+                : AppColors.primaryTeal.withValues(alpha: 0.0),
+            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primaryTeal
+                  : AppColors.textSecondary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            period,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -247,38 +338,53 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     }
 
     if (state.filteredTransactions.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.md),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              EmptyStateCard(
-                icon: Icons.receipt_long_outlined,
-                title: state.transactions.isEmpty
-                    ? 'No Transactions Yet'
-                    : 'No Transactions Found',
-                message: state.transactions.isEmpty
-                    ? 'Start by adding your first transaction to begin tracking your finances.'
-                    : state.hasActiveFilters || state.searchQuery.isNotEmpty
-                        ? 'Try adjusting your filters or search query to find transactions.'
-                        : 'No transactions found.',
-                backgroundColor: AppColors.primaryTeal,
-              ),
-              if (state.hasActiveFilters || state.searchQuery.isNotEmpty) ...[
-                const SizedBox(height: AppSizes.lg),
-                FilledButton.icon(
+      final hasAnyFilter = state.hasActiveFilters ||
+          state.searchQuery.isNotEmpty ||
+          state.selectedFilter != 'All' ||
+          state.selectedPeriod != 'All';
+      return Padding(
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            EmptyStateCard(
+              icon: Icons.receipt_long_outlined,
+              title: 'No Transactions Found',
+              message: hasAnyFilter
+                  ? 'Try adjusting your filters or search query to find transactions.'
+                  : 'No transactions found.',
+              backgroundColor: AppColors.primaryTeal,
+            ),
+            if (hasAnyFilter) ...[
+              const SizedBox(height: AppSizes.lg),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
                   onPressed: () {
                     notifier.clearFilters();
+                    notifier.setFilter('All');
                     notifier.setSearchQuery('');
                     _searchController.clear();
                   },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Clear Filters'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh, size: 20),
+                  label: const Text(
+                    'Clear Filters',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
                 ),
-              ],
+              ),
             ],
-          ),
+          ],
         ),
       );
     }
