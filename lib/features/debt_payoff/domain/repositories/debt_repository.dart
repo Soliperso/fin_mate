@@ -21,5 +21,11 @@ abstract class DebtRepository {
     required DateTime paymentDate,
     String? notes,
   });
+  Future<void> recordDebtPayment({
+    required String debtId,
+    required double amount,
+    required DateTime paymentDate,
+    String? notes,
+  });
   Future<Map<String, dynamic>> getDebtSummary();
 }

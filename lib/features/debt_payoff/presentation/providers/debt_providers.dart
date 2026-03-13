@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../data/datasources/debt_remote_datasource.dart';
 import '../../data/repositories/debt_repository_impl.dart';
 import '../../domain/entities/debt_entity.dart';
@@ -75,8 +76,14 @@ final simulatedPayoffProvider = Provider<PayoffResult?>((ref) {
 class DebtNotifier extends StateNotifier<AsyncValue<void>> {
   final DebtRepository _repository;
   final AnalyticsService _analytics;
+  final Ref _ref;
 
-  DebtNotifier(this._repository, this._analytics) : super(const AsyncValue.data(null));
+  DebtNotifier(this._repository, this._analytics, this._ref) : super(const AsyncValue.data(null));
+
+  void _invalidateDashboard() {
+    _ref.invalidate(dashboardNotifierProvider);
+    _ref.invalidate(netWorthSnapshotsProvider);
+  }
 
   Future<DebtEntity?> createDebt({
     required String name,
@@ -100,6 +107,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
       );
       _analytics.trackDebtCreated(debtId: debt.id, balance: balance);
       state = const AsyncValue.data(null);
+      _invalidateDashboard();
       return debt;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -112,6 +120,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await _repository.updateDebt(id, fields);
       state = const AsyncValue.data(null);
+      _invalidateDashboard();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -124,6 +133,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await _repository.deleteDebt(id);
       state = const AsyncValue.data(null);
+      _invalidateDashboard();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -147,10 +157,30 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
       );
       _analytics.trackDebtPaymentLogged(debtId: debtId, amount: amount);
       state = const AsyncValue.data(null);
+      _invalidateDashboard();
       return payment;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       return null;
+    }
+  }
+
+  Future<bool> recordPaymentFromTransaction({
+    required String debtId,
+    required double amount,
+    required DateTime paymentDate,
+    String? notes,
+  }) async {
+    try {
+      await _repository.recordDebtPayment(
+        debtId: debtId,
+        amount: amount,
+        paymentDate: paymentDate,
+        notes: notes,
+      );
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 }
@@ -158,5 +188,5 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
 final debtNotifierProvider = StateNotifierProvider<DebtNotifier, AsyncValue<void>>((ref) {
   final repository = ref.watch(debtRepositoryProvider);
   final analytics = ref.watch(analyticsServiceProvider);
-  return DebtNotifier(repository, analytics);
+  return DebtNotifier(repository, analytics, ref);
 });

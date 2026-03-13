@@ -32,7 +32,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
       ]);
 
       final currentNetWorth = results[0] as double;
-      final previousNetWorth = results[1] as double;
+      final previousNetWorth = results[1] as double?;
       final monthlyIncome = results[2] as double;
       final monthlyExpenses = results[3] as double;
       final healthScore = results[4] as int;
@@ -41,16 +41,20 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
       // Calculate net worth change percentage
       double changePercentage = 0;
-      if (previousNetWorth > 0) {
-        changePercentage = ((currentNetWorth - previousNetWorth) / previousNetWorth) * 100;
-      } else if (currentNetWorth > 0) {
-        changePercentage = 100;
+      if (previousNetWorth != null) {
+        final base = previousNetWorth.abs();
+        if (base != 0) {
+          changePercentage =
+              ((currentNetWorth - previousNetWorth) / base) * 100;
+        }
       }
 
       return DashboardStats(
         netWorth: currentNetWorth,
         netWorthChangePercentage: changePercentage.abs(),
-        isNetWorthPositive: changePercentage >= 0,
+        isNetWorthPositive: previousNetWorth != null
+            ? currentNetWorth >= previousNetWorth
+            : currentNetWorth >= 0,
         monthlyIncome: monthlyIncome,
         monthlyExpenses: monthlyExpenses,
         moneyHealthScore: healthScore,
@@ -83,10 +87,26 @@ class DashboardRepositoryImpl implements DashboardRepository {
     }
   }
 
-  /// Get net worth from previous month (for comparison)
-  Future<double> _getPreviousMonthNetWorth() async {
-    // Returns current net worth - historical tracking deferred to future release
-    return _getNetWorth();
+  /// Get net worth snapshot from the start of the current month (for % comparison).
+  /// Returns null if no snapshot exists yet (can't compute a meaningful change).
+  Future<double?> _getPreviousMonthNetWorth() async {
+    try {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+
+      final response = await _supabase.rpc('get_net_worth_snapshots', params: {
+        'p_user_id': _supabase.auth.currentUser?.id,
+        'p_start_date': startOfMonth.toIso8601String().split('T')[0],
+        'p_end_date': startOfMonth.toIso8601String().split('T')[0],
+      });
+
+      if (response is List && response.isNotEmpty) {
+        return (response.first['net_worth'] as num?)?.toDouble();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Get total income for a date range

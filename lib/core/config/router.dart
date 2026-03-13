@@ -216,12 +216,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'add',
                 name: 'add-transaction',
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final type = state.uri.queryParameters['type'];
                   final id = state.uri.queryParameters['id'];
-                  return AddTransactionPage(
-                    transactionType: type,
-                    transactionId: id,
+                  return NoTransitionPage(
+                    child: AddTransactionPage(
+                      transactionType: type,
+                      transactionId: id,
+                    ),
                   );
                 },
               ),

@@ -122,33 +122,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             'Start by adding your first transaction to begin tracking your finances.',
                         backgroundColor: AppColors.primaryTeal,
                       ),
-                      const SizedBox(height: AppSizes.lg),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            await context.push('/transactions/add');
-                            if (mounted) {
-                              ref.read(transactionListProvider.notifier).refresh();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryTeal,
-                            foregroundColor: Colors.white,
-                            elevation: 4,
-                            shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                            ),
-                          ),
-                          icon: const Icon(CupertinoIcons.add, size: 20),
-                          label: const Text(
-                            'New Transaction',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 )
@@ -199,37 +172,35 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ],
                 ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state.transactions.isNotEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    await context.push('/transactions/add');
-                    if (mounted) {
-                      ref.read(transactionListProvider.notifier).refresh();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeal,
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                    shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                    ),
-                  ),
-                  icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'New Transaction',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              await context.push('/transactions/add');
+              if (mounted) {
+                ref.read(transactionListProvider.notifier).refresh();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
               ),
-            )
-          : null,
+            ),
+            icon: const Icon(CupertinoIcons.add, size: 20),
+            label: const Text(
+              'New Transaction',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

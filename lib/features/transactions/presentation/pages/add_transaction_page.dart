@@ -19,6 +19,8 @@ import '../../data/services/receipt_categorizer_service.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
+import '../../../debt_payoff/domain/entities/debt_entity.dart';
+import '../../../debt_payoff/presentation/providers/debt_providers.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -55,6 +57,17 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   // Attachment
   XFile? _attachmentFile;
+
+  // Debt linking (shown when a debt-payment category is selected)
+  DebtEntity? _linkedDebt;
+  static const _debtPaymentCategories = {
+    'Credit Card Payment',
+    'Personal Loan Payment',
+    'Student Loan Payment',
+    'Auto Loan Payment',
+    'Mortgage Payment',
+    'Medical Debt Payment',
+  };
 
   @override
   void initState() {
@@ -621,6 +634,50 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     return _buildCategoryChips(categories, isDark);
                   },
                 ),
+                // Debt picker — only for expense + debt-payment categories
+                if (_selectedType == 'expense' &&
+                    _debtPaymentCategories.contains(_selectedCategory))
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: AppSizes.sm,
+                        left: AppSizes.md,
+                        right: AppSizes.md),
+                    child: ref.watch(debtsProvider).when(
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                          data: (debts) {
+                            if (debts.isEmpty) return const SizedBox.shrink();
+                            return DropdownButtonFormField<DebtEntity>(
+                              initialValue: _linkedDebt,
+                              decoration: InputDecoration(
+                                labelText: 'Link to Debt (optional)',
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.link_rounded),
+                                isDense: true,
+                                suffixIcon: _linkedDebt != null
+                                    ? IconButton(
+                                        icon: const Icon(Icons.close, size: 18),
+                                        onPressed: () => setState(
+                                            () => _linkedDebt = null),
+                                      )
+                                    : null,
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('None'),
+                                ),
+                                ...debts.map((d) => DropdownMenuItem(
+                                      value: d,
+                                      child: Text(d.name),
+                                    )),
+                              ],
+                              onChanged: (d) =>
+                                  setState(() => _linkedDebt = d),
+                            );
+                          },
+                        ),
+                  ),
               ],
             ),
           ),
@@ -1349,6 +1406,21 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           type: _selectedType,
           category: _selectedCategory,
         ));
+        // If a debt was linked, update its balance
+        if (_linkedDebt != null) {
+          await ref
+              .read(debtNotifierProvider.notifier)
+              .recordPaymentFromTransaction(
+                debtId: _linkedDebt!.id,
+                amount: amount.abs(),
+                paymentDate: _selectedDate,
+                notes: _notesController.text.trim().isEmpty
+                    ? null
+                    : _notesController.text.trim(),
+              );
+          ref.invalidate(debtsProvider);
+          ref.invalidate(debtSummaryProvider);
+        }
       }
 
       // Upload attachment if one was picked

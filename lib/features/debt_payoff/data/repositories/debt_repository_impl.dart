@@ -57,5 +57,19 @@ class DebtRepositoryImpl implements DebtRepository {
       );
 
   @override
+  Future<void> recordDebtPayment({
+    required String debtId,
+    required double amount,
+    required DateTime paymentDate,
+    String? notes,
+  }) =>
+      _datasource.recordDebtPayment(
+        debtId: debtId,
+        amount: amount,
+        paymentDate: paymentDate,
+        notes: notes,
+      );
+
+  @override
   Future<Map<String, dynamic>> getDebtSummary() => _datasource.getDebtSummary();
 }

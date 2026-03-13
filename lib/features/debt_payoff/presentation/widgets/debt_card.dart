@@ -144,35 +144,55 @@ class DebtCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                     size: 20,
                   ),
+                  elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                    side: BorderSide(
+                      color: isDark
+                          ? AppColors.separatorDark
+                          : AppColors.separator,
+                      width: 0.5,
+                    ),
                   ),
                   itemBuilder: (_) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
+                      value: 'log_payment',
+                      child: _MenuRow(
+                        icon: Icons.add_circle_outline_rounded,
+                        label: 'Log Payment',
+                        color: AppColors.success,
+                      ),
+                    ),
+                    PopupMenuItem(
                       value: 'edit',
                       child: _MenuRow(
                         icon: Icons.edit_outlined,
-                        label: 'Edit',
+                        label: 'Edit Debt',
+                        color: AppColors.systemBlue,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'history',
                       child: _MenuRow(
                         icon: Icons.history_rounded,
                         label: 'Payment History',
+                        color: AppColors.brandTeal,
                       ),
                     ),
-                    const PopupMenuItem(
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
                       value: 'delete',
                       child: _MenuRow(
                         icon: Icons.delete_outline_rounded,
-                        label: 'Delete',
+                        label: 'Delete Debt',
                         isDestructive: true,
                       ),
                     ),
                   ],
                   onSelected: (value) {
                     switch (value) {
+                      case 'log_payment':
+                        onLogPayment();
                       case 'edit':
                         onEdit();
                       case 'history':
@@ -306,22 +326,41 @@ class _MenuRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isDestructive;
+  final Color? color;
 
   const _MenuRow({
     required this.icon,
     required this.label,
     this.isDestructive = false,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isDestructive ? AppColors.error : Theme.of(context).colorScheme.onSurface;
+    final resolvedColor = isDestructive
+        ? AppColors.error
+        : color ?? Theme.of(context).colorScheme.onSurface;
     return Row(
       children: [
-        Icon(icon, size: 18, color: color),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: resolvedColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: resolvedColor),
+        ),
         const SizedBox(width: AppSizes.sm),
-        Text(label, style: TextStyle(color: color)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: isDestructive
+                ? AppColors.error.withValues(alpha: 0.85)
+                : AppColors.textSecondary,
+            fontWeight: isDestructive ? FontWeight.w500 : FontWeight.normal,
+          ),
+        ),
       ],
     );
   }

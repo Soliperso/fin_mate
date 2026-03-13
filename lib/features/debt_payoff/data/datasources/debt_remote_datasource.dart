@@ -121,6 +121,8 @@ class DebtRemoteDatasource {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
+      final dateStr = paymentDate.toIso8601String().split('T')[0];
+
       // Insert payment record
       final paymentResponse = await _supabase
           .from('debt_payments')
@@ -128,7 +130,7 @@ class DebtRemoteDatasource {
             'debt_id': debtId,
             'user_id': userId,
             'amount': amount,
-            'payment_date': paymentDate.toIso8601String().split('T')[0],
+            'payment_date': dateStr,
             'notes': notes,
           })
           .select()
@@ -154,6 +156,48 @@ class DebtRemoteDatasource {
       return DebtPaymentModel.fromJson(paymentResponse);
     } catch (e) {
       throw Exception('Failed to log payment: $e');
+    }
+  }
+
+  /// Records a debt payment that originated from the Transactions screen.
+  /// Does NOT create a transaction entry (the transaction already exists).
+  Future<void> recordDebtPayment({
+    required String debtId,
+    required double amount,
+    required DateTime paymentDate,
+    String? notes,
+  }) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final dateStr = paymentDate.toIso8601String().split('T')[0];
+
+      await _supabase.from('debt_payments').insert({
+        'debt_id': debtId,
+        'user_id': userId,
+        'amount': amount,
+        'payment_date': dateStr,
+        'notes': notes,
+      });
+
+      final debtResponse = await _supabase
+          .from('debts')
+          .select('balance')
+          .eq('id', debtId)
+          .eq('user_id', userId)
+          .single();
+
+      final currentBalance = (debtResponse['balance'] as num).toDouble();
+      final newBalance = (currentBalance - amount).clamp(0.0, double.infinity);
+
+      await _supabase
+          .from('debts')
+          .update({'balance': newBalance})
+          .eq('id', debtId)
+          .eq('user_id', userId);
+    } catch (e) {
+      throw Exception('Failed to record debt payment: $e');
     }
   }
 
