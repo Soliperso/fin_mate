@@ -22,8 +22,8 @@ class NetWorthCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final gradientColors = netWorth >= 0
-        ? [AppColors.brandTeal, const Color(0xFF1A6B76)]
-        : [AppColors.systemRed, const Color(0xFFB52D23)];
+        ? [AppColors.brandTeal, AppColors.brandTealDark]
+        : [AppColors.systemRed, AppColors.systemRedDeep];
 
     return Container(
       width: double.infinity,
@@ -52,12 +52,9 @@ class NetWorthCard extends StatelessWidget {
             children: [
               Text(
                 'Net Worth',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white70,
-                  letterSpacing: -0.24,
-                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white70,
+                    ),
               ),
               // Trend badge
               Container(
@@ -79,12 +76,10 @@ class NetWorthCard extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       '${changePercentage.abs().toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: -0.08,
-                      ),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                     ),
                   ],
                 ),
@@ -97,13 +92,13 @@ class NetWorthCard extends StatelessWidget {
           // Balance — large Apple Pay-style number
           Text(
             currencyFormat.format(netWorth),
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: -1.5,
-              height: 1.1,
-            ),
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: -1.5,
+                  height: 1.1,
+                ),
           ),
 
           const SizedBox(height: AppSizes.sm),
@@ -111,12 +106,10 @@ class NetWorthCard extends StatelessWidget {
           // Subtitle
           Text(
             isPositive ? 'Growing this month' : 'Declining this month',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: Colors.white60,
-              letterSpacing: -0.08,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white60,
+                ),
           ),
         ],
       ),

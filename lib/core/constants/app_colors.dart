@@ -101,6 +101,21 @@ class AppColors {
   // Gradients for hero cards
   static const gradientStart = brandTeal;
   static const gradientEnd = brandTealLight;
+  static const brandTealDark = Color(0xFF1A6B76);   // net worth positive gradient end
+  static const systemRedDeep = Color(0xFFB52D23);   // net worth negative gradient end
+  static const debtRedStart = Color(0xFFCC2B2B);    // debt hero gradient start
+  static const debtRedEnd = Color(0xFF8B1A1A);      // debt hero gradient end
+
+  // Shadow helper — avoids duplicating the isDark check in every card widget
+  static List<BoxShadow> cardShadow(bool isDark) => isDark
+      ? const []
+      : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ];
 
   AppColors._();
 }

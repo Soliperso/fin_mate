@@ -65,11 +65,6 @@ class _DebtPageState extends ConsumerState<DebtPage>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSizes.radiusXl)),
-      ),
       builder: (_) => const AddDebtBottomSheet(),
     );
   }
@@ -78,11 +73,6 @@ class _DebtPageState extends ConsumerState<DebtPage>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSizes.radiusXl)),
-      ),
       builder: (_) => LogPaymentBottomSheet(debt: debt),
     );
   }
@@ -91,11 +81,6 @@ class _DebtPageState extends ConsumerState<DebtPage>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSizes.radiusXl)),
-      ),
       builder: (_) => EditDebtBottomSheet(debt: debt),
     );
   }
@@ -104,11 +89,6 @@ class _DebtPageState extends ConsumerState<DebtPage>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSizes.radiusXl)),
-      ),
       builder: (_) => const StrategyComparisonSheet(),
     );
   }
@@ -117,12 +97,6 @@ class _DebtPageState extends ConsumerState<DebtPage>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSizes.radiusXl)),
-      ),
       builder: (_) => PaymentHistorySheet(debt: debt),
     );
   }
@@ -164,8 +138,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.primaryTeal,
-          labelColor: AppColors.primaryTeal,
+          indicatorColor: AppColors.brandTeal,
+          labelColor: AppColors.brandTeal,
           unselectedLabelColor: AppColors.textSecondary,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
           tabs: const [
@@ -180,14 +154,14 @@ class _DebtPageState extends ConsumerState<DebtPage>
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
               child: SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: AppSizes.buttonHeightMd,
                 child: ElevatedButton.icon(
                   onPressed: _showAddDebt,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeal,
+                    backgroundColor: AppColors.brandTeal,
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
@@ -231,7 +205,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     icon: CupertinoIcons.creditcard,
                     title: 'No Debts Tracked',
                     message: 'Add your debts to start your payoff journey.',
-                    backgroundColor: AppColors.primaryTeal,
+                    backgroundColor: AppColors.brandTeal,
                   ),
                   const SizedBox(height: AppSizes.lg),
                   SizedBox(
@@ -240,11 +214,11 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     child: ElevatedButton.icon(
                       onPressed: _showAddDebt,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryTeal,
+                        backgroundColor: AppColors.brandTeal,
                         foregroundColor: Colors.white,
                         elevation: 4,
                         shadowColor:
-                            AppColors.primaryTeal.withValues(alpha: 0.4),
+                            AppColors.brandTeal.withValues(alpha: 0.4),
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(AppSizes.radiusFull),
@@ -274,7 +248,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
               // ── Tab 0: Overview ───────────────────────────────────────
               RefreshIndicator(
                 onRefresh: _refresh,
-                color: AppColors.primaryTeal,
+                color: AppColors.brandTeal,
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.md, AppSizes.md, AppSizes.md, 100,
@@ -313,7 +287,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                               iconColor:
                                   WidgetStateProperty.resolveWith((states) {
                                 if (states.contains(WidgetState.selected)) {
-                                  return AppColors.primaryTeal;
+                                  return AppColors.brandTeal;
                                 }
                                 return AppColors.textSecondary;
                               }),

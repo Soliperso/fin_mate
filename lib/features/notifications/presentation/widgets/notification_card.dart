@@ -45,10 +45,10 @@ class NotificationCard extends StatelessWidget {
         child: GlassContainer(
           padding: EdgeInsets.zero,
           enableGlass: false,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+            borderRadius: BorderRadius.circular(AppSizes.radiusCard),
             child: Container(
               decoration: BoxDecoration(
                 border: !notification.isRead
@@ -59,7 +59,7 @@ class NotificationCard extends StatelessWidget {
                         ),
                       )
                     : null,
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
               ),
               padding: const EdgeInsets.all(AppSizes.lg),
               child: Row(
@@ -67,8 +67,8 @@ class NotificationCard extends StatelessWidget {
                 children: [
                   // Icon
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: AppSizes.iconContainer,
+                    height: AppSizes.iconContainer,
                     decoration: BoxDecoration(
                       color: _getTypeColor(notification.type)
                           .withValues(alpha: isDark ? 0.2 : 0.1),
@@ -77,7 +77,7 @@ class NotificationCard extends StatelessWidget {
                     child: Icon(
                       _getTypeIcon(notification.type),
                       color: _getTypeColor(notification.type),
-                      size: 22,
+                      size: AppSizes.iconSm,
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -93,12 +93,11 @@ class NotificationCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 notification.title,
-                                style: TextStyle(
-                                  fontWeight: notification.isRead
-                                      ? FontWeight.w500
-                                      : FontWeight.w600,
-                                  fontSize: 15,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: notification.isRead
+                                          ? FontWeight.w500
+                                          : FontWeight.w600,
+                                    ),
                               ),
                             ),
                             if (!notification.isRead)
@@ -117,13 +116,12 @@ class NotificationCard extends StatelessWidget {
                         // Message
                         Text(
                           notification.message,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                            fontWeight: notification.isRead
-                                ? FontWeight.normal
-                                : FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: notification.isRead
+                                    ? FontWeight.normal
+                                    : FontWeight.w500,
+                              ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -135,19 +133,17 @@ class NotificationCard extends StatelessWidget {
                           children: [
                             Text(
                               _formatTime(notification.createdAt),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                             if (notification.actionLabel != null)
                               Text(
                                 notification.actionLabel!,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.brandTeal,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                      color: AppColors.brandTeal,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                           ],
                         ),

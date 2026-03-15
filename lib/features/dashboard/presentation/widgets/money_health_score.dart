@@ -10,28 +10,28 @@ class MoneyHealthScore extends StatelessWidget {
     required this.score,
   });
 
+  bool get _hasNoData => score == 0;
+
   @override
   Widget build(BuildContext context) {
-    final color = _getScoreColor(score);
-    final label = _getScoreLabel(score);
+    final color = _hasNoData ? AppColors.systemGray : _getScoreColor(score);
+    final label = _hasNoData ? 'No Data Yet' : _getScoreLabel(score);
+    final subtitle = _hasNoData
+        ? 'Add income & expense transactions to get your score'
+        : 'Based on your spending & savings (last 30 days)';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
+    final ringBg = isDark
+        ? AppColors.tertiarySystemBackgroundDark
+        : AppColors.systemGray5;
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        boxShadow: AppColors.cardShadow(isDark),
       ),
       padding: const EdgeInsets.all(AppSizes.md),
       child: Row(
@@ -46,23 +46,20 @@ class MoneyHealthScore extends StatelessWidget {
                   width: 72,
                   height: 72,
                   child: CircularProgressIndicator(
-                    value: score / 100,
+                    value: _hasNoData ? 0.0 : score / 100,
                     strokeWidth: 7,
-                    backgroundColor: isDark
-                        ? AppColors.tertiarySystemBackgroundDark
-                        : AppColors.systemGray5,
+                    backgroundColor: ringBg,
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                     strokeCap: StrokeCap.round,
                   ),
                 ),
                 Text(
-                  '$score',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                    letterSpacing: -0.5,
-                  ),
+                  _hasNoData ? '—' : '$score',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                        letterSpacing: -0.5,
+                      ),
                 ),
               ],
             ),
@@ -87,17 +84,15 @@ class MoneyHealthScore extends StatelessWidget {
                   ),
                   child: Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                      letterSpacing: -0.08,
-                    ),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Based on your spending and savings',
+                  subtitle,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

@@ -14,6 +14,11 @@ class LegalDocumentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryText = isDark ? AppColors.labelDark : AppColors.label;
+    final secondaryText =
+        isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -21,80 +26,81 @@ class LegalDocumentView extends StatelessWidget {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: _buildFormattedContent(context, content),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.pagePadding,
+          vertical: AppSizes.sm,
         ),
+        child: _buildFormattedContent(context, content, primaryText, secondaryText),
       ),
     );
   }
 
-  Widget _buildFormattedContent(BuildContext context, String content) {
+  Widget _buildFormattedContent(
+    BuildContext context,
+    String content,
+    Color primaryText,
+    Color secondaryText,
+  ) {
     final lines = content.split('\n');
     final widgets = <Widget>[];
 
     for (final line in lines) {
       if (line.isEmpty) {
-        widgets.add(const SizedBox(height: AppSizes.md));
+        widgets.add(const SizedBox(height: AppSizes.xs));
       } else if (line.startsWith('# ')) {
-        // H1
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+            padding: const EdgeInsets.only(top: AppSizes.md, bottom: AppSizes.xs),
             child: Text(
               line.replaceFirst('# ', ''),
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-              ),
+                    color: primaryText,
+                    letterSpacing: -0.3,
+                  ),
             ),
           ),
         );
       } else if (line.startsWith('## ')) {
-        // H2
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+            padding: const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
             child: Text(
               line.replaceFirst('## ', ''),
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-              ),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: primaryText,
+                    letterSpacing: -0.2,
+                  ),
             ),
           ),
         );
       } else if (line.startsWith('### ')) {
-        // H3
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+            padding: const EdgeInsets.only(top: AppSizes.xs, bottom: 2),
             child: Text(
               line.replaceFirst('### ', ''),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-              ),
+                    color: primaryText,
+                  ),
             ),
           ),
         );
       } else if (line.startsWith('- ')) {
-        // Bullet point
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSizes.md,
-              bottom: AppSizes.sm,
-            ),
+            padding: const EdgeInsets.only(left: AppSizes.md, bottom: AppSizes.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(right: AppSizes.md, top: 4),
+                  padding: const EdgeInsets.only(right: AppSizes.sm, top: 7),
                   child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
+                    width: 4,
+                    height: 4,
+                    decoration: const BoxDecoration(
                       color: AppColors.primaryTeal,
                       shape: BoxShape.circle,
                     ),
@@ -104,9 +110,9 @@ class LegalDocumentView extends StatelessWidget {
                   child: Text(
                     line.replaceFirst('- ', ''),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.6,
-                    ),
+                          color: secondaryText,
+                          height: 1.5,
+                        ),
                   ),
                 ),
               ],
@@ -114,31 +120,26 @@ class LegalDocumentView extends StatelessWidget {
           ),
         );
       } else if (line.startsWith('**')) {
-        // Bold text
         widgets.add(
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.xs),
+            padding: const EdgeInsets.only(top: 2),
             child: Text(
               line.replaceAll('**', ''),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-              ),
+                    color: primaryText,
+                  ),
             ),
           ),
         );
       } else {
-        // Regular paragraph
         widgets.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.xs),
-            child: Text(
-              line,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.6,
-              ),
-            ),
+          Text(
+            line,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: secondaryText,
+                  height: 1.55,
+                ),
           ),
         );
       }

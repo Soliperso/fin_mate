@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/budget_entity.dart';
 import '../providers/budget_providers.dart';
@@ -37,7 +38,16 @@ class BudgetsPage extends ConsumerWidget {
                   },
                 ),
               ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(AppSizes.md),
+          children: const [
+            SkeletonCard(),
+            SizedBox(height: AppSizes.md),
+            SkeletonCard(),
+            SizedBox(height: AppSizes.md),
+            SkeletonCard(),
+          ],
+        ),
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.xl),
@@ -63,7 +73,7 @@ class BudgetsPage extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.lg),
-                ElevatedButton.icon(
+                FilledButton.icon(
                   onPressed: () {
                     ref.read(budgetNotifierProvider.notifier).loadBudgets();
                   },
@@ -80,14 +90,14 @@ class BudgetsPage extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
         child: SizedBox(
           width: double.infinity,
-          height: 52,
+          height: AppSizes.buttonHeightMd,
           child: ElevatedButton.icon(
             onPressed: () => _showCreateBudgetBottomSheet(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryTeal,
+              backgroundColor: AppColors.brandTeal,
               foregroundColor: Colors.white,
               elevation: 4,
-              shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+              shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
               ),
@@ -111,7 +121,7 @@ class BudgetsPage extends ConsumerWidget {
           icon: Icons.savings_outlined,
           title: 'No Budgets Yet',
           message: 'Create budgets to track your spending by category',
-          backgroundColor: AppColors.primaryTeal,
+          backgroundColor: AppColors.brandTeal,
         ),
       ),
     );
@@ -125,7 +135,7 @@ class BudgetsPage extends ConsumerWidget {
     final isNearLimit = budget.isNearLimit;
 
     // Get color for the category icon
-    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.primaryTeal;
+    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
@@ -136,15 +146,7 @@ class BudgetsPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -226,7 +228,7 @@ class BudgetsPage extends ConsumerWidget {
                         ? AppColors.systemRed
                         : isNearLimit
                             ? AppColors.systemOrange
-                            : AppColors.primaryTeal,
+                            : AppColors.brandTeal,
                   ),
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
@@ -310,12 +312,12 @@ class BudgetsPage extends ConsumerWidget {
     final percentage = (budget.spentPercentage.clamp(0.0, 100.0) / 100);
     final isOverBudget = budget.isExceeded;
     final isNearLimit = budget.isNearLimit;
-    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.primaryTeal;
+    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
     final progressColor = isOverBudget
         ? AppColors.systemRed
         : isNearLimit
             ? AppColors.systemOrange
-            : AppColors.primaryTeal;
+            : AppColors.brandTeal;
 
     showModalBottomSheet(
       context: context,
@@ -440,7 +442,7 @@ class BudgetsPage extends ConsumerWidget {
               _buildActionRow(
                 context: sheetContext,
                 icon: CupertinoIcons.pencil,
-                iconColor: AppColors.primaryTeal,
+                iconColor: AppColors.brandTeal,
                 label: 'Edit Budget',
                 onTap: () {
                   Navigator.pop(sheetContext);

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../providers/savings_goal_providers.dart';
 import '../widgets/create_goal_bottom_sheet.dart';
@@ -40,13 +41,12 @@ class SavingsGoalsPage extends ConsumerWidget {
             if (goals.isEmpty) {
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height - 200,
-                  child: EmptyState(
-                    icon: Icons.savings_outlined,
-                    title: 'No Savings Goals Yet',
-                    message: 'Start planning for your future by creating your first savings goal',
-                  ),
+                padding: const EdgeInsets.all(AppSizes.md),
+                child: EmptyStateCard(
+                  icon: Icons.savings_outlined,
+                  title: 'No Savings Goals Yet',
+                  message: 'Start planning for your future by creating your first savings goal',
+                  backgroundColor: AppColors.brandTeal,
                 ),
               );
             }

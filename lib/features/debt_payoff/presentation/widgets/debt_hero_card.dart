@@ -32,7 +32,7 @@ class DebtHeroCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFCC2B2B), Color(0xFF8B1A1A)],
+          colors: [AppColors.debtRedStart, AppColors.debtRedEnd],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

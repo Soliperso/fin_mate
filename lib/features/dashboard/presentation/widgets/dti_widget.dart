@@ -51,27 +51,19 @@ class DtiWidget extends ConsumerWidget {
               ? AppColors.secondarySystemBackgroundDark
               : AppColors.systemBackground,
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          boxShadow: AppColors.cardShadow(isDark),
         ),
         padding: const EdgeInsets.all(AppSizes.md),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: AppSizes.iconContainer,
+              height: AppSizes.iconContainer,
               decoration: BoxDecoration(
                 color: dtiColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
-              child: Icon(CupertinoIcons.creditcard, color: dtiColor, size: 20),
+              child: Icon(CupertinoIcons.creditcard, color: dtiColor, size: AppSizes.iconSm),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(

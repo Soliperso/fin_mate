@@ -36,7 +36,7 @@ class SettingsPage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSizes.md),
-              ElevatedButton(
+              FilledButton(
                 onPressed: () {
                   // ignore: unused_result
                   ref.refresh(settingsOperationsProvider);
@@ -155,15 +155,7 @@ class SettingsPage extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),

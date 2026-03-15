@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -9,180 +10,136 @@ class LegalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Legal & Compliance'),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Text(
-                'Legal Documents',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.xs),
-              Text(
-                'Review our policies and terms of service',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.lg),
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.pagePadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSizes.lg),
 
-              // Privacy Policy Card
-              _buildLegalCard(
+            // Documents group
+            _sectionLabel(context, 'Documents'),
+            const SizedBox(height: AppSizes.sm),
+            _buildCard(context, isDark, children: [
+              _buildTile(
                 context,
+                icon: CupertinoIcons.hand_raised,
                 title: 'Privacy Policy',
-                description: 'How we collect, use, and protect your data',
-                icon: Icons.privacy_tip_outlined,
-                onTap: () {
-                  _showPrivacyPolicy(context);
-                },
+                subtitle: 'How we collect, use, and protect your data',
+                onTap: () => _showPrivacyPolicy(context),
               ),
-              const SizedBox(height: AppSizes.md),
-
-              // Terms of Service Card
-              _buildLegalCard(
+              _buildDivider(isDark),
+              _buildTile(
                 context,
+                icon: CupertinoIcons.doc_text,
                 title: 'Terms of Service',
-                description: 'Our terms and conditions for using FinMate',
-                icon: Icons.description_outlined,
-                onTap: () {
-                  _showTermsOfService(context);
-                },
+                subtitle: 'Our terms and conditions for using FinMate',
+                onTap: () => _showTermsOfService(context),
               ),
-              const SizedBox(height: AppSizes.md),
-
-              // App Privacy Details Card
-              _buildLegalCard(
+              _buildDivider(isDark),
+              _buildTile(
                 context,
+                icon: CupertinoIcons.lock_shield,
                 title: 'App Privacy Details',
-                description: 'App Store privacy information and data practices',
-                icon: Icons.security_outlined,
-                onTap: () {
-                  _showAppPrivacyDetails(context);
-                },
+                subtitle: 'App Store privacy information and data practices',
+                onTap: () => _showAppPrivacyDetails(context),
               ),
-              const SizedBox(height: AppSizes.lg),
+            ]),
+            const SizedBox(height: AppSizes.lg),
 
-              // Last Updated Section
-              Container(
-                padding: const EdgeInsets.all(AppSizes.md),
-                decoration: BoxDecoration(
-                  color: AppColors.lightGray.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Important Information',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                    ),
-                    const SizedBox(height: AppSizes.sm),
-                    Text(
-                      'Last Updated: October 21, 2025\n\n'
-                      'By using FinMate, you agree to our Privacy Policy and Terms of Service. '
-                      'We are committed to protecting your personal information and maintaining your trust.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                            height: 1.6,
-                          ),
-                    ),
-                  ],
-                ),
+            // Info group
+            _sectionLabel(context, 'Information'),
+            const SizedBox(height: AppSizes.sm),
+            _buildCard(context, isDark, children: [
+              _buildTile(
+                context,
+                icon: CupertinoIcons.info_circle,
+                title: 'Last Updated',
+                subtitle: 'October 21, 2025',
+                onTap: () {},
               ),
-              const SizedBox(height: AppSizes.lg),
-
-              // Contact Section
-              Container(
-                padding: const EdgeInsets.all(AppSizes.md),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColors.lightGray.withValues(alpha: 0.3),
-                  ),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Questions?',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                    ),
-                    const SizedBox(height: AppSizes.sm),
-                    Text(
-                      'If you have any questions about our legal documents or privacy practices, '
-                      'please contact us at:',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    const SizedBox(height: AppSizes.sm),
-                    Text(
-                      'privacy@finmate.app',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primaryTeal,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
-                ),
+              _buildDivider(isDark),
+              _buildTile(
+                context,
+                icon: CupertinoIcons.envelope,
+                title: 'Contact Us',
+                subtitle: 'privacy@finmate.app',
+                onTap: () {},
               ),
-              const SizedBox(height: AppSizes.xl),
-            ],
-          ),
+            ]),
+            const SizedBox(height: AppSizes.xl),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildLegalCard(
+  Widget _sectionLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, bool isDark,
+      {required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildTile(
     BuildContext context, {
-    required String title,
-    required String description,
     required IconData icon,
+    required String title,
+    required String subtitle,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          border: Border.all(
-            color: AppColors.lightGray.withValues(alpha: 0.2),
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSizes.sm),
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primaryTeal,
-                size: 24,
-              ),
+              child: Icon(icon, color: AppColors.labelDark, size: 17),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -191,37 +148,40 @@ class LegalPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF9E9EA3),
                         ),
                   ),
-                  const SizedBox(height: AppSizes.xs),
+                  const SizedBox(height: 2),
                   Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: AppSizes.md),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.textTertiary,
-            ),
+            const Icon(CupertinoIcons.chevron_right,
+                size: 16, color: AppColors.systemGray3),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildDivider(bool isDark) {
+    return Divider(
+      height: 0,
+      thickness: 0.5,
+      indent: AppSizes.md + 32 + AppSizes.md,
+      color: isDark ? AppColors.separatorDark : AppColors.separator,
+    );
+  }
+
   Future<void> _showPrivacyPolicy(BuildContext context) async {
     try {
-      final content = await rootBundle.loadString('assets/legal/privacy_policy.md');
+      final content =
+          await rootBundle.loadString('assets/legal/privacy_policy.md');
       if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -234,14 +194,16 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(context, 'Failed to load Privacy Policy: ${e.toString()}');
+        _showErrorDialog(
+            context, 'Failed to load Privacy Policy: ${e.toString()}');
       }
     }
   }
 
   Future<void> _showTermsOfService(BuildContext context) async {
     try {
-      final content = await rootBundle.loadString('assets/legal/terms_of_service.md');
+      final content =
+          await rootBundle.loadString('assets/legal/terms_of_service.md');
       if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -254,14 +216,16 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(context, 'Failed to load Terms of Service: ${e.toString()}');
+        _showErrorDialog(
+            context, 'Failed to load Terms of Service: ${e.toString()}');
       }
     }
   }
 
   Future<void> _showAppPrivacyDetails(BuildContext context) async {
     try {
-      final content = await rootBundle.loadString('assets/legal/app_privacy_details.md');
+      final content =
+          await rootBundle.loadString('assets/legal/app_privacy_details.md');
       if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -274,7 +238,8 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(context, 'Failed to load App Privacy Details: ${e.toString()}');
+        _showErrorDialog(
+            context, 'Failed to load App Privacy Details: ${e.toString()}');
       }
     }
   }
@@ -295,4 +260,3 @@ class LegalPage extends StatelessWidget {
     );
   }
 }
-

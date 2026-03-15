@@ -21,7 +21,8 @@ import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
-import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+// [MVP: AI Insights - Commented out]
+// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
@@ -239,11 +240,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'debt',
             builder: (context, state) => const DebtPage(),
           ),
-          GoRoute(
-            path: '/insights',
-            name: 'insights',
-            builder: (context, state) => const AiInsightsPage(),
-          ),
+          // [MVP: AI Insights - Commented out]
+          // GoRoute(
+          //   path: '/insights',
+          //   name: 'insights',
+          //   builder: (context, state) => const AiInsightsPage(),
+          // ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',
@@ -423,11 +425,11 @@ class MainShell extends StatelessWidget {
                   onTap: () => context.go('/debt'),
                 ),
                 _TabItem(
-                  icon: CupertinoIcons.lightbulb,
-                  activeIcon: CupertinoIcons.lightbulb_fill,
-                  label: 'Insights',
+                  icon: CupertinoIcons.person,
+                  activeIcon: CupertinoIcons.person_fill,
+                  label: 'Profile',
                   isSelected: selectedIndex == 4,
-                  onTap: () => context.go('/insights'),
+                  onTap: () => context.go('/profile'),
                 ),
               ],
             ),
@@ -443,7 +445,7 @@ class MainShell extends StatelessWidget {
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
     if (location.startsWith('/debt')) return 3;
-    if (location.startsWith('/insights')) return 4;
+    if (location.startsWith('/profile')) return 4;
     return 0;
   }
 }

@@ -34,13 +34,13 @@ class GoalCard extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSizes.sm),
                     decoration: BoxDecoration(
-                      color: (isCompleted ? AppColors.success : AppColors.primaryTeal)
+                      color: (isCompleted ? AppColors.success : AppColors.brandTeal)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Icon(
                       isCompleted ? Icons.check_circle : Icons.savings,
-                      color: isCompleted ? AppColors.success : AppColors.primaryTeal,
+                      color: isCompleted ? AppColors.success : AppColors.brandTeal,
                       size: 24,
                     ),
                   ),
@@ -94,7 +94,7 @@ class GoalCard extends ConsumerWidget {
                   Text(
                     currencyFormat.format(goal.currentAmount),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: isCompleted ? AppColors.success : AppColors.primaryTeal,
+                          color: isCompleted ? AppColors.success : AppColors.brandTeal,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -111,7 +111,7 @@ class GoalCard extends ConsumerWidget {
                 value: progress / 100,
                 backgroundColor: AppColors.lightGray,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isCompleted ? AppColors.success : AppColors.primaryTeal,
+                  isCompleted ? AppColors.success : AppColors.brandTeal,
                 ),
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(4),

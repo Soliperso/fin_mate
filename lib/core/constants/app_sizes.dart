@@ -23,6 +23,7 @@ class AppSizes {
   static const double iconMd = 24.0;
   static const double iconLg = 28.0;
   static const double iconXl = 44.0;    // iOS minimum tap target
+  static const double iconContainer = 40.0; // icon background container size
 
   // ── Button Heights ─────────────────────────────────────────────────────────
   static const double buttonHeightSm = 36.0;

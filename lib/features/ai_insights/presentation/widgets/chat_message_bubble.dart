@@ -41,7 +41,7 @@ class ChatMessageBubble extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isUser
-                        ? AppColors.primaryTeal
+                        ? AppColors.brandTeal
                         : AppColors.lightGray,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
@@ -60,9 +60,8 @@ class ChatMessageBubble extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   timeFormat.format(message.timestamp),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppColors.textTertiary,
-                        fontSize: 11,
                       ),
                 ),
               ],
@@ -82,7 +81,7 @@ class ChatMessageBubble extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isUser ? AppColors.primaryTeal : AppColors.tealLight,
+        color: isUser ? AppColors.brandTeal : AppColors.tealLight,
         shape: BoxShape.circle,
       ),
       child: Icon(
