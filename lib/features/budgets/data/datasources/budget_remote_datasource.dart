@@ -152,6 +152,11 @@ class BudgetRemoteDataSource {
     }).toList();
   }
 
+  /// Run server-side carry-over calculation for period rollovers
+  Future<void> applyCarryOvers() async {
+    await _supabase.rpc('apply_budget_carry_overs');
+  }
+
   /// Calculate total spending for a budget period
   ///
   /// Gets sum of all expenses in the budget's category

@@ -84,10 +84,10 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // Premium Status Provider
 // ============================================================================
 
-/// Computed provider that returns true if user has premium subscription
+/// Computed provider that returns true if user has premium subscription.
+/// During free MVP beta, all users have full access — no paywall.
 final isPremiumProvider = FutureProvider<bool>((ref) async {
-  final tier = await ref.watch(subscriptionTierProvider.future);
-  return tier == 'premium';
+  return true; // Free MVP: all features unlocked during beta
 });
 
 // ============================================================================

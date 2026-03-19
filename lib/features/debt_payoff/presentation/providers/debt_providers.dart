@@ -83,6 +83,8 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
   void _invalidateDashboard() {
     _ref.invalidate(dashboardNotifierProvider);
     _ref.invalidate(netWorthSnapshotsProvider);
+    _ref.invalidate(debtsProvider);
+    _ref.invalidate(debtSummaryProvider);
   }
 
   Future<DebtEntity?> createDebt({
@@ -178,6 +180,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
         paymentDate: paymentDate,
         notes: notes,
       );
+      _invalidateDashboard();
       return true;
     } catch (_) {
       return false;

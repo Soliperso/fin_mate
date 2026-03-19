@@ -14,6 +14,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
     super.transactionThreshold = 1000,
     super.moneyHealthUpdates = 'weekly',
     super.goalNotifications = 'milestones',
+    super.autoBackupSchedule = 'off',
   });
 
   /// Create from JSON
@@ -30,6 +31,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       transactionThreshold: json['transaction_threshold'] as int? ?? 1000,
       moneyHealthUpdates: json['money_health_updates'] as String? ?? 'weekly',
       goalNotifications: json['goal_notifications'] as String? ?? 'milestones',
+      autoBackupSchedule: json['auto_backup_schedule'] as String? ?? 'off',
     );
   }
 
@@ -47,6 +49,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       'transaction_threshold': transactionThreshold,
       'money_health_updates': moneyHealthUpdates,
       'goal_notifications': goalNotifications,
+      'auto_backup_schedule': autoBackupSchedule,
     };
   }
 
@@ -64,6 +67,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       transactionThreshold: transactionThreshold,
       moneyHealthUpdates: moneyHealthUpdates,
       goalNotifications: goalNotifications,
+      autoBackupSchedule: autoBackupSchedule,
     );
   }
 }

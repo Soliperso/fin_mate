@@ -89,6 +89,8 @@ class TransactionListState {
   final double? minAmount;
   final double? maxAmount;
   final String selectedPeriod; // 'All', 'Today', 'Week', 'Month', 'Year'
+  final bool hideFutureTransactions;
+  final bool showNotes;
 
   const TransactionListState({
     this.transactions = const [],
@@ -102,6 +104,8 @@ class TransactionListState {
     this.minAmount,
     this.maxAmount,
     this.selectedPeriod = 'All',
+    this.hideFutureTransactions = false,
+    this.showNotes = false,
   });
 
   TransactionListState copyWith({
@@ -116,6 +120,8 @@ class TransactionListState {
     double? minAmount,
     double? maxAmount,
     String? selectedPeriod,
+    bool? hideFutureTransactions,
+    bool? showNotes,
     bool clearCategory = false,
     bool clearDateRange = false,
     bool clearMinAmount = false,
@@ -133,6 +139,8 @@ class TransactionListState {
       minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
       maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
       selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+      hideFutureTransactions: hideFutureTransactions ?? this.hideFutureTransactions,
+      showNotes: showNotes ?? this.showNotes,
     );
   }
 
@@ -140,7 +148,8 @@ class TransactionListState {
       selectedCategory != null ||
       dateRange != null ||
       minAmount != null ||
-      maxAmount != null;
+      maxAmount != null ||
+      hideFutureTransactions;
 }
 
 /// Transaction list notifier with filtering and search
@@ -151,70 +160,45 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     loadTransactions();
   }
 
-  /// Load all transactions (last 3 months)
   Future<void> loadTransactions() async {
     state = state.copyWith(isLoading: true, error: null);
-
     try {
       final now = DateTime.now();
-      final startDate = DateTime(now.year, now.month - 2, 1); // Last 3 months
+      final startDate = DateTime(now.year, now.month - 2, 1);
       final endDate = DateTime(now.year, now.month + 1, 0);
-
       final transactions = await _repository.getTransactions(
         startDate: startDate,
         endDate: endDate,
       );
-
-      state = state.copyWith(
-        transactions: transactions,
-        isLoading: false,
-      );
-
+      state = state.copyWith(transactions: transactions, isLoading: false);
       _applyFilters();
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  /// Refresh transactions
-  Future<void> refresh() async {
-    await loadTransactions();
-  }
+  Future<void> refresh() async => loadTransactions();
 
-  /// Update filter type (All, Income, Expense, Transfer)
   void setFilter(String filter) {
     state = state.copyWith(selectedFilter: filter);
     _applyFilters();
   }
 
-  /// Update search query
   void setSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
     _applyFilters();
   }
 
-  /// Update category filter
   void setCategory(String? category) {
-    state = state.copyWith(
-      selectedCategory: category,
-      clearCategory: category == null,
-    );
+    state = state.copyWith(selectedCategory: category, clearCategory: category == null);
     _applyFilters();
   }
 
-  /// Update date range filter
   void setDateRange(DateTimeRange? range) {
-    state = state.copyWith(
-      dateRange: range,
-      clearDateRange: range == null,
-    );
+    state = state.copyWith(dateRange: range, clearDateRange: range == null);
     _applyFilters();
   }
 
-  /// Update amount range filter
   void setAmountRange(double? min, double? max) {
     state = state.copyWith(
       minAmount: min,
@@ -225,12 +209,10 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     _applyFilters();
   }
 
-  /// Set period filter and derive its date range
   void setPeriod(String period) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     DateTimeRange? range;
-
     switch (period) {
       case 'Today':
         range = DateTimeRange(start: today, end: today);
@@ -242,21 +224,14 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
         );
         break;
       case 'Month':
-        range = DateTimeRange(
-          start: DateTime(now.year, now.month, 1),
-          end: today,
-        );
+        range = DateTimeRange(start: DateTime(now.year, now.month, 1), end: today);
         break;
       case 'Year':
-        range = DateTimeRange(
-          start: DateTime(now.year, 1, 1),
-          end: today,
-        );
+        range = DateTimeRange(start: DateTime(now.year, 1, 1), end: today);
         break;
       default:
         range = null;
     }
-
     state = state.copyWith(
       selectedPeriod: period,
       dateRange: range,
@@ -265,7 +240,15 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     _applyFilters();
   }
 
-  /// Clear all filters
+  void setHideFutureTransactions(bool hide) {
+    state = state.copyWith(hideFutureTransactions: hide);
+    _applyFilters();
+  }
+
+  void toggleShowNotes() {
+    state = state.copyWith(showNotes: !state.showNotes);
+  }
+
   void clearFilters() {
     state = state.copyWith(
       selectedCategory: null,
@@ -273,6 +256,7 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       minAmount: null,
       maxAmount: null,
       selectedPeriod: 'All',
+      hideFutureTransactions: false,
       clearCategory: true,
       clearDateRange: true,
       clearMinAmount: true,
@@ -281,30 +265,30 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     _applyFilters();
   }
 
-  /// Delete a transaction
   Future<bool> deleteTransaction(String transactionId) async {
     try {
       await _repository.deleteTransaction(transactionId);
-
-      // Remove from local state
-      final updatedTransactions = state.transactions
-          .where((t) => t.id != transactionId)
-          .toList();
-
-      state = state.copyWith(transactions: updatedTransactions);
+      final updated = state.transactions.where((t) => t.id != transactionId).toList();
+      state = state.copyWith(transactions: updated);
       _applyFilters();
-
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  /// Apply all active filters
   void _applyFilters() {
     var filtered = List<TransactionEntity>.from(state.transactions);
 
-    // Filter by type
+    if (state.hideFutureTransactions) {
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+      filtered = filtered.where((t) {
+        final txDate = DateTime(t.date.year, t.date.month, t.date.day);
+        return !txDate.isAfter(todayDate);
+      }).toList();
+    }
+
     if (state.selectedFilter != 'All') {
       filtered = filtered.where((t) {
         if (state.selectedFilter == 'Income') return t.type == TransactionType.income;
@@ -314,7 +298,6 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       }).toList();
     }
 
-    // Filter by search query
     if (state.searchQuery.isNotEmpty) {
       final query = state.searchQuery.toLowerCase();
       filtered = filtered.where((t) {
@@ -324,12 +307,10 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       }).toList();
     }
 
-    // Filter by category
     if (state.selectedCategory != null) {
       filtered = filtered.where((t) => t.categoryName == state.selectedCategory).toList();
     }
 
-    // Filter by date range
     if (state.dateRange != null) {
       filtered = filtered.where((t) {
         return t.date.isAfter(state.dateRange!.start.subtract(const Duration(days: 1))) &&
@@ -337,7 +318,6 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       }).toList();
     }
 
-    // Filter by amount range
     if (state.minAmount != null || state.maxAmount != null) {
       filtered = filtered.where((t) {
         final amount = t.amount.abs();

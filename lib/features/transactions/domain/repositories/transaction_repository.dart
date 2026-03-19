@@ -33,4 +33,5 @@ abstract class TransactionRepository {
 
   Future<List<TransactionEntity>> getRecentTransactions({int limit = 10});
   Future<List<TransactionEntity>> searchTransactions(String query);
+  Future<TransactionEntity?> getTransactionById(String id);
 }

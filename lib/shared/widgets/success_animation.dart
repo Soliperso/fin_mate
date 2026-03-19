@@ -508,12 +508,12 @@ class SuccessDialog extends StatelessWidget {
 /// Reusable error dialog helper — replaces all ErrorSnackbar usage
 Future<void> showErrorDialog(BuildContext context, String message) => showDialog(
   context: context,
-  builder: (_) => AlertDialog(
+  builder: (dialogContext) => AlertDialog(
     title: const Text('Something went wrong'),
     content: Text(message),
     actions: [
       TextButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => Navigator.pop(dialogContext),
         child: const Text('OK'),
       ),
     ],

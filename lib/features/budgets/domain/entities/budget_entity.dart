@@ -36,6 +36,10 @@ class BudgetEntity extends Equatable {
   final String? categoryIcon;
   final String? categoryColor;
 
+  // Carry-over fields
+  final bool carryOverEnabled;
+  final double lastCarryOverAmount;
+
   // Calculated fields (not from database)
   final double? spent;
   final double? remaining;
@@ -54,20 +58,26 @@ class BudgetEntity extends Equatable {
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
+    this.carryOverEnabled = false,
+    this.lastCarryOverAmount = 0,
     this.spent,
     this.remaining,
   });
 
+  /// Effective budget = base amount + carry-over (positive = surplus, negative = deficit)
+  double get effectiveAmount =>
+      amount + (carryOverEnabled ? lastCarryOverAmount : 0);
+
   /// Get the percentage of budget spent (0-100+)
   double get spentPercentage {
-    if (spent == null || amount == 0) return 0;
-    return (spent! / amount) * 100;
+    if (spent == null || effectiveAmount == 0) return 0;
+    return (spent! / effectiveAmount) * 100;
   }
 
   /// Check if budget is exceeded
   bool get isExceeded {
     if (spent == null) return false;
-    return spent! > amount;
+    return spent! > effectiveAmount;
   }
 
   /// Check if budget is close to limit (>= 80%)
@@ -143,6 +153,8 @@ class BudgetEntity extends Equatable {
         categoryName,
         categoryIcon,
         categoryColor,
+        carryOverEnabled,
+        lastCarryOverAmount,
         spent,
         remaining,
       ];
@@ -161,6 +173,8 @@ class BudgetEntity extends Equatable {
     String? categoryName,
     String? categoryIcon,
     String? categoryColor,
+    bool? carryOverEnabled,
+    double? lastCarryOverAmount,
     double? spent,
     double? remaining,
   }) {
@@ -178,6 +192,8 @@ class BudgetEntity extends Equatable {
       categoryName: categoryName ?? this.categoryName,
       categoryIcon: categoryIcon ?? this.categoryIcon,
       categoryColor: categoryColor ?? this.categoryColor,
+      carryOverEnabled: carryOverEnabled ?? this.carryOverEnabled,
+      lastCarryOverAmount: lastCarryOverAmount ?? this.lastCarryOverAmount,
       spent: spent ?? this.spent,
       remaining: remaining ?? this.remaining,
     );

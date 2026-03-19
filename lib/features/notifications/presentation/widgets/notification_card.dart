@@ -11,23 +11,52 @@ class NotificationCard extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback onTap;
   final VoidCallback? onDismiss;
+  final VoidCallback? onMarkAsRead;
 
   const NotificationCard({
     super.key,
     required this.notification,
     required this.onTap,
     this.onDismiss,
+    this.onMarkAsRead,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final canMarkRead = !notification.isRead && onMarkAsRead != null;
 
     return Dismissible(
       key: Key(notification.id),
-      direction: DismissDirection.endToStart,
+      direction: canMarkRead
+          ? DismissDirection.horizontal
+          : DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd && canMarkRead) {
+          onMarkAsRead?.call();
+          return false; // don't remove the card, just mark as read
+        }
+        return true; // endToStart → delete
+      },
       onDismissed: (_) => onDismiss?.call(),
-      background: Container(
+      // Left-to-right: mark as read
+      background: canMarkRead
+          ? Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: AppSizes.lg),
+              decoration: BoxDecoration(
+                color: AppColors.brandTeal,
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              ),
+              child: const Icon(
+                CupertinoIcons.check_mark,
+                color: Colors.white,
+                size: 24,
+              ),
+            )
+          : const SizedBox.shrink(),
+      // Right-to-left: delete
+      secondaryBackground: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSizes.lg),
         decoration: BoxDecoration(

@@ -21,6 +21,7 @@ import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/domain/entities/debt_entity.dart';
 import '../../../debt_payoff/presentation/providers/debt_providers.dart';
+import '../../data/datasources/reminder_remote_datasource.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -47,13 +48,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   DateTime _selectedDate = DateTime.now();
   AccountEntity? _selectedAccount;
 
-  // Tags
-  final List<String> _tags = [];
-  final _tagInputController = TextEditingController();
-
   // Recurring
   bool _isRecurring = false;
   String _recurringInterval = 'monthly';
+
+  // Reminder
+  bool _reminderEnabled = false;
+  int _reminderDaysBefore = 1;
+  final _reminderMessageController = TextEditingController();
 
   // Attachment
   XFile? _attachmentFile;
@@ -126,11 +128,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           _selectedDate = transaction.date;
           if (category != null) _selectedCategory = (category as dynamic).name as String?;
           if (account != null) _selectedAccount = account as AccountEntity;
-          if (transaction.tags != null) {
-            _tags
-              ..clear()
-              ..addAll(transaction.tags!);
-          }
           _isRecurring = transaction.isRecurring;
           if (transaction.recurringInterval != null) {
             _recurringInterval = transaction.recurringInterval!;
@@ -149,7 +146,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     _titleController.dispose();
     _amountController.dispose();
     _notesController.dispose();
-    _tagInputController.dispose();
+    _reminderMessageController.dispose();
     super.dispose();
   }
 
@@ -230,6 +227,12 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               _sectionLabel(context, 'Notes'),
               const SizedBox(height: AppSizes.sm),
               _buildNotesSection(context, isDark, cardColor),
+              const SizedBox(height: AppSizes.lg),
+
+              // ── Reminder ───────────────────────────────────────────────
+              _sectionLabel(context, 'Reminder'),
+              const SizedBox(height: AppSizes.sm),
+              _buildReminderSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
 
               // ── Receipt scan (premium) ──────────────────────────────────
@@ -559,7 +562,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 horizontal: AppSizes.md, vertical: 4),
             child: Row(
               children: [
-                _rowIcon(CupertinoIcons.pencil, isDark),
+                _rowIcon(CupertinoIcons.pencil, accentColor: _typeColor, isDark: isDark),
                 const SizedBox(width: AppSizes.md),
                 Expanded(
                   child: TextFormField(
@@ -606,15 +609,24 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       const EdgeInsets.symmetric(horizontal: AppSizes.md),
                   child: Row(
                     children: [
-                      _rowIcon(CupertinoIcons.tag, isDark),
+                      _rowIcon(CupertinoIcons.tag, accentColor: _typeColor, isDark: isDark),
                       const SizedBox(width: AppSizes.md),
                       Text(
                         'Category',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.secondaryLabel,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
                       ),
+                      const Spacer(),
+                      if (_selectedCategory != null) ...[
+                        Text(
+                          _selectedCategory!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.secondaryLabel,
+                              ),
+                        ),
+                        const SizedBox(width: 2),
+                      ],
                     ],
                   ),
                 ),
@@ -693,15 +705,22 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               children: [
                 Row(
                   children: [
-                    _rowIcon(CupertinoIcons.calendar, isDark),
+                    _rowIcon(CupertinoIcons.calendar, accentColor: _typeColor, isDark: isDark),
                     const SizedBox(width: AppSizes.md),
                     Text(
                       'Date',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.secondaryLabel,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
                     ),
+                    const Spacer(),
+                    Text(
+                      _dateTrailingSummary(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.secondaryLabel,
+                          ),
+                    ),
+                    const SizedBox(width: 2),
                   ],
                 ),
                 const SizedBox(height: AppSizes.xs),
@@ -727,7 +746,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             horizontal: AppSizes.md, vertical: 4),
                         child: Row(
                           children: [
-                            _rowIcon(CupertinoIcons.creditcard, isDark),
+                            _rowIcon(CupertinoIcons.creditcard, accentColor: _typeColor, isDark: isDark),
                             const SizedBox(width: AppSizes.md),
                             Expanded(
                               child: DropdownButtonHideUnderline(
@@ -769,9 +788,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ),
 
           _divider(isDark),
-          _buildTagsRow(context, isDark),
-
-          _divider(isDark),
           _buildRecurringRow(context, isDark),
 
           _divider(isDark),
@@ -781,80 +797,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
-  // ── Tags row ──────────────────────────────────────────────────────────────
-
-  Widget _buildTagsRow(BuildContext context, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md, vertical: AppSizes.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _rowIcon(CupertinoIcons.number, isDark),
-              const SizedBox(width: AppSizes.md),
-              Text(
-                'Tags',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.secondaryLabel,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ],
-          ),
-          if (_tags.isNotEmpty) ...[
-            const SizedBox(height: AppSizes.xs),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: _tags.map((tag) {
-                return Chip(
-                  label: Text(
-                    tag,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  deleteIcon: const Icon(CupertinoIcons.xmark, size: 12),
-                  onDeleted: () => setState(() => _tags.remove(tag)),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  labelPadding: const EdgeInsets.only(left: 4),
-                  backgroundColor: _typeColor.withValues(alpha: 0.1),
-                  deleteIconColor: _typeColor,
-                  side: BorderSide(color: _typeColor.withValues(alpha: 0.3)),
-                  labelStyle: TextStyle(color: _typeColor, fontWeight: FontWeight.w500),
-                );
-              }).toList(),
-            ),
-          ],
-          const SizedBox(height: AppSizes.xs),
-          TextField(
-            controller: _tagInputController,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textCapitalization: TextCapitalization.none,
-            decoration: InputDecoration(
-              hintText: 'Add tag, press Enter…',
-              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.tertiaryLabel,
-                  ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.only(
-                  left: AppSizes.sm, top: 6, bottom: 6),
-              isDense: true,
-            ),
-            onSubmitted: (value) {
-              final tag = value.trim().toLowerCase();
-              if (tag.isNotEmpty && !_tags.contains(tag)) {
-                setState(() => _tags.add(tag));
-              }
-              _tagInputController.clear();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── Recurring row ─────────────────────────────────────────────────────────
 
@@ -869,7 +811,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         children: [
           Row(
             children: [
-              _rowIcon(CupertinoIcons.repeat, isDark),
+              _rowIcon(CupertinoIcons.repeat, accentColor: _typeColor, isDark: isDark),
               const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Text(
@@ -879,10 +821,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       ),
                 ),
               ),
-              CupertinoSwitch(
-                value: _isRecurring,
-                activeTrackColor: AppColors.primaryTeal,
-                onChanged: (val) => setState(() => _isRecurring = val),
+              Transform.scale(
+                scale: 0.75,
+                child: CupertinoSwitch(
+                  value: _isRecurring,
+                  activeTrackColor: AppColors.primaryTeal,
+                  onChanged: (val) => setState(() => _isRecurring = val),
+                ),
               ),
             ],
           ),
@@ -951,7 +896,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           horizontal: AppSizes.md, vertical: AppSizes.sm),
       child: Row(
         children: [
-          _rowIcon(CupertinoIcons.paperclip, isDark),
+          _rowIcon(CupertinoIcons.paperclip, accentColor: _typeColor, isDark: isDark),
           const SizedBox(width: AppSizes.md),
           Expanded(
             child: _attachmentFile != null
@@ -978,13 +923,44 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   )
                 : GestureDetector(
                     onTap: _pickAttachment,
-                    child: Text(
-                      'Attach receipt',
-                      style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.primaryTeal,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: AppSizes.md, horizontal: AppSizes.sm),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                        border: Border.all(
+                          color: _typeColor.withValues(alpha: 0.35),
+                          width: 1.5,
+                        ),
+                        color: _typeColor.withValues(alpha: 0.05),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(CupertinoIcons.paperclip,
+                              size: AppSizes.iconMd,
+                              color: _typeColor),
+                          const SizedBox(height: AppSizes.xs),
+                          Text(
+                            'Attach Receipt',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: _typeColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                          Text(
+                            'Photo or file',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.secondaryLabel),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
           ),
@@ -994,30 +970,27 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   }
 
   Future<void> _pickAttachment() async {
-    final action = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(CupertinoIcons.photo),
-              title: const Text('Photo Library'),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(CupertinoIcons.camera),
-              title: const Text('Camera'),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (action == null) return;
-    final file =
-        await ImagePicker().pickImage(source: action, imageQuality: 85);
-    if (file != null) setState(() => _attachmentFile = file);
+    try {
+      final result =
+          await context.push<ReceiptData>('/transactions/scan-receipt');
+      if (result != null && mounted) {
+        setState(() {
+          _titleController.text = result.merchant;
+          _amountController.text = result.amount.toStringAsFixed(2);
+          _selectedDate = result.date;
+          final suggestedCategory = ReceiptCategorizerService.suggestCategory(
+            result.merchant,
+            result.items,
+          );
+          _selectedCategory =
+              suggestedCategory.substring(0, 1).toUpperCase() +
+                  suggestedCategory.substring(1);
+          _selectedType = 'expense';
+        });
+      }
+    } catch (e) {
+      if (mounted) showErrorDialog(context, 'Failed to scan receipt: $e');
+    }
   }
 
   Widget _buildCategoryChips(List<dynamic> categories, bool isDark) {
@@ -1209,7 +1182,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 14),
-              child: _rowIcon(CupertinoIcons.text_alignleft, isDark),
+              child: _rowIcon(CupertinoIcons.text_alignleft, accentColor: _typeColor, isDark: isDark),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -1237,6 +1210,123 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
+  // ── Reminder section ──────────────────────────────────────────────────────
+
+  Widget _buildReminderSection(
+      BuildContext context, bool isDark, Color cardColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          SwitchListTile(
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.md, vertical: 0),
+            title: const Text('Set Reminder'),
+            subtitle: Text(
+              'Get notified before this transaction\'s date',
+              style: TextStyle(
+                  color: AppColors.textSecondary, fontSize: 12),
+            ),
+            value: _reminderEnabled,
+            activeThumbColor: _typeColor,
+            onChanged: (val) => setState(() => _reminderEnabled = val),
+          ),
+          if (_reminderEnabled) ...[
+            Divider(
+              height: 0,
+              thickness: 0.5,
+              color: isDark ? AppColors.separatorDark : AppColors.separator,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSizes.md, AppSizes.sm, AppSizes.md, 0),
+              child: Row(
+                children: [
+                  _rowIcon(CupertinoIcons.bell, accentColor: _typeColor, isDark: isDark),
+                  const SizedBox(width: AppSizes.md),
+                  const Text('Remind me'),
+                  const SizedBox(width: AppSizes.sm),
+                  SizedBox(
+                    width: 56,
+                    child: TextFormField(
+                      initialValue: _reminderDaysBefore.toString(),
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusSm),
+                        ),
+                      ),
+                      onChanged: (v) {
+                        final parsed = int.tryParse(v);
+                        if (parsed != null && parsed > 0 && parsed <= 30) {
+                          setState(() => _reminderDaysBefore = parsed);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  const Text('day(s) before'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: _rowIcon(CupertinoIcons.text_bubble,
+                        accentColor: _typeColor, isDark: isDark),
+                  ),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _reminderMessageController,
+                      maxLines: 2,
+                      minLines: 1,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: 'Custom reminder message (optional)',
+                        hintStyle:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.tertiaryLabel,
+                                ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.only(
+                            left: AppSizes.sm, top: 14, bottom: 14),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   Widget _sectionLabel(BuildContext context, String text) {
@@ -1253,13 +1343,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
-  Widget _rowIcon(IconData icon, bool isDark) {
+  Widget _rowIcon(IconData icon, {required Color accentColor, bool isDark = false}) {
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF48484A) : const Color(0xFF1C1C1E),
-        borderRadius: BorderRadius.circular(8),
+        color: isDark ? accentColor.withValues(alpha: 0.75) : accentColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
       child: Icon(icon, size: 16, color: Colors.white),
     );
@@ -1272,6 +1362,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       indent: AppSizes.md + 32 + AppSizes.md,
       color: isDark ? AppColors.separatorDark : AppColors.separator,
     );
+  }
+
+  String _dateTrailingSummary() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final sel = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    if (sel == today) return 'Today';
+    if (sel == yesterday) return 'Yesterday';
+    return _formatDateFull(_selectedDate);
   }
 
   String _formatDateFull(DateTime date) {
@@ -1383,7 +1483,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         date: _selectedDate,
         accountId: _selectedAccount?.id ?? accountsList.first.id,
         categoryId: category.id,
-        tags: _tags.isEmpty ? null : List.unmodifiable(_tags),
         isRecurring: _isRecurring,
         recurringInterval: _isRecurring ? _recurringInterval : null,
         createdAt: DateTime.now(),
@@ -1450,6 +1549,22 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           });
         } catch (_) {
           // Attachment upload failure is non-fatal — transaction was saved
+        }
+      }
+
+      // Save reminder if enabled (non-fatal if it fails)
+      if (_reminderEnabled) {
+        try {
+          await ReminderRemoteDatasource().createReminder(
+            transactionId: savedTransactionId,
+            transactionDate: _selectedDate,
+            daysBefore: _reminderDaysBefore,
+            message: _reminderMessageController.text.trim().isEmpty
+                ? null
+                : _reminderMessageController.text.trim(),
+          );
+        } catch (_) {
+          // Reminder creation is non-fatal
         }
       }
 

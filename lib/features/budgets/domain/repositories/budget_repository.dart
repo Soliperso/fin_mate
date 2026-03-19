@@ -34,4 +34,7 @@ abstract class BudgetRepository {
   /// This is the main method for displaying budgets in the UI
   /// as it includes real-time spending data
   Future<List<BudgetEntity>> getBudgetsWithSpending();
+
+  /// Run server-side carry-over calculation for period rollovers
+  Future<void> applyCarryOvers();
 }

@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../domain/entities/debt_entity.dart';
 import '../../domain/services/payoff_calculator.dart';
 
 class DebtHeroCard extends StatelessWidget {
   final double totalBalance;
   final int debtCount;
   final PayoffResult? payoffResult;
+  final List<DebtEntity> debts;
 
   const DebtHeroCard({
     super.key,
     required this.totalBalance,
     required this.debtCount,
+    required this.debts,
     this.payoffResult,
   });
 
@@ -27,6 +30,25 @@ class DebtHeroCard extends StatelessWidget {
     final totalInterestLabel = payoffResult != null
         ? currencyFormat.format(payoffResult!.totalInterestPaid)
         : '—';
+
+    // Overall progress — only shown when at least one debt has originalBalance
+    double? overallProgress;
+    bool hasAnyOriginal = false;
+    double totalOriginal = 0;
+    double totalPaid = 0;
+    for (final d in debts) {
+      if (d.originalBalance != null && d.originalBalance! > 0) {
+        hasAnyOriginal = true;
+        totalOriginal += d.originalBalance!;
+        totalPaid +=
+            (d.originalBalance! - d.balance).clamp(0.0, d.originalBalance!);
+      } else {
+        totalOriginal += d.balance;
+      }
+    }
+    if (hasAnyOriginal && totalOriginal > 0) {
+      overallProgress = (totalPaid / totalOriginal).clamp(0.0, 1.0);
+    }
 
     return Container(
       width: double.infinity,
@@ -89,6 +111,36 @@ class DebtHeroCard extends StatelessWidget {
               ),
             ],
           ),
+
+          // Overall progress bar
+          if (overallProgress != null) ...[
+            const SizedBox(height: AppSizes.md),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    child: LinearProgressIndicator(
+                      value: overallProgress,
+                      minHeight: 5,
+                      backgroundColor: Colors.white.withValues(alpha: 0.20),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSizes.sm),
+                Text(
+                  '${(overallProgress * 100).toStringAsFixed(0)}% paid off',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

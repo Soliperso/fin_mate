@@ -108,112 +108,121 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
-      body: state.isLoading
-          ? ListView(
-              padding: const EdgeInsets.all(AppSizes.md),
-              children: const [
-                SkeletonCard(height: 72),
-                SizedBox(height: AppSizes.sm),
-                SkeletonCard(height: 72),
-                SizedBox(height: AppSizes.sm),
-                SkeletonCard(height: 72),
-                SizedBox(height: AppSizes.sm),
-                SkeletonCard(height: 72),
-                SizedBox(height: AppSizes.sm),
-                SkeletonCard(height: 72),
-              ],
-            )
-          : state.transactions.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(AppSizes.md),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      EmptyStateCard(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'No Transactions Yet',
-                        message:
-                            'Start by adding your first transaction to begin tracking your finances.',
-                        backgroundColor: AppColors.brandTeal,
-                      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: state.isLoading
+                ? ListView(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    children: const [
+                      SkeletonCard(height: 72),
+                      SizedBox(height: AppSizes.sm),
+                      SkeletonCard(height: 72),
+                      SizedBox(height: AppSizes.sm),
+                      SkeletonCard(height: 72),
+                      SizedBox(height: AppSizes.sm),
+                      SkeletonCard(height: 72),
+                      SizedBox(height: AppSizes.sm),
+                      SkeletonCard(height: 72),
                     ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    // Period selector
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSizes.md, AppSizes.sm, AppSizes.md, 0,
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: ['All', 'Today', 'Week', 'Month', 'Year']
-                              .map((period) => _buildPeriodChip(
-                                    context, period, state.selectedPeriod, notifier))
-                              .toList(),
+                  )
+                : state.transactions.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(AppSizes.md),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            EmptyStateCard(
+                              icon: Icons.receipt_long_outlined,
+                              title: 'No Transactions Yet',
+                              message:
+                                  'Start by adding your first transaction to begin tracking your finances.',
+                              backgroundColor: AppColors.brandTeal,
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-
-                    // Type filter chips
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.md,
-                        vertical: AppSizes.sm,
-                      ),
-                      child: Row(
+                      )
+                    : Column(
                         children: [
-                          Expanded(child: _buildFilterChip(context, 'All', state.selectedFilter, notifier)),
-                          const SizedBox(width: AppSizes.sm),
-                          Expanded(child: _buildFilterChip(context, 'Income', state.selectedFilter, notifier)),
-                          const SizedBox(width: AppSizes.sm),
-                          Expanded(child: _buildFilterChip(context, 'Expense', state.selectedFilter, notifier)),
+                          // Period selector
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSizes.md, AppSizes.sm, AppSizes.md, 0,
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: ['All', 'Today', 'Week', 'Month', 'Year']
+                                    .map((period) => _buildPeriodChip(
+                                          context, period, state.selectedPeriod, notifier))
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+
+                          // Type filter chips
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSizes.md,
+                              vertical: AppSizes.sm,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(child: _buildFilterChip(context, 'All', state.selectedFilter, notifier)),
+                                const SizedBox(width: AppSizes.sm),
+                                Expanded(child: _buildFilterChip(context, 'Income', state.selectedFilter, notifier)),
+                                const SizedBox(width: AppSizes.sm),
+                                Expanded(child: _buildFilterChip(context, 'Expense', state.selectedFilter, notifier)),
+                              ],
+                            ),
+                          ),
+
+                          // Income / Expense summary row
+                          _buildSummaryRow(context, state),
+
+                          Divider(
+                            height: 1,
+                            color: AppColors.borderLight.withValues(alpha: 0.3),
+                          ),
+
+                          // Transactions list
+                          Expanded(
+                            child: _buildTransactionsList(state, notifier),
+                          ),
                         ],
                       ),
-                    ),
-
-                    Divider(
-                      height: 1,
-                      color: AppColors.borderLight.withValues(alpha: 0.3),
-                    ),
-
-                    // Transactions list
-                    Expanded(
-                      child: _buildTransactionsList(state, notifier),
-                    ),
-                  ],
+          ),
+          // New Transaction button — same context and padding as Clear Filters
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.md),
+            child: SizedBox(
+              width: double.infinity,
+              height: AppSizes.buttonHeightMd,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await context.push('/transactions/add');
+                  if (mounted) {
+                    ref.read(transactionListProvider.notifier).refresh();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.brandTeal,
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                  ),
                 ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-        child: SizedBox(
-          width: double.infinity,
-          height: AppSizes.buttonHeightMd,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              await context.push('/transactions/add');
-              if (mounted) {
-                ref.read(transactionListProvider.notifier).refresh();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.brandTeal,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                icon: const Icon(CupertinoIcons.add, size: 20),
+                label: const Text(
+                  'New Transaction',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
               ),
             ),
-            icon: const Icon(CupertinoIcons.add, size: 20),
-            label: const Text(
-              'New Transaction',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -282,6 +291,124 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               color: isSelected ? Colors.white : AppColors.textSecondary,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  double _totalIncome(List<TransactionEntity> txns) =>
+      txns.where((t) => t.type == TransactionType.income).fold(0.0, (s, t) => s + t.amount);
+
+  double _totalExpense(List<TransactionEntity> txns) =>
+      txns.where((t) => t.type == TransactionType.expense).fold(0.0, (s, t) => s + t.amount);
+
+  Widget _buildSummaryRow(BuildContext context, TransactionListState state) {
+    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final income = _totalIncome(state.filteredTransactions);
+    final expense = _totalExpense(state.filteredTransactions);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          boxShadow: AppColors.cardShadow(isDark),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: AppColors.systemGreen.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(CupertinoIcons.arrow_up, size: 14, color: AppColors.systemGreen),
+                    ),
+                    const SizedBox(width: AppSizes.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Income',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                          Text(
+                            fmt.format(income),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.systemGreen,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            VerticalDivider(
+              width: 1,
+              thickness: 0.5,
+              color: AppColors.borderLight.withValues(alpha: 0.4),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: AppColors.systemRed.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(CupertinoIcons.arrow_down, size: 14, color: AppColors.systemRed),
+                    ),
+                    const SizedBox(width: AppSizes.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Expenses',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                          Text(
+                            fmt.format(expense),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.systemRed,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -815,6 +942,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     DateTimeRange? dateRange = state.dateRange;
     double? minAmount = state.minAmount;
     double? maxAmount = state.maxAmount;
+    bool hideFuture = state.hideFutureTransactions;
 
     _minAmountController.text = minAmount?.toString() ?? '';
     _maxAmountController.text = maxAmount?.toString() ?? '';
@@ -854,6 +982,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               dateRange = null;
                               minAmount = null;
                               maxAmount = null;
+                              hideFuture = false;
                               _minAmountController.clear();
                               _maxAmountController.clear();
                             });
@@ -961,12 +1090,32 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     ),
                     const SizedBox(height: AppSizes.lg),
 
+                    // Hide Future Transactions toggle
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Hide Future Transactions',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      subtitle: Text(
+                        'Only show transactions up to today',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      ),
+                      value: hideFuture,
+                      activeThumbColor: AppColors.brandTeal,
+                      onChanged: (val) => setModalState(() => hideFuture = val),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+
                     // Apply Button
                     ElevatedButton(
                       onPressed: () {
                         notifier.setCategory(selectedCategory);
                         notifier.setDateRange(dateRange);
                         notifier.setAmountRange(minAmount, maxAmount);
+                        notifier.setHideFutureTransactions(hideFuture);
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

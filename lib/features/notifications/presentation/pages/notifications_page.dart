@@ -18,16 +18,43 @@ class NotificationsPage extends ConsumerStatefulWidget {
 }
 
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  /// Groups notifications into Today / Yesterday / Earlier buckets.
+  Map<String, List<AppNotification>> _groupByDate(
+      List<AppNotification> notifications) {
+    final groups = <String, List<AppNotification>>{};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    for (final n in notifications) {
+      final date =
+          DateTime(n.createdAt.year, n.createdAt.month, n.createdAt.day);
+      final String key;
+      if (date == today) {
+        key = 'Today';
+      } else if (date == yesterday) {
+        key = 'Yesterday';
+      } else {
+        key = 'Earlier';
+      }
+      groups.putIfAbsent(key, () => []).add(n);
+    }
+    return groups;
+  }
+
   @override
   Widget build(BuildContext context) {
     final notificationsState = ref.watch(notificationsProvider);
     final notifications = notificationsState.notifications;
     final isLoading = notificationsState.isLoading;
+    final unreadCount =
+        notifications.where((n) => !n.isRead).length;
 
-    // Separate unread and read notifications
-    final unreadNotifications =
-        notifications.where((n) => !n.isRead).toList();
-    final readNotifications = notifications.where((n) => n.isRead).toList();
+    final grouped = _groupByDate(notifications);
+    // Preserve display order
+    final groupOrder = ['Today', 'Yesterday', 'Earlier'];
+    final presentGroups =
+        groupOrder.where((k) => grouped.containsKey(k)).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +65,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           onPressed: () => context.pop(),
         ),
         actions: [
-          if (unreadNotifications.isNotEmpty)
+          if (unreadCount > 0)
             TextButton(
               onPressed: () async {
                 await ref
@@ -80,69 +107,20 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(AppSizes.lg),
                     children: [
-                      // Unread section
-                      if (unreadNotifications.isNotEmpty) ...[
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSizes.md),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Unread',
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(width: AppSizes.sm),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.brandTeal
-                                      .withValues(alpha: 0.2),
-                                  borderRadius:
-                                      BorderRadius.circular(AppSizes.radiusSm),
-                                ),
-                                child: Text(
-                                  '${unreadNotifications.length}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.brandTeal,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ...unreadNotifications.map(
+                      for (final group in presentGroups) ...[
+                        _buildGroupHeader(context, group, grouped[group]!),
+                        ...grouped[group]!.map(
                           (notification) => NotificationCard(
                             notification: notification,
-                            onTap: () => _handleNotificationTap(notification),
-                            onDismiss: () => _handleNotificationDismiss(
-                                notification.id),
+                            onTap: () =>
+                                _handleNotificationTap(notification),
+                            onDismiss: () =>
+                                _handleNotificationDismiss(notification.id),
+                            onMarkAsRead: () =>
+                                _handleMarkAsRead(notification.id),
                           ),
                         ),
-                        const SizedBox(height: AppSizes.lg),
-                      ],
-
-                      // Read section
-                      if (readNotifications.isNotEmpty) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSizes.md),
-                          child: Text(
-                            'Earlier',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                        ...readNotifications.map(
-                          (notification) => NotificationCard(
-                            notification: notification,
-                            onTap: () => _handleNotificationTap(notification),
-                            onDismiss: () => _handleNotificationDismiss(
-                                notification.id),
-                          ),
-                        ),
+                        const SizedBox(height: AppSizes.sm),
                       ],
                     ],
                   ),
@@ -150,24 +128,60 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
   }
 
+  Widget _buildGroupHeader(
+    BuildContext context,
+    String label,
+    List<AppNotification> groupNotifications,
+  ) {
+    final unread = groupNotifications.where((n) => !n.isRead).length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.md),
+      child: Row(
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          if (unread > 0) ...[
+            const SizedBox(width: AppSizes.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.brandTeal.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              ),
+              child: Text(
+                '$unread',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.brandTeal,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleNotificationTap(AppNotification notification) async {
-    // Mark as read if unread
     if (!notification.isRead) {
       await ref
           .read(notificationsProvider.notifier)
           .markAsRead(notification.id);
     }
-
-    // Navigate to action URL if exists
     if (notification.actionUrl != null && mounted) {
       context.push(notification.actionUrl!);
     }
+  }
+
+  Future<void> _handleMarkAsRead(String notificationId) async {
+    await ref
+        .read(notificationsProvider.notifier)
+        .markAsRead(notificationId);
   }
 
   Future<void> _handleNotificationDismiss(String notificationId) async {
     await ref
         .read(notificationsProvider.notifier)
         .deleteNotification(notificationId);
-
   }
 }

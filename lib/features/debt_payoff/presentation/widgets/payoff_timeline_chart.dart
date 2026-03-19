@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,7 +33,12 @@ class PayoffTimelineChart extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (result.schedule.isEmpty) return const SizedBox.shrink();
 
-    final maxY = result.schedule.first.totalBalance * 1.08;
+    final initialBalance = debts.fold(0.0, (s, d) => s + d.balance);
+    final maxY = max(
+          initialBalance,
+          result.schedule.map((s) => s.totalBalance).reduce(max),
+        ) *
+        1.1;
     final debtFreeLabel = DateFormat('MMM yyyy').format(result.debtFreeDate);
 
     // Build per-debt line data. Fall back to a single total line when no
@@ -54,6 +60,7 @@ class PayoffTimelineChart extends StatelessWidget {
         children: [
           // Title + legend
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Payoff Timeline',
@@ -61,35 +68,39 @@ class PayoffTimelineChart extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              const Spacer(),
-              ...debts.asMap().entries.map((e) {
-                final color = _kDebtColors[e.key % _kDebtColors.length];
-                return Padding(
-                  padding: const EdgeInsets.only(left: AppSizes.xs),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
+              const SizedBox(width: AppSizes.sm),
+              Flexible(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: AppSizes.xs,
+                  runSpacing: 4,
+                  children: debts.asMap().entries.map((e) {
+                    final color = _kDebtColors[e.key % _kDebtColors.length];
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        e.value.name,
-                        style:
-                            Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 9,
-                                ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                        const SizedBox(width: 3),
+                        Text(
+                          e.value.name,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 9,
+                                  ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSizes.md),
@@ -255,10 +266,14 @@ class PayoffTimelineChart extends StatelessWidget {
         final balance = snap.debtBalancesAfter[debt.id] ?? 0.0;
         spots.add(FlSpot(i.toDouble(), balance));
       }
-      // Ensure the line ends at zero
-      if (spots.isNotEmpty && spots.last.y > 0.01) {
+      // Only drop to zero if the debt is actually fully paid off in the schedule
+      final lastBalance =
+          result.schedule.last.debtBalancesAfter[debt.id] ?? 0.0;
+      if (spots.isNotEmpty && spots.last.y > 0.01 && lastBalance < 0.01) {
         spots.add(FlSpot(targetCount.toDouble(), 0));
       }
+      // fl_chart needs ≥ 2 points to draw a line
+      if (spots.length < 2) spots.add(FlSpot(1.0, 0.0));
 
       return LineChartBarData(
         spots: spots,

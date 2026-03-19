@@ -20,6 +20,7 @@ import '../widgets/monthly_funding_card.dart';
 import '../widgets/monthly_schedule_list.dart';
 import '../widgets/payment_history_sheet.dart';
 import '../widgets/payoff_timeline_chart.dart';
+import '../widgets/debt_cost_split_card.dart';
 import '../widgets/strategy_comparison_sheet.dart';
 
 export '../../domain/services/payoff_calculator.dart' show DebtStrategy;
@@ -259,6 +260,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                       totalBalance: totalBalance,
                       debtCount: debts.length,
                       payoffResult: payoffResult,
+                      debts: debts,
                     ),
                     const SizedBox(height: AppSizes.md),
 
@@ -317,17 +319,27 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     const SizedBox(height: AppSizes.md),
 
                     // Debt cards
-                    ...sorted.map((debt) => Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSizes.sm),
-                          child: DebtCard(
-                            debt: debt,
-                            onLogPayment: () => _showLogPayment(debt),
-                            onEdit: () => _showEditDebt(debt),
-                            onHistory: () => _showPaymentHistory(debt),
-                            onDelete: () => _deleteDebt(debt),
-                          ),
-                        )),
+                    ...sorted.map((debt) {
+                          final isFocus = payoffResult?.schedule.isNotEmpty ==
+                                  true &&
+                              payoffResult!.schedule.first.focusDebtName ==
+                                  debt.name;
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSizes.sm),
+                            child: DebtCard(
+                              debt: debt,
+                              isFocusDebt: isFocus,
+                              focusReason: strategy == DebtStrategy.avalanche
+                                  ? 'Highest rate'
+                                  : 'Lowest balance',
+                              onLogPayment: () => _showLogPayment(debt),
+                              onEdit: () => _showEditDebt(debt),
+                              onHistory: () => _showPaymentHistory(debt),
+                              onDelete: () => _deleteDebt(debt),
+                            ),
+                          );
+                        }),
                     const SizedBox(height: AppSizes.sm),
                     MonthlyFundingCard(debts: sorted),
                   ],
@@ -347,6 +359,11 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         AppSizes.md, AppSizes.md, AppSizes.md, 100,
                       ),
                       children: [
+                        DebtCostSplitCard(
+                          payoffResult: activeResult ?? payoffResult,
+                          totalCurrentBalance: totalBalance,
+                        ),
+                        const SizedBox(height: AppSizes.md),
                         PayoffTimelineChart(
                           result: activeResult ?? payoffResult,
                           debts: debts,

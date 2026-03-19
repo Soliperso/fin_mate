@@ -26,10 +26,21 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
   final _amountController = TextEditingController();
 
   CategoryEntity? _selectedCategory;
+  String? _initialCategoryId;
+  List<CategoryEntity> _loadedCategories = [];
+
+  // Returns the user's explicit selection, or falls back to the existing budget's category
+  CategoryEntity? get _effectiveCategory =>
+      _selectedCategory ??
+      (_initialCategoryId != null
+          ? _loadedCategories.where((c) => c.id == _initialCategoryId).firstOrNull
+          : null);
+
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
   bool _isLoading = false;
+  bool _carryOverEnabled = false;
 
   @override
   void initState() {
@@ -39,6 +50,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
       _selectedPeriod = widget.budget!.period;
       _startDate = widget.budget!.startDate;
       _endDate = widget.budget!.endDate;
+      _carryOverEnabled = widget.budget!.carryOverEnabled;
+      _initialCategoryId = widget.budget!.categoryId;
     }
   }
 
@@ -111,34 +124,37 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   // Category Selection
                   Text(
                     'Category',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   categoriesState.when(
-                    data: (categories) => DropdownButtonFormField<CategoryEntity>(
-                      initialValue: _selectedCategory,
-                      decoration: const InputDecoration(
-                        hintText: 'Select a category',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a category';
-                        }
-                        return null;
-                      },
-                    ),
+                    data: (categories) {
+                      _loadedCategories = categories;
+                      return DropdownButtonFormField<CategoryEntity>(
+                        initialValue: _effectiveCategory,
+                        decoration: const InputDecoration(
+                          hintText: 'Select a category',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      );
+                    },
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (error, _) => const Text('Failed to load categories'),
                   ),
@@ -147,7 +163,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   // Amount
                   Text(
                     'Budget Amount',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   TextFormField(
@@ -177,7 +193,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   // Period
                   Text(
                     'Budget Period',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   SizedBox(
@@ -210,7 +226,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   // Start Date
                   Text(
                     'Start Date',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   InkWell(
@@ -230,10 +246,11 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.calendar_today),
+                        suffixIcon: Icon(Icons.calendar_today, size: 16),
                       ),
                       child: Text(
                         '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
+                        style: TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
                   ),
@@ -245,7 +262,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       Expanded(
                         child: Text(
                           'End Date (Optional)',
-                          style: Theme.of(context).textTheme.labelLarge,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                         ),
                       ),
                       if (_endDate != null)
@@ -277,21 +294,33 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.calendar_today),
+                        suffixIcon: Icon(Icons.calendar_today, size: 16),
                       ),
                       child: Text(
                         _endDate != null
                             ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
                             : 'Select end date',
-                        style: TextStyle(
-                          color: _endDate != null
-                              ? Theme.of(context).textTheme.bodyLarge?.color
-                              : Theme.of(context).hintColor,
-                        ),
+                        style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSizes.xl),
+                  const SizedBox(height: AppSizes.md),
+
+                  // Carry-Over Toggle
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Carry Over Unspent / Overspent'),
+                    subtitle: Text(
+                      'Rolls the surplus or deficit into the next period',
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 12),
+                    ),
+                    value: _carryOverEnabled,
+                    activeTrackColor: AppColors.brandTeal,
+                    activeThumbColor: AppColors.white,
+                    onChanged: (val) => setState(() => _carryOverEnabled = val),
+                  ),
+                  const SizedBox(height: AppSizes.md),
 
                   // Actions
                   Row(
@@ -305,7 +334,11 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       const SizedBox(width: AppSizes.md),
                       Expanded(
                         child: widget.budget == null
-                            ? ElevatedButton(
+                            ? OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: AppColors.brandTeal,
+                                  foregroundColor: AppColors.white,
+                                ),
                                 onPressed: _isLoading ? null : _saveBudget,
                                 child: _isLoading
                                     ? const SizedBox(
@@ -354,7 +387,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
       final budget = BudgetEntity(
         id: widget.budget?.id ?? '',
         userId: widget.budget?.userId ?? '', // This will be set by Supabase
-        categoryId: _selectedCategory!.id,
+        categoryId: _effectiveCategory!.id,
         amount: amount,
         period: _selectedPeriod,
         startDate: _startDate,
@@ -362,9 +395,11 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
         isActive: true,
         createdAt: widget.budget?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
-        categoryName: _selectedCategory!.name,
-        categoryIcon: _selectedCategory!.icon,
-        categoryColor: _selectedCategory!.color,
+        categoryName: _effectiveCategory!.name,
+        categoryIcon: _effectiveCategory!.icon,
+        categoryColor: _effectiveCategory!.color,
+        carryOverEnabled: _carryOverEnabled,
+        lastCarryOverAmount: widget.budget?.lastCarryOverAmount ?? 0,
       );
 
       if (widget.budget == null) {

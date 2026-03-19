@@ -10,6 +10,8 @@ class DebtCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onHistory;
   final VoidCallback onDelete;
+  final bool isFocusDebt;
+  final String focusReason;
 
   const DebtCard({
     super.key,
@@ -18,6 +20,8 @@ class DebtCard extends StatelessWidget {
     required this.onEdit,
     required this.onHistory,
     required this.onDelete,
+    this.isFocusDebt = false,
+    this.focusReason = '',
   });
 
   IconData _iconForType(String debtType) {
@@ -39,6 +43,20 @@ class DebtCard extends StatelessWidget {
     }
   }
 
+  String _daySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -46,7 +64,7 @@ class DebtCard extends StatelessWidget {
         NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final monthsLeft = debt.monthsToPayoffAtMinimum;
 
-    // Progress: how much has been paid off
+    // ── Progress ──────────────────────────────────────────────────────────
     double? progressValue;
     if (debt.originalBalance != null &&
         debt.originalBalance! > 0 &&
@@ -54,19 +72,59 @@ class DebtCard extends StatelessWidget {
       progressValue =
           (debt.originalBalance! - debt.balance) / debt.originalBalance!;
     }
-
     final paidPercent = progressValue != null
         ? '${(progressValue * 100).toStringAsFixed(0)}% paid'
         : null;
+
+    // ── Due date ──────────────────────────────────────────────────────────
+    String? dueDateLabel;
+    Color? dueDateColor;
+    int daysUntil = 0;
+    if (debt.dueDay != null) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final daysInCurrentMonth = DateTime(now.year, now.month + 1, 0).day;
+      final clampedDay = debt.dueDay!.clamp(1, daysInCurrentMonth);
+      DateTime nextDue = DateTime(now.year, now.month, clampedDay);
+      if (!nextDue.isAfter(today)) {
+        final daysInNextMonth = DateTime(now.year, now.month + 2, 0).day;
+        final clampedDayNext = debt.dueDay!.clamp(1, daysInNextMonth);
+        nextDue = DateTime(now.year, now.month + 1, clampedDayNext);
+      }
+      daysUntil = nextDue.difference(today).inDays;
+      if (daysUntil == 0) {
+        dueDateLabel = 'Due today';
+        dueDateColor = AppColors.error;
+      } else if (daysUntil <= 5) {
+        dueDateLabel = 'Due in $daysUntil day${daysUntil == 1 ? '' : 's'}';
+        dueDateColor = AppColors.warning;
+      } else {
+        final suffix = _daySuffix(clampedDay);
+        dueDateLabel = 'Due on the $clampedDay$suffix';
+        dueDateColor = AppColors.textSecondary;
+      }
+    }
+
+    // ── Interest trap ─────────────────────────────────────────────────────
+    String? interestTrapText;
+    if (debt.balance > 0 && debt.minimumPayment > 0) {
+      final pct = (debt.monthlyInterest / debt.minimumPayment) * 100;
+      if (pct >= 50) {
+        interestTrapText =
+            '${pct.round()}% of your min payment goes to interest';
+      }
+    }
 
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         side: BorderSide(
-          color: isDark
-              ? AppColors.separatorDark.withValues(alpha: 0.5)
-              : AppColors.separator.withValues(alpha: 0.4),
+          color: isFocusDebt
+              ? AppColors.brandTeal.withValues(alpha: 0.45)
+              : isDark
+                  ? AppColors.separatorDark.withValues(alpha: 0.5)
+                  : AppColors.separator.withValues(alpha: 0.4),
         ),
       ),
       child: Padding(
@@ -92,48 +150,76 @@ class DebtCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSizes.sm),
-                // Name + type
+                // Name + type + optional focus chip
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         debt.name,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         debt.debtTypeDisplay,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
                       ),
+                      if (isFocusDebt && focusReason.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandTeal.withValues(alpha: 0.12),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusFull),
+                            border: Border.all(
+                              color: AppColors.brandTeal.withValues(alpha: 0.35),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Text(
+                            focusReason,
+                            style: const TextStyle(
+                              color: AppColors.brandTeal,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                // Balance + overflow menu
+                // Balance + APR
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       currencyFormat.format(debt.balance),
-                      style:
-                          Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.error,
-                              ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.error),
                     ),
                     Text(
                       '${debt.interestRate.toStringAsFixed(1)}% APR',
-                      style:
-                          Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -228,11 +314,10 @@ class DebtCard extends StatelessWidget {
                   const SizedBox(width: AppSizes.sm),
                   Text(
                     paidPercent!,
-                    style:
-                        Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -248,7 +333,8 @@ class DebtCard extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Min: ${currencyFormat.format(debt.minimumPayment)}/mo',
+                          text:
+                              'Min: ${currencyFormat.format(debt.minimumPayment)}/mo',
                         ),
                         if (monthsLeft != null) ...[
                           const TextSpan(text: '  ·  '),
@@ -288,6 +374,61 @@ class DebtCard extends StatelessWidget {
                 ),
               ],
             ),
+
+            // ── Due date chip ─────────────────────────────────────────────
+            if (dueDateLabel != null) ...[
+              const SizedBox(height: AppSizes.xs),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today_outlined,
+                      size: 11, color: dueDateColor),
+                  const SizedBox(width: AppSizes.xs),
+                  Text(
+                    dueDateLabel,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: dueDateColor,
+                          fontWeight: daysUntil <= 5
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                  ),
+                ],
+              ),
+            ],
+
+            // ── Interest trap warning ─────────────────────────────────────
+            if (interestTrapText != null) ...[
+              const SizedBox(height: AppSizes.xs + 2),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.sm,
+                  vertical: AppSizes.xs + 1,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 13, color: AppColors.warning),
+                    const SizedBox(width: AppSizes.xs),
+                    Expanded(
+                      child: Text(
+                        interestTrapText,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

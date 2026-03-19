@@ -21,6 +21,7 @@ import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
+import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
 // [MVP: AI Insights - Commented out]
 // import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
@@ -232,6 +233,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'scan-receipt',
                 name: 'scan-receipt',
                 builder: (context, state) => const ScanReceiptPage(),
+              ),
+              GoRoute(
+                path: ':id',
+                name: 'transaction-detail',
+                builder: (context, state) => TransactionDetailPage(
+                  transactionId: state.pathParameters['id']!,
+                ),
               ),
             ],
           ),

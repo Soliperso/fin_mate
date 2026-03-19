@@ -14,6 +14,8 @@ class BudgetModel {
   final String? categoryName;
   final String? categoryIcon;
   final String? categoryColor;
+  final bool carryOverEnabled;
+  final double lastCarryOverAmount;
   final double? spent;
   final double? remaining;
 
@@ -31,6 +33,8 @@ class BudgetModel {
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
+    this.carryOverEnabled = false,
+    this.lastCarryOverAmount = 0,
     this.spent,
     this.remaining,
   });
@@ -50,6 +54,8 @@ class BudgetModel {
       categoryName: json['category_name'],
       categoryIcon: json['category_icon'],
       categoryColor: json['category_color'],
+      carryOverEnabled: json['carry_over_enabled'] ?? false,
+      lastCarryOverAmount: (json['last_carry_over_amount'] as num?)?.toDouble() ?? 0,
       spent: json['spent'] != null ? (json['spent'] as num).toDouble() : null,
       remaining: json['remaining'] != null ? (json['remaining'] as num).toDouble() : null,
     );
@@ -64,6 +70,7 @@ class BudgetModel {
       'start_date': startDate.toIso8601String().split('T')[0],
       'end_date': endDate?.toIso8601String().split('T')[0],
       'is_active': isActive,
+      'carry_over_enabled': carryOverEnabled,
     };
   }
 
@@ -82,6 +89,8 @@ class BudgetModel {
       categoryName: categoryName,
       categoryIcon: categoryIcon,
       categoryColor: categoryColor,
+      carryOverEnabled: carryOverEnabled,
+      lastCarryOverAmount: lastCarryOverAmount,
       spent: spent,
       remaining: remaining,
     );
@@ -102,6 +111,8 @@ class BudgetModel {
       categoryName: entity.categoryName,
       categoryIcon: entity.categoryIcon,
       categoryColor: entity.categoryColor,
+      carryOverEnabled: entity.carryOverEnabled,
+      lastCarryOverAmount: entity.lastCarryOverAmount,
       spent: entity.spent,
       remaining: entity.remaining,
     );

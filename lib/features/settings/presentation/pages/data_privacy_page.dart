@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/services/auto_backup_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
 
 class DataPrivacyPage extends ConsumerWidget {
@@ -12,6 +14,10 @@ class DataPrivacyPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(userSettingsProvider);
+    final settings = settingsAsync.valueOrNull;
+    final schedule = settings?.notificationPreferences.autoBackupSchedule ?? 'off';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -26,6 +32,17 @@ class DataPrivacyPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Automatic Backup Section
+            _buildSectionTitle(context, 'Automatic Backup'),
+            const SizedBox(height: AppSizes.sm),
+            _buildSectionDescription(
+              context,
+              'Automatically save a JSON backup to secure cloud storage.',
+            ),
+            const SizedBox(height: AppSizes.md),
+            _buildBackupSection(context, ref, schedule, settings),
+            const SizedBox(height: AppSizes.lg),
+
             // Data Export Section
             _buildSectionTitle(context, 'Export Your Data'),
             const SizedBox(height: AppSizes.sm),
@@ -113,6 +130,99 @@ class DataPrivacyPage extends ConsumerWidget {
             const SizedBox(height: AppSizes.xl),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBackupSection(
+    BuildContext context,
+    WidgetRef ref,
+    String schedule,
+    SettingsEntity? settings,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(AppSizes.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              ),
+              child: Icon(Icons.cloud_upload_outlined,
+                  color: AppColors.primaryTeal, size: 24),
+            ),
+            title: const Text(
+              'Backup Schedule',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+            subtitle: FutureBuilder<DateTime?>(
+              future: AutoBackupService().lastBackupDate(),
+              builder: (context, snap) {
+                if (snap.data != null) {
+                  final d = snap.data!;
+                  return Text(
+                    'Last backup: ${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}',
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13),
+                  );
+                }
+                return Text('No backup yet',
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13));
+              },
+            ),
+            trailing: DropdownButton<String>(
+              value: schedule,
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(value: 'off', child: Text('Off')),
+                DropdownMenuItem(value: 'daily', child: Text('Daily')),
+                DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+              ],
+              onChanged: (value) {
+                if (value == null || settings == null) return;
+                final updated = settings.notificationPreferences
+                    .copyWith(autoBackupSchedule: value);
+                ref
+                    .read(settingsOperationsProvider.notifier)
+                    .updateNotificationPreferences(updated);
+              },
+            ),
+          ),
+          if (schedule != 'off') ...[
+            const Divider(height: 0, thickness: 0.5, indent: 16),
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.backup_outlined, size: 20),
+              title: const Text('Back Up Now',
+                  style: TextStyle(fontSize: 15)),
+              onTap: () async {
+                try {
+                  final svc = AutoBackupService();
+                  await svc.runBackup();
+                  await svc.markBackupComplete();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Backup completed')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Backup failed: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ],
       ),
     );
   }

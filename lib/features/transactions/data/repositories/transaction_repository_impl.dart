@@ -102,4 +102,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
     final models = await _dataSource.searchTransactions(query);
     return models.map((m) => m.toEntity()).toList();
   }
+
+  @override
+  Future<TransactionEntity?> getTransactionById(String id) async {
+    final model = await _dataSource.getTransactionById(id);
+    return model?.toEntity();
+  }
 }

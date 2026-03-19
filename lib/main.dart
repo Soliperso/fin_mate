@@ -16,6 +16,9 @@ import 'core/services/device_security_service.dart';
 import 'core/services/theme_provider.dart';
 import 'core/error/global_error_handler.dart';
 import 'shared/widgets/offline_indicator.dart';
+import 'features/transactions/data/datasources/reminder_remote_datasource.dart';
+import 'features/budgets/data/datasources/budget_remote_datasource.dart';
+import 'core/services/auto_backup_service.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -125,6 +128,14 @@ class _FinMateAppState extends ConsumerState<FinMateApp> {
       final themeService = ref.read(themeServiceProvider);
       await themeService.initialize();
       await ref.read(themeModeProvider.notifier).initialize();
+
+      // Fire due reminders, apply budget carry-overs, and run auto backup on app open
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        unawaited(ReminderRemoteDatasource().processReminders().catchError((_) {}));
+        unawaited(BudgetRemoteDataSource().applyCarryOvers().catchError((_) {}));
+        unawaited(AutoBackupService().runIfDue().catchError((_) {}));
+      }
     });
   }
 

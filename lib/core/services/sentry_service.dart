@@ -34,13 +34,16 @@ class SentryService {
           // Performance monitoring
           options.tracesSampleRate = kDebugMode ? 1.0 : 0.2; // 100% in dev, 20% in prod
 
-          // Debug mode
+          // Only enable Sentry's internal debug logging in debug mode,
+          // but raise the diagnostic level to suppress noisy network tracker messages.
           options.debug = kDebugMode;
+          options.diagnosticLevel = SentryLevel.warning;
 
           // Disable screenshots in production for privacy
           options.attachScreenshot = kDebugMode;
 
           // Disable view hierarchy in production for privacy
+          // ignore: experimental_member_use
           options.attachViewHierarchy = kDebugMode;
 
           // Send default PII (Personally Identifiable Information)

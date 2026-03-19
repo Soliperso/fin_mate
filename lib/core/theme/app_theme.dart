@@ -141,6 +141,8 @@ class AppTheme {
           return AppColors.systemGray3;
         }),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        splashRadius: 14,
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
@@ -156,14 +158,16 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.systemBackground,
+        fillColor: AppColors.secondarySystemBackground,
+        suffixIconColor: AppColors.textTertiary,
+        prefixIconColor: AppColors.textTertiary,
         hintStyle: const TextStyle(
-          color: AppColors.systemGray2,
+          color: AppColors.systemGray3,
           fontSize: 17,
           letterSpacing: -0.41,
         ),
         labelStyle: const TextStyle(
-          color: AppColors.secondaryLabel,
+          color: AppColors.textTertiary,
           fontSize: 17,
           letterSpacing: -0.41,
         ),
@@ -238,7 +242,7 @@ class AppTheme {
         ),
         elevation: 0,
         dragHandleColor: AppColors.systemGray3,
-        showDragHandle: true,
+        showDragHandle: false,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.systemBackground,
@@ -394,6 +398,8 @@ class AppTheme {
           return AppColors.tertiarySystemBackgroundDark;
         }),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        splashRadius: 14,
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
@@ -409,14 +415,16 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.secondarySystemBackgroundDark,
+        fillColor: const Color(0xFF141414),
+        suffixIconColor: AppColors.tertiaryLabelDark,
+        prefixIconColor: AppColors.tertiaryLabelDark,
         hintStyle: TextStyle(
-          color: AppColors.white.withValues(alpha: 0.4),
+          color: AppColors.white.withValues(alpha: 0.25),
           fontSize: 17,
           letterSpacing: -0.41,
         ),
         labelStyle: TextStyle(
-          color: AppColors.white.withValues(alpha: 0.6),
+          color: AppColors.white.withValues(alpha: 0.35),
           fontSize: 17,
           letterSpacing: -0.41,
         ),
@@ -490,7 +498,7 @@ class AppTheme {
         ),
         elevation: 0,
         dragHandleColor: AppColors.systemGray,
-        showDragHandle: true,
+        showDragHandle: false,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.secondarySystemBackgroundDark,

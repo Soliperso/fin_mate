@@ -275,4 +275,28 @@ class TransactionRemoteDataSource {
       return TransactionModel.fromJson(data);
     }).toList();
   }
+
+  Future<TransactionModel?> getTransactionById(String id) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    final response = await _supabase
+        .from('transactions')
+        .select('''
+          *,
+          categories(name),
+          accounts!transactions_account_id_fkey(name),
+          to_account:accounts!transactions_to_account_id_fkey(name)
+        ''')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    final data = Map<String, dynamic>.from(response);
+    data['category_name'] = response['categories']?['name'];
+    data['account_name'] = response['accounts']?['name'];
+    data['to_account_name'] = response['to_account']?['name'];
+    return TransactionModel.fromJson(data);
+  }
 }

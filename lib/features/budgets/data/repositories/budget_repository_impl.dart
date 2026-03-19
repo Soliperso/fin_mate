@@ -85,8 +85,20 @@ class BudgetRepositoryImpl implements BudgetRepository {
   }
 
   @override
+  Future<void> applyCarryOvers() async {
+    try {
+      await _remoteDataSource.applyCarryOvers();
+    } catch (_) {
+      // Non-fatal: carry-over failure should not block budget display
+    }
+  }
+
+  @override
   Future<List<BudgetEntity>> getBudgetsWithSpending() async {
     try {
+      // Apply carry-overs first so lastCarryOverAmount is up-to-date
+      await applyCarryOvers();
+
       // Get all active budgets
       final budgets = await getBudgets(isActive: true);
 
@@ -94,7 +106,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       final budgetsWithSpending = await Future.wait(
         budgets.map((budget) async {
           final spent = await calculateSpending(budget);
-          final remaining = budget.amount - spent;
+          final remaining = budget.effectiveAmount - spent;
 
           return budget.copyWith(
             spent: spent,
