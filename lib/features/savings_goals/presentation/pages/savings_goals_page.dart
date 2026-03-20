@@ -6,9 +6,11 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
+import '../../domain/entities/savings_goal_entity.dart';
 import '../providers/savings_goal_providers.dart';
 import '../widgets/add_contribution_bottom_sheet.dart';
 import '../widgets/create_goal_bottom_sheet.dart';
+import '../widgets/goal_achievement_dialog.dart';
 import '../widgets/goal_card.dart';
 import '../widgets/goals_summary_card.dart';
 
@@ -79,7 +81,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                   const SizedBox(height: AppSizes.md),
                   ...goals.where((g) => !g.isCompleted).map((goal) => GoalCard(
                     goal: goal,
-                    onContribute: () => _showContributeSheet(context, ref, goal.id),
+                    onContribute: () => _showContributeSheet(context, ref, goal),
                   )),
 
                   // Completed Goals
@@ -154,15 +156,32 @@ class SavingsGoalsPage extends ConsumerWidget {
     );
   }
 
-  void _showContributeSheet(BuildContext context, WidgetRef ref, String goalId) {
+  void _showContributeSheet(BuildContext context, WidgetRef ref, SavingsGoal goal) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => AddContributionBottomSheet(goalId: goalId),
+      builder: (context) => AddContributionBottomSheet(goalId: goal.id),
     ).then((result) {
-      if (result != null) {
-        ref.invalidate(savingsGoalsProvider);
-        ref.invalidate(goalsSummaryProvider);
+      if (result == null) return;
+
+      ref.invalidate(savingsGoalsProvider);
+      ref.invalidate(goalsSummaryProvider);
+
+      if (!context.mounted) return;
+
+      final contributedAmount = result is double ? result : null;
+      final achieved = contributedAmount != null &&
+          !goal.isCompleted &&
+          (goal.currentAmount + contributedAmount) >= goal.targetAmount;
+
+      if (achieved) {
+        ref.read(goalOperationsProvider.notifier).markGoalAsCompleted(goal.id);
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierColor: Colors.black54,
+          builder: (_) => GoalAchievementDialog(goalName: goal.name),
+        );
       }
     });
   }
