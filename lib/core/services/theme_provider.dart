@@ -11,7 +11,7 @@ final themeServiceProvider = Provider<ThemeService>((ref) {
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   final ThemeService _themeService;
 
-  ThemeModeNotifier(this._themeService) : super(ThemeMode.system);
+  ThemeModeNotifier(this._themeService) : super(ThemeMode.dark);
 
   /// Initialize theme from storage
   Future<void> initialize() async {

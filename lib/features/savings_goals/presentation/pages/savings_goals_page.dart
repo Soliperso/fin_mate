@@ -49,10 +49,32 @@ class SavingsGoalsPage extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     EmptyStateCard(
-                      icon: Icons.savings_outlined,
+                      icon: CupertinoIcons.money_dollar,
                       title: 'No Savings Goals Yet',
                       message: 'Start planning for your future by creating your first savings goal',
                       backgroundColor: AppColors.brandTeal,
+                    ),
+                    const SizedBox(height: AppSizes.lg),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showCreateGoalSheet(context, ref),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brandTeal,
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          ),
+                        ),
+                        icon: const Icon(CupertinoIcons.add, size: 20),
+                        label: const Text(
+                          'New Goal',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -124,31 +146,6 @@ class SavingsGoalsPage extends ConsumerWidget {
                   onRetry: () => ref.invalidate(savingsGoalsProvider),
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-        child: SizedBox(
-          width: double.infinity,
-          height: AppSizes.buttonHeightMd,
-          child: ElevatedButton.icon(
-            onPressed: () => _showCreateGoalSheet(context, ref),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.brandTeal,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              ),
-            ),
-            icon: const Icon(CupertinoIcons.add, size: 20),
-            label: const Text(
-              'New Goal',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
           ),
         ),

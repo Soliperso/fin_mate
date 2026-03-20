@@ -133,11 +133,33 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             EmptyStateCard(
-                              icon: Icons.receipt_long_outlined,
+                              icon: CupertinoIcons.doc_text,
                               title: 'No Transactions Yet',
                               message:
                                   'Start by adding your first transaction to begin tracking your finances.',
                               backgroundColor: AppColors.brandTeal,
+                            ),
+                            const SizedBox(height: AppSizes.lg),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                onPressed: () => context.go('/transactions/add'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.brandTeal,
+                                  foregroundColor: Colors.white,
+                                  elevation: 4,
+                                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                                  ),
+                                ),
+                                icon: const Icon(CupertinoIcons.add, size: 20),
+                                label: const Text(
+                                  'Add Transaction',
+                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -191,36 +213,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           ),
                         ],
                       ),
-          ),
-          // New Transaction button — same context and padding as Clear Filters
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.md),
-            child: SizedBox(
-              width: double.infinity,
-              height: AppSizes.buttonHeightMd,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await context.push('/transactions/add');
-                  if (mounted) {
-                    ref.read(transactionListProvider.notifier).refresh();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandTeal,
-                  foregroundColor: Colors.white,
-                  elevation: 4,
-                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                  ),
-                ),
-                icon: const Icon(CupertinoIcons.add, size: 20),
-                label: const Text(
-                  'New Transaction',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -469,7 +461,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             EmptyStateCard(
-              icon: Icons.receipt_long_outlined,
+              icon: CupertinoIcons.doc_text,
               title: 'No Transactions Found',
               message: hasAnyFilter
                   ? 'Try adjusting your filters or search query to find transactions.'
@@ -480,7 +472,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               const SizedBox(height: AppSizes.lg),
               SizedBox(
                 width: double.infinity,
-                height: AppSizes.buttonHeightMd,
+                height: 52,
                 child: ElevatedButton.icon(
                   onPressed: () {
                     notifier.clearFilters();

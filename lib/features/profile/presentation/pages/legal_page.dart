@@ -148,9 +148,10 @@ class LegalPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF9E9EA3),
+                          inherit: true,
                         ),
                   ),
                   const SizedBox(height: 2),

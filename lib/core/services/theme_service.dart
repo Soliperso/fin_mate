@@ -14,7 +14,7 @@ class ThemeService {
 
   /// Get current theme mode
   ThemeMode getThemeMode() {
-    final themeName = _prefs.getString(_themeKey) ?? 'system';
+    final themeName = _prefs.getString(_themeKey) ?? 'dark';
     switch (themeName) {
       case 'light':
         return ThemeMode.light;
@@ -38,7 +38,7 @@ class ThemeService {
 
   /// Get theme mode as string
   String getThemeModeString() {
-    return _prefs.getString(_themeKey) ?? 'system';
+    return _prefs.getString(_themeKey) ?? 'dark';
   }
 
   /// Set theme mode from string

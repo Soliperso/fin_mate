@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/success_animation.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../providers/savings_goal_providers.dart';
 import '../widgets/add_contribution_bottom_sheet.dart';
 import '../widgets/edit_goal_bottom_sheet.dart';
@@ -29,12 +31,12 @@ class GoalDetailPage extends ConsumerWidget {
         title: const Text('Goal Details'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
+            icon: const Icon(CupertinoIcons.pencil),
             onPressed: () => _showEditGoalSheet(context, ref, goalAsync.value),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline),
-            color: AppColors.error,
+            icon: const Icon(CupertinoIcons.trash),
+            color: AppColors.brandTeal,
             onPressed: () => _showDeleteConfirmation(context, ref),
           ),
         ],
@@ -94,7 +96,7 @@ class GoalDetailPage extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                               ),
                               child: Icon(
-                                isCompleted ? Icons.check_circle_rounded : Icons.savings_rounded,
+                                isCompleted ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.money_dollar,
                                 color: AppColors.white,
                                 size: AppSizes.iconMd,
                               ),
@@ -193,7 +195,7 @@ class GoalDetailPage extends ConsumerWidget {
                           Expanded(
                             child: _InfoChip(
                               isDark: isDark,
-                              icon: Icons.trending_up_rounded,
+                              icon: CupertinoIcons.arrow_up_right,
                               iconColor: AppColors.brandTeal,
                               label: 'Remaining',
                               value: currencyFormat.format(remaining < 0 ? 0 : remaining),
@@ -206,7 +208,7 @@ class GoalDetailPage extends ConsumerWidget {
                           Expanded(
                             child: _InfoChip(
                               isDark: isDark,
-                              icon: Icons.calendar_today_rounded,
+                              icon: CupertinoIcons.calendar,
                               iconColor: _getDaysRemainingColor(goal.deadline!),
                               label: isCompleted
                                   ? 'Deadline'
@@ -220,7 +222,7 @@ class GoalDetailPage extends ConsumerWidget {
                       const SizedBox(height: AppSizes.sm),
                       _InfoChip(
                         isDark: isDark,
-                        icon: Icons.savings_outlined,
+                        icon: CupertinoIcons.money_dollar,
                         iconColor: AppColors.warning,
                         label: 'Monthly target to hit deadline',
                         value: '${currencyFormat.format(goal.monthlySavingsNeeded!)}/mo',
@@ -248,7 +250,7 @@ class GoalDetailPage extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(
-                            Icons.celebration_rounded,
+                            CupertinoIcons.star_fill,
                             color: AppColors.success,
                             size: AppSizes.iconSm,
                           ),
@@ -277,29 +279,38 @@ class GoalDetailPage extends ConsumerWidget {
                   contributionsAsync.when(
                     data: (contributions) {
                       if (contributions.isEmpty) {
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppSizes.xl),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.cardBackgroundDark
-                                : AppColors.white,
-                            borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                            boxShadow: AppColors.cardShadow(isDark),
-                          ),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSizes.xl),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.account_balance_wallet_outlined,
-                                size: 48,
-                                color: AppColors.textTertiary.withValues(alpha: 0.5),
+                              EmptyStateCard(
+                                icon: CupertinoIcons.plus_circle,
+                                title: 'No Contributions Yet',
+                                message: 'Start building your savings by adding your first contribution.',
+                                backgroundColor: AppColors.brandTeal,
                               ),
-                              const SizedBox(height: AppSizes.md),
-                              Text(
-                                'No contributions yet',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.textSecondary,
+                              const SizedBox(height: AppSizes.lg),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _showAddContributionSheet(context, ref),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.brandTeal,
+                                    foregroundColor: AppColors.white,
+                                    elevation: 4,
+                                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                                     ),
+                                  ),
+                                  icon: const Icon(CupertinoIcons.add, size: 20),
+                                  label: const Text(
+                                    'Add Contribution',
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -365,7 +376,7 @@ class GoalDetailPage extends ConsumerWidget {
                                     color: AppColors.error,
                                     borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                                   ),
-                                  child: const Icon(Icons.delete_outline, color: AppColors.white),
+                                  child: const Icon(CupertinoIcons.trash, color: AppColors.white),
                                 ),
                                 child: _ContributionRow(
                                   contribution: contributions[i],
@@ -435,7 +446,7 @@ class GoalDetailPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
-                  icon: const Icon(Icons.add, size: 20),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
                   label: const Text(
                     'Add Contribution',
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
@@ -630,14 +641,16 @@ class _InfoChip extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
                         color: AppColors.textSecondary,
+                        inherit: true,
                       ),
                 ),
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
                         fontWeight: FontWeight.w600,
+                        inherit: true,
                       ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -680,7 +693,7 @@ class _ContributionRow extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.add_rounded,
+              CupertinoIcons.add,
               color: AppColors.success,
               size: AppSizes.iconSm,
             ),
@@ -712,9 +725,9 @@ class _ContributionRow extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              Icons.delete_outline,
+              CupertinoIcons.trash,
               size: AppSizes.iconSm,
-              color: AppColors.textTertiary,
+              color: AppColors.brandTeal,
             ),
             onPressed: onDelete,
           ),

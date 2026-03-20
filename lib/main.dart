@@ -142,7 +142,6 @@ class _FinMateAppState extends ConsumerState<FinMateApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
-    final themeMode = ref.watch(themeModeProvider);
 
     return OfflineIndicator(
       child: MaterialApp.router(
@@ -150,7 +149,7 @@ class _FinMateAppState extends ConsumerState<FinMateApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
-        themeMode: themeMode,
+        themeMode: ThemeMode.dark,
         routerConfig: router,
       ),
     );

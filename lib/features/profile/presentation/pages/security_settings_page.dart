@@ -163,8 +163,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                               ),
                               title: Text(
                                 mfaMethodEnum?.displayName ?? 'Unknown Method',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
                                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                                      inherit: true,
                                     ),
                               ),
                               trailing: TextButton(

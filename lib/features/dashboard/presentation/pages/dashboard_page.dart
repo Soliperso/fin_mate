@@ -8,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
@@ -335,39 +336,11 @@ class _RecentTransactionsCard extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-              boxShadow: isDark
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 12,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-            ),
-            padding: const EdgeInsets.all(AppSizes.xl),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    CupertinoIcons.doc_text,
-                    size: 40,
-                    color: AppColors.systemGray3,
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  Text(
-                    'No recent transactions',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.systemGray,
-                        ),
-                  ),
-                ],
-              ),
-            ),
+          EmptyStateCard(
+            icon: CupertinoIcons.doc_text,
+            title: 'No Recent Transactions',
+            message: 'Start tracking your finances by adding transactions.',
+            backgroundColor: AppColors.brandTeal,
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(

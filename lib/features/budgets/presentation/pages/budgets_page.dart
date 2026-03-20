@@ -124,51 +124,41 @@ class BudgetsPage extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    return Column(
+    return Padding(
+      padding: const EdgeInsets.all(AppSizes.md),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: EmptyStateCard(
-                  icon: Icons.savings_outlined,
-                  title: 'No Budgets Yet',
-                  message: 'Create budgets to track your spending by category',
-                  backgroundColor: AppColors.brandTeal,
+          EmptyStateCard(
+            icon: CupertinoIcons.money_dollar,
+            title: 'No Budgets Yet',
+            message: 'Create budgets to track your spending by category',
+            backgroundColor: AppColors.brandTeal,
+          ),
+          const SizedBox(height: AppSizes.lg),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () => _showCreateBudgetBottomSheet(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brandTeal,
+                foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: AppSizes.md,
-              right: AppSizes.md,
-              top: AppSizes.lg,
-              bottom: AppSizes.lg,
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              height: AppSizes.buttonHeightMd,
-              child: ElevatedButton.icon(
-                onPressed: () => _showCreateBudgetBottomSheet(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandTeal,
-                  foregroundColor: Colors.white,
-                  elevation: 4,
-                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                  ),
-                ),
-                icon: const Icon(CupertinoIcons.add, size: 20),
-                label: const Text(
-                  'New Budget',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
+              icon: const Icon(CupertinoIcons.add, size: 20),
+              label: const Text(
+                'New Budget',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
           ),
         ],
+      ),
     );
   }
 

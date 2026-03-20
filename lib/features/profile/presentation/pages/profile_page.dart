@@ -189,15 +189,16 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'Manage notification preferences',
                             onTap: () {},
                           ),
-                          _buildDivider(isDark),
-                          _buildSettingsTile(
-                            context: context,
-                            icon: CupertinoIcons.moon,
-                            title: 'Appearance',
-                            subtitle: _getThemeModeLabel(themeMode),
-                            onTap: () => _showThemeDialog(context, ref),
-                          ),
-                          _buildDivider(isDark),
+                          // TODO: Fix TextStyle interpolation issue when switching to light mode
+                          // _buildDivider(isDark),
+                          // _buildSettingsTile(
+                          //   context: context,
+                          //   icon: CupertinoIcons.moon,
+                          //   title: 'Appearance',
+                          //   subtitle: _getThemeModeLabel(themeMode),
+                          //   onTap: () => _showThemeDialog(context, ref),
+                          // ),
+                          // _buildDivider(isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.globe,
@@ -370,9 +371,10 @@ class ProfilePage extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF9E9EA3),
+                          inherit: true,
                         ),
                   ),
                   const SizedBox(height: 2),
@@ -452,15 +454,15 @@ class ProfilePage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSizes.sm),
-            _buildThemeOption(
-              context: context,
-              ref: ref,
-              themeMode: ThemeMode.light,
-              title: 'Light',
-              subtitle: 'Use light theme',
-              icon: CupertinoIcons.sun_min,
-              isSelected: currentThemeMode == ThemeMode.light,
-            ),
+            // _buildThemeOption(
+            //   context: context,
+            //   ref: ref,
+            //   themeMode: ThemeMode.light,
+            //   title: 'Light',
+            //   subtitle: 'Use light theme',
+            //   icon: CupertinoIcons.sun_min,
+            //   isSelected: currentThemeMode == ThemeMode.light,
+            // ),
             _buildThemeOption(
               context: context,
               ref: ref,

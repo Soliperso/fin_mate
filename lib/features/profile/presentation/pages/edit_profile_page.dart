@@ -132,8 +132,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               const SizedBox(height: AppSizes.sm),
               Text(
                 'Tap to change photo',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
                       color: AppColors.textSecondary,
+                      inherit: true,
                     ),
               ),
               const SizedBox(height: AppSizes.xxl),
