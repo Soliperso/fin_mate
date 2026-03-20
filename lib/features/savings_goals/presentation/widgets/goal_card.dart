@@ -8,8 +8,9 @@ import '../../domain/entities/savings_goal_entity.dart';
 
 class GoalCard extends ConsumerWidget {
   final SavingsGoal goal;
+  final VoidCallback? onContribute;
 
-  const GoalCard({super.key, required this.goal});
+  const GoalCard({super.key, required this.goal, this.onContribute});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,6 +20,12 @@ class GoalCard extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSizes.md),
+      shape: goal.isOverdue
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              side: const BorderSide(color: AppColors.error, width: 1.5),
+            )
+          : null,
       child: InkWell(
         onTap: () {
           context.go('/goals/${goal.id}');
@@ -127,11 +134,30 @@ class GoalCard extends ConsumerWidget {
                         ),
                   ),
                   if (!isCompleted)
-                    Text(
-                      '${currencyFormat.format(goal.remainingAmount)} to go',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                    Row(
+                      children: [
+                        Text(
+                          '${currencyFormat.format(goal.remainingAmount)} to go',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                        ),
+                        if (onContribute != null) ...[
+                          const SizedBox(width: AppSizes.sm),
+                          GestureDetector(
+                            onTap: onContribute,
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: AppColors.brandTeal,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.add, color: AppColors.white, size: 16),
+                            ),
                           ),
+                        ],
+                      ],
                     ),
                 ],
               ),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -21,7 +20,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  DateTime? _selectedDateOfBirth;
   String _selectedCurrency = 'USD';
   String? _selectedAvatarPath;
 
@@ -49,7 +47,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     if (profile != null) {
       _fullNameController.text = profile.fullName ?? '';
       _phoneController.text = profile.phone ?? '';
-      _selectedDateOfBirth = profile.dateOfBirth;
       _selectedCurrency = profile.currency;
     }
   }
@@ -180,26 +177,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ),
               const SizedBox(height: AppSizes.md),
 
-              // Date of Birth Field
-              InkWell(
-                onTap: _selectDateOfBirth,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date of Birth (optional)',
-                    prefixIcon: Icon(Icons.cake_outlined),
-                  ),
-                  child: Text(
-                    _selectedDateOfBirth != null
-                        ? DateFormat('MMM d, yyyy').format(_selectedDateOfBirth!)
-                        : 'Not set',
-                    style: _selectedDateOfBirth != null
-                        ? null
-                        : TextStyle(color: AppColors.textSecondary),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.md),
-
               // Currency Dropdown
               DropdownButtonFormField<String>(
                 initialValue: _selectedCurrency,
@@ -294,19 +271,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     );
   }
 
-  Future<void> _selectDateOfBirth() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDateOfBirth ?? DateTime(2000),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-
-    if (picked != null) {
-      setState(() => _selectedDateOfBirth = picked);
-    }
-  }
-
   Future<void> _showAvatarOptions() async {
     showModalBottomSheet(
       context: context,
@@ -365,7 +329,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               phone: _phoneController.text.trim().isEmpty
                   ? null
                   : _phoneController.text.trim(),
-              dateOfBirth: _selectedDateOfBirth,
               currency: _selectedCurrency,
             );
 

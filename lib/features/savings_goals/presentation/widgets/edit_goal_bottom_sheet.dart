@@ -91,6 +91,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -121,6 +122,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               // Goal Name
               TextFormField(
                 controller: _nameController,
+                style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Goal Name',
                   prefixIcon: Icon(Icons.flag),
@@ -138,6 +140,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               // Description
               TextFormField(
                 controller: _descriptionController,
+                style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
                   prefixIcon: Icon(Icons.description),
@@ -150,6 +153,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               // Target Amount
               TextFormField(
                 controller: _targetAmountController,
+                style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Target Amount',
                   prefixIcon: Icon(Icons.attach_money),
@@ -178,6 +182,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               // Category
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
+                style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Category (Optional)',
                   prefixIcon: Icon(Icons.category),
@@ -232,11 +237,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                     _selectedDeadline == null
                         ? 'Select deadline date'
                         : '${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}',
-                    style: TextStyle(
-                      color: _selectedDeadline == null
-                          ? AppColors.textSecondary
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -246,7 +247,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSizes.md),
                 decoration: BoxDecoration(
-                  color: AppColors.lightGray,
+                  color: isDark ? AppColors.cardBackgroundDark : AppColors.lightGray,
                   borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
                 child: Row(
@@ -269,7 +270,12 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               // Submit Button
               SizedBox(
                 width: double.infinity,
-                child: FilledButton(
+                height: AppSizes.buttonHeightMd,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: AppColors.white,
+                  ),
                   onPressed: _updateGoal,
                   child: const Text('Update Goal'),
                 ),

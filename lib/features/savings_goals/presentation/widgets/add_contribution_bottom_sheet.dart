@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
 
@@ -59,15 +58,15 @@ class _AddContributionBottomSheetState
 
     try {
       final notifier = ref.read(goalOperationsProvider.notifier);
+      final amount = double.parse(_amountController.text);
       final contribution = await notifier.addContribution(
         goalId: widget.goalId,
-        amount: double.parse(_amountController.text),
+        amount: amount,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
       );
 
       if (contribution != null && mounted) {
-        Navigator.pop(context, true);
-        SuccessSnackbar.show(context, message: 'Contribution added successfully!');
+        Navigator.pop(context, amount); // pass back the amount so caller can detect achievement
       } else if (mounted) {
         ErrorSnackbar.show(context, message: 'Failed to add contribution');
       }
@@ -159,11 +158,13 @@ class _AddContributionBottomSheetState
                   decoration: const InputDecoration(
                     labelText: 'Date',
                     border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
+                    suffixIcon: Icon(Icons.calendar_today, size: 16),
                   ),
                   child: Text(
                     DateFormat('MMM dd, yyyy').format(_selectedDate),
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ),
               ),
@@ -183,10 +184,25 @@ class _AddContributionBottomSheetState
               const SizedBox(height: AppSizes.xl),
 
               // Submit Button
-              CustomButton(
-                onPressed: _isLoading ? null : _submitContribution,
-                isLoading: _isLoading,
-                label: 'Add Contribution',
+              SizedBox(
+                height: AppSizes.buttonHeightMd,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: AppColors.white,
+                  ),
+                  onPressed: _isLoading ? null : _submitContribution,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.white,
+                          ),
+                        )
+                      : const Text('Add Contribution'),
+                ),
               ),
               const SizedBox(height: AppSizes.sm),
             ],

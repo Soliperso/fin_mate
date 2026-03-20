@@ -51,6 +51,13 @@ class SavingsGoal extends Equatable {
     return DateTime.now().isAfter(deadline!);
   }
 
+  double? get monthlySavingsNeeded {
+    if (deadline == null || isCompleted || remainingAmount <= 0) return null;
+    final months = deadline!.difference(DateTime.now()).inDays / 30.0;
+    if (months <= 0) return null;
+    return remainingAmount / months;
+  }
+
   @override
   List<Object?> get props => [
         id,

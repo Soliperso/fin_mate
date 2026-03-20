@@ -12,129 +12,193 @@ class GoalsSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalGoals = summary['total_goals'] as int? ?? 0;
     final completedGoals = summary['completed_goals'] as int? ?? 0;
+    final activeGoals = summary['active_goals'] as int? ?? 0;
     final totalTarget = (summary['total_target'] as num?)?.toDouble() ?? 0.0;
     final totalSaved = (summary['total_saved'] as num?)?.toDouble() ?? 0.0;
     final overallProgress = (summary['overall_progress'] as num?)?.toDouble() ?? 0.0;
 
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Goals Overview',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSizes.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStat(
-                    context,
-                    'Total Goals',
-                    totalGoals.toString(),
-                    Icons.flag,
-                    AppColors.primaryTeal,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  child: _buildStat(
-                    context,
-                    'Completed',
-                    completedGoals.toString(),
-                    Icons.check_circle,
-                    AppColors.success,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.md),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total Saved',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      currencyFormat.format(totalSaved),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total Target',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      currencyFormat.format(totalTarget),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.md),
-                LinearProgressIndicator(
-                  value: overallProgress / 100,
-                  backgroundColor: AppColors.lightGray,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    overallProgress >= 100 ? AppColors.success : AppColors.primaryTeal,
-                  ),
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                const SizedBox(height: AppSizes.xs),
-                Text(
-                  '${overallProgress.toStringAsFixed(1)}% of total target',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-              ],
-            ),
-          ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.lg),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.brandTeal, AppColors.brandTealLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandTeal.withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              Container(
+                width: AppSizes.iconContainer,
+                height: AppSizes.iconContainer,
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                ),
+                child: const Icon(
+                  Icons.savings_rounded,
+                  color: AppColors.white,
+                  size: AppSizes.iconMd,
+                ),
+              ),
+              const SizedBox(width: AppSizes.md),
+              Expanded(
+                child: Text(
+                  'Goals Overview',
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Total / Completed badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.sm,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                ),
+                child: Text(
+                  '$completedGoals / $totalGoals done',
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.lg),
+
+          // Stat chips row
+          Row(
+            children: [
+              Expanded(
+                child: _StatChip(
+                  label: 'Active',
+                  value: activeGoals.toString(),
+                  icon: Icons.flag_rounded,
+                ),
+              ),
+              const SizedBox(width: AppSizes.sm),
+              Expanded(
+                child: _StatChip(
+                  label: 'Saved',
+                  value: currencyFormat.format(totalSaved),
+                  icon: Icons.account_balance_wallet_rounded,
+                ),
+              ),
+              const SizedBox(width: AppSizes.sm),
+              Expanded(
+                child: _StatChip(
+                  label: 'Target',
+                  value: currencyFormat.format(totalTarget),
+                  icon: Icons.track_changes_rounded,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.lg),
+
+          // Overall progress
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Overall Progress',
+                style: TextStyle(
+                  color: AppColors.white.withValues(alpha: 0.85),
+                  fontSize: 13,
+                ),
+              ),
+              Text(
+                '${overallProgress.toStringAsFixed(1)}%',
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            child: LinearProgressIndicator(
+              value: overallProgress / 100,
+              minHeight: 8,
+              backgroundColor: AppColors.white.withValues(alpha: 0.25),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildStat(BuildContext context, String label, String value, IconData icon, Color color) {
+class _StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _StatChip({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.sm,
+        vertical: AppSizes.sm,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: AppColors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: AppSizes.sm),
+          Icon(icon, color: AppColors.white, size: AppSizes.iconSm),
+          const SizedBox(height: 4),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: const TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.white.withValues(alpha: 0.75),
+              fontSize: 11,
+            ),
           ),
         ],
       ),

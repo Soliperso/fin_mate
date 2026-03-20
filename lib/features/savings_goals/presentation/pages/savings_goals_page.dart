@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -6,6 +7,7 @@ import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../providers/savings_goal_providers.dart';
+import '../widgets/add_contribution_bottom_sheet.dart';
 import '../widgets/create_goal_bottom_sheet.dart';
 import '../widgets/goal_card.dart';
 import '../widgets/goals_summary_card.dart';
@@ -39,14 +41,18 @@ class SavingsGoalsPage extends ConsumerWidget {
         child: goalsAsync.when(
           data: (goals) {
             if (goals.isEmpty) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+              return Padding(
                 padding: const EdgeInsets.all(AppSizes.md),
-                child: EmptyStateCard(
-                  icon: Icons.savings_outlined,
-                  title: 'No Savings Goals Yet',
-                  message: 'Start planning for your future by creating your first savings goal',
-                  backgroundColor: AppColors.brandTeal,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    EmptyStateCard(
+                      icon: Icons.savings_outlined,
+                      title: 'No Savings Goals Yet',
+                      message: 'Start planning for your future by creating your first savings goal',
+                      backgroundColor: AppColors.brandTeal,
+                    ),
+                  ],
                 ),
               );
             }
@@ -71,7 +77,10 @@ class SavingsGoalsPage extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSizes.md),
-                  ...goals.where((g) => !g.isCompleted).map((goal) => GoalCard(goal: goal)),
+                  ...goals.where((g) => !g.isCompleted).map((goal) => GoalCard(
+                    goal: goal,
+                    onContribute: () => _showContributeSheet(context, ref, goal.id),
+                  )),
 
                   // Completed Goals
                   if (goals.any((g) => g.isCompleted)) ...[
@@ -117,12 +126,45 @@ class SavingsGoalsPage extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateGoalSheet(context, ref),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Goal', style: TextStyle(color: Colors.white)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        child: SizedBox(
+          width: double.infinity,
+          height: AppSizes.buttonHeightMd,
+          child: ElevatedButton.icon(
+            onPressed: () => _showCreateGoalSheet(context, ref),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+            ),
+            icon: const Icon(CupertinoIcons.add, size: 20),
+            label: const Text(
+              'New Goal',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  void _showContributeSheet(BuildContext context, WidgetRef ref, String goalId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AddContributionBottomSheet(goalId: goalId),
+    ).then((result) {
+      if (result != null) {
+        ref.invalidate(savingsGoalsProvider);
+        ref.invalidate(goalsSummaryProvider);
+      }
+    });
   }
 
   void _showCreateGoalSheet(BuildContext context, WidgetRef ref) {

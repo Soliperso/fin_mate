@@ -43,7 +43,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
           children: [
             Text(
               'Authentication Methods',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                  ),
             ),
             const SizedBox(height: AppSizes.md),
 
@@ -58,20 +60,37 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                     final isEnabled = snapshot.data ?? false;
 
                     return Card(
-                      child: SwitchListTile(
-                        title: const Text('Biometric Login'),
+                      child: ListTile(
+                        leading: const Icon(Icons.fingerprint),
+                        title: Text(
+                          'Biometric Login',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                          ),
+                        ),
                         subtitle: FutureBuilder<String?>(
                           future: ref.read(biometricServiceProvider).getPrimaryBiometricType(),
                           builder: (context, typeSnapshot) {
                             final type = typeSnapshot.data ?? 'Biometric';
-                            return Text('Use $type to sign in quickly');
+                            return Text(
+                              'Use $type to sign in quickly',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
+                              ),
+                            );
                           },
                         ),
-                        value: isEnabled,
-                        onChanged: _isLoadingBiometric
-                            ? null
-                            : (value) => _handleBiometricToggle(value),
-                        secondary: const Icon(Icons.fingerprint),
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            value: isEnabled,
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: AppColors.primaryTeal,
+                            onChanged: _isLoadingBiometric
+                                ? null
+                                : (value) => _handleBiometricToggle(value),
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -93,14 +112,30 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                     children: [
                       ListTile(
                         leading: const Icon(Icons.security),
-                        title: const Text('Multi-Factor Authentication'),
+                        title: Text(
+                          'Multi-Factor Authentication',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                          ),
+                        ),
                         subtitle: Text(
                           isMfaEnabled
                               ? 'MFA is enabled for extra security'
                               : 'Add an extra layer of security',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
+                          ),
                         ),
-                        trailing: Switch(
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
                           value: isMfaEnabled,
+                          thumbColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected) ? Colors.white : null,
+                          ),
+                          trackColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected) ? AppColors.primaryTeal : null,
+                          ),
                           onChanged: _isLoadingMfa
                               ? null
                               : (value) {
@@ -110,6 +145,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                                     _handleDisableMfa();
                                   }
                                 },
+                          ),
                         ),
                       ),
                       if (isMfaEnabled) ...[
@@ -127,7 +163,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                               ),
                               title: Text(
                                 mfaMethodEnum?.displayName ?? 'Unknown Method',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                                    ),
                               ),
                               trailing: TextButton(
                                 onPressed: _showMfaSetupOptions,
@@ -146,15 +184,27 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
             Text(
               'Password',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                  ),
             ),
             const SizedBox(height: AppSizes.md),
 
             Card(
               child: ListTile(
                 leading: const Icon(Icons.lock),
-                title: const Text('Change Password'),
-                subtitle: const Text('Update your account password'),
+                title: Text(
+                  'Change Password',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                  ),
+                ),
+                subtitle: Text(
+                  'Update your account password',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
+                  ),
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   showDialog(
