@@ -345,7 +345,7 @@ class _RecentTransactionsCard extends StatelessWidget {
           const SizedBox(height: AppSizes.md),
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: AppSizes.buttonHeightMd,
             child: ElevatedButton.icon(
               onPressed: () => context.go('/transactions/add?type=expense'),
               style: ElevatedButton.styleFrom(

@@ -426,10 +426,14 @@ class EmergencyFundCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppSizes.lg),
               decoration: BoxDecoration(
-                color: AppColors.lightGray,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.secondarySystemBackgroundDark
+                    : AppColors.lightGray,
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 border: Border.all(
-                  color: AppColors.borderLight,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.separatorDark
+                      : AppColors.borderLight,
                   width: 1,
                 ),
               ),

@@ -57,7 +57,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                     const SizedBox(height: AppSizes.lg),
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: AppSizes.buttonHeightMd,
                       child: ElevatedButton.icon(
                         onPressed: () => _showCreateGoalSheet(context, ref),
                         style: ElevatedButton.styleFrom(

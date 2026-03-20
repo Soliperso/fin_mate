@@ -142,7 +142,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             const SizedBox(height: AppSizes.lg),
                             SizedBox(
                               width: double.infinity,
-                              height: 52,
+                              height: AppSizes.buttonHeightMd,
                               child: ElevatedButton.icon(
                                 onPressed: () => context.go('/transactions/add'),
                                 style: ElevatedButton.styleFrom(
@@ -204,7 +204,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
                           Divider(
                             height: 1,
-                            color: AppColors.borderLight.withValues(alpha: 0.3),
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.separatorDark
+                                : AppColors.separator,
                           ),
 
                           // Transactions list
@@ -357,7 +359,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             VerticalDivider(
               width: 1,
               thickness: 0.5,
-              color: AppColors.borderLight.withValues(alpha: 0.4),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.separatorDark
+                  : AppColors.separator,
             ),
             Expanded(
               child: Padding(
@@ -472,7 +476,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               const SizedBox(height: AppSizes.lg),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: AppSizes.buttonHeightMd,
                 child: ElevatedButton.icon(
                   onPressed: () {
                     notifier.clearFilters();

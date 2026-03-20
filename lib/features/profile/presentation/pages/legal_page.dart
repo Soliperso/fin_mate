@@ -125,6 +125,7 @@ class LegalPage extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -136,10 +137,14 @@ class LegalPage extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.secondarySystemBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.labelDark, size: 17),
+              child: Icon(icon,
+                  color: isDark ? AppColors.labelDark : AppColors.label,
+                  size: 17),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -148,22 +153,25 @@ class LegalPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF9E9EA3),
-                          inherit: true,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.secondaryLabel,
+                        ),
                   ),
                 ],
               ),
             ),
-            const Icon(CupertinoIcons.chevron_right,
-                size: 16, color: AppColors.systemGray3),
+            Icon(CupertinoIcons.chevron_right,
+                size: 16,
+                color: isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3),
           ],
         ),
       ),

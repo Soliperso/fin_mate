@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/services/theme_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
@@ -16,7 +15,6 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(currentUserProfileProvider);
     final profile = profileState.profile;
-    final themeMode = ref.watch(themeModeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -348,6 +346,7 @@ class ProfilePage extends ConsumerWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -359,10 +358,14 @@ class ProfilePage extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.secondarySystemBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.labelDark, size: 17),
+              child: Icon(icon,
+                  color: isDark ? AppColors.labelDark : AppColors.label,
+                  size: 17),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -371,22 +374,25 @@ class ProfilePage extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF9E9EA3),
-                          inherit: true,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.secondaryLabel,
+                        ),
                   ),
                 ],
               ),
             ),
-            const Icon(CupertinoIcons.chevron_right,
-                size: 16, color: AppColors.systemGray3),
+            Icon(CupertinoIcons.chevron_right,
+                size: 16,
+                color: isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3),
           ],
         ),
       ),
@@ -402,129 +408,6 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  String _getThemeModeLabel(ThemeMode themeMode) {
-    switch (themeMode) {
-      case ThemeMode.light:
-        return 'Light';
-      case ThemeMode.dark:
-        return 'Dark';
-      case ThemeMode.system:
-        return 'System default';
-    }
-  }
-
-  void _showThemeDialog(BuildContext context, WidgetRef ref) {
-    final currentThemeMode = ref.read(themeModeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: isDark
-              ? AppColors.secondarySystemBackgroundDark
-              : AppColors.systemBackground,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(AppSizes.radiusXl),
-            topRight: Radius.circular(AppSizes.radiusXl),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: AppSizes.sm),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.systemGray4,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: AppSizes.md),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Appearance',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.sm),
-            // _buildThemeOption(
-            //   context: context,
-            //   ref: ref,
-            //   themeMode: ThemeMode.light,
-            //   title: 'Light',
-            //   subtitle: 'Use light theme',
-            //   icon: CupertinoIcons.sun_min,
-            //   isSelected: currentThemeMode == ThemeMode.light,
-            // ),
-            _buildThemeOption(
-              context: context,
-              ref: ref,
-              themeMode: ThemeMode.dark,
-              title: 'Dark',
-              subtitle: 'Use dark theme',
-              icon: CupertinoIcons.moon,
-              isSelected: currentThemeMode == ThemeMode.dark,
-            ),
-            _buildThemeOption(
-              context: context,
-              ref: ref,
-              themeMode: ThemeMode.system,
-              title: 'System default',
-              subtitle: 'Follow system settings',
-              icon: CupertinoIcons.device_phone_portrait,
-              isSelected: currentThemeMode == ThemeMode.system,
-            ),
-            SizedBox(
-                height:
-                    MediaQuery.of(context).padding.bottom + AppSizes.md),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThemeOption({
-    required BuildContext context,
-    required WidgetRef ref,
-    required ThemeMode themeMode,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required bool isSelected,
-  }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? AppColors.brandTeal : AppColors.secondaryLabel,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isSelected ? AppColors.brandTeal : null,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(color: AppColors.secondaryLabel),
-      ),
-      trailing: isSelected
-          ? const Icon(CupertinoIcons.checkmark_circle_fill,
-              color: AppColors.brandTeal)
-          : null,
-      onTap: () async {
-        await ref.read(themeModeProvider.notifier).setThemeMode(themeMode);
-        if (context.mounted) Navigator.pop(context);
-      },
-    );
-  }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(

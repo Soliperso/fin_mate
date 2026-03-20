@@ -27,7 +27,7 @@ class AppSizes {
 
   // ── Button Heights ─────────────────────────────────────────────────────────
   static const double buttonHeightSm = 36.0;
-  static const double buttonHeightMd = 50.0;  // iOS standard button height
+  static const double buttonHeightMd = 52.0;  // standard action button height
   static const double buttonHeightLg = 56.0;
 
   // ── Elevation / Shadow ─────────────────────────────────────────────────────

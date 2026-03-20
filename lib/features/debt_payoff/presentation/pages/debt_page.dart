@@ -211,7 +211,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                   const SizedBox(height: AppSizes.lg),
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: AppSizes.buttonHeightMd,
                     child: ElevatedButton.icon(
                       onPressed: _showAddDebt,
                       style: ElevatedButton.styleFrom(

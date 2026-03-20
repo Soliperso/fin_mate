@@ -293,7 +293,7 @@ class GoalDetailPage extends ConsumerWidget {
                               const SizedBox(height: AppSizes.lg),
                               SizedBox(
                                 width: double.infinity,
-                                height: 52,
+                                height: AppSizes.buttonHeightMd,
                                 child: ElevatedButton.icon(
                                   onPressed: () => _showAddContributionSheet(context, ref),
                                   style: ElevatedButton.styleFrom(

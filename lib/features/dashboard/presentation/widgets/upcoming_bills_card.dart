@@ -65,7 +65,9 @@ class UpcomingBillsCard extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: bills.length > 3 ? 3 : bills.length,
                 separatorBuilder: (context, index) => Divider(
-                  color: AppColors.borderLight.withValues(alpha: 0.3),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.separatorDark
+                      : AppColors.separator,
                 ),
                 itemBuilder: (context, index) {
                   final bill = bills[index];

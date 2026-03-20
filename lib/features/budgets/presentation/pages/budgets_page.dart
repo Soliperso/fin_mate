@@ -138,7 +138,7 @@ class BudgetsPage extends ConsumerWidget {
           const SizedBox(height: AppSizes.lg),
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: AppSizes.buttonHeightMd,
             child: ElevatedButton.icon(
               onPressed: () => _showCreateBudgetBottomSheet(context),
               style: ElevatedButton.styleFrom(
@@ -538,7 +538,7 @@ class BudgetsPage extends ConsumerWidget {
                 ),
               ),
 
-              Divider(height: 1, thickness: 0.5, color: AppColors.borderLight.withValues(alpha: 0.5)),
+              Divider(height: 1, thickness: 0.5, color: isDark ? AppColors.separatorDark : AppColors.separator),
 
               // Edit action
               _buildActionRow(
@@ -552,7 +552,7 @@ class BudgetsPage extends ConsumerWidget {
                 },
               ),
 
-              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: AppColors.borderLight.withValues(alpha: 0.5)),
+              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: isDark ? AppColors.separatorDark : AppColors.separator),
 
               // View Transactions action
               _buildActionRow(
@@ -566,7 +566,7 @@ class BudgetsPage extends ConsumerWidget {
                 },
               ),
 
-              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: AppColors.borderLight.withValues(alpha: 0.5)),
+              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: isDark ? AppColors.separatorDark : AppColors.separator),
 
               // Delete action
               _buildActionRow(
