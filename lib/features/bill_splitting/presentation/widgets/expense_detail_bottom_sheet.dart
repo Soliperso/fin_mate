@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -51,7 +52,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
                 child: const Icon(
-                  Icons.receipt_long,
+                  CupertinoIcons.doc_text,
                   color: AppColors.primaryTeal,
                   size: 28,
                 ),
@@ -77,7 +78,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(CupertinoIcons.xmark),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -87,7 +88,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
           // Amount
           _buildDetailRow(
             context,
-            icon: Icons.attach_money,
+            icon: CupertinoIcons.money_dollar,
             label: 'Amount',
             value: currencyFormat.format(expense.amount),
             valueColor: AppColors.primaryTeal,
@@ -98,7 +99,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
           // Paid By
           _buildDetailRow(
             context,
-            icon: Icons.person,
+            icon: CupertinoIcons.person,
             label: 'Paid by',
             value: isCurrentUser ? 'You' : 'Member',
           ),
@@ -107,7 +108,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
           // Date
           _buildDetailRow(
             context,
-            icon: Icons.calendar_today,
+            icon: CupertinoIcons.calendar,
             label: 'Date',
             value: dateFormat.format(expense.date),
           ),
@@ -116,7 +117,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
           // Split Type
           _buildDetailRow(
             context,
-            icon: Icons.pie_chart,
+            icon: CupertinoIcons.chart_pie,
             label: 'Split Type',
             value: expense.splitType.value.toUpperCase(),
           ),
@@ -126,7 +127,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
             const Divider(height: AppSizes.lg),
             _buildDetailRow(
               context,
-              icon: Icons.category,
+              icon: CupertinoIcons.tag,
               label: 'Category',
               value: expense.category!,
             ),
@@ -137,7 +138,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
             const Divider(height: AppSizes.lg),
             _buildDetailRow(
               context,
-              icon: Icons.note,
+              icon: CupertinoIcons.doc_text,
               label: 'Notes',
               value: expense.notes!,
             ),
@@ -160,7 +161,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _showEditExpenseSheet(context, ref),
-                    icon: const Icon(Icons.edit),
+                    icon: const Icon(CupertinoIcons.pencil),
                     label: const Text('Edit'),
                   ),
                 ),
@@ -168,7 +169,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () => _showDeleteConfirmation(context, ref),
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(CupertinoIcons.trash),
                     label: const Text('Delete'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.error,
@@ -186,7 +187,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 20, color: AppColors.textSecondary),
+                  const Icon(CupertinoIcons.info_circle, size: 20, color: AppColors.textSecondary),
                   const SizedBox(width: AppSizes.sm),
                   Expanded(
                     child: Text(
@@ -231,7 +232,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 18, color: AppColors.primaryTeal),
+                  const Icon(CupertinoIcons.info_circle, size: 18, color: AppColors.primaryTeal),
                   const SizedBox(width: AppSizes.sm),
                   Expanded(
                     child: Text(
@@ -250,7 +251,7 @@ class ExpenseDetailBottomSheet extends ConsumerWidget {
                   onPressed: members != null && members!.isNotEmpty
                       ? () => _showEditSplitsSheet(context)
                       : null,
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(CupertinoIcons.pencil),
                   label: const Text('Configure Splits'),
                 ),
               ),

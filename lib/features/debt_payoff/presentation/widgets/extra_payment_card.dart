@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -42,7 +43,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: const Icon(
-                    Icons.bolt_rounded,
+                    CupertinoIcons.bolt,
                     color: AppColors.success,
                     size: 18,
                   ),
@@ -123,7 +124,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                 child: Column(
                   children: [
                     _ImpactRow(
-                      icon: Icons.calendar_today_outlined,
+                      icon: CupertinoIcons.calendar,
                       text: monthsSaved > 0
                           ? 'Pay off $monthsSaved months sooner'
                           : 'Same payoff timeline',
@@ -131,7 +132,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                     if (interestSaved > 0) ...[
                       const SizedBox(height: 4),
                       _ImpactRow(
-                        icon: Icons.savings_outlined,
+                        icon: CupertinoIcons.money_dollar,
                         text:
                             'Save ${currencyFormat.format(interestSaved)} in interest',
                       ),

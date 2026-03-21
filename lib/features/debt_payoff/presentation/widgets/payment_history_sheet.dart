@@ -61,7 +61,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(CupertinoIcons.xmark),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -134,7 +134,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                       child: Row(
                         children: [
                           const Icon(
-                            Icons.savings_outlined,
+                            CupertinoIcons.money_dollar,
                             color: AppColors.success,
                             size: 18,
                           ),
@@ -186,7 +186,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
-                                    Icons.check_rounded,
+                                    CupertinoIcons.checkmark,
                                     color: AppColors.success,
                                     size: 18,
                                   ),

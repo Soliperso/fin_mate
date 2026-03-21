@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -334,7 +335,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                             ),
                           ),
                         )
-                      : const Icon(Icons.add_circle_outline),
+                      : const Icon(CupertinoIcons.add_circled),
                   label: Text(
                     _isLoading
                         ? 'Adding...'
@@ -373,7 +374,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                     Row(
                       children: [
                         Icon(
-                          Icons.info_outline,
+                          CupertinoIcons.info_circle,
                           color: AppColors.tealLight,
                           size: 20,
                         ),
@@ -447,7 +448,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.error_outline,
+                CupertinoIcons.exclamationmark_circle,
                 size: 48,
                 color: AppColors.error,
               ),

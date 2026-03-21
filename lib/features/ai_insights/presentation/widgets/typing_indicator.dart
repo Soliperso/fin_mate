@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -79,7 +80,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
         shape: BoxShape.circle,
       ),
       child: const Icon(
-        Icons.auto_awesome,
+        CupertinoIcons.sparkles,
         size: 18,
         color: Colors.white,
       ),

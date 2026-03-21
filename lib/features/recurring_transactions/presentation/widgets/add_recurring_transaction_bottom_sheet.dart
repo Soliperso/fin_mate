@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -162,7 +163,7 @@ class _AddRecurringTransactionBottomSheetState
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(CupertinoIcons.xmark),
                 ),
               ],
             ),
@@ -320,7 +321,7 @@ class _AddRecurringTransactionBottomSheetState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(DateFormat('MMM d, yyyy').format(_startDate)),
-                    const Icon(Icons.calendar_today),
+                    const Icon(CupertinoIcons.calendar),
                   ],
                 ),
               ),
@@ -342,7 +343,7 @@ class _AddRecurringTransactionBottomSheetState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(DateFormat('MMM d, yyyy').format(_nextOccurrence)),
-                    const Icon(Icons.calendar_today),
+                    const Icon(CupertinoIcons.calendar),
                   ],
                 ),
               ),
@@ -378,7 +379,7 @@ class _AddRecurringTransactionBottomSheetState
                           ? DateFormat('MMM d, yyyy').format(_endDate!)
                           : 'No end date',
                     ),
-                    const Icon(Icons.calendar_today),
+                    const Icon(CupertinoIcons.calendar),
                   ],
                 ),
               ),

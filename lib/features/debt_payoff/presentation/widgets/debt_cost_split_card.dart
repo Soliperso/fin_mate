@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -55,7 +56,7 @@ class DebtCostSplitCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: const Icon(
-                    Icons.account_balance_rounded,
+                    CupertinoIcons.building_2_fill,
                     color: AppColors.brandTeal,
                     size: 18,
                   ),

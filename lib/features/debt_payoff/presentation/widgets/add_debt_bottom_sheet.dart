@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -98,7 +99,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                           ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(CupertinoIcons.xmark),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],

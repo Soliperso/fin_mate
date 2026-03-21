@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,7 @@ class _AddContributionBottomSheetState
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.add,
+                      CupertinoIcons.add,
                       color: AppColors.success,
                     ),
                   ),
@@ -117,7 +118,7 @@ class _AddContributionBottomSheetState
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -158,7 +159,7 @@ class _AddContributionBottomSheetState
                   decoration: const InputDecoration(
                     labelText: 'Date',
                     border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today, size: 16),
+                    suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
                   ),
                   child: Text(
                     DateFormat('MMM dd, yyyy').format(_selectedDate),

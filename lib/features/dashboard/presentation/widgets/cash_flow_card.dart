@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -62,7 +63,7 @@ class CashFlowCard extends StatelessWidget {
                     label: 'Income',
                     amount: income,
                     color: AppColors.systemGreen,
-                    icon: Icons.arrow_downward_rounded,
+                    icon: CupertinoIcons.arrow_down,
                     currencyFormat: currencyFormat,
                   ),
                 ),
@@ -76,7 +77,7 @@ class CashFlowCard extends StatelessWidget {
                     label: 'Expenses',
                     amount: expenses,
                     color: AppColors.systemRed,
-                    icon: Icons.arrow_upward_rounded,
+                    icon: CupertinoIcons.arrow_up,
                     currencyFormat: currencyFormat,
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -114,7 +115,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
                           ),
                         )
                       : Icon(
-                          Icons.send,
+                          CupertinoIcons.arrow_up_circle_fill,
                           color: _hasText ? Colors.white : AppColors.textTertiary,
                           size: 20,
                         ),

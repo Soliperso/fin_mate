@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -141,7 +142,7 @@ class _UploadDocumentBottomSheetState
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _pickImage(ImageSource.camera),
-                          icon: const Icon(Icons.camera_alt),
+                          icon: const Icon(CupertinoIcons.camera),
                           label: const Text('Camera'),
                         ),
                       ),
@@ -149,7 +150,7 @@ class _UploadDocumentBottomSheetState
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _pickImage(ImageSource.gallery),
-                          icon: const Icon(Icons.photo_library),
+                          icon: const Icon(CupertinoIcons.photo),
                           label: const Text('Gallery'),
                         ),
                       ),
@@ -160,7 +161,7 @@ class _UploadDocumentBottomSheetState
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: _pickFile,
-                      icon: const Icon(Icons.insert_drive_file),
+                      icon: const Icon(CupertinoIcons.doc),
                       label: const Text('Choose File (PDF, Images)'),
                     ),
                   ),
@@ -175,7 +176,7 @@ class _UploadDocumentBottomSheetState
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.insert_drive_file, color: AppColors.primaryTeal),
+                    const Icon(CupertinoIcons.doc, color: AppColors.primaryTeal),
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: Text(
@@ -184,7 +185,7 @@ class _UploadDocumentBottomSheetState
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(CupertinoIcons.xmark),
                       onPressed: () => setState(() => _selectedFile = null),
                     ),
                   ],

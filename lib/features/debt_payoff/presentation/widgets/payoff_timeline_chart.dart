@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -223,7 +224,7 @@ class PayoffTimelineChart extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.flag_rounded,
+                  CupertinoIcons.flag,
                   size: 14,
                   color: AppColors.success,
                 ),

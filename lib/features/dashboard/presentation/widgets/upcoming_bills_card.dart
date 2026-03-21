@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -44,7 +45,7 @@ class UpcomingBillsCard extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(
-                        Icons.check_circle_outline,
+                        CupertinoIcons.checkmark_circle_fill,
                         size: 48,
                         color: AppColors.success.withValues(alpha: 0.5),
                       ),
@@ -83,7 +84,7 @@ class UpcomingBillsCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       child: const Icon(
-                        Icons.receipt,
+                        CupertinoIcons.doc_text,
                         color: AppColors.warning,
                       ),
                     ),

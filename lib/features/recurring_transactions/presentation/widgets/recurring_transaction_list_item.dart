@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -40,10 +41,10 @@ class RecurringTransactionListItem extends StatelessWidget {
           ),
           child: Icon(
             isIncome
-                ? Icons.arrow_downward
+                ? CupertinoIcons.arrow_down_right
                 : isExpense
-                    ? Icons.arrow_upward
-                    : Icons.swap_horiz,
+                    ? CupertinoIcons.arrow_up_right
+                    : CupertinoIcons.arrow_left_right,
             color: isIncome
                 ? AppColors.success
                 : isExpense

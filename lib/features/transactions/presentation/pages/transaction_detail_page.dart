@@ -38,7 +38,7 @@ class TransactionDetailPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline,
+              Icon(CupertinoIcons.exclamationmark_circle,
                   size: 48, color: AppColors.error.withValues(alpha: 0.5)),
               const SizedBox(height: AppSizes.md),
               Text('Failed to load transaction',
@@ -61,7 +61,7 @@ class TransactionDetailPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long_outlined,
+                  Icon(CupertinoIcons.doc_text,
                       size: 48,
                       color: AppColors.textSecondary.withValues(alpha: 0.5)),
                   const SizedBox(height: AppSizes.md),
@@ -157,7 +157,7 @@ class TransactionDetailPage extends ConsumerWidget {
                           _transactionDetailProvider(transactionId));
                     }
                   },
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(CupertinoIcons.pencil),
                   label: const Text('Edit'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.brandTeal,
@@ -168,7 +168,7 @@ class TransactionDetailPage extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context, ref, transaction),
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(CupertinoIcons.trash),
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,

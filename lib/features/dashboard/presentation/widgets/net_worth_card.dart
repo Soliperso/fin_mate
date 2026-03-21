@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -68,8 +69,8 @@ class NetWorthCard extends StatelessWidget {
                   children: [
                     Icon(
                       isPositive
-                          ? Icons.arrow_upward_rounded
-                          : Icons.arrow_downward_rounded,
+                          ? CupertinoIcons.arrow_up
+                          : CupertinoIcons.arrow_down,
                       color: Colors.white,
                       size: 12,
                     ),

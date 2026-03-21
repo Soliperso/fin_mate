@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -112,7 +113,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -125,7 +126,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Goal Name',
-                  prefixIcon: Icon(Icons.flag),
+                  prefixIcon: Icon(CupertinoIcons.flag),
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -143,7 +144,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
-                  prefixIcon: Icon(Icons.description),
+                  prefixIcon: Icon(CupertinoIcons.doc_text),
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -156,7 +157,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Target Amount',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(CupertinoIcons.money_dollar),
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -185,7 +186,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 style: TextStyle(color: AppColors.textSecondary),
                 decoration: const InputDecoration(
                   labelText: 'Category (Optional)',
-                  prefixIcon: Icon(Icons.category),
+                  prefixIcon: Icon(CupertinoIcons.square_grid_2x2),
                   border: OutlineInputBorder(),
                 ),
                 items: _categories.map((category) {
@@ -220,11 +221,11 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Deadline (Optional)',
-                    prefixIcon: const Icon(Icons.calendar_today),
+                    prefixIcon: const Icon(CupertinoIcons.calendar),
                     border: const OutlineInputBorder(),
                     suffixIcon: _selectedDeadline != null
                         ? IconButton(
-                            icon: const Icon(Icons.clear, size: 20),
+                            icon: const Icon(CupertinoIcons.xmark, size: 20),
                             onPressed: () {
                               setState(() {
                                 _selectedDeadline = null;
@@ -252,7 +253,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 20, color: AppColors.textSecondary),
+                    const Icon(CupertinoIcons.info_circle, size: 20, color: AppColors.textSecondary),
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: Text(

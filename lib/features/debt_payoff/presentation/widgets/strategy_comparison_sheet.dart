@@ -110,7 +110,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
                               BorderRadius.circular(AppSizes.radiusSm),
                         ),
                         child: const Icon(
-                          Icons.lightbulb_rounded,
+                          CupertinoIcons.lightbulb,
                           size: 14,
                           color: AppColors.success,
                         ),
@@ -134,7 +134,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
 
                   // Interest savings row
                   _InsightRow(
-                    icon: Icons.savings_rounded,
+                    icon: CupertinoIcons.money_dollar,
                     iconColor: AppColors.warning,
                     label: 'Interest Savings',
                     value: interestDiff > 0
@@ -166,7 +166,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
 
                   // Recommendation row
                   _InsightRow(
-                    icon: Icons.recommend_rounded,
+                    icon: CupertinoIcons.star,
                     iconColor: AppColors.success,
                     label: 'Best For You',
                     value: interestDiff >= 0

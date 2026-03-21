@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,7 @@ class _PremiumBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
-              Icons.workspace_premium,
+              CupertinoIcons.star_fill,
               color: AppColors.warning,
               size: 20,
             ),
@@ -83,7 +84,7 @@ class _PremiumBanner extends StatelessWidget {
             ),
           ),
           const Icon(
-            Icons.check_circle,
+            CupertinoIcons.checkmark_circle_fill,
             color: AppColors.success,
             size: 20,
           ),
@@ -122,8 +123,8 @@ class _FreemiumBanner extends ConsumerWidget {
                 ),
                 child: Icon(
                   hasReachedLimit
-                      ? Icons.block
-                      : Icons.chat_bubble_outline,
+                      ? CupertinoIcons.nosign
+                      : CupertinoIcons.chat_bubble,
                   color: hasReachedLimit
                       ? AppColors.error
                       : AppColors.primaryTeal,
@@ -199,7 +200,7 @@ class _FreemiumBanner extends ConsumerWidget {
               child: Row(
                 children: [
                   const Icon(
-                    Icons.info_outline,
+                    CupertinoIcons.info_circle,
                     color: AppColors.error,
                     size: 16,
                   ),

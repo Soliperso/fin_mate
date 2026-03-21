@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -25,7 +26,7 @@ class BalanceForecastCard extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  Icons.account_balance_wallet,
+                  CupertinoIcons.creditcard,
                   color: AppColors.primaryTeal,
                   size: 24,
                 ),
@@ -92,7 +93,7 @@ class BalanceForecastCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      Icons.warning_amber_rounded,
+                      CupertinoIcons.exclamationmark_triangle,
                       color: AppColors.warning,
                       size: 20,
                     ),

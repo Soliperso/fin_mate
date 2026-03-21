@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +37,7 @@ class GroupDetailPage extends ConsumerWidget {
             title: Text(group.name),
             actions: [
               IconButton(
-                icon: const Icon(Icons.settings),
+                icon: const Icon(CupertinoIcons.settings),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -120,7 +121,7 @@ class GroupDetailPage extends ConsumerWidget {
                             ),
                             TextButton.icon(
                               onPressed: () => _showAddExpenseSheet(context),
-                              icon: const Icon(Icons.add),
+                              icon: const Icon(CupertinoIcons.add),
                               label: const Text('Add'),
                             ),
                           ],
@@ -179,7 +180,7 @@ class GroupDetailPage extends ConsumerWidget {
           floatingActionButton: balancesAsync.maybeWhen(
             data: (balances) => FloatingActionButton.extended(
               onPressed: () => _showSettleUpSheet(context, balances),
-              icon: const Icon(Icons.done_all, color: Colors.white),
+              icon: const Icon(CupertinoIcons.checkmark, color: Colors.white),
               label: const Text('Settle Up', style: TextStyle(color: Colors.white)),
             ),
             orElse: () => null,
@@ -204,7 +205,7 @@ class GroupDetailPage extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                const Icon(CupertinoIcons.exclamationmark_circle, size: 64, color: AppColors.error),
                 const SizedBox(height: AppSizes.lg),
                 Text(
                   'Failed to load group',
@@ -221,7 +222,7 @@ class GroupDetailPage extends ConsumerWidget {
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton.icon(
                   onPressed: () => ref.invalidate(groupProvider(groupId)),
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                   label: const Text('Retry'),
                 ),
               ],
@@ -453,7 +454,7 @@ class GroupDetailPage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           ),
           child: const Icon(
-            Icons.receipt,
+            CupertinoIcons.doc_text,
             color: AppColors.primaryTeal,
           ),
         ),

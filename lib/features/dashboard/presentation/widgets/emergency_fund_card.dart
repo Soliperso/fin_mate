@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,15 +37,15 @@ class EmergencyFundCard extends ConsumerWidget {
   IconData _getLevelIcon() {
     switch (status.level) {
       case EmergencyFundLevel.critical:
-        return Icons.warning_amber_rounded;
+        return CupertinoIcons.exclamationmark_triangle;
       case EmergencyFundLevel.low:
-        return Icons.trending_up;
+        return CupertinoIcons.arrow_up_right;
       case EmergencyFundLevel.moderate:
-        return Icons.shield_outlined;
+        return CupertinoIcons.shield;
       case EmergencyFundLevel.good:
-        return Icons.shield;
+        return CupertinoIcons.shield;
       case EmergencyFundLevel.excellent:
-        return Icons.verified_user;
+        return CupertinoIcons.checkmark_shield;
     }
   }
 
@@ -116,7 +117,7 @@ class EmergencyFundCard extends ConsumerWidget {
                       ),
                     ),
                     Icon(
-                      Icons.chevron_right,
+                      CupertinoIcons.chevron_right,
                       color: AppColors.textSecondary,
                     ),
                   ],
@@ -220,7 +221,7 @@ class EmergencyFundCard extends ConsumerWidget {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.lightbulb_outline,
+                          CupertinoIcons.lightbulb,
                           color: AppColors.tealLight,
                           size: 20,
                         ),
@@ -245,7 +246,7 @@ class EmergencyFundCard extends ConsumerWidget {
                     onPressed: () {
                       context.pushNamed('emergency-fund');
                     },
-                    icon: const Icon(Icons.add_circle_outline),
+                    icon: const Icon(CupertinoIcons.add_circled),
                     label: const Text('Add to Emergency Fund'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: levelColor,
@@ -311,7 +312,7 @@ class EmergencyFundCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   child: Icon(
-                    Icons.shield,
+                    CupertinoIcons.shield,
                     color: _getLevelColor(),
                     size: 32,
                   ),
@@ -337,7 +338,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
+                  icon: const Icon(CupertinoIcons.pencil, size: 20),
                   onPressed: () {
                     Navigator.pop(context);
                     _showSetTargetDialog(context, ref, currencyFormat);
@@ -347,7 +348,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   tooltip: 'Set target amount',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 24),
+                  icon: const Icon(CupertinoIcons.xmark, size: 24),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -442,7 +443,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   // Current Emergency Fund
                   _buildMetricRowWithIcon(
                     context,
-                    Icons.account_balance_wallet_outlined,
+                    CupertinoIcons.creditcard,
                     'Current Emergency Fund',
                     currencyFormat.format(status.currentAmount),
                     _getLevelColor(),
@@ -452,7 +453,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   // Your Target
                   _buildMetricRowWithIcon(
                     context,
-                    Icons.flag_outlined,
+                    CupertinoIcons.flag,
                     'Your Target',
                     currencyFormat.format(status.targetRecommended),
                     AppColors.textSecondary,
@@ -514,7 +515,7 @@ class EmergencyFundCard extends ConsumerWidget {
             // Breakdown Metrics
             _buildMetricRowWithIcon(
               context,
-              Icons.calendar_today_outlined,
+              CupertinoIcons.calendar,
               'Months Covered',
               '${status.monthsCovered.toStringAsFixed(1)} months',
               _getLevelColor(),
@@ -523,7 +524,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             _buildMetricRowWithIcon(
               context,
-              Icons.receipt_long_outlined,
+              CupertinoIcons.doc_text,
               'Monthly Expenses (avg)',
               currencyFormat.format(status.averageMonthlyExpenses),
               AppColors.textSecondary,
@@ -532,7 +533,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             _buildMetricRowWithIcon(
               context,
-              Icons.check_circle_outline,
+              CupertinoIcons.checkmark_circle_fill,
               'Minimum Goal (3 months)',
               currencyFormat.format(status.minimumRecommended),
               AppColors.textSecondary,
@@ -541,7 +542,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             _buildMetricRowWithIcon(
               context,
-              Icons.pie_chart_outline,
+              CupertinoIcons.chart_pie_fill,
               'Percentage of Net Worth',
               '${status.percentageOfNetWorth.toStringAsFixed(1)}%',
               AppColors.textSecondary,
@@ -565,7 +566,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      Icons.check_circle,
+                      CupertinoIcons.checkmark_circle_fill,
                       color: _getLevelColor(),
                       size: 20,
                     ),

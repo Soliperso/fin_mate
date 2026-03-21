@@ -433,7 +433,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.error_outline,
+              CupertinoIcons.exclamationmark_circle,
               size: 64,
               color: AppColors.error.withValues(alpha: 0.5),
             ),
@@ -493,7 +493,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
-                  icon: const Icon(Icons.refresh, size: 20),
+                  icon: const Icon(CupertinoIcons.arrow_counterclockwise, size: 20),
                   label: const Text(
                     'Clear Filters',
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
@@ -712,7 +712,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(CupertinoIcons.xmark),
                   onPressed: () => Navigator.pop(sheetContext),
                 ),
               ],
@@ -765,7 +765,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         notifier.refresh();
                       }
                     },
-                    icon: const Icon(Icons.edit),
+                    icon: const Icon(CupertinoIcons.pencil),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.brandTeal,
@@ -779,7 +779,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       Navigator.pop(sheetContext);
                       _confirmDelete(context, transaction, notifier);
                     },
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(CupertinoIcons.trash),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,
@@ -1024,7 +1024,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           });
                         }
                       },
-                      icon: const Icon(Icons.calendar_today),
+                      icon: const Icon(CupertinoIcons.calendar),
                       label: Text(
                         dateRange == null
                             ? 'Select Date Range'

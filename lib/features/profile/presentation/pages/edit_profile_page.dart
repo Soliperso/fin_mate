@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -68,7 +69,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Edit Profile'),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(CupertinoIcons.xmark),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -120,7 +121,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                                 ),
                               )
                             : const Icon(
-                                Icons.camera_alt,
+                                CupertinoIcons.camera,
                                 size: 20,
                                 color: AppColors.white,
                               ),
@@ -145,7 +146,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 controller: _fullNameController,
                 decoration: const InputDecoration(
                   labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person_outline),
+                  prefixIcon: Icon(CupertinoIcons.person),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -161,7 +162,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 initialValue: profile?.email ?? '',
                 decoration: const InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined),
+                  prefixIcon: Icon(CupertinoIcons.envelope),
                   helperText: 'Email cannot be changed',
                 ),
                 enabled: false,
@@ -173,7 +174,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 controller: _phoneController,
                 decoration: const InputDecoration(
                   labelText: 'Phone Number (optional)',
-                  prefixIcon: Icon(Icons.phone_outlined),
+                  prefixIcon: Icon(CupertinoIcons.phone),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -184,7 +185,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 initialValue: _selectedCurrency,
                 decoration: const InputDecoration(
                   labelText: 'Preferred Currency',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(CupertinoIcons.money_dollar),
                 ),
                 items: _currencies.map((currency) {
                   return DropdownMenuItem(
@@ -202,7 +203,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   onPressed: profileState.isUploadingAvatar
                       ? null
                       : _handleDeleteAvatar,
-                  icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                  icon: const Icon(CupertinoIcons.trash, color: AppColors.error),
                   label: const Text(
                     'Remove Profile Photo',
                     style: TextStyle(color: AppColors.error),
@@ -280,7 +281,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const Icon(CupertinoIcons.photo),
               title: const Text('Choose from Gallery'),
               onTap: () {
                 Navigator.pop(context);
@@ -288,7 +289,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const Icon(CupertinoIcons.camera),
               title: const Text('Take a Photo'),
               onTap: () {
                 Navigator.pop(context);

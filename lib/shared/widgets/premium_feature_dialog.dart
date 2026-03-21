@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 // [MVP: go_router import removed - not navigating to pricing page]
 // import 'package:go_router/go_router.dart';
@@ -42,7 +43,7 @@ class PremiumFeatureDialog extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  Icons.star_rounded,
+                  CupertinoIcons.star_fill,
                   size: 40,
                   color: AppColors.primaryTeal,
                 ),
@@ -92,7 +93,7 @@ class PremiumFeatureDialog extends StatelessWidget {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.check_circle_rounded,
+                              CupertinoIcons.checkmark_circle_fill,
                               size: 20,
                               color: AppColors.primaryTeal,
                             ),

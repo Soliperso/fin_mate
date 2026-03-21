@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -116,7 +117,7 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                       ] else if (isUser && message.status == MessageStatus.error) ...[
                         const SizedBox(width: 4),
                         Icon(
-                          Icons.error_outline,
+                          CupertinoIcons.exclamationmark_circle,
                           size: 12,
                           color: AppColors.error,
                         ),
@@ -153,7 +154,7 @@ class EnhancedChatMessageBubble extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(
-        isUser ? Icons.person : Icons.auto_awesome,
+        isUser ? CupertinoIcons.person : CupertinoIcons.sparkles,
         size: 18,
         color: Colors.white,
       ),
@@ -239,15 +240,15 @@ class EnhancedChatMessageBubble extends StatelessWidget {
   IconData _getIconForActionType(String type) {
     switch (type) {
       case 'view_accounts':
-        return Icons.account_balance_wallet;
+        return CupertinoIcons.creditcard;
       case 'add_transaction':
-        return Icons.add_circle_outline;
+        return CupertinoIcons.add_circled;
       case 'view_details':
-        return Icons.info_outline;
+        return CupertinoIcons.info_circle;
       case 'create_budget':
-        return Icons.savings_outlined;
+        return CupertinoIcons.money_dollar;
       default:
-        return Icons.arrow_forward;
+        return CupertinoIcons.chevron_right;
     }
   }
 }

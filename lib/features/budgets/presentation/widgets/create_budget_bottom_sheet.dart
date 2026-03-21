@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,7 +247,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.calendar_today, size: 16),
+                        suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
                       ),
                       child: Text(
                         '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
@@ -294,7 +295,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.calendar_today, size: 16),
+                        suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
                       ),
                       child: Text(
                         _endDate != null

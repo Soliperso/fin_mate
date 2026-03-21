@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Subscription'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -66,7 +67,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                   if (isPremium) ...[
                     _buildActionButton(
                       context: context,
-                      icon: Icons.credit_card,
+                      icon: CupertinoIcons.creditcard,
                       title: 'Payment Methods',
                       subtitle: 'Manage your payment methods',
                       onTap: () => context.push('/profile/subscription/payment-methods'),
@@ -74,7 +75,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                     const SizedBox(height: AppSizes.md),
                     _buildActionButton(
                       context: context,
-                      icon: Icons.receipt_long,
+                      icon: CupertinoIcons.doc_text,
                       title: 'Billing History',
                       subtitle: 'View invoices and payment history',
                       onTap: () => context.push('/profile/subscription/billing-history'),
@@ -82,7 +83,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                     const SizedBox(height: AppSizes.md),
                     _buildActionButton(
                       context: context,
-                      icon: Icons.cancel_outlined,
+                      icon: CupertinoIcons.xmark_circle,
                       title: 'Cancel Subscription',
                       subtitle: 'Cancel your premium subscription',
                       isDestructive: true,
@@ -91,7 +92,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                   ] else ...[
                     _buildActionButton(
                       context: context,
-                      icon: Icons.workspace_premium,
+                      icon: CupertinoIcons.star_fill,
                       title: 'Upgrade to Premium',
                       subtitle: 'Unlock unlimited AI insights and more',
                       onTap: () => context.push('/pricing'),
@@ -118,7 +119,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+              const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
               const SizedBox(height: AppSizes.md),
               const Text(
                 'Failed to load subscription',
@@ -178,7 +179,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
           ),
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const Icon(CupertinoIcons.chevron_right),
         onTap: onTap,
       ),
     );
@@ -187,37 +188,37 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   Widget _buildFeaturesList(bool isPremium) {
     final features = [
       _FeatureItem(
-        icon: Icons.chat_bubble_outline,
+        icon: CupertinoIcons.chat_bubble,
         title: 'Unlimited AI Insights',
         description: 'Ask unlimited questions about your finances',
         isActive: isPremium,
       ),
       _FeatureItem(
-        icon: Icons.receipt_long,
+        icon: CupertinoIcons.doc_text,
         title: 'Receipt Scanning',
         description: 'Scan and store receipts automatically',
         isActive: isPremium,
       ),
       _FeatureItem(
-        icon: Icons.history,
+        icon: CupertinoIcons.clock,
         title: 'Unlimited History',
         description: 'Access all your financial data, forever',
         isActive: isPremium,
       ),
       _FeatureItem(
-        icon: Icons.savings_outlined,
+        icon: CupertinoIcons.money_dollar_circle,
         title: 'Savings Goals',
         description: 'Track and achieve your savings targets',
         isActive: isPremium,
       ),
       _FeatureItem(
-        icon: Icons.analytics_outlined,
+        icon: CupertinoIcons.chart_bar,
         title: 'Advanced Analytics',
         description: 'Detailed insights and forecasting',
         isActive: isPremium,
       ),
       _FeatureItem(
-        icon: Icons.support_agent,
+        icon: CupertinoIcons.person_crop_circle_badge_checkmark,
         title: 'Priority Support',
         description: 'Get help faster when you need it',
         isActive: isPremium,

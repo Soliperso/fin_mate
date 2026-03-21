@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Security Settings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -61,7 +62,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
                     return Card(
                       child: ListTile(
-                        leading: const Icon(Icons.fingerprint),
+                        leading: const Icon(Icons.fingerprint), // keep as-is (platform-specific)
                         title: Text(
                           'Biometric Login',
                           style: TextStyle(
@@ -111,7 +112,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.security),
+                        leading: const Icon(CupertinoIcons.shield),
                         title: Text(
                           'Multi-Factor Authentication',
                           style: TextStyle(
@@ -158,7 +159,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
                             return ListTile(
                               leading: Icon(
-                                method == 'email' ? Icons.email : Icons.qr_code,
+                                method == 'email' ? CupertinoIcons.envelope : CupertinoIcons.qrcode,
                                 size: 20,
                               ),
                               title: Text(
@@ -192,7 +193,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
             Card(
               child: ListTile(
-                leading: const Icon(Icons.lock),
+                leading: const Icon(CupertinoIcons.lock),
                 title: Text(
                   'Change Password',
                   style: TextStyle(
@@ -205,7 +206,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                   ),
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(CupertinoIcons.chevron_right),
                 onTap: () {
                   showDialog(
                     context: context,
@@ -327,10 +328,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             // Email OTP
             Card(
               child: ListTile(
-                leading: const Icon(Icons.email, color: AppColors.primaryTeal),
+                leading: const Icon(CupertinoIcons.envelope, color: AppColors.primaryTeal),
                 title: Text(MfaMethod.email.displayName),
                 subtitle: Text(MfaMethod.email.description),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(CupertinoIcons.chevron_right),
                 onTap: () {
                   Navigator.pop(context);
                   _handleEnableEmailMfa();
@@ -342,10 +343,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             // TOTP
             Card(
               child: ListTile(
-                leading: const Icon(Icons.qr_code, color: AppColors.slateBlue),
+                leading: const Icon(CupertinoIcons.qrcode, color: AppColors.slateBlue),
                 title: Text(MfaMethod.totp.displayName),
                 subtitle: Text(MfaMethod.totp.description),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(CupertinoIcons.chevron_right),
                 onTap: () {
                   Navigator.pop(context);
                   _handleEnableTotpMfa();

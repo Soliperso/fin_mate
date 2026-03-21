@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class DocumentsPage extends ConsumerWidget {
         title: const Text('Documents'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download),
+            icon: const Icon(CupertinoIcons.arrow_down_circle),
             onPressed: () => _showExportOptions(context, ref),
             tooltip: 'Export Tax Documents',
           ),
@@ -41,7 +42,7 @@ class DocumentsPage extends ConsumerWidget {
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height - 200,
                   child: const EmptyState(
-                    icon: Icons.folder_outlined,
+                    icon: CupertinoIcons.folder,
                     title: 'No Documents Yet',
                     message: 'Upload receipts, invoices, and tax documents to keep everything organized',
                   ),
@@ -70,7 +71,7 @@ class DocumentsPage extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: AppColors.error),
                 const SizedBox(height: AppSizes.md),
                 Text('Failed to load documents'),
                 const SizedBox(height: AppSizes.sm),
@@ -86,7 +87,7 @@ class DocumentsPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showUploadSheet(context, ref),
         backgroundColor: AppColors.primaryTeal,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(CupertinoIcons.add, color: Colors.white),
       ),
     );
   }
@@ -147,13 +148,13 @@ class DocumentsPage extends ConsumerWidget {
   IconData _getTypeIcon(DocumentType type) {
     switch (type) {
       case DocumentType.receipt:
-        return Icons.receipt;
+        return CupertinoIcons.doc_text;
       case DocumentType.invoice:
-        return Icons.description;
+        return CupertinoIcons.doc_text;
       case DocumentType.taxDocument:
-        return Icons.account_balance;
+        return CupertinoIcons.building_2_fill;
       case DocumentType.other:
-        return Icons.insert_drive_file;
+        return CupertinoIcons.doc;
     }
   }
 

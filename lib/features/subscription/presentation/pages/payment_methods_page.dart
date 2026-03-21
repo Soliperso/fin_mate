@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,13 +30,13 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Payment Methods'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
         actions: [
           if (!_isProcessing)
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Icon(CupertinoIcons.add),
               onPressed: () => _addPaymentMethod(context),
             ),
         ],
@@ -69,7 +70,7 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+              const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
               const SizedBox(height: AppSizes.md),
               const Text(
                 'Failed to load payment methods',
@@ -95,7 +96,7 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.credit_card_off,
+              CupertinoIcons.creditcard,
               size: 80,
               color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
@@ -119,7 +120,7 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
             const SizedBox(height: AppSizes.xl),
             ElevatedButton.icon(
               onPressed: _isProcessing ? null : () => _addPaymentMethod(context),
-              icon: const Icon(Icons.add),
+              icon: const Icon(CupertinoIcons.add),
               label: const Text('Add Payment Method'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
@@ -228,7 +229,7 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
                         value: 'set_default',
                         child: Row(
                           children: [
-                            Icon(Icons.check_circle_outline, size: 20),
+                            Icon(CupertinoIcons.checkmark_circle, size: 20),
                             SizedBox(width: AppSizes.sm),
                             Text('Set as Default'),
                           ],
@@ -238,7 +239,7 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
                       value: 'remove',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 20, color: AppColors.error),
+                          Icon(CupertinoIcons.trash, size: 20, color: AppColors.error),
                           SizedBox(width: AppSizes.sm),
                           Text('Remove', style: TextStyle(color: AppColors.error)),
                         ],
@@ -257,23 +258,23 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
   IconData _getCardIcon(String brand) {
     switch (brand.toLowerCase()) {
       case 'visa':
-        return Icons.credit_card;
+        return CupertinoIcons.creditcard;
       case 'mastercard':
-        return Icons.credit_card;
+        return CupertinoIcons.creditcard;
       case 'amex':
       case 'american_express':
-        return Icons.credit_card_outlined;
+        return CupertinoIcons.creditcard;
       case 'discover':
-        return Icons.credit_card;
+        return CupertinoIcons.creditcard;
       case 'diners':
       case 'diners_club':
-        return Icons.payment;
+        return CupertinoIcons.creditcard;
       case 'jcb':
-        return Icons.credit_card;
+        return CupertinoIcons.creditcard;
       case 'unionpay':
-        return Icons.payment;
+        return CupertinoIcons.creditcard;
       default:
-        return Icons.payment;
+        return CupertinoIcons.creditcard;
     }
   }
 

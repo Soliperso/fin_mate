@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -44,7 +45,7 @@ class MonthlyFundingCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: const Icon(
-                    Icons.account_balance_wallet_outlined,
+                    CupertinoIcons.creditcard,
                     color: AppColors.primaryTeal,
                     size: 18,
                   ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -27,19 +28,19 @@ class DebtCard extends StatelessWidget {
   IconData _iconForType(String debtType) {
     switch (debtType) {
       case 'credit_card':
-        return Icons.credit_card_rounded;
+        return CupertinoIcons.creditcard;
       case 'student_loan':
-        return Icons.school_rounded;
+        return CupertinoIcons.book;
       case 'auto_loan':
-        return Icons.directions_car_rounded;
+        return CupertinoIcons.car_detailed;
       case 'mortgage':
-        return Icons.home_rounded;
+        return CupertinoIcons.house;
       case 'medical':
-        return Icons.local_hospital_rounded;
+        return CupertinoIcons.heart;
       case 'personal_loan':
-        return Icons.account_balance_wallet_rounded;
+        return CupertinoIcons.creditcard;
       default:
-        return Icons.payments_rounded;
+        return CupertinoIcons.money_dollar_circle;
     }
   }
 
@@ -226,7 +227,7 @@ class DebtCard extends StatelessWidget {
                 const SizedBox(width: AppSizes.xs),
                 PopupMenuButton<String>(
                   icon: Icon(
-                    Icons.more_vert_rounded,
+                    CupertinoIcons.ellipsis_vertical,
                     color: AppColors.textSecondary,
                     size: 20,
                   ),
@@ -244,7 +245,7 @@ class DebtCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'log_payment',
                       child: _MenuRow(
-                        icon: Icons.add_circle_outline_rounded,
+                        icon: CupertinoIcons.add_circled,
                         label: 'Log Payment',
                         color: AppColors.success,
                       ),
@@ -252,7 +253,7 @@ class DebtCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'edit',
                       child: _MenuRow(
-                        icon: Icons.edit_outlined,
+                        icon: CupertinoIcons.pencil,
                         label: 'Edit Debt',
                         color: AppColors.systemBlue,
                       ),
@@ -260,7 +261,7 @@ class DebtCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'history',
                       child: _MenuRow(
-                        icon: Icons.history_rounded,
+                        icon: CupertinoIcons.clock,
                         label: 'Payment History',
                         color: AppColors.brandTeal,
                       ),
@@ -269,7 +270,7 @@ class DebtCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'delete',
                       child: _MenuRow(
-                        icon: Icons.delete_outline_rounded,
+                        icon: CupertinoIcons.trash,
                         label: 'Delete Debt',
                         isDestructive: true,
                       ),
@@ -380,7 +381,7 @@ class DebtCard extends StatelessWidget {
               const SizedBox(height: AppSizes.xs),
               Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined,
+                  Icon(CupertinoIcons.calendar,
                       size: 11, color: dueDateColor),
                   const SizedBox(width: AppSizes.xs),
                   Text(
@@ -410,7 +411,7 @@ class DebtCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded,
+                    Icon(CupertinoIcons.exclamationmark_triangle,
                         size: 13, color: AppColors.warning),
                     const SizedBox(width: AppSizes.xs),
                     Expanded(

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +47,7 @@ class GoalCard extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Icon(
-                      isCompleted ? Icons.check_circle : Icons.savings,
+                      isCompleted ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.money_dollar,
                       color: isCompleted ? AppColors.success : AppColors.brandTeal,
                       size: 24,
                     ),
@@ -153,7 +154,7 @@ class GoalCard extends ConsumerWidget {
                                 color: AppColors.brandTeal,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.add, color: AppColors.white, size: 16),
+                              child: const Icon(CupertinoIcons.add, color: AppColors.white, size: 16),
                             ),
                           ),
                         ],

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -205,7 +206,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Group Settings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -248,7 +249,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.warning, color: AppColors.warning, size: 20),
+                            const Icon(CupertinoIcons.exclamationmark_triangle, color: AppColors.warning, size: 20),
                             const SizedBox(width: AppSizes.sm),
                             Expanded(
                               child: Text(
@@ -307,7 +308,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   child: const Icon(
-                    Icons.group,
+                    CupertinoIcons.person_2,
                     color: AppColors.primaryTeal,
                     size: 28,
                   ),
@@ -365,7 +366,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
         onPressed: () {
           setState(() => _isEditing = true);
         },
-        icon: const Icon(Icons.edit),
+        icon: const Icon(CupertinoIcons.pencil),
         label: Text(isCreator ? 'Edit Group' : 'View Details'),
       ),
     );
@@ -461,7 +462,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _showDeleteConfirmation,
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(CupertinoIcons.trash),
                   label: const Text('Delete Group'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.error,
@@ -486,7 +487,7 @@ class _GroupSettingsPageState extends ConsumerState<GroupSettingsPage> {
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _showLeaveConfirmation,
-                  icon: const Icon(Icons.logout),
+                  icon: const Icon(CupertinoIcons.arrow_left_right),
                   label: const Text('Leave Group'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.error,

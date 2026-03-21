@@ -189,7 +189,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
             Center(
               child: FilledButton.icon(
                 onPressed: _refresh,
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                 label: const Text('Retry'),
               ),
             ),

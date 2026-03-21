@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -51,7 +52,7 @@ class GoalsSummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
                 child: const Icon(
-                  Icons.savings_rounded,
+                  CupertinoIcons.money_dollar,
                   color: AppColors.white,
                   size: AppSizes.iconMd,
                 ),
@@ -97,7 +98,7 @@ class GoalsSummaryCard extends StatelessWidget {
                 child: _StatChip(
                   label: 'Active',
                   value: activeGoals.toString(),
-                  icon: Icons.flag_rounded,
+                  icon: CupertinoIcons.flag,
                 ),
               ),
               const SizedBox(width: AppSizes.sm),
@@ -105,7 +106,7 @@ class GoalsSummaryCard extends StatelessWidget {
                 child: _StatChip(
                   label: 'Saved',
                   value: currencyFormat.format(totalSaved),
-                  icon: Icons.account_balance_wallet_rounded,
+                  icon: CupertinoIcons.creditcard,
                 ),
               ),
               const SizedBox(width: AppSizes.sm),
@@ -113,7 +114,7 @@ class GoalsSummaryCard extends StatelessWidget {
                 child: _StatChip(
                   label: 'Target',
                   value: currencyFormat.format(totalTarget),
-                  icon: Icons.track_changes_rounded,
+                  icon: CupertinoIcons.arrow_up_right,
                 ),
               ),
             ],

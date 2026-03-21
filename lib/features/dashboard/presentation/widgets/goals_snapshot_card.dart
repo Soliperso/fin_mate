@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +54,7 @@ class GoalsSnapshotCard extends ConsumerWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.savings_rounded,
+                          CupertinoIcons.money_dollar,
                           size: AppSizes.iconSm,
                           color: AppColors.brandTeal,
                         ),

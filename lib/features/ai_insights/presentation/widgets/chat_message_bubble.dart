@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -85,7 +86,7 @@ class ChatMessageBubble extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(
-        isUser ? Icons.person : Icons.auto_awesome,
+        isUser ? CupertinoIcons.person : CupertinoIcons.sparkles,
         size: 18,
         color: Colors.white,
       ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -54,7 +55,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
             Row(
               children: [
                 Icon(
-                  Icons.receipt_long_outlined,
+                  CupertinoIcons.doc_text,
                   size: 20,
                   color: AppColors.primaryTeal,
                 ),
@@ -100,7 +101,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => _showPremiumDialog(context),
-                icon: const Icon(Icons.star_outline),
+                icon: const Icon(CupertinoIcons.star),
                 label: const Text('Learn More'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryTeal,
@@ -130,7 +131,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.receipt_long_outlined,
+                    CupertinoIcons.doc_text,
                     size: 20,
                     color: AppColors.primaryTeal,
                   ),
@@ -146,7 +147,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
               ),
               TextButton.icon(
                 onPressed: () => _showUploadSheet(context),
-                icon: const Icon(Icons.add, size: 18),
+                icon: const Icon(CupertinoIcons.add, size: 18),
                 label: const Text('Add Receipt'),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primaryTeal,
@@ -172,7 +173,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
                 child: Column(
                   children: [
                     Icon(
-                      Icons.image_not_supported_outlined,
+                      CupertinoIcons.photo,
                       size: 40,
                       color: AppColors.textTertiary,
                     ),
@@ -237,7 +238,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
             ),
             child: const Center(
               child: Icon(
-                Icons.receipt_long_outlined,
+                CupertinoIcons.doc_text,
                 size: 20,
                 color: AppColors.primaryTeal,
               ),
@@ -268,7 +269,7 @@ class ReceiptAttachmentSection extends ConsumerWidget {
             ),
           ),
           Icon(
-            Icons.chevron_right,
+            CupertinoIcons.chevron_right,
             color: AppColors.textTertiary,
           ),
         ],

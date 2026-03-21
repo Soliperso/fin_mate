@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -58,13 +59,13 @@ class _CashFlowChartState extends State<CashFlowChart> {
                   children: [
                     _buildChartTypeButton(
                       context,
-                      icon: Icons.show_chart,
+                      icon: CupertinoIcons.chart_bar_alt_fill,
                       type: ChartType.line,
                       isSelected: _selectedChartType == ChartType.line,
                     ),
                     _buildChartTypeButton(
                       context,
-                      icon: Icons.bar_chart,
+                      icon: CupertinoIcons.chart_bar,
                       type: ChartType.bar,
                       isSelected: _selectedChartType == ChartType.bar,
                     ),

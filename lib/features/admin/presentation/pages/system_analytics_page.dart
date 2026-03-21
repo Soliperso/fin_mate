@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(CupertinoIcons.arrow_counterclockwise),
             onPressed: () => ref.invalidate(systemStatsProvider),
           ),
         ],
@@ -51,7 +52,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(
-                        Icons.analytics_outlined,
+                        CupertinoIcons.chart_bar,
                         color: AppColors.white,
                         size: 40,
                       ),
@@ -84,7 +85,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.people,
+                        icon: CupertinoIcons.person_2,
                         label: 'Total Users',
                         value: stats.totalUsers.toString(),
                         color: AppColors.primaryTeal,
@@ -95,7 +96,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.check_circle,
+                        icon: CupertinoIcons.checkmark_circle_fill,
                         label: 'Active Users',
                         value: stats.activeUsers.toString(),
                         subtitle: '${stats.activeUserPercentage.toStringAsFixed(0)}%',
@@ -108,7 +109,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                 _buildStatCard(
                   context,
                   isDark: isDark,
-                  icon: Icons.person_add,
+                  icon: CupertinoIcons.person_add,
                   label: 'New This Month',
                   value: stats.newUsersThisMonth.toString(),
                   color: AppColors.info,
@@ -121,7 +122,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                 _buildStatCard(
                   context,
                   isDark: isDark,
-                  icon: Icons.account_balance_wallet,
+                  icon: CupertinoIcons.money_dollar_circle,
                   label: 'Total Net Worth',
                   value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalNetWorth),
                   color: AppColors.primaryTeal,
@@ -134,7 +135,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.arrow_upward,
+                        icon: CupertinoIcons.arrow_up,
                         label: 'Total Income',
                         value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalIncome),
                         color: AppColors.success,
@@ -145,7 +146,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.arrow_downward,
+                        icon: CupertinoIcons.arrow_down,
                         label: 'Total Expense',
                         value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalExpense),
                         color: AppColors.error,
@@ -161,7 +162,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                 _buildStatCard(
                   context,
                   isDark: isDark,
-                  icon: Icons.receipt_long,
+                  icon: CupertinoIcons.doc_text,
                   label: 'Total Transactions',
                   value: NumberFormat.decimalPattern().format(stats.totalTransactions),
                   subtitle: '${stats.averageTransactionsPerUser.toStringAsFixed(1)} avg per user',
@@ -174,7 +175,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.account_balance,
+                        icon: CupertinoIcons.building_2_fill,
                         label: 'Accounts',
                         value: stats.totalAccounts.toString(),
                         color: AppColors.info,
@@ -185,7 +186,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         isDark: isDark,
-                        icon: Icons.pie_chart,
+                        icon: CupertinoIcons.chart_pie_fill,
                         label: 'Budgets',
                         value: stats.totalBudgets.toString(),
                         color: AppColors.primaryTeal,
@@ -197,7 +198,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                 _buildStatCard(
                   context,
                   isDark: isDark,
-                  icon: Icons.group_work,
+                  icon: CupertinoIcons.person_3,
                   label: 'Bill Groups',
                   value: stats.totalBillGroups.toString(),
                   color: AppColors.warning,
@@ -215,7 +216,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.error_outline,
+                  CupertinoIcons.exclamationmark_circle,
                   size: 64,
                   color: AppColors.error,
                 ),
@@ -237,7 +238,7 @@ class SystemAnalyticsPage extends ConsumerWidget {
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton.icon(
                   onPressed: () => ref.invalidate(systemStatsProvider),
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                   label: const Text('Retry'),
                 ),
               ],

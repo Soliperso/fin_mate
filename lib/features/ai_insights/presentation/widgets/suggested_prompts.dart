@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -83,7 +84,7 @@ class _PromptChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.lightbulb_outline,
+                CupertinoIcons.lightbulb,
                 size: 16,
                 color: AppColors.primaryTeal,
               ),

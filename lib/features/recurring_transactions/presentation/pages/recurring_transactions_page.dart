@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -105,7 +106,7 @@ class _RecurringTransactionsPageState
         actions: [
           IconButton(
             onPressed: () => _showAddForm(null),
-            icon: const Icon(Icons.add),
+            icon: const Icon(CupertinoIcons.add),
           ),
         ],
       ),
@@ -151,7 +152,7 @@ class _RecurringTransactionsPageState
                         child: Padding(
                           padding: const EdgeInsets.all(AppSizes.md),
                           child: EmptyStateCard(
-                            icon: Icons.receipt_long_outlined,
+                            icon: CupertinoIcons.doc_text,
                             title: 'No Recurring Transactions',
                             message: 'Create recurring transactions to track your bills and income',
                             backgroundColor: AppColors.primaryTeal,
@@ -174,7 +175,7 @@ class _RecurringTransactionsPageState
                                   right: AppSizes.lg,
                                 ),
                                 child: const Icon(
-                                  Icons.delete,
+                                  CupertinoIcons.trash,
                                   color: Colors.white,
                                 ),
                               ),
@@ -244,7 +245,7 @@ class _RecurringTransactionsPageState
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.md),
             child: EmptyStateCard(
-              icon: Icons.error_outline,
+              icon: CupertinoIcons.exclamationmark_circle,
               title: 'Failed to Load',
               message: 'Unable to load recurring transactions. Please check your connection and try again.',
               backgroundColor: AppColors.error,
@@ -254,7 +255,7 @@ class _RecurringTransactionsPageState
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddForm(null),
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(CupertinoIcons.add, color: Colors.white),
         label: const Text('Add Recurring Transaction', style: TextStyle(color: Colors.white)),
       ),
     );

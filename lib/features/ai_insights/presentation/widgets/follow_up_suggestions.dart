@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -33,7 +34,7 @@ class FollowUpSuggestions extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.tips_and_updates_outlined,
+                CupertinoIcons.lightbulb,
                 size: 14,
                 color: AppColors.primaryTeal,
               ),
@@ -97,7 +98,7 @@ class _SuggestionChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.arrow_forward,
+                CupertinoIcons.chevron_right,
                 size: 14,
                 color: AppColors.primaryTeal,
               ),

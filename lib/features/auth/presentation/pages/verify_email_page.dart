@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +50,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     ),
                   ),
                   child: Icon(
-                    Icons.mark_email_read_outlined,
+                    CupertinoIcons.envelope_badge,
                     size: 58,
                     color: AppColors.primaryTeal.withValues(alpha: 0.7),
                     weight: 210,
@@ -93,7 +94,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.mail_outline, color: AppColors.primaryTeal, size: 20),
+                        Icon(CupertinoIcons.envelope, color: AppColors.primaryTeal, size: 20),
                         const SizedBox(width: AppSizes.sm),
                         Text(
                           'Check your email',
@@ -125,7 +126,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline, color: AppColors.error),
+                      Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
                       const SizedBox(width: AppSizes.sm),
                       Expanded(
                         child: Text(

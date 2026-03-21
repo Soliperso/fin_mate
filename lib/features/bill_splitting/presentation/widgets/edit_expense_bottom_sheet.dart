@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -140,7 +141,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -153,7 +154,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   hintText: 'e.g., Dinner at restaurant',
-                  prefixIcon: Icon(Icons.description),
+                  prefixIcon: Icon(CupertinoIcons.doc_text),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -172,7 +173,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                   labelText: 'Amount',
                   hintText: '0.00',
                   prefixText: '\$ ',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(CupertinoIcons.money_dollar),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
@@ -198,7 +199,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Date',
-                    prefixIcon: Icon(Icons.calendar_today),
+                    prefixIcon: Icon(CupertinoIcons.calendar),
                   ),
                   child: Text(
                     DateFormat('MMM dd, yyyy').format(_selectedDate),
@@ -212,7 +213,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                 initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category (Optional)',
-                  prefixIcon: Icon(Icons.category),
+                  prefixIcon: Icon(CupertinoIcons.tag),
                 ),
                 items: _categories.map((category) {
                   return DropdownMenuItem(
@@ -234,7 +235,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
               InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Split Type',
-                  prefixIcon: Icon(Icons.pie_chart),
+                  prefixIcon: Icon(CupertinoIcons.chart_pie),
                   helperText: 'Split type cannot be changed after creation',
                 ),
                 child: Text(
@@ -252,7 +253,7 @@ class _EditExpenseBottomSheetState extends ConsumerState<EditExpenseBottomSheet>
                 decoration: const InputDecoration(
                   labelText: 'Notes (Optional)',
                   hintText: 'Add any additional details',
-                  prefixIcon: Icon(Icons.note),
+                  prefixIcon: Icon(CupertinoIcons.doc_text),
                 ),
                 maxLines: 3,
                 enabled: !isLoading,

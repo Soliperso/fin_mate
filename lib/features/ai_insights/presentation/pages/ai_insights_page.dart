@@ -203,7 +203,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
             data: (messages) {
               if (messages.isEmpty) {
                 return EmptyStateCard(
-                  icon: Icons.chat_bubble_outline,
+                  icon: CupertinoIcons.chat_bubble,
                   title: 'Start a Conversation',
                   message: 'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
                   backgroundColor: AppColors.brandTeal,
@@ -531,7 +531,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.check_circle,
+                      Icon(CupertinoIcons.checkmark_circle_fill,
                         color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Unlimited AI queries'),
@@ -540,7 +540,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.check_circle,
+                      Icon(CupertinoIcons.checkmark_circle_fill,
                         color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Advanced insights & forecasting'),
@@ -549,7 +549,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.check_circle,
+                      Icon(CupertinoIcons.checkmark_circle_fill,
                         color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Receipt scanning & more'),

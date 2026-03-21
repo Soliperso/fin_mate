@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -84,7 +85,7 @@ class UserListItem extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
-                                    Icons.shield,
+                                    CupertinoIcons.shield,
                                     size: 14,
                                     color: AppColors.primaryTeal,
                                   ),
@@ -119,18 +120,18 @@ class UserListItem extends StatelessWidget {
                         runSpacing: AppSizes.xs,
                         children: [
                           _buildStatChip(
-                            icon: Icons.receipt_outlined,
+                            icon: CupertinoIcons.doc_text,
                             label: '${user.transactionCount} txns',
                             color: AppColors.tealBlue,
                           ),
                           _buildStatChip(
-                            icon: Icons.account_balance_wallet_outlined,
+                            icon: CupertinoIcons.money_dollar_circle,
                             label: NumberFormat.compactCurrency(symbol: '\$').format(user.netWorth),
                             color: AppColors.info,
                           ),
                           if (user.isActive)
                             _buildStatChip(
-                              icon: Icons.check_circle,
+                              icon: CupertinoIcons.checkmark_circle_fill,
                               label: 'Active',
                               color: AppColors.success,
                             ),
@@ -142,7 +143,7 @@ class UserListItem extends StatelessWidget {
 
                 // Arrow Icon
                 Icon(
-                  Icons.chevron_right,
+                  CupertinoIcons.chevron_right,
                   color: AppColors.textSecondary,
                   size: 20,
                 ),

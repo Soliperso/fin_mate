@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +40,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
               Row(
                 children: [
                   Icon(
-                    isPremium ? Icons.workspace_premium : Icons.account_circle,
+                    isPremium ? CupertinoIcons.star_fill : CupertinoIcons.person_crop_circle,
                     color: isPremium ? AppColors.warning : AppColors.textSecondary,
                     size: 32,
                   ),
@@ -119,46 +120,46 @@ class SubscriptionStatusCard extends ConsumerWidget {
               // Subscription details
               if (isPremium && isTrialing && trialEndDate != null) ...[
                 _DetailRow(
-                  icon: Icons.calendar_today,
+                  icon: CupertinoIcons.calendar,
                   label: 'Trial ends',
                   value: _formatDate(trialEndDate),
                 ),
                 const SizedBox(height: 12),
                 _DetailRow(
-                  icon: Icons.info_outline,
+                  icon: CupertinoIcons.info_circle,
                   label: 'Status',
                   value: 'You won\'t be charged until trial ends',
                   valueColor: AppColors.textSecondary,
                 ),
               ] else if (isPremium && isCanceled && endDate != null) ...[
                 _DetailRow(
-                  icon: Icons.event_busy,
+                  icon: CupertinoIcons.calendar_badge_minus,
                   label: 'Access until',
                   value: _formatDate(endDate),
                 ),
                 const SizedBox(height: 12),
                 _DetailRow(
-                  icon: Icons.info_outline,
+                  icon: CupertinoIcons.info_circle,
                   label: 'Status',
                   value: 'Your subscription will end on this date',
                   valueColor: AppColors.error,
                 ),
               ] else if (isPremium && endDate != null) ...[
                 _DetailRow(
-                  icon: Icons.event,
+                  icon: CupertinoIcons.calendar,
                   label: 'Next billing date',
                   value: _formatDate(endDate),
                 ),
                 const SizedBox(height: 12),
                 _DetailRow(
-                  icon: Icons.attach_money,
+                  icon: CupertinoIcons.money_dollar,
                   label: 'Amount',
                   value: '\$9.99/month',
                 ),
               ] else if (isPremium) ...[
                 // Premium user without billing date (e.g., admin with manual premium)
                 const _DetailRow(
-                  icon: Icons.verified,
+                  icon: CupertinoIcons.checkmark_shield,
                   label: 'Status',
                   value: 'All premium features unlocked',
                   valueColor: AppColors.success,
@@ -166,7 +167,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
               ] else ...[
                 // Freemium user
                 const _DetailRow(
-                  icon: Icons.info_outline,
+                  icon: CupertinoIcons.info_circle,
                   label: 'Current plan',
                   value: 'Limited features available',
                 ),
@@ -182,7 +183,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+            const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
             const SizedBox(height: 12),
             Text(
               'Failed to load subscription status',

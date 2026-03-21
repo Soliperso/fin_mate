@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class InsightsPage extends ConsumerWidget {
         title: const Text('AI Insights'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(CupertinoIcons.arrow_counterclockwise),
             onPressed: () {
               ref.invalidate(spendingInsightsProvider);
               ref.invalidate(defaultCategoryBreakdownProvider);
@@ -54,7 +55,7 @@ class InsightsPage extends ConsumerWidget {
                 data: (insights) {
                   if (insights.isEmpty) {
                     return EmptyStateCard(
-                      icon: Icons.insights,
+                      icon: CupertinoIcons.chart_bar_alt_fill,
                       title: 'No Insights Yet',
                       message: 'Start adding transactions to get personalized financial insights',
                       backgroundColor: AppColors.primaryTeal,
@@ -90,7 +91,7 @@ class InsightsPage extends ConsumerWidget {
                 data: (categories) {
                   if (categories.isEmpty) {
                     return EmptyStateCard(
-                      icon: Icons.pie_chart,
+                      icon: CupertinoIcons.chart_pie_fill,
                       title: 'No Spending Data',
                       message: 'Add some expenses to see your category breakdown',
                       backgroundColor: AppColors.primaryTeal,
@@ -118,7 +119,7 @@ class InsightsPage extends ConsumerWidget {
                 data: (forecast) {
                   if (forecast.isEmpty) {
                     return EmptyStateCard(
-                      icon: Icons.trending_up,
+                      icon: CupertinoIcons.arrow_up_right,
                       title: 'No Forecast Available',
                       message: 'Need more transaction history to generate forecasts',
                       backgroundColor: AppColors.primaryTeal,
@@ -166,22 +167,22 @@ class InsightsPage extends ConsumerWidget {
     IconData icon;
     switch (insight['icon'] as String?) {
       case 'trending_up':
-        icon = Icons.trending_up;
+        icon = CupertinoIcons.arrow_up_right;
         break;
       case 'check_circle':
-        icon = Icons.check_circle;
+        icon = CupertinoIcons.checkmark_circle_fill;
         break;
       case 'warning':
-        icon = Icons.warning;
+        icon = CupertinoIcons.exclamationmark_triangle;
         break;
       case 'savings':
-        icon = Icons.savings;
+        icon = CupertinoIcons.money_dollar;
         break;
       case 'info':
-        icon = Icons.info;
+        icon = CupertinoIcons.info_circle;
         break;
       default:
-        icon = Icons.lightbulb;
+        icon = CupertinoIcons.lightbulb;
     }
 
     return Card(

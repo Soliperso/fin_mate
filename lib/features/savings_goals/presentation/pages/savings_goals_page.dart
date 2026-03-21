@@ -28,7 +28,7 @@ class SavingsGoalsPage extends ConsumerWidget {
         title: const Text('Savings Goals'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(CupertinoIcons.info_circle),
             onPressed: () {
               _showInfoDialog(context);
             },

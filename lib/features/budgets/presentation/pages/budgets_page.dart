@@ -63,7 +63,7 @@ class BudgetsPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.error_outline,
+                  CupertinoIcons.exclamationmark_circle,
                   size: 64,
                   color: AppColors.error,
                 ),
@@ -85,7 +85,7 @@ class BudgetsPage extends ConsumerWidget {
                   onPressed: () {
                     ref.read(budgetNotifierProvider.notifier).loadBudgets();
                   },
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                   label: const Text('Retry'),
                 ),
               ],
@@ -674,32 +674,32 @@ class BudgetsPage extends ConsumerWidget {
   IconData _getIconForCategory(String? icon) {
     switch (icon) {
       // Income
-      case '💼': return Icons.work_outline;
-      case '💻': return Icons.computer;
-      case '📈': return Icons.trending_up;
-      case '🎁': return Icons.card_giftcard;
-      case '💰': return Icons.monetization_on_outlined;
+      case '💼': return CupertinoIcons.briefcase;
+      case '💻': return CupertinoIcons.desktopcomputer;
+      case '📈': return CupertinoIcons.arrow_up_right;
+      case '🎁': return CupertinoIcons.gift;
+      case '💰': return CupertinoIcons.money_dollar;
       // Expense — food & transport
-      case '🍔': return Icons.restaurant;
-      case '🚗': return Icons.directions_car;
-      case '🛍️': return Icons.shopping_bag;
-      case '🎬': return Icons.movie_outlined;
-      case '💡': return Icons.lightbulb_outline;
+      case '🍔': return CupertinoIcons.cart;
+      case '🚗': return CupertinoIcons.car;
+      case '🛍️': return CupertinoIcons.bag;
+      case '🎬': return CupertinoIcons.film;
+      case '💡': return CupertinoIcons.lightbulb;
       // Healthcare & education
       case '⚕️':
-      case '🏥': return Icons.local_hospital_outlined;
-      case '📚': return Icons.menu_book;
-      case '🎓': return Icons.school;
+      case '🏥': return CupertinoIcons.heart;
+      case '📚': return CupertinoIcons.book;
+      case '🎓': return CupertinoIcons.book;
       // Housing
       case '🏠':
-      case '🏡': return Icons.home_outlined;
+      case '🏡': return CupertinoIcons.house;
       // Personal & misc
-      case '💅': return Icons.spa_outlined;
-      case '💸': return Icons.money_off;
+      case '💅': return CupertinoIcons.sparkles;
+      case '💸': return CupertinoIcons.money_dollar;
       // Debt payments
-      case '💳': return Icons.credit_card;
-      case '🏦': return Icons.account_balance_outlined;
-      default:   return Icons.category_outlined;
+      case '💳': return CupertinoIcons.creditcard;
+      case '🏦': return CupertinoIcons.building_2_fill;
+      default:   return CupertinoIcons.tag;
     }
   }
 

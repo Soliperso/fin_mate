@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -64,7 +65,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
     return ListTile(
       title: Text(label),
       trailing: _dateRange.startDate == range.startDate && _dateRange.endDate == range.endDate
-          ? const Icon(Icons.check, color: AppColors.primaryTeal)
+          ? const Icon(CupertinoIcons.checkmark, color: AppColors.primaryTeal)
           : null,
       onTap: () {
         setState(() {
@@ -98,12 +99,12 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.date_range),
+            icon: const Icon(CupertinoIcons.calendar),
             tooltip: 'Date Range',
             onPressed: _showDateRangePicker,
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(CupertinoIcons.arrow_counterclockwise),
             tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(systemStatsProvider);
@@ -154,7 +155,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               data: (trends) {
                 if (trends.isEmpty) {
                   return EmptyStateCard(
-                    icon: Icons.trending_up_outlined,
+                    icon: CupertinoIcons.arrow_up_right,
                     title: 'No User Growth Data',
                     message: 'User growth trends will appear once data is available',
                     backgroundColor: AppColors.primaryTeal,
@@ -179,7 +180,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                 ),
               ),
               error: (error, stack) => EmptyStateCard(
-                icon: Icons.error_outline,
+                icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading User Growth',
                 message: 'Failed to load user growth data: $error',
                 backgroundColor: AppColors.error,
@@ -192,7 +193,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               data: (trends) {
                 if (trends.isEmpty) {
                   return EmptyStateCard(
-                    icon: Icons.show_chart_outlined,
+                    icon: CupertinoIcons.chart_bar,
                     title: 'No Financial Data Available',
                     message: 'Financial trends will appear as users make transactions',
                     backgroundColor: AppColors.success,
@@ -247,7 +248,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                 ),
               ),
               error: (error, stack) => EmptyStateCard(
-                icon: Icons.error_outline,
+                icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading Financial Data',
                 message: 'Failed to load financial trends: $error',
                 backgroundColor: AppColors.error,
@@ -316,7 +317,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               data: (categories) {
                 if (categories.isEmpty) {
                   return EmptyStateCard(
-                    icon: Icons.category_outlined,
+                    icon: CupertinoIcons.square_grid_2x2,
                     title: 'No Category Data Available',
                     message: 'Category spending data will appear once transactions are created',
                     backgroundColor: AppColors.tealBlue,
@@ -341,7 +342,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
                 ),
               ),
               error: (error, stack) => EmptyStateCard(
-                icon: Icons.error_outline,
+                icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading Category Data',
                 message: 'Failed to load category breakdown: $error',
                 backgroundColor: AppColors.error,
@@ -371,7 +372,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(AppSizes.md),
               child: EmptyStateCard(
-                icon: Icons.apps_outlined,
+                icon: CupertinoIcons.square_grid_2x2,
                 title: 'No Feature Adoption Data',
                 message: 'Feature adoption metrics will appear once users start using features',
                 backgroundColor: AppColors.tealBlue,
@@ -448,7 +449,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(AppSizes.md),
           child: EmptyStateCard(
-            icon: Icons.error_outline,
+            icon: CupertinoIcons.exclamationmark_circle,
             title: 'Error Loading Features',
             message: 'Failed to load feature adoption data: $error',
             backgroundColor: AppColors.error,
@@ -486,7 +487,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               data: (percentiles) {
                 if (percentiles.isEmpty) {
                   return EmptyStateCard(
-                    icon: Icons.info_outline,
+                    icon: CupertinoIcons.info_circle,
                     title: 'No Percentile Data Available',
                     message: 'Net worth distribution data will appear once users create accounts',
                     backgroundColor: AppColors.primaryTeal,
@@ -525,7 +526,7 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => EmptyStateCard(
-                icon: Icons.error_outline,
+                icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading Percentile Data',
                 message: 'Failed to load net worth distribution: $error',
                 backgroundColor: AppColors.error,
@@ -537,3 +538,4 @@ class _SystemAnalyticsPageEnhancedState extends ConsumerState<SystemAnalyticsPag
     );
   }
 }
+

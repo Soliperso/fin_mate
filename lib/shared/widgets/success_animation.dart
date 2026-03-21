@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
@@ -537,7 +538,7 @@ class SuccessSnackbar {
         right: 0,
         child: _TopSnackBar(
           message: message,
-          icon: Icons.check_circle,
+          icon: CupertinoIcons.checkmark_circle_fill,
           backgroundColor: AppColors.success,
           duration: duration,
           onDismiss: () => overlayEntry.remove(),
@@ -568,7 +569,7 @@ class ErrorSnackbar {
         right: 0,
         child: _TopErrorSnackBar(
           message: message,
-          icon: Icons.error_outline,
+          icon: CupertinoIcons.exclamationmark_circle,
           backgroundColor: AppColors.error,
           duration: duration,
           actionLabel: actionLabel,

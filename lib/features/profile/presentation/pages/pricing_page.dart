@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -238,7 +239,7 @@ class PricingPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                Icons.check_circle_rounded,
+                                CupertinoIcons.checkmark_circle_fill,
                                 size: 20,
                                 color: AppColors.iconTeal,
                               ),

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -118,7 +119,7 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.emoji_events_rounded,
+                            CupertinoIcons.rosette,
                             color: AppColors.warning,
                             size: 48,
                           ),

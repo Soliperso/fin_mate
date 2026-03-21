@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -62,10 +63,10 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               decoration: InputDecoration(
                 hintText: 'Search users by name or email...',
                 hintStyle: TextStyle(color: AppColors.textSecondary),
-                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+                prefixIcon: Icon(CupertinoIcons.search, color: AppColors.textSecondary),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(CupertinoIcons.xmark),
                         onPressed: () {
                           _searchController.clear();
                           _onSearch('');
@@ -120,7 +121,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.people_outline,
+                            CupertinoIcons.person_2,
                             size: 80,
                             color: AppColors.textSecondary.withValues(alpha: 0.5),
                           ),
@@ -171,7 +172,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(
-                        Icons.error_outline,
+                        CupertinoIcons.exclamationmark_circle,
                         size: 64,
                         color: AppColors.error,
                       ),
@@ -193,7 +194,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                       const SizedBox(height: AppSizes.lg),
                       ElevatedButton.icon(
                         onPressed: () => ref.invalidate(usersListProvider),
-                        icon: const Icon(Icons.refresh),
+                        icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                         label: const Text('Retry'),
                       ),
                     ],

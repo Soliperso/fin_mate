@@ -664,11 +664,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                               decoration: InputDecoration(
                                 labelText: 'Link to Debt (optional)',
                                 border: const OutlineInputBorder(),
-                                prefixIcon: const Icon(Icons.link_rounded),
+                                prefixIcon: const Icon(CupertinoIcons.link),
                                 isDense: true,
                                 suffixIcon: _linkedDebt != null
                                     ? IconButton(
-                                        icon: const Icon(Icons.close, size: 18),
+                                        icon: const Icon(CupertinoIcons.xmark, size: 18),
                                         onPressed: () => setState(
                                             () => _linkedDebt = null),
                                       )

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -192,7 +193,7 @@ class NetWorthTrendChart extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isGrowth ? Icons.trending_up : Icons.trending_down,
+            isGrowth ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
             color: isGrowth ? AppColors.success : AppColors.error,
             size: 16,
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,7 +78,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (insights) {
                 if (insights.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.lightbulb_outline,
+                    icon: CupertinoIcons.lightbulb,
                     title: 'No Insights Yet',
                     message: 'Start adding transactions to unlock personalized financial insights and smart recommendations.',
                     backgroundColor: AppColors.primaryTeal,
@@ -106,7 +107,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (categories) {
                 if (categories.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.pie_chart_outline,
+                    icon: CupertinoIcons.chart_pie_fill,
                     title: 'No Spending Data',
                     message: 'Add some expenses to see your category breakdown and track where your money goes.',
                     backgroundColor: AppColors.primaryTeal,
@@ -131,7 +132,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (forecast) {
                 if (forecast.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.trending_up_outlined,
+                    icon: CupertinoIcons.arrow_up_right,
                     title: 'No Forecast Yet',
                     message: 'Build up your transaction history to generate accurate cashflow forecasts for the next 3 months.',
                     backgroundColor: AppColors.primaryTeal,
@@ -156,7 +157,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (patterns) {
                 if (patterns.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.subscriptions_outlined,
+                    icon: CupertinoIcons.bell,
                     title: 'No Subscriptions Yet',
                     message: 'Add recurring transactions to identify your subscriptions and track price changes.',
                     backgroundColor: AppColors.primaryTeal,
@@ -181,7 +182,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (anomalies) {
                 if (anomalies.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.trending_flat,
+                    icon: CupertinoIcons.arrow_right,
                     title: 'Spending on Track',
                     message: 'Great news! No unusual spending detected. Your spending patterns are consistent.',
                     backgroundColor: AppColors.success,
@@ -206,7 +207,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               data: (merchants) {
                 if (merchants.isEmpty) {
                   return _buildEmptyStateCard(
-                    icon: Icons.store_outlined,
+                    icon: CupertinoIcons.building_2_fill,
                     title: 'No Merchant Data',
                     message: 'Start adding transactions to see your favorite merchants and spending patterns.',
                     backgroundColor: AppColors.warning,
@@ -272,7 +273,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
           color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         ),
-        child: Icon(Icons.close, color: AppColors.error),
+        child: Icon(CupertinoIcons.xmark, color: AppColors.error),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSizes.sm),
@@ -305,7 +306,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_left, color: AppColors.textSecondary, size: 16),
+              Icon(CupertinoIcons.chevron_left, color: AppColors.textSecondary, size: 16),
             ],
           ),
         ),
@@ -335,22 +336,22 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
     IconData icon;
     switch (insight['icon'] as String?) {
       case 'trending_up':
-        icon = Icons.trending_up;
+        icon = CupertinoIcons.arrow_up_right;
         break;
       case 'check_circle':
-        icon = Icons.check_circle;
+        icon = CupertinoIcons.checkmark_circle_fill;
         break;
       case 'warning':
-        icon = Icons.warning;
+        icon = CupertinoIcons.exclamationmark_triangle;
         break;
       case 'savings':
-        icon = Icons.savings;
+        icon = CupertinoIcons.money_dollar;
         break;
       case 'info':
-        icon = Icons.info;
+        icon = CupertinoIcons.info_circle;
         break;
       default:
-        icon = Icons.lightbulb;
+        icon = CupertinoIcons.lightbulb;
     }
 
     return Card(
@@ -549,7 +550,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       child: Icon(
-                        pattern.isPriceIncreased ? Icons.trending_up : Icons.subscriptions,
+                        pattern.isPriceIncreased ? CupertinoIcons.arrow_up_right : CupertinoIcons.bell,
                         color: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
                         size: 24,
                       ),
@@ -586,7 +587,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       icon: Icon(
-                        pattern.isPriceIncreased ? Icons.edit_outlined : Icons.check_outlined,
+                        pattern.isPriceIncreased ? CupertinoIcons.pencil : CupertinoIcons.checkmark_circle_fill,
                         size: 16,
                       ),
                       label: Text(pattern.isPriceIncreased ? 'Update Amount' : 'Mark Reviewed'),
@@ -692,7 +693,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                         color: severityColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
-                      child: Icon(Icons.warning, color: severityColor, size: 24),
+                      child: Icon(CupertinoIcons.exclamationmark_triangle, color: severityColor, size: 24),
                     ),
                     const SizedBox(width: AppSizes.md),
                     Expanded(
@@ -721,7 +722,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.list_alt_outlined, size: 16),
+                        icon: const Icon(CupertinoIcons.list_bullet, size: 16),
                         label: const Text('View Transactions'),
                         onPressed: () => context.go('/transactions'),
                         style: OutlinedButton.styleFrom(
@@ -734,7 +735,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: FilledButton.icon(
-                        icon: const Icon(Icons.add_alert_outlined, size: 16),
+                        icon: const Icon(CupertinoIcons.bell, size: 16),
                         label: const Text('Set Budget Alert'),
                         onPressed: () => context.go('/budgets'),
                         style: FilledButton.styleFrom(

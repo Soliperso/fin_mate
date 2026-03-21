@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -188,10 +189,10 @@ class BalanceTimelineChart extends StatelessWidget {
             : AppColors.success;
     final label = hasCritical ? 'Critical' : hasWarning ? 'Warning' : 'On Track';
     final icon = hasCritical
-        ? Icons.trending_down
+        ? CupertinoIcons.arrow_down_right
         : hasWarning
-            ? Icons.warning_amber_rounded
-            : Icons.trending_up;
+            ? CupertinoIcons.exclamationmark_triangle
+            : CupertinoIcons.arrow_up_right;
 
     return Container(
       padding: const EdgeInsets.symmetric(

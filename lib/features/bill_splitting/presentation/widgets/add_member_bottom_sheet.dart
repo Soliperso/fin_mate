@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -102,7 +103,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -122,7 +123,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
                 child: Row(
                   children: [
                     const Icon(
-                      Icons.info_outline,
+                      CupertinoIcons.info_circle,
                       color: AppColors.primaryTeal,
                       size: 20,
                     ),
@@ -146,7 +147,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Email Address',
                   hintText: 'user@example.com',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(CupertinoIcons.mail),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,
@@ -202,7 +203,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
                           child: Column(
                             children: [
                               Icon(
-                                Icons.person,
+                                CupertinoIcons.person,
                                 color: _selectedRole == MemberRole.member
                                     ? AppColors.primaryTeal
                                     : AppColors.textSecondary,
@@ -258,7 +259,7 @@ class _AddMemberBottomSheetState extends ConsumerState<AddMemberBottomSheet> {
                           child: Column(
                             children: [
                               Icon(
-                                Icons.admin_panel_settings,
+                                CupertinoIcons.shield,
                                 color: _selectedRole == MemberRole.admin
                                     ? AppColors.primaryTeal
                                     : AppColors.textSecondary,

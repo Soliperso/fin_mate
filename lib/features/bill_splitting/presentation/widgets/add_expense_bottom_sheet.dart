@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -129,7 +130,7 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -184,7 +185,7 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Date',
-                    prefixIcon: Icon(Icons.calendar_today),
+                    prefixIcon: Icon(CupertinoIcons.calendar),
                   ),
                   child: Text(
                     DateFormat('MMM d, yyyy').format(_selectedDate),
@@ -251,7 +252,7 @@ class _AddExpenseBottomSheetState extends ConsumerState<AddExpenseBottomSheet> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.info_outline,
+                        CupertinoIcons.info_circle,
                         size: 16,
                         color: AppColors.warning,
                       ),

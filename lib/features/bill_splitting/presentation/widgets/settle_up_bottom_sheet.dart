@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -155,7 +156,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(CupertinoIcons.xmark),
                     onPressed: isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -244,7 +245,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: AppColors.textSecondary),
+                      const Icon(CupertinoIcons.info_circle, color: AppColors.textSecondary),
                       const SizedBox(width: AppSizes.sm),
                       Expanded(
                         child: Text(
@@ -264,7 +265,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
                   key: ValueKey(_isPayingUser), // Rebuild when payment direction changes
                   decoration: InputDecoration(
                     labelText: _isPayingUser ? 'Paid to' : 'Received from',
-                    prefixIcon: const Icon(Icons.person),
+                    prefixIcon: const Icon(CupertinoIcons.person),
                   ),
                   items: availableUsers.map((balance) {
                     return DropdownMenuItem(
@@ -294,7 +295,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Amount',
                   hintText: '0.00',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(CupertinoIcons.money_dollar),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
@@ -320,7 +321,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
                 decoration: const InputDecoration(
                   labelText: 'Notes (Optional)',
                   hintText: 'Add payment method or reference',
-                  prefixIcon: Icon(Icons.note),
+                  prefixIcon: Icon(CupertinoIcons.doc_text),
                 ),
                 maxLines: 3,
                 enabled: !isLoading,
@@ -373,7 +374,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.check_circle, color: AppColors.success, size: 32),
+            const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.success, size: 32),
             const SizedBox(width: AppSizes.md),
             Expanded(
               child: Column(
@@ -413,7 +414,7 @@ class _SettleUpBottomSheetState extends ConsumerState<SettleUpBottomSheet> {
       child: Row(
         children: [
           Icon(
-            isOwed ? Icons.arrow_downward : Icons.arrow_upward,
+            isOwed ? CupertinoIcons.arrow_down_right : CupertinoIcons.arrow_up_right,
             color: isOwed ? AppColors.success : AppColors.error,
             size: 32,
           ),

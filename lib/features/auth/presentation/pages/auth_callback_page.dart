@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -89,7 +90,7 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
                   const CircularProgressIndicator()
                 else
                   Icon(
-                    _isSuccess ? Icons.check_circle_outline : Icons.info_outline,
+                    _isSuccess ? CupertinoIcons.checkmark_circle : CupertinoIcons.info_circle,
                     size: 80,
                     color: _isSuccess ? AppColors.success : AppColors.warning,
                   ),

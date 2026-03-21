@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -38,7 +39,7 @@ class SettlementHistorySection extends ConsumerWidget {
               ),
               TextButton.icon(
                 onPressed: () => _showFullHistory(context, settlements),
-                icon: const Icon(Icons.history, size: 18),
+                icon: const Icon(CupertinoIcons.clock, size: 18),
                 label: const Text('View All'),
               ),
             ],
@@ -68,15 +69,15 @@ class SettlementHistorySection extends ConsumerWidget {
     if (isCurrentUserPayer) {
       description = 'You paid ${settlement.toUserName}';
       indicatorColor = AppColors.error;
-      icon = Icons.arrow_upward;
+      icon = CupertinoIcons.arrow_up_right;
     } else if (isCurrentUserReceiver) {
       description = '${settlement.fromUserName} paid you';
       indicatorColor = AppColors.success;
-      icon = Icons.arrow_downward;
+      icon = CupertinoIcons.arrow_down_right;
     } else {
       description = '${settlement.fromUserName} paid ${settlement.toUserName}';
       indicatorColor = AppColors.textSecondary;
-      icon = Icons.swap_horiz;
+      icon = CupertinoIcons.arrow_left_right;
     }
 
     return Card(
@@ -157,7 +158,7 @@ class SettlementHistorySection extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(CupertinoIcons.xmark),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -190,7 +191,7 @@ class SettlementHistorySection extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.payment, color: AppColors.primaryTeal),
+            Icon(CupertinoIcons.creditcard, color: AppColors.primaryTeal),
             SizedBox(width: AppSizes.sm),
             Text('Settlement Details'),
           ],
@@ -204,28 +205,28 @@ class SettlementHistorySection extends ConsumerWidget {
                 context,
                 'From',
                 settlement.fromUserName ?? 'Unknown',
-                Icons.person,
+                CupertinoIcons.person,
               ),
               const SizedBox(height: AppSizes.md),
               _buildDetailRow(
                 context,
                 'To',
                 settlement.toUserName ?? 'Unknown',
-                Icons.person_outline,
+                CupertinoIcons.person,
               ),
               const SizedBox(height: AppSizes.md),
               _buildDetailRow(
                 context,
                 'Amount',
                 currencyFormat.format(settlement.amount),
-                Icons.attach_money,
+                CupertinoIcons.money_dollar,
               ),
               const SizedBox(height: AppSizes.md),
               _buildDetailRow(
                 context,
                 'Date',
                 dateTimeFormat.format(settlement.settledAt),
-                Icons.calendar_today,
+                CupertinoIcons.calendar,
               ),
               if (settlement.notes != null && settlement.notes!.isNotEmpty) ...[
                 const SizedBox(height: AppSizes.md),
@@ -233,7 +234,7 @@ class SettlementHistorySection extends ConsumerWidget {
                   context,
                   'Notes',
                   settlement.notes!,
-                  Icons.note,
+                  CupertinoIcons.doc_text,
                 ),
               ],
               if (settlement.evidenceUrl != null && settlement.evidenceUrl!.isNotEmpty) ...[
@@ -242,7 +243,7 @@ class SettlementHistorySection extends ConsumerWidget {
                   context,
                   'Evidence',
                   'View Receipt',
-                  Icons.receipt_long,
+                  CupertinoIcons.doc_text,
                   onTap: () {
                     // Evidence viewing feature placeholder
                     ErrorSnackbar.show(context, message: 'Receipt viewing coming soon');
@@ -303,7 +304,7 @@ class SettlementHistorySection extends ConsumerWidget {
               ),
             ),
             if (onTap != null)
-              const Icon(Icons.open_in_new, size: 16, color: AppColors.primaryTeal),
+              const Icon(CupertinoIcons.arrow_up_right, size: 16, color: AppColors.primaryTeal),
           ],
         ),
       ),

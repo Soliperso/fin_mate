@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +29,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.people,
+                    icon: CupertinoIcons.person_2,
                     label: 'Total Users',
                     value: stats.totalUsers.toString(),
                     iconColor: AppColors.primaryTeal,
@@ -38,7 +39,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.check_circle,
+                    icon: CupertinoIcons.checkmark_circle_fill,
                     label: 'Active Users',
                     value: stats.activeUsers.toString(),
                     subtitle: '${stats.activeUserPercentage.toStringAsFixed(0)}%',
@@ -50,7 +51,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             const SizedBox(height: AppSizes.md),
             _buildCleanStatCard(
               context,
-              icon: Icons.person_add,
+              icon: CupertinoIcons.person_add,
               label: 'New This Month',
               value: stats.newUsersThisMonth.toString(),
               iconColor: AppColors.primaryTeal,
@@ -62,7 +63,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             const SizedBox(height: AppSizes.md),
             _buildPremiumNetWorthCard(
               context,
-              icon: Icons.account_balance_wallet,
+              icon: CupertinoIcons.money_dollar_circle,
               label: 'Total Net Worth',
               value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalNetWorth),
             ),
@@ -72,7 +73,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.arrow_upward,
+                    icon: CupertinoIcons.arrow_up,
                     label: 'Total Income',
                     value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalIncome),
                     iconColor: AppColors.success,
@@ -83,7 +84,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.arrow_downward,
+                    icon: CupertinoIcons.arrow_down,
                     label: 'Total Expense',
                     value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalExpense),
                     iconColor: AppColors.error,
@@ -99,7 +100,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             const SizedBox(height: AppSizes.md),
             _buildCleanStatCard(
               context,
-              icon: Icons.receipt_long,
+              icon: CupertinoIcons.doc_text,
               label: 'Total Transactions',
               value: NumberFormat.decimalPattern().format(stats.totalTransactions),
               subtitle: '${stats.averageTransactionsPerUser.toStringAsFixed(1)} avg per user',
@@ -111,7 +112,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.account_balance,
+                    icon: CupertinoIcons.building_2_fill,
                     label: 'Accounts',
                     value: stats.totalAccounts.toString(),
                     iconColor: AppColors.primaryTeal,
@@ -121,7 +122,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 Expanded(
                   child: _buildCleanStatCard(
                     context,
-                    icon: Icons.pie_chart,
+                    icon: CupertinoIcons.chart_pie_fill,
                     label: 'Budgets',
                     value: stats.totalBudgets.toString(),
                     iconColor: AppColors.primaryTeal,
@@ -132,7 +133,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             const SizedBox(height: AppSizes.md),
             _buildCleanStatCard(
               context,
-              icon: Icons.group_work,
+              icon: CupertinoIcons.person_3,
               label: 'Bill Groups',
               value: stats.totalBillGroups.toString(),
               iconColor: AppColors.primaryTeal,
@@ -146,7 +147,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.lg),
           child: EmptyStateCard(
-            icon: Icons.error_outline,
+            icon: CupertinoIcons.exclamationmark_circle,
             title: 'Failed to Load Analytics',
             message: 'Unable to load system analytics. Please try again.',
             backgroundColor: AppColors.error,

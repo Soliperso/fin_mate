@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,7 +147,7 @@ class _EditSplitsBottomSheetState extends ConsumerState<EditSplitsBottomSheet> {
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   child: const Icon(
-                    Icons.pie_chart,
+                    CupertinoIcons.chart_pie,
                     color: AppColors.primaryTeal,
                     size: 28,
                   ),
@@ -174,7 +175,7 @@ class _EditSplitsBottomSheetState extends ConsumerState<EditSplitsBottomSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(CupertinoIcons.xmark),
                   onPressed: isLoading ? null : () => Navigator.pop(context),
                 ),
               ],
@@ -292,7 +293,7 @@ class _EditSplitsBottomSheetState extends ConsumerState<EditSplitsBottomSheet> {
                   Row(
                     children: [
                       Icon(
-                        _isValid ? Icons.check_circle : Icons.error,
+                        _isValid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.exclamationmark_circle,
                         color: _isValid ? AppColors.success : AppColors.error,
                         size: 20,
                       ),

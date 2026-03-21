@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -103,7 +104,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(CupertinoIcons.xmark),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -144,7 +145,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                     decoration: const InputDecoration(
                       labelText: 'Payment Date',
                       border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today_outlined),
+                      suffixIcon: Icon(CupertinoIcons.calendar),
                     ),
                     child: Text(_formatDate(_selectedDate)),
                   ),

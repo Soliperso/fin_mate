@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +24,7 @@ class DataPrivacyPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Data & Privacy'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -54,7 +55,7 @@ class DataPrivacyPage extends ConsumerWidget {
             _buildExportButton(
               context,
               ref,
-              icon: Icons.download_outlined,
+              icon: CupertinoIcons.arrow_down_circle,
               title: 'Export All Data',
               subtitle: 'Download complete profile as JSON',
               onPressed: () => _exportAllData(context, ref),
@@ -63,7 +64,7 @@ class DataPrivacyPage extends ConsumerWidget {
             _buildExportButton(
               context,
               ref,
-              icon: Icons.table_chart_outlined,
+              icon: CupertinoIcons.table,
               title: 'Export Transactions',
               subtitle: 'Download transactions as CSV',
               onPressed: () => _exportTransactions(context, ref),
@@ -72,7 +73,7 @@ class DataPrivacyPage extends ConsumerWidget {
             _buildExportButton(
               context,
               ref,
-              icon: Icons.assessment_outlined,
+              icon: CupertinoIcons.chart_bar,
               title: 'Export Budgets',
               subtitle: 'Download budgets as CSV',
               onPressed: () => _exportBudgets(context, ref),
@@ -95,7 +96,7 @@ class DataPrivacyPage extends ConsumerWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.info_outlined,
+                    CupertinoIcons.info_circle,
                     color: Colors.blue,
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -122,7 +123,7 @@ class DataPrivacyPage extends ConsumerWidget {
             _buildDangerButton(
               context,
               ref,
-              icon: Icons.delete_outline,
+              icon: CupertinoIcons.trash,
               title: 'Delete Account',
               subtitle: 'Permanently delete your account and all data',
               onPressed: () => _showDeleteAccountDialog(context, ref),
@@ -154,7 +155,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 color: AppColors.primaryTeal.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
-              child: Icon(Icons.cloud_upload_outlined,
+              child: Icon(CupertinoIcons.cloud_upload,
                   color: AppColors.primaryTeal, size: 24),
             ),
             title: const Text(
@@ -199,7 +200,7 @@ class DataPrivacyPage extends ConsumerWidget {
             const Divider(height: 0, thickness: 0.5, indent: 16),
             ListTile(
               dense: true,
-              leading: const Icon(Icons.backup_outlined, size: 20),
+              leading: const Icon(CupertinoIcons.arrow_up_circle, size: 20),
               title: const Text('Back Up Now',
                   style: TextStyle(fontSize: 15)),
               onTap: () async {
@@ -295,7 +296,7 @@ class DataPrivacyPage extends ConsumerWidget {
           ),
         ),
         trailing: const Icon(
-          Icons.arrow_forward,
+          CupertinoIcons.chevron_right,
           color: AppColors.textTertiary,
         ),
         onTap: onPressed,
@@ -353,7 +354,7 @@ class DataPrivacyPage extends ConsumerWidget {
           ),
         ),
         trailing: Icon(
-          Icons.arrow_forward,
+          CupertinoIcons.chevron_right,
           color: AppColors.error.withValues(alpha: 0.5),
         ),
         onTap: onPressed,

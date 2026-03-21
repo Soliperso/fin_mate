@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
@@ -14,7 +15,7 @@ class ErrorRetryWidget extends StatelessWidget {
     this.title = 'Something went wrong',
     this.message = 'Unable to load data. Please try again.',
     required this.onRetry,
-    this.icon = Icons.error_outline,
+    this.icon = CupertinoIcons.exclamationmark_circle,
   });
 
   @override
@@ -50,7 +51,7 @@ class ErrorRetryWidget extends StatelessWidget {
             const SizedBox(height: AppSizes.xl),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(CupertinoIcons.arrow_counterclockwise),
               label: const Text('Retry'),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

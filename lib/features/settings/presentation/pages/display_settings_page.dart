@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +20,7 @@ class DisplaySettingsPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Display Settings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -50,7 +51,7 @@ class DisplaySettingsPage extends ConsumerWidget {
                         .read(settingsOperationsProvider.notifier)
                         .updateThemeMode('light');
                   },
-                  icon: Icons.light_mode,
+                  icon: CupertinoIcons.sun_max,
                 ),
                 const SizedBox(height: AppSizes.sm),
                 _buildThemeTile(
@@ -66,7 +67,7 @@ class DisplaySettingsPage extends ConsumerWidget {
                         .read(settingsOperationsProvider.notifier)
                         .updateThemeMode('dark');
                   },
-                  icon: Icons.dark_mode,
+                  icon: CupertinoIcons.moon,
                 ),
                 const SizedBox(height: AppSizes.sm),
                 _buildThemeTile(
@@ -82,7 +83,7 @@ class DisplaySettingsPage extends ConsumerWidget {
                         .read(settingsOperationsProvider.notifier)
                         .updateThemeMode('system');
                   },
-                  icon: Icons.settings_brightness,
+                  icon: CupertinoIcons.device_phone_portrait,
                 ),
                 const SizedBox(height: AppSizes.lg),
 
@@ -227,7 +228,7 @@ class DisplaySettingsPage extends ConsumerWidget {
             ),
             if (isSelected)
               const Icon(
-                Icons.check_circle,
+                CupertinoIcons.checkmark_circle_fill,
                 color: AppColors.primaryTeal,
                 size: 24,
               ),

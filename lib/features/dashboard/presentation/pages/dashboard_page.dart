@@ -253,7 +253,7 @@ class DashboardPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   EmptyState(
-                    icon: Icons.error_outline,
+                    icon: CupertinoIcons.exclamationmark_circle,
                     title: 'Failed to load dashboard',
                     message:
                         'Unable to fetch your financial data. Please check your connection and try again.',
@@ -265,7 +265,7 @@ class DashboardPage extends ConsumerWidget {
                             .read(dashboardNotifierProvider.notifier)
                             .loadDashboard();
                       },
-                      icon: const Icon(Icons.refresh),
+                      icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                       label: const Text('Retry'),
                     ),
                   ),

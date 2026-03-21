@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -95,7 +96,7 @@ class MembersSection extends ConsumerWidget {
               if (onAddMember != null)
                 TextButton.icon(
                   onPressed: onAddMember,
-                  icon: const Icon(Icons.person_add, size: 20),
+                  icon: const Icon(CupertinoIcons.person_badge_plus, size: 20),
                   label: const Text('Add'),
                 ),
             ],
@@ -154,7 +155,7 @@ class MembersSection extends ConsumerWidget {
                       : null,
                   trailing: isCurrentUser
                       ? Icon(
-                          Icons.person,
+                          CupertinoIcons.person,
                           color: AppColors.slateBlue.withValues(alpha: 0.5),
                         )
                       : null,

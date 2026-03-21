@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
@@ -181,7 +182,7 @@ class _RequirementChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isMet ? Icons.check_circle : Icons.circle_outlined,
+            isMet ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
             size: 12,
             color: isMet ? AppColors.success : AppColors.textTertiary,
           ),

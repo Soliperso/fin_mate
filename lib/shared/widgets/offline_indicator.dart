@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../core/constants/app_colors.dart';
@@ -104,7 +105,7 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
           child: Row(
             children: [
               const Icon(
-                Icons.wifi_off,
+                CupertinoIcons.wifi_slash,
                 color: Colors.white,
                 size: 20,
               ),
@@ -163,7 +164,7 @@ class OfflineBanner extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Icons.wifi_off,
+                CupertinoIcons.wifi_slash,
                 color: Colors.white,
                 size: 16,
               ),

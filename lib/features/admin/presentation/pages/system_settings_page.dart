@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -36,7 +37,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.settings_outlined,
+                    CupertinoIcons.gear,
                     color: AppColors.white,
                     size: 40,
                   ),
@@ -66,7 +67,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.category_outlined,
+              icon: CupertinoIcons.square_grid_2x2,
               title: 'Default Categories',
               subtitle: 'Manage system default transaction categories',
               onTap: () {
@@ -77,7 +78,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.add_circle_outline,
+              icon: CupertinoIcons.add_circled,
               title: 'Add Custom Category',
               subtitle: 'Create new transaction categories',
               onTap: () {
@@ -92,7 +93,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.toggle_on_outlined,
+              icon: CupertinoIcons.slider_horizontal_3,
               title: 'Feature Toggles',
               subtitle: 'Enable or disable features for all users',
               onTap: () {
@@ -103,7 +104,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.science_outlined,
+              icon: CupertinoIcons.lab_flask,
               title: 'Beta Features',
               subtitle: 'Manage experimental features',
               onTap: () {
@@ -118,7 +119,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.cleaning_services_outlined,
+              icon: CupertinoIcons.trash,
               title: 'Clean Old Data',
               subtitle: 'Remove old logs and temporary data',
               onTap: () {
@@ -129,7 +130,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.backup_outlined,
+              icon: CupertinoIcons.archivebox,
               title: 'Database Backup',
               subtitle: 'Create system-wide data backup',
               onTap: () {
@@ -140,7 +141,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.download_outlined,
+              icon: CupertinoIcons.arrow_down_to_line,
               title: 'Export All Data',
               subtitle: 'Export complete system data (CSV/JSON)',
               onTap: () {
@@ -155,7 +156,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.notifications_outlined,
+              icon: CupertinoIcons.bell,
               title: 'System Notifications',
               subtitle: 'Send notifications to all users',
               onTap: () {
@@ -166,7 +167,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.email_outlined,
+              icon: CupertinoIcons.envelope,
               title: 'Email Templates',
               subtitle: 'Manage system email templates',
               onTap: () {
@@ -181,7 +182,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.security_outlined,
+              icon: CupertinoIcons.shield,
               title: 'Security Settings',
               subtitle: 'Configure authentication and security policies',
               onTap: () {
@@ -192,7 +193,7 @@ class SystemSettingsPage extends ConsumerWidget {
             _buildSettingCard(
               context,
               isDark: isDark,
-              icon: Icons.history_outlined,
+              icon: CupertinoIcons.clock,
               title: 'Activity Logs',
               subtitle: 'View system and admin activity logs',
               onTap: () {
@@ -279,7 +280,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSizes.sm),
                 Icon(
-                  Icons.chevron_right,
+                  CupertinoIcons.chevron_right,
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
@@ -296,7 +297,7 @@ class SystemSettingsPage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(
-          Icons.construction_outlined,
+          CupertinoIcons.hammer,
           size: 48,
           color: AppColors.warning,
         ),

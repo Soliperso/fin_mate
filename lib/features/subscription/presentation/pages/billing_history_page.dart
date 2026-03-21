@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +29,7 @@ class BillingHistoryPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Billing History'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(CupertinoIcons.chevron_left),
           onPressed: () => context.pop(),
         ),
       ),
@@ -61,7 +62,7 @@ class BillingHistoryPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+              const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
               const SizedBox(height: AppSizes.md),
               const Text(
                 'Failed to load billing history',
@@ -87,7 +88,7 @@ class BillingHistoryPage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.receipt_long,
+              CupertinoIcons.doc_text,
               size: 80,
               color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
@@ -155,7 +156,7 @@ class BillingHistoryPage extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   child: Icon(
-                    paid ? Icons.check_circle : Icons.schedule,
+                    paid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock,
                     color: statusColor,
                     size: 28,
                   ),
@@ -282,7 +283,7 @@ class BillingHistoryPage extends ConsumerWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => _downloadInvoice(context, invoicePdf, number ?? 'invoice'),
-                        icon: const Icon(Icons.download, size: 18),
+                        icon: const Icon(CupertinoIcons.arrow_down_to_line, size: 18),
                         label: const Text('Download'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
@@ -295,7 +296,7 @@ class BillingHistoryPage extends ConsumerWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => _launchUrl(hostedInvoiceUrl),
-                        icon: const Icon(Icons.open_in_new, size: 18),
+                        icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 18),
                         label: const Text('View Online'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,7 +58,7 @@ class BillsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateGroupDialog(context, ref),
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(CupertinoIcons.add, color: Colors.white),
         label: const Text('New Group', style: TextStyle(color: Colors.white)),
       ),
     );
@@ -153,7 +154,7 @@ class BillsPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            const Icon(CupertinoIcons.exclamationmark_circle, size: 64, color: AppColors.error),
             const SizedBox(height: AppSizes.lg),
             Text(
               isMigrationError
@@ -191,7 +192,7 @@ class BillsPage extends ConsumerWidget {
             const SizedBox(height: AppSizes.lg),
             ElevatedButton.icon(
               onPressed: () => ref.invalidate(userGroupsProvider),
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(CupertinoIcons.arrow_counterclockwise),
               label: const Text('Retry'),
             ),
           ],
@@ -205,7 +206,7 @@ class BillsPage extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.xl),
         child: EmptyStateCard(
-          icon: Icons.groups_outlined,
+          icon: CupertinoIcons.person_2,
           title: 'No Groups Yet',
           message: 'Create a group to start splitting expenses and settling payments with friends.',
           backgroundColor: AppColors.primaryTeal,
@@ -246,7 +247,7 @@ class BillsPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
-                      Icons.group,
+                      CupertinoIcons.person_2,
                       color: AppColors.slateBlue,
                     ),
                   ),
@@ -282,7 +283,7 @@ class BillsPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                  const Icon(CupertinoIcons.chevron_right, color: AppColors.textTertiary),
                 ],
               ),
               const SizedBox(height: AppSizes.md),
@@ -309,13 +310,13 @@ class BillsPage extends ConsumerWidget {
                       )
                     else if (hasBalanceError)
                       const Icon(
-                        Icons.error_outline,
+                        CupertinoIcons.exclamationmark_circle,
                         size: AppSizes.iconSm,
                         color: AppColors.textTertiary,
                       )
                     else if (balance != 0)
                       Icon(
-                        isOwed ? Icons.arrow_downward : Icons.arrow_upward,
+                        isOwed ? CupertinoIcons.arrow_down_right : CupertinoIcons.arrow_up_right,
                         size: AppSizes.iconSm,
                         color: isOwed ? AppColors.success : AppColors.error,
                       ),
