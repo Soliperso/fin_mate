@@ -108,11 +108,31 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: state.transactions.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: () => context.go('/transactions/add'),
-              backgroundColor: AppColors.brandTeal,
-              child: const Icon(CupertinoIcons.add, color: Colors.white),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSizes.buttonHeightMd,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.go('/transactions/add'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: const Text(
+                    'Add Transaction',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
+              ),
             )
           : null,
       body: Column(
