@@ -108,6 +108,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
+      floatingActionButton: state.transactions.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: () => context.go('/transactions/add'),
+              backgroundColor: AppColors.brandTeal,
+              child: const Icon(CupertinoIcons.add, color: Colors.white),
+            )
+          : null,
       body: Column(
         children: [
           Expanded(
