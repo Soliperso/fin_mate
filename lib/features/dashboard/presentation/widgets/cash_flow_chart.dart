@@ -59,7 +59,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
                   children: [
                     _buildChartTypeButton(
                       context,
-                      icon: CupertinoIcons.chart_bar_alt_fill,
+                      icon: CupertinoIcons.waveform_path_ecg,
                       type: ChartType.line,
                       isSelected: _selectedChartType == ChartType.line,
                     ),
