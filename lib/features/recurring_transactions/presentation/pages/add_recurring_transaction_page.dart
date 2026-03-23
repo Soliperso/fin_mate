@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -8,18 +9,18 @@ import '../../../transactions/presentation/providers/transaction_providers.dart'
 import '../../domain/entities/recurring_transaction_entity.dart';
 import '../providers/recurring_transactions_providers.dart';
 
-class AddRecurringTransactionBottomSheet extends ConsumerStatefulWidget {
+class AddRecurringTransactionPage extends ConsumerStatefulWidget {
   final RecurringTransactionEntity? transaction;
 
-  const AddRecurringTransactionBottomSheet({super.key, this.transaction});
+  const AddRecurringTransactionPage({super.key, this.transaction});
 
   @override
-  ConsumerState<AddRecurringTransactionBottomSheet> createState() =>
-      _AddRecurringTransactionBottomSheetState();
+  ConsumerState<AddRecurringTransactionPage> createState() =>
+      _AddRecurringTransactionPageState();
 }
 
-class _AddRecurringTransactionBottomSheetState
-    extends ConsumerState<AddRecurringTransactionBottomSheet> {
+class _AddRecurringTransactionPageState
+    extends ConsumerState<AddRecurringTransactionPage> {
   late String _type;
   String? _accountId;
   String? _categoryId;
@@ -84,10 +85,7 @@ class _AddRecurringTransactionBottomSheetState
           _endDate = picked;
         } else {
           _startDate = picked;
-          // Auto-sync next occurrence to start date only in create mode
-          if (!isEditing) {
-            _nextOccurrence = picked;
-          }
+          if (!isEditing) _nextOccurrence = picked;
         }
       });
     }
@@ -100,9 +98,7 @@ class _AddRecurringTransactionBottomSheetState
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
-      setState(() => _nextOccurrence = picked);
-    }
+    if (picked != null) setState(() => _nextOccurrence = picked);
   }
 
   Future<void> _submit() async {
@@ -149,7 +145,7 @@ class _AddRecurringTransactionBottomSheetState
         );
       }
 
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -229,7 +225,7 @@ class _AddRecurringTransactionBottomSheetState
       ),
       decoration: BoxDecoration(
         color: isDark
-            ? AppColors.tertiarySystemBackgroundDark.withValues(alpha: 0.6)
+            ? AppColors.tertiarySystemBackgroundDark
             : AppColors.systemGray6,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
       ),
@@ -254,7 +250,6 @@ class _AddRecurringTransactionBottomSheetState
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoriesProvider(_type));
 
-    // One-time init: set accountId to first account when loaded in create mode
     accountsAsync.whenData((accounts) {
       if (!isEditing && _accountId == null && accounts.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -267,63 +262,21 @@ class _AddRecurringTransactionBottomSheetState
         ? AppColors.tertiarySystemBackgroundDark
         : AppColors.systemGray6;
 
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: AppSizes.md,
-        right: AppSizes.md,
-        top: MediaQuery.of(context).padding.top + AppSizes.sm,
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        title: Text(
+          isEditing ? 'Edit Recurring Transaction' : 'Add Recurring Transaction',
+        ),
       ),
-      child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.pagePadding,
+          vertical: AppSizes.md,
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.separatorDark : AppColors.borderLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.sm),
-
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  isEditing
-                      ? 'Edit Recurring Transaction'
-                      : 'Add Recurring Transaction',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.tertiarySystemBackgroundDark
-                          : AppColors.systemGray5,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      CupertinoIcons.xmark,
-                      size: 14,
-                      color: AppColors.secondaryLabel,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.lg),
-
             // Type selector
             Container(
               height: 40,
@@ -383,9 +336,8 @@ class _AddRecurringTransactionBottomSheetState
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 6),
                       ),
-                      onChanged: (value) {
-                        setState(() => _amount = double.tryParse(value) ?? 0);
-                      },
+                      onChanged: (value) =>
+                          setState(() => _amount = double.tryParse(value) ?? 0),
                     ),
                   ),
                 ],
@@ -424,9 +376,9 @@ class _AddRecurringTransactionBottomSheetState
                       isExpanded: true,
                       initialValue: _accountId,
                       items: accounts
-                          .map((account) => DropdownMenuItem(
-                                value: account.id,
-                                child: Text(account.name),
+                          .map((a) => DropdownMenuItem(
+                                value: a.id,
+                                child: Text(a.name),
                               ))
                           .toList(),
                       onChanged: (value) => setState(() => _accountId = value),
@@ -459,9 +411,9 @@ class _AddRecurringTransactionBottomSheetState
                           value: null,
                           child: Text('No category'),
                         ),
-                        ...categories.map((category) => DropdownMenuItem(
-                              value: category.id,
-                              child: Text(category.name),
+                        ...categories.map((c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
                             )),
                       ],
                       onChanged: (value) => setState(() => _categoryId = value),
@@ -501,7 +453,9 @@ class _AddRecurringTransactionBottomSheetState
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       decoration: BoxDecoration(
-                        color: selected ? AppColors.brandTeal : sectionBg,
+                        color: selected
+                            ? AppColors.brandTeal
+                            : sectionBg,
                         borderRadius:
                             BorderRadius.circular(AppSizes.radiusSm),
                         border: Border.all(
@@ -529,7 +483,7 @@ class _AddRecurringTransactionBottomSheetState
             ),
             const SizedBox(height: AppSizes.lg),
 
-            // Schedule — start + next occurrence side by side
+            // Dates section — start + next occurrence side by side
             _sectionLabel(context, CupertinoIcons.calendar, 'Schedule'),
             const SizedBox(height: AppSizes.xs),
             Row(
@@ -629,7 +583,7 @@ class _AddRecurringTransactionBottomSheetState
                                 : AppColors.textSecondary,
                           ),
                     ),
-                    const Icon(
+                    Icon(
                       CupertinoIcons.calendar,
                       color: AppColors.brandTeal,
                       size: 18,
@@ -640,7 +594,7 @@ class _AddRecurringTransactionBottomSheetState
             ),
             const SizedBox(height: AppSizes.xl),
 
-            // Submit button
+            // Submit
             SizedBox(
               width: double.infinity,
               height: AppSizes.buttonHeightMd,

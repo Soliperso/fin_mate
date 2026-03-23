@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../transactions/domain/entities/transaction_entity.dart';
+import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
 import '../providers/recurring_transactions_providers.dart';
 import '../widgets/recurring_transaction_list_item.dart';
-import '../widgets/add_recurring_transaction_bottom_sheet.dart';
 
 class RecurringTransactionsPage extends ConsumerStatefulWidget {
   const RecurringTransactionsPage({super.key});
@@ -21,32 +26,9 @@ class RecurringTransactionsPage extends ConsumerStatefulWidget {
 class _RecurringTransactionsPageState
     extends ConsumerState<RecurringTransactionsPage> {
   String _filterType = 'all'; // all, active, inactive
-  final List<Map<String, dynamic>> _accounts = [];
-  final List<Map<String, dynamic>> _categories = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  void _loadData() async {
-    // Accounts and categories are managed by repository
-  }
 
   void _showAddForm(RecurringTransactionEntity? transaction) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => AddRecurringTransactionBottomSheet(
-        transaction: transaction,
-        accounts: _accounts,
-        categories: _categories,
-      ),
-    );
+    context.push('/recurring-transactions/add', extra: transaction);
   }
 
   void _deleteTransaction(String id) {
@@ -80,6 +62,80 @@ class _RecurringTransactionsPageState
     ref
         .read(recurringTransactionsOperationsProvider.notifier)
         .toggleActiveStatus(transaction.id, !transaction.isActive);
+  }
+
+  Future<void> _markAsPaid(RecurringTransactionEntity transaction) async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      // Create a transaction for today's payment
+      final type = TransactionType.values.firstWhere(
+        (t) => t.name == transaction.type,
+        orElse: () => TransactionType.expense,
+      );
+      final now = DateTime.now();
+      final newTransaction = TransactionEntity(
+        id: '',
+        userId: userId,
+        accountId: transaction.accountId,
+        categoryId: transaction.categoryId,
+        type: type,
+        amount: transaction.amount,
+        description: transaction.description,
+        date: now,
+        isRecurring: true,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await ref.read(transactionRepositoryProvider).createTransaction(newTransaction);
+
+      // Advance nextOccurrence to the next cycle
+      final next = _advanceOccurrence(transaction.nextOccurrence, transaction.frequency);
+      await ref
+          .read(recurringTransactionsOperationsProvider.notifier)
+          .updateRecurringTransaction(
+            id: transaction.id,
+            nextOccurrence: next,
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${transaction.description ?? 'Payment'} logged — next due ${_formatDate(next)}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to log payment: $e')),
+        );
+      }
+    }
+  }
+
+  DateTime _advanceOccurrence(DateTime from, RecurringFrequency frequency) {
+    switch (frequency) {
+      case RecurringFrequency.daily:
+        return from.add(const Duration(days: 1));
+      case RecurringFrequency.weekly:
+        return from.add(const Duration(days: 7));
+      case RecurringFrequency.monthly:
+        return DateTime(from.year, from.month + 1, from.day);
+      case RecurringFrequency.yearly:
+        return DateTime(from.year + 1, from.month, from.day);
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}';
   }
 
   List<RecurringTransactionEntity> _filterTransactions(
@@ -116,6 +172,37 @@ class _RecurringTransactionsPageState
 
           return Column(
             children: [
+              // Auto-generation coming soon banner
+              Container(
+                margin: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.sm,
+                  vertical: AppSizes.xs + 2,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.systemBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                  border: Border.all(
+                    color: AppColors.systemBlue.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.info_circle,
+                        color: AppColors.systemBlue, size: 16),
+                    const SizedBox(width: AppSizes.xs),
+                    Expanded(
+                      child: Text(
+                        'Automatic scheduling is coming soon. You\'ll be reminded when transactions are due.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.systemBlue,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSizes.sm),
               // Filter tabs
               SizedBox(
                 height: 50,
@@ -148,15 +235,40 @@ class _RecurringTransactionsPageState
               // List or empty state
               Expanded(
                 child: filtered.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSizes.md),
-                          child: EmptyStateCard(
-                            icon: CupertinoIcons.doc_text,
-                            title: 'No Recurring Transactions',
-                            message: 'Create recurring transactions to track your bills and income',
-                            backgroundColor: AppColors.primaryTeal,
-                          ),
+                    ? Padding(
+                        padding: const EdgeInsets.all(AppSizes.md),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            EmptyStateCard(
+                              icon: CupertinoIcons.doc_text,
+                              title: 'No Recurring Transactions',
+                              message: 'Create recurring transactions to track your bills and income',
+                              backgroundColor: AppColors.primaryTeal,
+                            ),
+                            const SizedBox(height: AppSizes.md),
+                            SizedBox(
+                              width: double.infinity,
+                              height: AppSizes.buttonHeightMd,
+                              child: ElevatedButton.icon(
+                                onPressed: () => _showAddForm(null),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.brandTeal,
+                                  foregroundColor: Colors.white,
+                                  elevation: 4,
+                                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                                  ),
+                                ),
+                                icon: const Icon(CupertinoIcons.add, size: 20),
+                                label: const Text(
+                                  'Add Recurring Transaction',
+                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : RefreshIndicator(
@@ -182,9 +294,9 @@ class _RecurringTransactionsPageState
                               onDismissed: (_) => _deleteTransaction(transaction.id),
                               child: GestureDetector(
                                 onLongPress: () {
-                                  showModalBottomSheet(
+                                  GlassBottomSheet.show(
                                     context: context,
-                                    builder: (context) => Column(
+                                    child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         ListTile(
@@ -222,6 +334,9 @@ class _RecurringTransactionsPageState
                                   onTap: () => _showAddForm(transaction),
                                   onDelete: () => _deleteTransaction(transaction.id),
                                   onToggleActive: (_) => _toggleActive(transaction),
+                                  onMarkPaid: transaction.type == 'expense' && transaction.isActive
+                                      ? () => _markAsPaid(transaction)
+                                      : null,
                                 ),
                               ),
                             );
@@ -253,11 +368,34 @@ class _RecurringTransactionsPageState
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddForm(null),
-        icon: const Icon(CupertinoIcons.add, color: Colors.white),
-        label: const Text('Add Recurring Transaction', style: TextStyle(color: Colors.white)),
-      ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: recurringAsync.valueOrNull?.isNotEmpty == true
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSizes.buttonHeightMd,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showAddForm(null),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: const Text(
+                    'Add Recurring Transaction',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
@@ -275,28 +413,20 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      child: FilterChip(
-        label: AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          style: TextStyle(
-            color: selected ? Colors.white : AppColors.primaryTeal,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            fontSize: 14,
-          ),
-          child: Text(label),
-        ),
-        selected: selected,
-        onSelected: (_) => onTap(),
-        backgroundColor: selected ? AppColors.tealDark : AppColors.primaryTeal.withValues(alpha: 0.1),
-        side: BorderSide(
-          color: selected ? AppColors.tealDark : AppColors.borderLight,
-          width: selected ? 0 : 1,
-        ),
-        showCheckmark: false,
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      backgroundColor: Colors.transparent,
+      selectedColor: AppColors.brandTeal.withValues(alpha: 0.2),
+      showCheckmark: false,
+      checkmarkColor: Colors.transparent,
+      labelStyle: TextStyle(
+        color: selected ? AppColors.brandTeal : AppColors.textSecondary,
+        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+      ),
+      side: BorderSide(
+        color: selected ? AppColors.brandTeal : Colors.transparent,
       ),
     );
   }
