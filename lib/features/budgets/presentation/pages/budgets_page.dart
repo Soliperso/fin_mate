@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/budget_entity.dart';
@@ -93,6 +95,7 @@ class BudgetsPage extends ConsumerWidget {
           ),
         ),
       ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: budgetsState.valueOrNull?.isNotEmpty == true
           ? Padding(
@@ -119,7 +122,7 @@ class BudgetsPage extends ConsumerWidget {
                 ),
               ),
             )
-          : null,
+          : const SizedBox.shrink(),
     );
   }
 
@@ -399,12 +402,9 @@ class BudgetsPage extends ConsumerWidget {
   }
 
   void _showCreateBudgetBottomSheet(BuildContext context, {BudgetEntity? budget}) {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      showDragHandle: false,
-      builder: (context) => CreateBudgetBottomSheet(budget: budget),
+      child: CreateBudgetBottomSheet(budget: budget),
     );
   }
 
@@ -421,14 +421,10 @@ class BudgetsPage extends ConsumerWidget {
             ? AppColors.systemOrange
             : AppColors.brandTeal;
 
-    showModalBottomSheet(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    GlassBottomSheet.show(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXl)),
-      ),
-      builder: (sheetContext) {
-        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-        return SafeArea(
+      child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -462,13 +458,13 @@ class BudgetsPage extends ConsumerWidget {
                             children: [
                               Text(
                                 budget.categoryName ?? 'Uncategorized',
-                                style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
                               Text(
                                 budget.period.displayName,
-                                style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                               ),
@@ -499,13 +495,13 @@ class BudgetsPage extends ConsumerWidget {
                           children: [
                             Text(
                               'Spent',
-                              style: Theme.of(sheetContext).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                             Text(
                               '\$${spent.toStringAsFixed(0)}',
-                              style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textSecondary,
                                   ),
@@ -517,13 +513,13 @@ class BudgetsPage extends ConsumerWidget {
                           children: [
                             Text(
                               isOverBudget ? 'Over by' : 'Remaining',
-                              style: Theme.of(sheetContext).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                             Text(
                               '\$${remaining.abs().toStringAsFixed(0)}',
-                              style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: isOverBudget
                                         ? AppColors.systemRed
@@ -542,12 +538,12 @@ class BudgetsPage extends ConsumerWidget {
 
               // Edit action
               _buildActionRow(
-                context: sheetContext,
+                context: context,
                 icon: CupertinoIcons.pencil,
                 iconColor: AppColors.brandTeal,
                 label: 'Edit Budget',
                 onTap: () {
-                  Navigator.pop(sheetContext);
+                  Navigator.pop(context);
                   _showCreateBudgetBottomSheet(context, budget: budget);
                 },
               ),
@@ -556,12 +552,12 @@ class BudgetsPage extends ConsumerWidget {
 
               // View Transactions action
               _buildActionRow(
-                context: sheetContext,
+                context: context,
                 icon: CupertinoIcons.list_bullet,
                 iconColor: AppColors.brandTeal,
                 label: 'View Transactions',
                 onTap: () {
-                  Navigator.pop(sheetContext);
+                  Navigator.pop(context);
                   context.push('/transactions');
                 },
               ),
@@ -570,13 +566,13 @@ class BudgetsPage extends ConsumerWidget {
 
               // Delete action
               _buildActionRow(
-                context: sheetContext,
+                context: context,
                 icon: CupertinoIcons.trash,
                 iconColor: AppColors.systemRed,
                 label: 'Delete Budget',
                 labelColor: AppColors.systemRed,
                 onTap: () async {
-                  Navigator.pop(sheetContext);
+                  Navigator.pop(context);
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (dialogContext) => AlertDialog(
@@ -618,8 +614,7 @@ class BudgetsPage extends ConsumerWidget {
               const SizedBox(height: AppSizes.sm),
             ],
           ),
-        );
-      },
+        ),
     );
   }
 

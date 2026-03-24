@@ -62,7 +62,7 @@ class SettingsPage extends ConsumerWidget {
                   icon: CupertinoIcons.moon,
                   title: 'Theme',
                   subtitle: 'Light or dark theme',
-                  onTap: () => context.push('/settings/display'),
+                  onTap: () => context.push('/settings/display?section=theme'),
                   trailingText: settings?.themeMode ?? 'System',
                 ),
                 _buildDivider(isDark),
@@ -72,7 +72,7 @@ class SettingsPage extends ConsumerWidget {
                   icon: CupertinoIcons.money_dollar,
                   title: 'Currency',
                   subtitle: 'Default currency format',
-                  onTap: () => context.push('/settings/display'),
+                  onTap: () => context.push('/settings/display?section=currency'),
                   trailingText: 'USD',
                 ),
                 _buildDivider(isDark),
@@ -82,7 +82,7 @@ class SettingsPage extends ConsumerWidget {
                   icon: CupertinoIcons.calendar,
                   title: 'Date Format',
                   subtitle: 'How dates are displayed',
-                  onTap: () => context.push('/settings/display'),
+                  onTap: () => context.push('/settings/display?section=dateformat'),
                   trailingText: 'MM/DD/YYYY',
                 ),
               ]),
@@ -182,10 +182,16 @@ class SettingsPage extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppColors.systemGray5,
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.systemGray5,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: AppColors.secondaryLabel, size: 17),
+              child: Icon(
+                icon,
+                color: isDark ? AppColors.labelDark : AppColors.secondaryLabel,
+                size: 17,
+              ),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(

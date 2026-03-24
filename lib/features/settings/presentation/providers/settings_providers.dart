@@ -34,7 +34,9 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
   final SettingsRepository _repository;
   final String _userId;
 
-  SettingsNotifier(this._repository, this._userId) : super(const AsyncValue.loading());
+  SettingsNotifier(this._repository, this._userId) : super(const AsyncValue.loading()) {
+    initialize();
+  }
 
   /// Initialize settings
   Future<void> initialize() async {

@@ -242,32 +242,38 @@ class _RecurringTransactionsPageState
                           children: [
                             EmptyStateCard(
                               icon: CupertinoIcons.doc_text,
-                              title: 'No Recurring Transactions',
-                              message: 'Create recurring transactions to track your bills and income',
+                              title: _filterType == 'all'
+                                  ? 'No Recurring Transactions'
+                                  : 'No ${_filterType[0].toUpperCase()}${_filterType.substring(1)} Transactions',
+                              message: _filterType == 'all'
+                                  ? 'Create recurring transactions to track your bills and income'
+                                  : 'There are no $_filterType recurring transactions right now',
                               backgroundColor: AppColors.primaryTeal,
                             ),
-                            const SizedBox(height: AppSizes.md),
-                            SizedBox(
-                              width: double.infinity,
-                              height: AppSizes.buttonHeightMd,
-                              child: ElevatedButton.icon(
-                                onPressed: () => _showAddForm(null),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.brandTeal,
-                                  foregroundColor: Colors.white,
-                                  elevation: 4,
-                                  shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                            if (_filterType == 'all') ...[
+                              const SizedBox(height: AppSizes.md),
+                              SizedBox(
+                                width: double.infinity,
+                                height: AppSizes.buttonHeightMd,
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _showAddForm(null),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.brandTeal,
+                                    foregroundColor: Colors.white,
+                                    elevation: 4,
+                                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                                    ),
+                                  ),
+                                  icon: const Icon(CupertinoIcons.add, size: 20),
+                                  label: const Text(
+                                    'Add Recurring Transaction',
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                                   ),
                                 ),
-                                icon: const Icon(CupertinoIcons.add, size: 20),
-                                label: const Text(
-                                  'Add Recurring Transaction',
-                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       )
@@ -296,36 +302,20 @@ class _RecurringTransactionsPageState
                                 onLongPress: () {
                                   GlassBottomSheet.show(
                                     context: context,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ListTile(
-                                          title: const Text('Edit'),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            _showAddForm(transaction);
-                                          },
-                                        ),
-                                        ListTile(
-                                          title: Text(
-                                            transaction.isActive ? 'Deactivate' : 'Activate',
-                                          ),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            _toggleActive(transaction);
-                                          },
-                                        ),
-                                        ListTile(
-                                          title: const Text(
-                                            'Delete',
-                                            style: TextStyle(color: AppColors.error),
-                                          ),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            _deleteTransaction(transaction.id);
-                                          },
-                                        ),
-                                      ],
+                                    child: _TransactionActionSheet(
+                                      transaction: transaction,
+                                      onEdit: () {
+                                        Navigator.pop(context);
+                                        _showAddForm(transaction);
+                                      },
+                                      onToggleActive: () {
+                                        Navigator.pop(context);
+                                        _toggleActive(transaction);
+                                      },
+                                      onDelete: () {
+                                        Navigator.pop(context);
+                                        _deleteTransaction(transaction.id);
+                                      },
                                     ),
                                   );
                                 },
@@ -427,6 +417,208 @@ class _FilterChip extends StatelessWidget {
       ),
       side: BorderSide(
         color: selected ? AppColors.brandTeal : Colors.transparent,
+      ),
+    );
+  }
+}
+
+class _TransactionActionSheet extends StatelessWidget {
+  final RecurringTransactionEntity transaction;
+  final VoidCallback onEdit;
+  final VoidCallback onToggleActive;
+  final VoidCallback onDelete;
+
+  const _TransactionActionSheet({
+    required this.transaction,
+    required this.onEdit,
+    required this.onToggleActive,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isIncome = transaction.type == 'income';
+    final isExpense = transaction.type == 'expense';
+    final typeColor = isIncome
+        ? AppColors.systemGreen
+        : isExpense
+            ? AppColors.systemRed
+            : AppColors.primaryTeal;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Drag handle
+        Center(
+          child: Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: AppSizes.md),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+
+        // Transaction summary header
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isIncome
+                      ? CupertinoIcons.arrow_down_circle_fill
+                      : isExpense
+                          ? CupertinoIcons.arrow_up_circle_fill
+                          : CupertinoIcons.arrow_left_right_circle_fill,
+                  color: typeColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AppSizes.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description ?? 'Recurring ${transaction.type}',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${transaction.frequency.displayName}  ·  ${transaction.isActive ? 'Active' : 'Inactive'}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${isIncome ? '+' : isExpense ? '-' : ''}\$${transaction.amount.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isIncome
+                          ? AppColors.success
+                          : isExpense
+                              ? AppColors.error
+                              : AppColors.textPrimary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSizes.md),
+
+        Divider(
+          height: 1,
+          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+        ),
+
+        // Edit
+        _ActionRow(
+          icon: CupertinoIcons.pencil,
+          label: 'Edit',
+          onTap: onEdit,
+        ),
+
+        Divider(
+          height: 1,
+          indent: AppSizes.md + 44 + AppSizes.sm,
+          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+        ),
+
+        // Activate / Deactivate
+        _ActionRow(
+          icon: transaction.isActive
+              ? CupertinoIcons.pause_circle
+              : CupertinoIcons.play_circle,
+          label: transaction.isActive ? 'Deactivate' : 'Activate',
+          onTap: onToggleActive,
+        ),
+
+        Divider(
+          height: 1,
+          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+        ),
+        const SizedBox(height: AppSizes.xs),
+
+        // Delete — destructive, visually separated
+        _ActionRow(
+          icon: CupertinoIcons.trash,
+          label: 'Delete',
+          color: AppColors.error,
+          onTap: onDelete,
+        ),
+        const SizedBox(height: AppSizes.sm),
+      ],
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _ActionRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? Theme.of(context).textTheme.bodyLarge?.color;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md,
+          vertical: AppSizes.sm + 2,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: (color ?? AppColors.textSecondary).withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 20, color: effectiveColor),
+            ),
+            const SizedBox(width: AppSizes.sm),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: effectiveColor,
+                  ),
+            ),
+            const Spacer(),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 14,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
       ),
     );
   }

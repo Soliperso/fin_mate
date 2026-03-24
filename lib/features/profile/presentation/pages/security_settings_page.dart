@@ -9,6 +9,7 @@ import '../../../../core/services/biometric_provider.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/mfa_provider.dart';
 import '../../../../core/services/mfa_service.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
@@ -305,13 +306,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
   }
 
   void _showMfaSetupOptions() {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-      ),
-      builder: (context) => Padding(
+      child: Padding(
         padding: const EdgeInsets.all(AppSizes.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,

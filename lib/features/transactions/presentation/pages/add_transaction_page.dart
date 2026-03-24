@@ -60,16 +60,31 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   // Attachment
   XFile? _attachmentFile;
 
-  // Debt linking (shown when a debt-payment category is selected)
+  // Debt linking (shown for any expense — optionally reduces a tracked debt balance)
   DebtEntity? _linkedDebt;
-  static const _debtPaymentCategories = {
-    'Credit Card Payment',
-    'Personal Loan Payment',
-    'Student Loan Payment',
-    'Auto Loan Payment',
-    'Mortgage Payment',
-    'Medical Debt Payment',
+
+  // Maps debt-payment category names → debt type strings in the debts table
+  static const _categoryDebtTypeMap = {
+    'Auto Loan Payment': 'auto_loan',
+    'Credit Card Payment': 'credit_card',
+    'Personal Loan Payment': 'personal_loan',
+    'Student Loan Payment': 'student_loan',
+    'Mortgage Payment': 'mortgage',
+    'Medical Debt Payment': 'medical',
   };
+
+  /// Auto-selects the matching debt when a debt-payment category is tapped.
+  /// Only pre-fills when exactly one debt of that type exists; otherwise the
+  /// user picks manually from the dropdown.
+  void _autoLinkDebt(String categoryName) {
+    final debtType = _categoryDebtTypeMap[categoryName];
+    if (debtType == null) return;
+    final debts = ref.read(debtsProvider).valueOrNull ?? [];
+    final matching = debts.where((d) => d.debtType == debtType).toList();
+    if (matching.length == 1) {
+      _linkedDebt = matching.first;
+    }
+  }
 
   @override
   void initState() {
@@ -243,16 +258,54 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     data: (premium) => premium
                         ? Column(
                             children: [
-                              OutlinedButton.icon(
-                                onPressed: _openScanReceipt,
-                                icon: const Icon(CupertinoIcons.camera, size: 18),
-                                label: const Text('Scan Receipt'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.brandTeal,
-                                  side: const BorderSide(
-                                      color: AppColors.brandTeal),
-                                  minimumSize: const Size(double.infinity,
-                                      AppSizes.buttonHeightMd),
+                              GestureDetector(
+                                onTap: _openScanReceipt,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cardColor,
+                                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                                    boxShadow: isDark
+                                        ? []
+                                        : [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.06),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSizes.md, vertical: AppSizes.md),
+                                  child: Row(
+                                    children: [
+                                      _rowIcon(CupertinoIcons.camera,
+                                          accentColor: AppColors.brandTeal, isDark: isDark),
+                                      const SizedBox(width: AppSizes.md),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text('Scan Receipt'),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Use camera to extract transaction details',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                      color: AppColors.textSecondary),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        CupertinoIcons.chevron_right,
+                                        size: 14,
+                                        color: AppColors.systemGray3,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: AppSizes.md),
@@ -646,49 +699,68 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     return _buildCategoryChips(categories, isDark);
                   },
                 ),
-                // Debt picker — only for expense + debt-payment categories
-                if (_selectedType == 'expense' &&
-                    _debtPaymentCategories.contains(_selectedCategory))
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: AppSizes.sm,
-                        left: AppSizes.md,
-                        right: AppSizes.md),
-                    child: ref.watch(debtsProvider).when(
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
-                          data: (debts) {
-                            if (debts.isEmpty) return const SizedBox.shrink();
-                            return DropdownButtonFormField<DebtEntity>(
-                              initialValue: _linkedDebt,
-                              decoration: InputDecoration(
-                                labelText: 'Link to Debt (optional)',
-                                border: const OutlineInputBorder(),
-                                prefixIcon: const Icon(CupertinoIcons.link),
-                                isDense: true,
-                                suffixIcon: _linkedDebt != null
-                                    ? IconButton(
-                                        icon: const Icon(CupertinoIcons.xmark, size: 18),
-                                        onPressed: () => setState(
-                                            () => _linkedDebt = null),
-                                      )
-                                    : null,
-                              ),
-                              items: [
-                                const DropdownMenuItem(
-                                  value: null,
-                                  child: Text('None'),
+                // Debt picker — inline row, visible for any expense
+                if (_selectedType == 'expense')
+                  ref.watch(debtsProvider).when(
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                    data: (debts) {
+                      if (debts.isEmpty) return const SizedBox.shrink();
+                      return Column(
+                        children: [
+                          _divider(isDark),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.md, vertical: 4),
+                            child: Row(
+                              children: [
+                                _rowIcon(CupertinoIcons.link,
+                                    accentColor: _typeColor, isDark: isDark),
+                                const SizedBox(width: AppSizes.md),
+                                Expanded(
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<DebtEntity>(
+                                      value: _linkedDebt,
+                                      hint: Text(
+                                        'Link to debt (optional)',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                color: AppColors.tertiaryLabel),
+                                      ),
+                                      isExpanded: true,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w500),
+                                      icon: const Icon(
+                                          CupertinoIcons.chevron_up_chevron_down,
+                                          size: 14,
+                                          color: AppColors.systemGray3),
+                                      items: [
+                                        DropdownMenuItem(
+                                          value: null,
+                                          child: Text('None',
+                                              style: TextStyle(
+                                                  color:
+                                                      AppColors.tertiaryLabel)),
+                                        ),
+                                        ...debts.map((d) => DropdownMenuItem(
+                                            value: d, child: Text(d.name))),
+                                      ],
+                                      onChanged: (d) =>
+                                          setState(() => _linkedDebt = d),
+                                    ),
+                                  ),
                                 ),
-                                ...debts.map((d) => DropdownMenuItem(
-                                      value: d,
-                                      child: Text(d.name),
-                                    )),
                               ],
-                              onChanged: (d) =>
-                                  setState(() => _linkedDebt = d),
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
               ],
             ),
@@ -923,44 +995,22 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   )
                 : GestureDetector(
                     onTap: _pickAttachment,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: AppSizes.md, horizontal: AppSizes.sm),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                        border: Border.all(
-                          color: _typeColor.withValues(alpha: 0.35),
-                          width: 1.5,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Attach a receipt or file',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: AppColors.tertiaryLabel),
                         ),
-                        color: _typeColor.withValues(alpha: 0.05),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(CupertinoIcons.paperclip,
-                              size: AppSizes.iconMd,
-                              color: _typeColor),
-                          const SizedBox(height: AppSizes.xs),
-                          Text(
-                            'Attach Receipt',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: _typeColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ),
-                          Text(
-                            'Photo or file',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.secondaryLabel),
-                          ),
-                        ],
-                      ),
+                        const Spacer(),
+                        const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: AppColors.systemGray3,
+                        ),
+                      ],
                     ),
                   ),
           ),
@@ -1016,7 +1066,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           return Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
             child: GestureDetector(
-              onTap: () => setState(() => _selectedCategory = category.name),
+              onTap: () => setState(() {
+                _selectedCategory = category.name;
+                _autoLinkDebt(category.name);
+              }),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -1231,18 +1284,35 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          SwitchListTile(
-            contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.md, vertical: 0),
-            title: const Text('Set Reminder'),
-            subtitle: Text(
-              'Get notified before this transaction\'s date',
-              style: TextStyle(
-                  color: AppColors.textSecondary, fontSize: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.md, vertical: AppSizes.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Set Reminder'),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Get notified before this transaction\'s date',
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                Transform.scale(
+                  scale: 0.75,
+                  child: CupertinoSwitch(
+                    value: _reminderEnabled,
+                    activeTrackColor: _typeColor,
+                    onChanged: (val) => setState(() => _reminderEnabled = val),
+                  ),
+                ),
+              ],
             ),
-            value: _reminderEnabled,
-            activeThumbColor: _typeColor,
-            onChanged: (val) => setState(() => _reminderEnabled = val),
           ),
           if (_reminderEnabled) ...[
             Divider(
@@ -1348,10 +1418,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isDark ? accentColor.withValues(alpha: 0.75) : accentColor,
+        color: accentColor.withValues(alpha: isDark ? 0.20 : 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
-      child: Icon(icon, size: 16, color: Colors.white),
+      child: Icon(icon, size: 16, color: accentColor),
     );
   }
 

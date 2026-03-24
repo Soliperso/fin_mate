@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/emergency_fund_status.dart';
 import '../../data/services/emergency_fund_service.dart';
@@ -269,17 +270,9 @@ class EmergencyFundCard extends ConsumerWidget {
   void _showEmergencyFundDetails(BuildContext context, WidgetRef ref) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: true,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-        ),
-        child: SingleChildScrollView(
+      child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -600,7 +593,6 @@ class EmergencyFundCard extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 

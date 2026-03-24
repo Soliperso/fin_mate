@@ -94,16 +94,38 @@ class DebtCostSplitCard extends StatelessWidget {
                   Flexible(
                     flex: (principalFraction * 1000).round(),
                     child: Container(
-                      height: 12,
+                      height: 22,
                       color: AppColors.brandTeal,
+                      alignment: Alignment.center,
+                      child: principalFraction >= 0.15
+                          ? Text(
+                              '${(principalFraction * 100).round()}%',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   if (interestFraction > 0.005)
                     Flexible(
                       flex: (interestFraction * 1000).round(),
                       child: Container(
-                        height: 12,
+                        height: 22,
                         color: AppColors.error,
+                        alignment: Alignment.center,
+                        child: interestFraction >= 0.15
+                            ? Text(
+                                '${(interestFraction * 100).round()}%',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )
+                            : null,
                       ),
                     ),
                 ],

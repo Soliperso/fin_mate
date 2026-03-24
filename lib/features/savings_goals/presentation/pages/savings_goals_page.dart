@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../domain/entities/savings_goal_entity.dart';
@@ -154,10 +155,9 @@ class SavingsGoalsPage extends ConsumerWidget {
   }
 
   void _showContributeSheet(BuildContext context, WidgetRef ref, SavingsGoal goal) {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => AddContributionBottomSheet(goalId: goal.id),
+      child: AddContributionBottomSheet(goalId: goal.id),
     ).then((result) {
       if (result == null) return;
 
@@ -184,10 +184,9 @@ class SavingsGoalsPage extends ConsumerWidget {
   }
 
   void _showCreateGoalSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => const CreateGoalBottomSheet(),
+      child: const CreateGoalBottomSheet(),
     ).then((created) {
       if (created == true) {
         ref.invalidate(savingsGoalsProvider);

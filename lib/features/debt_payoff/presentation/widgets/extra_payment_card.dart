@@ -7,7 +7,9 @@ import '../../../../core/constants/app_sizes.dart';
 import '../providers/debt_providers.dart';
 
 class ExtraPaymentCard extends ConsumerWidget {
-  const ExtraPaymentCard({super.key});
+  final double totalMinimum;
+
+  const ExtraPaymentCard({super.key, this.totalMinimum = 0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,6 +37,7 @@ class ExtraPaymentCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSizes.xs),
@@ -49,11 +52,27 @@ class ExtraPaymentCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: AppSizes.sm),
-                Text(
-                  'What if you paid extra?',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'What if you paid extra?',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
+                      if (totalMinimum > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Required minimum: ${currencyFormat.format(totalMinimum)}/mo',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -81,15 +100,15 @@ class ExtraPaymentCard extends ConsumerWidget {
                     child: Slider(
                       value: extra,
                       min: 0,
-                      max: 1000,
-                      divisions: 40,
+                      max: 2000,
+                      divisions: 80,
                       onChanged: (v) =>
                           ref.read(extraPaymentProvider.notifier).state = v,
                     ),
                   ),
                 ),
                 Text(
-                  '\$1K',
+                  '\$2K',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),

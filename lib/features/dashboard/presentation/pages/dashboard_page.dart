@@ -20,6 +20,9 @@ import '../widgets/cash_flow_chart.dart';
 import '../widgets/net_worth_trend_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
+import '../widgets/upcoming_bills_card.dart';
+import '../widgets/savings_rate_card.dart';
+import '../widgets/spending_breakdown_card.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -159,8 +162,19 @@ class DashboardPage extends ConsumerWidget {
                 const DtiWidget(),
                 const SizedBox(height: AppSizes.md),
 
+                // ── Upcoming bills ────────────────────────────────────────
+                const UpcomingBillsCard(),
+                const SizedBox(height: AppSizes.md),
+
                 // ── Cash flow ─────────────────────────────────────────────
                 CashFlowCard(
+                  income: stats.monthlyIncome,
+                  expenses: stats.monthlyExpenses,
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // ── Savings rate ──────────────────────────────────────────
+                SavingsRateCard(
                   income: stats.monthlyIncome,
                   expenses: stats.monthlyExpenses,
                 ),
@@ -204,6 +218,10 @@ class DashboardPage extends ConsumerWidget {
                     );
                   },
                 ),
+
+                // ── Spending breakdown ────────────────────────────────────
+                const SpendingBreakdownCard(),
+                const SizedBox(height: AppSizes.md),
 
                 // ── Recent Transactions ───────────────────────────────────
                 _SectionHeader(

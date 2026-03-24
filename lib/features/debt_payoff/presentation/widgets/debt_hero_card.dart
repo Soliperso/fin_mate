@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -10,6 +11,7 @@ class DebtHeroCard extends StatelessWidget {
   final int debtCount;
   final PayoffResult? payoffResult;
   final List<DebtEntity> debts;
+  final double extraMonthly;
 
   const DebtHeroCard({
     super.key,
@@ -17,6 +19,7 @@ class DebtHeroCard extends StatelessWidget {
     required this.debtCount,
     required this.debts,
     this.payoffResult,
+    this.extraMonthly = 0,
   });
 
   @override
@@ -111,6 +114,40 @@ class DebtHeroCard extends StatelessWidget {
               ),
             ],
           ),
+
+          // Extra payment active indicator
+          if (extraMonthly > 0) ...[
+            const SizedBox(height: AppSizes.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.sm,
+                vertical: AppSizes.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: 11),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Includes +\$${extraMonthly.toStringAsFixed(0)}/mo extra payment',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Overall progress bar
           if (overallProgress != null) ...[

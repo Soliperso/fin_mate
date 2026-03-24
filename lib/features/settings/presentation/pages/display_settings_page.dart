@@ -7,13 +7,64 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/theme_provider.dart';
 import '../providers/settings_providers.dart';
 
-class DisplaySettingsPage extends ConsumerWidget {
-  const DisplaySettingsPage({super.key});
+class DisplaySettingsPage extends ConsumerStatefulWidget {
+  final String? section;
+
+  const DisplaySettingsPage({super.key, this.section});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DisplaySettingsPage> createState() => _DisplaySettingsPageState();
+}
+
+class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
+  final _themeKey = GlobalKey();
+  final _currencyKey = GlobalKey();
+  final _scrollController = ScrollController();
+
+  String _currency = 'USD';
+  String _dateFormat = 'MM/DD/YYYY';
+  String _numberFormat = '1,234.56';
+  String _language = 'English (US)';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.section != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSection());
+    }
+  }
+
+  void _scrollToSection() {
+    GlobalKey? key;
+    switch (widget.section) {
+      case 'theme':
+        key = _themeKey;
+        break;
+      case 'currency':
+      case 'dateformat':
+        key = _currencyKey;
+        break;
+    }
+    if (key?.currentContext != null) {
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settingsState = ref.watch(settingsOperationsProvider);
     final currentThemeMode = ref.watch(themeModeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,181 +77,189 @@ class DisplaySettingsPage extends ConsumerWidget {
       ),
       body: settingsState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text('Error: $error'),
-        ),
-        data: (settings) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Theme Section
-                _buildSectionTitle(context, 'Theme'),
-                const SizedBox(height: AppSizes.sm),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        data: (_) => SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.pagePadding, vertical: AppSizes.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Theme ────────────────────────────────────────────────
+              _sectionLabel(context, 'Theme', key: _themeKey),
+              const SizedBox(height: AppSizes.sm),
+              _buildCard(context, isDark, children: [
                 _buildThemeTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.sun_max,
                   title: 'Light',
                   subtitle: 'Use light theme',
                   isSelected: currentThemeMode == ThemeMode.light,
                   onTap: () {
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(ThemeMode.light);
-                    ref
-                        .read(settingsOperationsProvider.notifier)
-                        .updateThemeMode('light');
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('light');
                   },
-                  icon: CupertinoIcons.sun_max,
                 ),
-                const SizedBox(height: AppSizes.sm),
+                _buildDivider(isDark),
                 _buildThemeTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.moon,
                   title: 'Dark',
                   subtitle: 'Use dark theme',
                   isSelected: currentThemeMode == ThemeMode.dark,
                   onTap: () {
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(ThemeMode.dark);
-                    ref
-                        .read(settingsOperationsProvider.notifier)
-                        .updateThemeMode('dark');
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('dark');
                   },
-                  icon: CupertinoIcons.moon,
                 ),
-                const SizedBox(height: AppSizes.sm),
+                _buildDivider(isDark),
                 _buildThemeTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.device_phone_portrait,
                   title: 'System',
                   subtitle: 'Follow device settings',
                   isSelected: currentThemeMode == ThemeMode.system,
                   onTap: () {
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(ThemeMode.system);
-                    ref
-                        .read(settingsOperationsProvider.notifier)
-                        .updateThemeMode('system');
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('system');
                   },
-                  icon: CupertinoIcons.device_phone_portrait,
                 ),
-                const SizedBox(height: AppSizes.lg),
+              ]),
+              const SizedBox(height: AppSizes.lg),
 
-                // Currency Section
-                _buildSectionTitle(context, 'Currency & Format'),
-                const SizedBox(height: AppSizes.sm),
-                _buildDropdownSettingTile(
+              // ── Currency & Format ─────────────────────────────────────
+              _sectionLabel(context, 'Currency & Format', key: _currencyKey),
+              const SizedBox(height: AppSizes.sm),
+              _buildCard(context, isDark, children: [
+                _buildOptionTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.money_dollar,
                   title: 'Currency',
                   subtitle: 'Default currency for amounts',
-                  value: settings?.notificationPreferences.budgetThreshold.toString() ?? 'USD',
-                  items: const ['USD', 'EUR', 'GBP', 'JPY', 'INR'],
-                  onChanged: (value) {
-                    // Update currency in profile
-                  },
+                  value: _currency,
+                  options: const ['USD', 'EUR', 'GBP', 'JPY', 'INR'],
+                  onSelected: (v) => setState(() => _currency = v),
                 ),
-                const SizedBox(height: AppSizes.sm),
-                _buildDropdownSettingTile(
+                _buildDivider(isDark),
+                _buildOptionTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.calendar,
                   title: 'Date Format',
                   subtitle: 'How dates are displayed',
-                  value: 'MM/DD/YYYY',
-                  items: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
-                  onChanged: (value) {
-                    // Update date format
-                  },
+                  value: _dateFormat,
+                  options: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
+                  onSelected: (v) => setState(() => _dateFormat = v),
                 ),
-                const SizedBox(height: AppSizes.sm),
-                _buildDropdownSettingTile(
+                _buildDivider(isDark),
+                _buildOptionTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.number,
                   title: 'Number Format',
                   subtitle: 'How numbers are formatted',
-                  value: '1,234.56',
-                  items: const ['1,234.56', '1.234,56', '1 234.56'],
-                  onChanged: (value) {
-                    // Update number format
-                  },
+                  value: _numberFormat,
+                  options: const ['1,234.56', '1.234,56', '1 234.56'],
+                  onSelected: (v) => setState(() => _numberFormat = v),
                 ),
-                const SizedBox(height: AppSizes.lg),
+              ]),
+              const SizedBox(height: AppSizes.lg),
 
-                // Language Section
-                _buildSectionTitle(context, 'Language'),
-                const SizedBox(height: AppSizes.sm),
-                _buildDropdownSettingTile(
+              // ── Language ──────────────────────────────────────────────
+              _sectionLabel(context, 'Language'),
+              const SizedBox(height: AppSizes.sm),
+              _buildCard(context, isDark, children: [
+                _buildOptionTile(
                   context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.globe,
                   title: 'Language',
-                  subtitle: 'App language',
-                  value: 'English (US)',
-                  items: const ['English (US)', 'Spanish', 'French', 'German'],
-                  onChanged: (value) {
-                    if (value != null) {
-                      final lang = value.toLowerCase().contains('spanish')
-                          ? 'es'
-                          : value.toLowerCase().contains('french')
-                              ? 'fr'
-                              : value.toLowerCase().contains('german')
-                                  ? 'de'
-                                  : 'en';
-                      ref
-                          .read(settingsOperationsProvider.notifier)
-                          .updateLanguage(lang);
-                    }
+                  subtitle: 'App display language',
+                  value: _language,
+                  options: const ['English (US)', 'Spanish', 'French', 'German'],
+                  onSelected: (v) {
+                    setState(() => _language = v);
+                    final lang = v.toLowerCase().contains('spanish')
+                        ? 'es'
+                        : v.toLowerCase().contains('french')
+                            ? 'fr'
+                            : v.toLowerCase().contains('german')
+                                ? 'de'
+                                : 'en';
+                    ref.read(settingsOperationsProvider.notifier).updateLanguage(lang);
                   },
                 ),
-                const SizedBox(height: AppSizes.xl),
-              ],
-            ),
-          );
-        },
+              ]),
+              const SizedBox(height: AppSizes.xl),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
+  Widget _sectionLabel(BuildContext context, String text, {Key? key}) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, bool isDark,
+      {required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: AppColors.cardShadow(isDark),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: children),
     );
   }
 
   Widget _buildThemeTile(
     BuildContext context, {
+    required bool isDark,
+    required IconData icon,
     required String title,
     required String subtitle,
     required bool isSelected,
     required VoidCallback onTap,
-    required IconData icon,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryTeal.withValues(alpha: 0.1)
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryTeal : Colors.transparent,
-            width: 2,
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppSizes.sm),
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.systemGray5,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 icon,
-                color: AppColors.primaryTeal,
-                size: 28,
+                color: isDark ? AppColors.labelDark : AppColors.secondaryLabel,
+                size: 17,
               ),
             ),
             const SizedBox(width: AppSizes.md),
@@ -210,84 +269,132 @@ class DisplaySettingsPage extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
-                  const SizedBox(height: AppSizes.xs),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
             ),
             if (isSelected)
-              const Icon(
-                CupertinoIcons.checkmark_circle_fill,
-                color: AppColors.primaryTeal,
-                size: 24,
-              ),
+              const Icon(CupertinoIcons.checkmark,
+                  size: 16, color: AppColors.primaryTeal)
+            else
+              const SizedBox(width: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDropdownSettingTile(
+  Widget _buildOptionTile(
     BuildContext context, {
+    required bool isDark,
+    required IconData icon,
     required String title,
     required String subtitle,
     required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
+    required List<String> options,
+    required ValueChanged<String> onSelected,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
+    return InkWell(
+      onTap: () => _showPickerDialog(context, title, value, options, onSelected),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.systemGray5,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: isDark ? AppColors.labelDark : AppColors.secondaryLabel,
+                size: 17,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSizes.xs),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: AppSizes.md),
-          DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            onChanged: onChanged,
-            items: items
-                .map(
-                  (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
-                )
-                .toList(),
-          ),
-        ],
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.secondaryLabel,
+                  ),
+            ),
+            const SizedBox(width: AppSizes.xs),
+            const Icon(CupertinoIcons.chevron_right,
+                size: 16, color: AppColors.systemGray3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider(bool isDark) {
+    return Divider(
+      height: 0,
+      thickness: 0.5,
+      indent: AppSizes.md + 32 + AppSizes.md,
+      color: isDark ? AppColors.separatorDark : AppColors.separator,
+    );
+  }
+
+  void _showPickerDialog(
+    BuildContext context,
+    String title,
+    String current,
+    List<String> options,
+    ValueChanged<String> onSelected,
+  ) {
+    showDialog(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: Text(title),
+        children: options
+            .map(
+              (option) => SimpleDialogOption(
+                onPressed: () {
+                  onSelected(option);
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  children: [
+                    Expanded(child: Text(option)),
+                    if (option == current)
+                      const Icon(CupertinoIcons.checkmark,
+                          size: 16, color: AppColors.primaryTeal),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }

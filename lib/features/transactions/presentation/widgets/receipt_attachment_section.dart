@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/subscription_provider.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/premium_feature_dialog.dart';
 import '../../../documents/presentation/widgets/upload_document_bottom_sheet.dart';
 
@@ -278,13 +279,11 @@ class ReceiptAttachmentSection extends ConsumerWidget {
   }
 
   void _showUploadSheet(BuildContext context) {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      builder: (context) => UploadDocumentBottomSheet(
+      child: UploadDocumentBottomSheet(
         transactionId: transactionId,
       ),
-      isScrollControlled: true,
-      useSafeArea: true,
     );
   }
 

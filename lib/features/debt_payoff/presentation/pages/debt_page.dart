@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -16,7 +19,6 @@ import '../widgets/debt_hero_card.dart';
 import '../widgets/edit_debt_bottom_sheet.dart';
 import '../widgets/extra_payment_card.dart';
 import '../widgets/log_payment_bottom_sheet.dart';
-import '../widgets/monthly_funding_card.dart';
 import '../widgets/monthly_schedule_list.dart';
 import '../widgets/payment_history_sheet.dart';
 import '../widgets/payoff_timeline_chart.dart';
@@ -63,42 +65,37 @@ class _DebtPageState extends ConsumerState<DebtPage>
   }
 
   void _showAddDebt() async {
-    await showModalBottomSheet(
+    await GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => const AddDebtBottomSheet(),
+      child: const AddDebtBottomSheet(),
     );
   }
 
   void _showLogPayment(DebtEntity debt) async {
-    await showModalBottomSheet(
+    await GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => LogPaymentBottomSheet(debt: debt),
+      child: LogPaymentBottomSheet(debt: debt),
     );
   }
 
   void _showEditDebt(DebtEntity debt) async {
-    await showModalBottomSheet(
+    await GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => EditDebtBottomSheet(debt: debt),
+      child: EditDebtBottomSheet(debt: debt),
     );
   }
 
   void _showStrategyComparison() {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => const StrategyComparisonSheet(),
+      child: const StrategyComparisonSheet(),
     );
   }
 
   void _showPaymentHistory(DebtEntity debt) {
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => PaymentHistorySheet(debt: debt),
+      child: PaymentHistorySheet(debt: debt),
     );
   }
 
@@ -130,6 +127,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
     final activeResult =
         extra > 0 && simResult != null ? simResult : payoffResult;
 
+    final dateFormat = DateFormat('MMM yyyy');
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -149,6 +149,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
           ],
         ),
       ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true
           ? Padding(
@@ -175,7 +176,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                 ),
               ),
             )
-          : null,
+          : const SizedBox.shrink(),
       body: debtsAsync.when(
         loading: () => _buildLoading(),
         error: (e, _) => Column(
@@ -255,68 +256,201 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     AppSizes.md, AppSizes.md, AppSizes.md, 100,
                   ),
                   children: [
-                    // Hero card
+                    // Hero card — uses simulated result when extra payment is active
                     DebtHeroCard(
                       totalBalance: totalBalance,
                       debtCount: debts.length,
-                      payoffResult: payoffResult,
+                      payoffResult: activeResult ?? payoffResult,
                       debts: debts,
+                      extraMonthly: extra,
                     ),
                     const SizedBox(height: AppSizes.md),
 
-                    // Strategy picker
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SegmentedButton<DebtStrategy>(
-                            segments: const [
-                              ButtonSegment(
-                                value: DebtStrategy.avalanche,
-                                label: Text('Avalanche'),
-                                icon: Icon(CupertinoIcons.flame),
+                    // Strategy card
+                    Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                        side: BorderSide(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.separatorDark.withValues(alpha: 0.5)
+                              : AppColors.separator.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSizes.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Payoff Strategy',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: _showStrategyComparison,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        'Compare',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: AppColors.brandTeal,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      const Icon(
+                                        CupertinoIcons.chevron_right,
+                                        size: 12,
+                                        color: AppColors.brandTeal,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSizes.sm),
+                            SizedBox(
+                              width: double.infinity,
+                              child: SegmentedButton<DebtStrategy>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: DebtStrategy.avalanche,
+                                    label: Text('Avalanche'),
+                                    icon: Icon(CupertinoIcons.flame),
+                                  ),
+                                  ButtonSegment(
+                                    value: DebtStrategy.snowball,
+                                    label: Text('Snowball'),
+                                    icon: Icon(CupertinoIcons.snow),
+                                  ),
+                                ],
+                                selected: {strategy},
+                                onSelectionChanged: (s) => ref
+                                    .read(selectedStrategyProvider.notifier)
+                                    .state = s.first,
+                                style: ButtonStyle(
+                                  iconColor: WidgetStateProperty.resolveWith(
+                                    (states) => states.contains(WidgetState.selected)
+                                        ? AppColors.brandTeal
+                                        : AppColors.textSecondary,
+                                  ),
+                                  textStyle: WidgetStateProperty.all(
+                                    Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          fontSize: (Theme.of(context).textTheme.labelLarge?.fontSize ?? 14) * 0.8,
+                                        ),
+                                  ),
+                                ),
                               ),
-                              ButtonSegment(
-                                value: DebtStrategy.snowball,
-                                label: Text('Snowball'),
-                                icon: Icon(CupertinoIcons.snow),
+                            ),
+                            const SizedBox(height: AppSizes.xs),
+                            Text(
+                              strategy == DebtStrategy.avalanche
+                                  ? 'Highest interest rate first — saves the most money'
+                                  : 'Lowest balance first — builds momentum faster',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                            if (payoffResult != null && payoffResult.schedule.isNotEmpty) ...[
+                              const SizedBox(height: AppSizes.sm),
+
+                              // 3-metric summary row
+                              Row(
+                                children: [
+                                  _MetricItem(
+                                    icon: CupertinoIcons.calendar,
+                                    iconColor: AppColors.brandTeal,
+                                    value: dateFormat.format(payoffResult.debtFreeDate),
+                                  ),
+                                  const SizedBox(width: AppSizes.sm),
+                                  _MetricItem(
+                                    icon: CupertinoIcons.clock,
+                                    iconColor: AppColors.brandTeal,
+                                    value: '${payoffResult.totalMonths} mo',
+                                  ),
+                                  const SizedBox(width: AppSizes.sm),
+                                  _MetricItem(
+                                    icon: CupertinoIcons.money_dollar,
+                                    iconColor: AppColors.error,
+                                    value: currencyFormat.format(payoffResult.totalInterestPaid),
+                                    valueColor: AppColors.error,
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: AppSizes.sm),
+
+                              // Focus chip
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.sm,
+                                  vertical: AppSizes.xs,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.brandTeal.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                                  border: Border.all(
+                                    color: AppColors.brandTeal.withValues(alpha: 0.35),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      CupertinoIcons.arrow_right_circle,
+                                      size: 11,
+                                      color: AppColors.brandTeal,
+                                    ),
+                                    const SizedBox(width: AppSizes.xs),
+                                    Text(
+                                      'Focus on: ${payoffResult.schedule.first.focusDebtName}',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                            color: AppColors.brandTeal,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
-                            selected: {strategy},
-                            onSelectionChanged: (s) => ref
-                                .read(selectedStrategyProvider.notifier)
-                                .state = s.first,
-                            style: ButtonStyle(
-                              iconColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColors.brandTeal;
-                                }
-                                return AppColors.textSecondary;
-                              }),
-                            ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: AppSizes.xs),
-                        IconButton(
-                          icon: const Icon(CupertinoIcons.info_circle),
-                          color: AppColors.textSecondary,
-                          tooltip: 'Compare strategies',
-                          onPressed: _showStrategyComparison,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+
+                    // Section header
+                    Row(
+                      children: [
+                        Text(
+                          'Your Debts',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '${debts.length} account${debts.length == 1 ? '' : 's'}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSizes.xs),
-                    Text(
-                      strategy == DebtStrategy.avalanche
-                          ? 'Highest interest rate first — saves the most money'
-                          : 'Lowest balance first — builds momentum faster',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: AppColors.textSecondary),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSizes.md),
+                    const SizedBox(height: AppSizes.sm),
 
                     // Debt cards
                     ...sorted.map((debt) {
@@ -340,8 +474,10 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             ),
                           );
                         }),
-                    const SizedBox(height: AppSizes.sm),
-                    MonthlyFundingCard(debts: sorted),
+                    const SizedBox(height: AppSizes.md),
+                    ExtraPaymentCard(
+                      totalMinimum: debts.fold(0.0, (s, d) => s + d.minimumPayment),
+                    ),
                   ],
                 ),
               ),
@@ -372,7 +508,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         MonthlyScheduleList(
                           result: activeResult ?? payoffResult,
                           debts: debts,
-                          monthsToShow: 6,
+                          monthsToShow: 3,
                         ),
                         const SizedBox(height: AppSizes.lg),
                         const ExtraPaymentCard(),
@@ -398,6 +534,45 @@ class _DebtPageState extends ConsumerState<DebtPage>
         SkeletonCard(),
         SizedBox(height: AppSizes.sm),
         SkeletonCard(),
+      ],
+    );
+  }
+}
+
+class _MetricItem extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String value;
+  final Color? valueColor;
+
+  const _MetricItem({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSizes.xs),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+          ),
+          child: Icon(icon, size: 12, color: iconColor),
+        ),
+        const SizedBox(width: AppSizes.xs),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: valueColor,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
       ],
     );
   }

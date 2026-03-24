@@ -43,7 +43,7 @@ class CashFlowCard extends StatelessWidget {
               children: [
                 Text(
                   'Monthly Cash Flow',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
                   'This month',

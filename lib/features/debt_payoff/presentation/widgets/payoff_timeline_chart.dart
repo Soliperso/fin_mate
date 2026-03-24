@@ -10,13 +10,14 @@ import '../../domain/entities/debt_entity.dart';
 import '../../domain/services/payoff_calculator.dart';
 
 /// Colours assigned to debts in chart order (cycles if > length).
+/// Matches _kScheduleDebtColors in monthly_schedule_list.dart exactly.
 const _kDebtColors = [
-  AppColors.error,
-  AppColors.info,
-  AppColors.warning,
-  AppColors.success,
-  AppColors.primaryTeal,
-  AppColors.systemGray,
+  AppColors.brandTeal,
+  AppColors.systemBlue,
+  AppColors.systemIndigo,
+  AppColors.systemPurple,
+  AppColors.systemPink,
+  AppColors.systemOrange,
 ];
 
 class PayoffTimelineChart extends StatelessWidget {
@@ -42,13 +43,10 @@ class PayoffTimelineChart extends StatelessWidget {
         1.1;
     final debtFreeLabel = DateFormat('MMM yyyy').format(result.debtFreeDate);
 
-    // Build per-debt line data. Fall back to a single total line when no
-    // per-debt data is available (e.g. empty debtBalancesAfter).
-    final lines = _buildLines();
+    final lines = _buildStackedAreas();
     if (lines.isEmpty) return const SizedBox.shrink();
 
-    // x-axis point count comes from the first line
-    final pointCount = lines.first.spots.length;
+    final pointCount = lines.last.spots.length; // last = smallest cumulative (debt0)
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -59,50 +57,11 @@ class PayoffTimelineChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + legend
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Payoff Timeline',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(width: AppSizes.sm),
-              Flexible(
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: AppSizes.xs,
-                  runSpacing: 4,
-                  children: debts.asMap().entries.map((e) {
-                    final color = _kDebtColors[e.key % _kDebtColors.length];
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          e.value.name,
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 9,
-                                  ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+          Text(
+            'Debt Payoff Breakdown',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-              ),
-            ],
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
@@ -128,7 +87,7 @@ class PayoffTimelineChart extends StatelessWidget {
                       getTitlesWidget: (value, _) => Text(
                         _compactCurrency(value),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontSize: 9,
+                              fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
                       ),
@@ -159,7 +118,7 @@ class PayoffTimelineChart extends StatelessWidget {
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(
-                                  fontSize: 9,
+                                  fontSize: 11,
                                   color: AppColors.textSecondary,
                                 ),
                           ),
@@ -182,34 +141,80 @@ class PayoffTimelineChart extends StatelessWidget {
                 lineBarsData: lines,
                 lineTouchData: LineTouchData(
                   enabled: true,
+                  getTouchedSpotIndicator: (barData, spotIndexes) {
+                    return spotIndexes.map((index) {
+                      return TouchedSpotIndicatorData(
+                        FlLine(
+                          color: (isDark ? AppColors.white : AppColors.charcoal)
+                              .withValues(alpha: 0.2),
+                          strokeWidth: 0.8,
+                        ),
+                        FlDotData(
+                          show: true,
+                          getDotPainter: (spot, percent, bar, idx) =>
+                              FlDotCirclePainter(
+                            radius: 3,
+                            color: bar.color ?? AppColors.textSecondary,
+                            strokeWidth: 1.5,
+                            strokeColor: isDark
+                                ? AppColors.secondarySystemBackgroundDark
+                                : AppColors.white,
+                          ),
+                        ),
+                      );
+                    }).toList();
+                  },
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipColor: (_) => isDark
-                        ? AppColors.secondarySystemBackgroundDark
-                        : AppColors.secondarySystemBackground,
+                        ? AppColors.tertiarySystemBackgroundDark
+                        : AppColors.white,
+                    tooltipBorder: BorderSide(
+                      color: isDark
+                          ? AppColors.separatorDark
+                          : AppColors.separator,
+                      width: 0.5,
+                    ),
+                    tooltipRoundedRadius: AppSizes.radiusSm,
+                    tooltipPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((s) {
+                      return touchedSpots.asMap().entries.map((entry) {
+                        final i = entry.key;
+                        final s = entry.value;
                         final snapIdx =
                             (s.x * result.schedule.length / pointCount)
                                 .round()
                                 .clamp(0, result.schedule.length - 1);
                         final snap = result.schedule[snapIdx];
-                        final debtIdx = s.barIndex;
-                        final debtName = debtIdx < debts.length
-                            ? debts[debtIdx].name
-                            : 'Total';
-                        final balance = debtIdx < debts.length
-                            ? (snap.debtBalancesAfter[debts[debtIdx].id] ?? 0)
+                        // lineBarsData is in reversed debt order:
+                        // barIndex 0 = debts.last, barIndex N-1 = debts.first
+                        final debtIdx = debts.length - 1 - s.barIndex;
+                        final debt = (debtIdx >= 0 && debtIdx < debts.length)
+                            ? debts[debtIdx]
+                            : null;
+                        final balance = debt != null
+                            ? (snap.debtBalancesAfter[debt.id] ?? 0)
                             : snap.totalBalance;
+                        final name = debt?.name ?? 'Total';
+
+                        // First item carries the date header on its own line
+                        final datePrefix = i == 0
+                            ? '${DateFormat('MMM yyyy').format(snap.date)}\n'
+                            : '';
+
                         return LineTooltipItem(
-                          '${DateFormat('MMM yyyy').format(snap.date)}\n'
-                          '$debtName: \$${NumberFormat('#,##0').format(balance)}',
+                          '$datePrefix$name:  \$${NumberFormat('#,##0').format(balance)}',
                           TextStyle(
                             color: isDark
                                 ? AppColors.labelDark
                                 : AppColors.label,
                             fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
+                          textAlign: TextAlign.left,
+                          children: const [],
                         );
                       }).toList();
                     },
@@ -219,11 +224,43 @@ class PayoffTimelineChart extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSizes.sm),
+
+          // Legend
+          if (debts.length > 1)
+            Wrap(
+              spacing: AppSizes.md,
+              runSpacing: AppSizes.xs,
+              children: debts.asMap().entries.map((e) {
+                final color = _kDebtColors[e.key % _kDebtColors.length];
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      e.value.name,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+
+          const SizedBox(height: AppSizes.sm),
           Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   CupertinoIcons.flag,
                   size: 14,
                   color: AppColors.success,
@@ -244,59 +281,60 @@ class PayoffTimelineChart extends StatelessWidget {
     );
   }
 
-  /// Builds one [LineChartBarData] per debt using per-debt balance history.
-  List<LineChartBarData> _buildLines() {
+  /// Builds stacked area chart data.
+  ///
+  /// Each debt gets a cumulative line (debt0, debt0+debt1, ..., all debts).
+  /// Lines are added to [lineBarsData] in DECREASING cumulative order so that
+  /// fl_chart draws the largest area first (bottom), then each smaller area
+  /// covers it — producing the stacked visual effect.
+  List<LineChartBarData> _buildStackedAreas() {
     final total = result.schedule.length;
-    if (total == 0) return [];
+    if (total == 0 || debts.isEmpty) return [];
 
     final targetCount = total <= 24 ? total : 24;
     final step = total / targetCount;
+    final sampledIndices = List.generate(
+      targetCount,
+      (i) => (i * step).round().clamp(0, total - 1),
+    );
 
-    // Sampled schedule indices
-    final sampledIndices = List.generate(targetCount, (i) {
-      return (i * step).round().clamp(0, total - 1);
-    });
+    // cum[di][si] = sum of debt[0..di] balances at sample point si
+    final cumulativeSpots = <List<FlSpot>>[];
 
-    return debts.asMap().entries.map((entry) {
-      final debt = entry.value;
-      final color = _kDebtColors[entry.key % _kDebtColors.length];
-
+    for (int di = 0; di < debts.length; di++) {
       final spots = <FlSpot>[];
-      for (int i = 0; i < sampledIndices.length; i++) {
-        final snap = result.schedule[sampledIndices[i]];
-        final balance = snap.debtBalancesAfter[debt.id] ?? 0.0;
-        spots.add(FlSpot(i.toDouble(), balance));
+      for (int si = 0; si < sampledIndices.length; si++) {
+        final snap = result.schedule[sampledIndices[si]];
+        double cum = 0;
+        for (int k = 0; k <= di; k++) {
+          cum += snap.debtBalancesAfter[debts[k].id] ?? 0.0;
+        }
+        spots.add(FlSpot(si.toDouble(), cum));
       }
-      // Only drop to zero if the debt is actually fully paid off in the schedule
-      final lastBalance =
-          result.schedule.last.debtBalancesAfter[debt.id] ?? 0.0;
-      if (spots.isNotEmpty && spots.last.y > 0.01 && lastBalance < 0.01) {
-        spots.add(FlSpot(targetCount.toDouble(), 0));
-      }
-      // fl_chart needs ≥ 2 points to draw a line
+      // Ensure ≥2 points
       if (spots.length < 2) spots.add(FlSpot(1.0, 0.0));
+      cumulativeSpots.add(spots);
+    }
 
-      return LineChartBarData(
-        spots: spots,
+    // Build in reverse order: largest cumulative first (drawn at bottom)
+    final lines = <LineChartBarData>[];
+    for (int di = debts.length - 1; di >= 0; di--) {
+      final color = _kDebtColors[di % _kDebtColors.length];
+      lines.add(LineChartBarData(
+        spots: cumulativeSpots[di],
         isCurved: true,
         curveSmoothness: 0.3,
         color: color,
-        barWidth: 2,
+        barWidth: 1.5,
         isStrokeCapRound: true,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(
           show: true,
-          gradient: LinearGradient(
-            colors: [
-              color.withValues(alpha: 0.10),
-              color.withValues(alpha: 0.0),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: color.withValues(alpha: 0.75),
         ),
-      );
-    }).toList();
+      ));
+    }
+    return lines;
   }
 
   double _interval(double maxY) {

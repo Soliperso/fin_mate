@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/services/auto_backup_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
@@ -18,6 +17,7 @@ class DataPrivacyPage extends ConsumerWidget {
     final settingsAsync = ref.watch(userSettingsProvider);
     final settings = settingsAsync.valueOrNull;
     final schedule = settings?.notificationPreferences.autoBackupSchedule ?? 'off';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,104 +29,124 @@ class DataPrivacyPage extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.lg),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.pagePadding, vertical: AppSizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Automatic Backup Section
-            _buildSectionTitle(context, 'Automatic Backup'),
+            // ── Data Management ───────────────────────────────────────
+            _sectionLabel(context, 'Data Management'),
             const SizedBox(height: AppSizes.sm),
-            _buildSectionDescription(
-              context,
-              'Automatically save a JSON backup to secure cloud storage.',
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildBackupSection(context, ref, schedule, settings),
+            _buildCard(context, isDark, children: [
+              _buildOptionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.cloud_upload,
+                title: 'Backup Schedule',
+                subtitle: 'Automatically back up your data',
+                trailingText: _scheduleLabel(schedule),
+                onTap: () => _showSchedulePicker(context, ref, settings, schedule),
+              ),
+              _buildDivider(isDark),
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.arrow_down_circle,
+                title: 'Export All Data',
+                subtitle: 'Download complete profile as JSON',
+                onTap: () => _exportAllData(context, ref),
+              ),
+              _buildDivider(isDark),
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.table,
+                title: 'Export Transactions',
+                subtitle: 'Download transactions as CSV',
+                onTap: () => _exportTransactions(context, ref),
+              ),
+              _buildDivider(isDark),
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.chart_bar,
+                title: 'Export Budgets',
+                subtitle: 'Download budgets as CSV',
+                onTap: () => _exportBudgets(context, ref),
+              ),
+              _buildDivider(isDark),
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.lock_shield,
+                title: 'Data Protection',
+                subtitle: 'Your data is encrypted and never shared',
+                showChevron: false,
+                onTap: null,
+              ),
+            ]),
             const SizedBox(height: AppSizes.lg),
 
-            // Data Export Section
-            _buildSectionTitle(context, 'Export Your Data'),
-            const SizedBox(height: AppSizes.sm),
-            _buildSectionDescription(
-              context,
-              'Download your financial data in various formats for backup or analysis.',
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildExportButton(
-              context,
-              ref,
-              icon: CupertinoIcons.arrow_down_circle,
-              title: 'Export All Data',
-              subtitle: 'Download complete profile as JSON',
-              onPressed: () => _exportAllData(context, ref),
-            ),
-            const SizedBox(height: AppSizes.sm),
-            _buildExportButton(
-              context,
-              ref,
-              icon: CupertinoIcons.table,
-              title: 'Export Transactions',
-              subtitle: 'Download transactions as CSV',
-              onPressed: () => _exportTransactions(context, ref),
-            ),
-            const SizedBox(height: AppSizes.sm),
-            _buildExportButton(
-              context,
-              ref,
-              icon: CupertinoIcons.chart_bar,
-              title: 'Export Budgets',
-              subtitle: 'Download budgets as CSV',
-              onPressed: () => _exportBudgets(context, ref),
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Privacy Section
-            _buildSectionTitle(context, 'Privacy Controls'),
+            // ── Danger Zone ───────────────────────────────────────────
+            _sectionLabel(context, 'Danger Zone', isDanger: true),
             const SizedBox(height: AppSizes.sm),
             Container(
-              padding: const EdgeInsets.all(AppSizes.md),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                color: AppColors.error.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                 border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.3),
-                  width: 1,
+                  color: AppColors.error.withValues(alpha: 0.2),
+                  width: 0.5,
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.info_circle,
-                    color: Colors.blue,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _showDeleteAccountDialog(context, ref),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(CupertinoIcons.trash,
+                            color: AppColors.error, size: 17),
+                      ),
+                      const SizedBox(width: AppSizes.md),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Delete Account',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.error,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Permanently delete your account and all data',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(CupertinoIcons.chevron_right,
+                          size: 16,
+                          color: AppColors.error.withValues(alpha: 0.5)),
+                    ],
                   ),
-                  const SizedBox(width: AppSizes.md),
-                  Expanded(
-                    child: Text(
-                      'Your data is encrypted and only accessible to you. We never share your financial information.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Danger Zone
-            _buildSectionTitle(context, 'Danger Zone', isDanger: true),
-            const SizedBox(height: AppSizes.sm),
-            _buildSectionDescription(
-              context,
-              'These actions cannot be undone. Please proceed with caution.',
-              isDanger: true,
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildDangerButton(
-              context,
-              ref,
-              icon: CupertinoIcons.trash,
-              title: 'Delete Account',
-              subtitle: 'Permanently delete your account and all data',
-              onPressed: () => _showDeleteAccountDialog(context, ref),
             ),
             const SizedBox(height: AppSizes.xl),
           ],
@@ -135,233 +155,218 @@ class DataPrivacyPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBackupSection(
+  // ── Shared layout helpers ──────────────────────────────────────────────────
+
+  Widget _sectionLabel(BuildContext context, String text,
+      {bool isDanger = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: isDanger ? AppColors.error : AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, bool isDark,
+      {required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: AppColors.cardShadow(isDark),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildActionTile(
+    BuildContext context, {
+    required bool isDark,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback? onTap,
+    bool showChevron = true,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.systemGray5,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: isDark ? AppColors.labelDark : AppColors.secondaryLabel,
+                size: 17,
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            if (showChevron)
+              const Icon(CupertinoIcons.chevron_right,
+                  size: 16, color: AppColors.systemGray3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile(
+    BuildContext context, {
+    required bool isDark,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String trailingText,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.tertiarySystemBackgroundDark
+                    : AppColors.systemGray5,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: isDark ? AppColors.labelDark : AppColors.secondaryLabel,
+                size: 17,
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              trailingText,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.secondaryLabel,
+                  ),
+            ),
+            const SizedBox(width: AppSizes.xs),
+            const Icon(CupertinoIcons.chevron_right,
+                size: 16, color: AppColors.systemGray3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider(bool isDark) {
+    return Divider(
+      height: 0,
+      thickness: 0.5,
+      indent: AppSizes.md + 32 + AppSizes.md,
+      color: isDark ? AppColors.separatorDark : AppColors.separator,
+    );
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  String _scheduleLabel(String schedule) {
+    switch (schedule) {
+      case 'daily':
+        return 'Daily';
+      case 'weekly':
+        return 'Weekly';
+      default:
+        return 'Off';
+    }
+  }
+
+  void _showSchedulePicker(
     BuildContext context,
     WidgetRef ref,
-    String schedule,
     SettingsEntity? settings,
+    String current,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(AppSizes.sm),
-              decoration: BoxDecoration(
-                color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-              ),
-              child: Icon(CupertinoIcons.cloud_upload,
-                  color: AppColors.primaryTeal, size: 24),
-            ),
-            title: const Text(
-              'Backup Schedule',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-            subtitle: FutureBuilder<DateTime?>(
-              future: AutoBackupService().lastBackupDate(),
-              builder: (context, snap) {
-                if (snap.data != null) {
-                  final d = snap.data!;
-                  return Text(
-                    'Last backup: ${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 13),
-                  );
-                }
-                return Text('No backup yet',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 13));
-              },
-            ),
-            trailing: DropdownButton<String>(
-              value: schedule,
-              underline: const SizedBox(),
-              items: const [
-                DropdownMenuItem(value: 'off', child: Text('Off')),
-                DropdownMenuItem(value: 'daily', child: Text('Daily')),
-                DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+    final options = ['off', 'daily', 'weekly'];
+    final labels = ['Off', 'Daily', 'Weekly'];
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Backup Schedule'),
+        children: List.generate(options.length, (i) {
+          return SimpleDialogOption(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              if (settings == null) return;
+              final updated = settings.notificationPreferences
+                  .copyWith(autoBackupSchedule: options[i]);
+              ref
+                  .read(settingsOperationsProvider.notifier)
+                  .updateNotificationPreferences(updated);
+            },
+            child: Row(
+              children: [
+                Expanded(child: Text(labels[i])),
+                if (options[i] == current)
+                  const Icon(CupertinoIcons.checkmark,
+                      size: 16, color: AppColors.primaryTeal),
               ],
-              onChanged: (value) {
-                if (value == null || settings == null) return;
-                final updated = settings.notificationPreferences
-                    .copyWith(autoBackupSchedule: value);
-                ref
-                    .read(settingsOperationsProvider.notifier)
-                    .updateNotificationPreferences(updated);
-              },
             ),
-          ),
-          if (schedule != 'off') ...[
-            const Divider(height: 0, thickness: 0.5, indent: 16),
-            ListTile(
-              dense: true,
-              leading: const Icon(CupertinoIcons.arrow_up_circle, size: 20),
-              title: const Text('Back Up Now',
-                  style: TextStyle(fontSize: 15)),
-              onTap: () async {
-                try {
-                  final svc = AutoBackupService();
-                  await svc.runBackup();
-                  await svc.markBackupComplete();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Backup completed')),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Backup failed: $e')),
-                    );
-                  }
-                }
-              },
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(
-    BuildContext context,
-    String title, {
-    bool isDanger = false,
-  }) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: isDanger ? AppColors.error : AppColors.textSecondary,
-          ),
-    );
-  }
-
-  Widget _buildSectionDescription(
-    BuildContext context,
-    String description, {
-    bool isDanger = false,
-  }) {
-    return Text(
-      description,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: isDanger ? AppColors.error.withValues(alpha: 0.7) : AppColors.textSecondary,
-          ),
-    );
-  }
-
-  Widget _buildExportButton(
-    BuildContext context,
-    WidgetRef ref, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(AppSizes.sm),
-          decoration: BoxDecoration(
-            color: AppColors.primaryTeal.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-          ),
-          child: Icon(
-            icon,
-            color: AppColors.primaryTeal,
-            size: 24,
-          ),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
-        ),
-        trailing: const Icon(
-          CupertinoIcons.chevron_right,
-          color: AppColors.textTertiary,
-        ),
-        onTap: onPressed,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDangerButton(
-    BuildContext context,
-    WidgetRef ref, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.error.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        border: Border.all(
-          color: AppColors.error.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(AppSizes.sm),
-          decoration: BoxDecoration(
-            color: AppColors.error.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-          ),
-          child: Icon(
-            icon,
-            color: AppColors.error,
-            size: 24,
-          ),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: AppColors.error,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            color: AppColors.error.withValues(alpha: 0.7),
-            fontSize: 14,
-          ),
-        ),
-        trailing: Icon(
-          CupertinoIcons.chevron_right,
-          color: AppColors.error.withValues(alpha: 0.5),
-        ),
-        onTap: onPressed,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm,
-        ),
+          );
+        }),
       ),
     );
   }
@@ -371,22 +376,9 @@ class DataPrivacyPage extends ConsumerWidget {
       final jsonData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportDataAsJson();
-      await Share.share(jsonData, subject: 'FinMate Data Export');
+      await _share(context, jsonData, subject: 'FinMate Data Export');
     } catch (e) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Export Failed'),
-            content: Text('Export failed: $e'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK')),
-            ],
-          ),
-        );
-      }
+      if (context.mounted) _showErrorDialog(context, e);
     }
   }
 
@@ -395,22 +387,9 @@ class DataPrivacyPage extends ConsumerWidget {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportTransactionsAsCsv();
-      await Share.share(csvData, subject: 'FinMate Transactions Export');
+      await _share(context, csvData, subject: 'FinMate Transactions Export');
     } catch (e) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Export Failed'),
-            content: Text('Export failed: $e'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK')),
-            ],
-          ),
-        );
-      }
+      if (context.mounted) _showErrorDialog(context, e);
     }
   }
 
@@ -419,23 +398,40 @@ class DataPrivacyPage extends ConsumerWidget {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportBudgetsAsCsv();
-      await Share.share(csvData, subject: 'FinMate Budgets Export');
+      await _share(context, csvData, subject: 'FinMate Budgets Export');
     } catch (e) {
+      if (context.mounted) _showErrorDialog(context, e);
+    }
+  }
+
+  Future<void> _share(BuildContext context, String text,
+      {required String subject}) async {
+    try {
+      await Share.share(text, subject: subject);
+    } catch (_) {
+      // Share sheet unavailable or dismissed — show a non-intrusive message
       if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Export Failed'),
-            content: Text('Export failed: $e'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK')),
-            ],
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sharing is not available on this device')),
         );
       }
     }
+  }
+
+  void _showErrorDialog(BuildContext context, Object e) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Export Failed'),
+        content: Text('$e'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
@@ -455,10 +451,8 @@ class DataPrivacyPage extends ConsumerWidget {
               ),
             ),
             SizedBox(height: AppSizes.md),
-            Text(
-              'Deleting your account will:',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+            Text('Deleting your account will:',
+                style: TextStyle(fontWeight: FontWeight.w600)),
             SizedBox(height: AppSizes.xs),
             Text('• Permanently delete all your transactions'),
             Text('• Delete all budgets and goals'),
@@ -468,9 +462,7 @@ class DataPrivacyPage extends ConsumerWidget {
             Text(
               'This action cannot be reversed.',
               style: TextStyle(
-                color: AppColors.error,
-                fontWeight: FontWeight.w600,
-              ),
+                  color: AppColors.error, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -484,10 +476,8 @@ class DataPrivacyPage extends ConsumerWidget {
               Navigator.pop(context);
               _showPasswordConfirmationDialog(context, ref);
             },
-            child: const Text(
-              'Delete My Account',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: const Text('Delete My Account',
+                style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -531,25 +521,21 @@ class DataPrivacyPage extends ConsumerWidget {
               Navigator.pop(context);
               await _performAccountDeletion(context, ref);
             },
-            child: const Text(
-              'Delete Account',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: const Text('Delete Account',
+                style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _performAccountDeletion(BuildContext context, WidgetRef ref) async {
+  Future<void> _performAccountDeletion(
+      BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(settingsOperationsProvider.notifier).deleteAccount();
-
       if (context.mounted) {
         await ref.read(authNotifierProvider.notifier).signOut();
-        if (context.mounted) {
-          context.go('/login');
-        }
+        if (context.mounted) context.go('/login');
       }
     } catch (e) {
       if (context.mounted) {
@@ -560,8 +546,9 @@ class DataPrivacyPage extends ConsumerWidget {
             content: Text('Failed to delete account: $e'),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK')),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
             ],
           ),
         );

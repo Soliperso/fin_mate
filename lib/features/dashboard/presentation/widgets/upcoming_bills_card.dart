@@ -1,115 +1,244 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../recurring_transactions/domain/entities/recurring_transaction_entity.dart';
+import '../../../recurring_transactions/presentation/providers/recurring_transactions_providers.dart';
 
-class UpcomingBillsCard extends StatelessWidget {
-  final List<Map<String, dynamic>> bills;
-
-  const UpcomingBillsCard({
-    super.key,
-    required this.bills,
-  });
+class UpcomingBillsCard extends ConsumerWidget {
+  const UpcomingBillsCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final upcomingAsync = ref.watch(upcomingRecurringTransactionsProvider);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    final bills = upcomingAsync.valueOrNull
+        ?.where((t) => t.type == 'expense' && t.isActive)
+        .toList()
+      ?..sort((a, b) => a.nextOccurrence.compareTo(b.nextOccurrence));
+
+    final isLoading = upcomingAsync.isLoading;
+    final isEmpty = !isLoading && (bills == null || bills.isEmpty);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: AppColors.cardShadow(isDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header ──────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Upcoming Bills',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                TextButton(
-                  onPressed: () {
-                    // context.go('/recurring-transactions'); // [V1.1: Recurring Transactions disabled]
-                  },
-                  child: const Text('View All'),
+                GestureDetector(
+                  onTap: () => context.push('/recurring-transactions'),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.brandTeal,
+                      letterSpacing: -0.24,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSizes.sm),
-            if (bills.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.lg),
-                  child: Column(
-                    children: [
-                      Icon(
+          ),
+
+          // ── Content ─────────────────────────────────────────────────────
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.all(AppSizes.lg),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.md,
+              ),
+              child: Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.systemGreen.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
                         CupertinoIcons.checkmark_circle_fill,
-                        size: 48,
-                        color: AppColors.success.withValues(alpha: 0.5),
+                        size: 28,
+                        color: AppColors.systemGreen.withValues(alpha: 0.5),
                       ),
-                      const SizedBox(height: AppSizes.sm),
-                      Text(
-                        'No upcoming bills',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                    ),
+                    const SizedBox(height: AppSizes.xs),
+                    Text(
+                      'No upcoming bills in the next 30 days',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            _BillsList(bills: bills!, isDark: isDark),
+        ],
+      ),
+    );
+  }
+}
+
+class _BillsList extends StatelessWidget {
+  final List<RecurringTransactionEntity> bills;
+  final bool isDark;
+
+  const _BillsList({required this.bills, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = bills.length > 3 ? bills.sublist(0, 3) : bills;
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+    return Column(
+      children: [
+        for (int i = 0; i < visible.length; i++) ...[
+          _BillRow(
+            bill: visible[i],
+            currencyFormat: currencyFormat,
+            isDark: isDark,
+          ),
+          if (i < visible.length - 1)
+            Divider(
+              height: 0,
+              thickness: 0.5,
+              indent: 60,
+              color: isDark ? AppColors.separatorDark : AppColors.separator,
+            ),
+        ],
+        const SizedBox(height: AppSizes.xs),
+      ],
+    );
+  }
+}
+
+class _BillRow extends StatelessWidget {
+  final RecurringTransactionEntity bill;
+  final NumberFormat currencyFormat;
+  final bool isDark;
+
+  const _BillRow({
+    required this.bill,
+    required this.currencyFormat,
+    required this.isDark,
+  });
+
+  Color _dueColor() {
+    if (bill.isOverdue || bill.daysUntilDue <= 0) return AppColors.systemRed;
+    if (bill.daysUntilDue <= 7) return AppColors.systemOrange;
+    return AppColors.systemGreen;
+  }
+
+  String _dueLabel() {
+    if (bill.isOverdue) return 'Overdue';
+    final days = bill.daysUntilDue;
+    if (days == 0) return 'Due today';
+    if (days == 1) return 'Due tomorrow';
+    return 'Due in $days days';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dueColor = _dueColor();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: 12,
+      ),
+      child: Row(
+        children: [
+          // Icon
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.systemRed.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              CupertinoIcons.arrow_up,
+              color: AppColors.systemRed,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppSizes.sm + 4),
+          // Name + due chip
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  bill.description ?? bill.categoryName ?? 'Bill',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.85),
                       ),
-                    ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: dueColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                  ),
+                  child: Text(
+                    _dueLabel(),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: dueColor,
+                      letterSpacing: -0.1,
+                    ),
                   ),
                 ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: bills.length > 3 ? 3 : bills.length,
-                separatorBuilder: (context, index) => Divider(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.separatorDark
-                      : AppColors.separator,
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSizes.sm),
+          // Amount
+          Text(
+            currencyFormat.format(bill.amount),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.systemRed,
                 ),
-                itemBuilder: (context, index) {
-                  final bill = bills[index];
-                  final dueDate = DateTime.parse(bill['dueDate'] as String);
-                  final daysUntilDue = dueDate.difference(DateTime.now()).inDays;
-
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(AppSizes.sm),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                      ),
-                      child: const Icon(
-                        CupertinoIcons.doc_text,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                    title: Text(bill['name'] as String),
-                    subtitle: Text(
-                      daysUntilDue == 0
-                          ? 'Due today'
-                          : daysUntilDue == 1
-                              ? 'Due tomorrow'
-                              : 'Due in $daysUntilDue days',
-                      style: TextStyle(
-                        color: daysUntilDue <= 3 ? AppColors.error : AppColors.textSecondary,
-                      ),
-                    ),
-                    trailing: Text(
-                      currencyFormat.format(bill['amount'] as double),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  );
-                },
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

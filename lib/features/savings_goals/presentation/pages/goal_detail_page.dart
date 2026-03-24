@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
@@ -429,6 +431,7 @@ class GoalDetailPage extends ConsumerWidget {
           ),
         ),
       ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
       floatingActionButton: goalAsync.value?.isCompleted == false
           ? Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
@@ -454,7 +457,7 @@ class GoalDetailPage extends ConsumerWidget {
                 ),
               ),
             )
-          : null,
+          : const SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
@@ -478,10 +481,9 @@ class GoalDetailPage extends ConsumerWidget {
     // Snapshot goal state BEFORE sheet opens for deterministic achievement check
     final goalSnapshot = ref.read(goalProvider(goalId)).value;
 
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => AddContributionBottomSheet(goalId: goalId),
+      child: AddContributionBottomSheet(goalId: goalId),
     ).then((result) {
       if (result == null) return;
 
@@ -516,10 +518,9 @@ class GoalDetailPage extends ConsumerWidget {
 
   void _showEditGoalSheet(BuildContext context, WidgetRef ref, goal) {
     if (goal == null) return;
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => EditGoalBottomSheet(goal: goal),
+      child: EditGoalBottomSheet(goal: goal),
     ).then((updated) {
       if (updated == true) {
         ref.invalidate(goalProvider(goalId));

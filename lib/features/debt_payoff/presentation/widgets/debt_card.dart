@@ -339,7 +339,12 @@ class DebtCard extends StatelessWidget {
                         ),
                         if (monthsLeft != null) ...[
                           const TextSpan(text: '  ·  '),
-                          TextSpan(text: '~$monthsLeft mo left'),
+                          TextSpan(
+                            text: '~$monthsLeft mo (min. only)',
+                            style: const TextStyle(
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
                       ],
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(

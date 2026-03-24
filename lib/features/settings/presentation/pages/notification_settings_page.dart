@@ -260,10 +260,14 @@ class NotificationSettingsPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: AppSizes.md),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: AppColors.primaryTeal,
+          Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: value,
+              onChanged: onChanged,
+              activeThumbColor: Colors.white,
+              activeTrackColor: AppColors.primaryTeal,
+            ),
           ),
         ],
       ),

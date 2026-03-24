@@ -7,9 +7,11 @@ import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
@@ -108,8 +110,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state.transactions.isNotEmpty
+      floatingActionButton: state.transactions.isNotEmpty && state.filteredTransactions.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
               child: SizedBox(
@@ -134,7 +137,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
               ),
             )
-          : null,
+          : const SizedBox.shrink(),
       body: Column(
         children: [
           Expanded(
@@ -527,6 +530,28 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppSizes.sm),
+              SizedBox(
+                width: double.infinity,
+                height: AppSizes.buttonHeightMd,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.go('/transactions/add'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: const Text(
+                    'Add Transaction',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
+              ),
             ],
           ],
         ),
@@ -717,13 +742,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final dateFormat = DateFormat('MMMM d, yyyy • h:mm a');
 
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-      ),
-      builder: (sheetContext) => Container(
+      child: Container(
         padding: const EdgeInsets.all(AppSizes.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -740,7 +761,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
                 IconButton(
                   icon: const Icon(CupertinoIcons.xmark),
-                  onPressed: () => Navigator.pop(sheetContext),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
@@ -785,7 +806,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      Navigator.pop(sheetContext);
+                      Navigator.pop(context);
                       await context.push('/transactions/add?id=${transaction.id}');
                       // Refresh after editing
                       if (context.mounted) {
@@ -803,7 +824,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.pop(sheetContext);
+                      Navigator.pop(context);
                       _confirmDelete(context, transaction, notifier);
                     },
                     icon: const Icon(CupertinoIcons.trash),
@@ -970,13 +991,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     _minAmountController.text = minAmount?.toString() ?? '';
     _maxAmountController.text = maxAmount?.toString() ?? '';
 
-    showModalBottomSheet(
+    GlassBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-      ),
-      builder: (context) => StatefulBuilder(
+      child: StatefulBuilder(
         builder: (context, setModalState) {
           return Padding(
             padding: EdgeInsets.only(

@@ -48,8 +48,9 @@ import '../../features/settings/presentation/pages/data_privacy_page.dart';
 // import '../../features/admin/presentation/pages/user_management_page.dart';
 // import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
 // import '../../features/admin/presentation/pages/system_settings_page.dart';
-// [V1.1: Recurring Transactions - Commented out]
-// import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
+import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
+import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
+import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -174,7 +175,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
-            builder: (context, state) => const DashboardPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: DashboardPage()),
             routes: [
               GoRoute(
                 path: 'emergency-fund',
@@ -202,18 +203,26 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/budgets',
             name: 'budgets',
-            builder: (context, state) => const BudgetsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: BudgetsPage()),
           ),
-          // [V1.1: Recurring Transactions - Commented out - Complex automation, defer for now]
-          // GoRoute(
-          //   path: '/recurring-transactions',
-          //   name: 'recurring-transactions',
-          //   builder: (context, state) => const RecurringTransactionsPage(),
-          // ),
+          GoRoute(
+            path: '/recurring-transactions',
+            name: 'recurring-transactions',
+            pageBuilder: (context, state) => const NoTransitionPage(child: RecurringTransactionsPage()),
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'add-recurring-transaction',
+                builder: (context, state) => AddRecurringTransactionPage(
+                  transaction: state.extra as RecurringTransactionEntity?,
+                ),
+              ),
+            ],
+          ),
           GoRoute(
             path: '/transactions',
             name: 'transactions',
-            builder: (context, state) => const TransactionsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: TransactionsPage()),
             routes: [
               GoRoute(
                 path: 'add',
@@ -246,7 +255,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/debt',
             name: 'debt',
-            builder: (context, state) => const DebtPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: DebtPage()),
           ),
           // [MVP: AI Insights - Commented out]
           // GoRoute(
@@ -257,12 +266,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/notifications',
             name: 'notifications',
-            builder: (context, state) => const NotificationsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: NotificationsPage()),
           ),
           GoRoute(
             path: '/goals',
             name: 'goals',
-            builder: (context, state) => const SavingsGoalsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: SavingsGoalsPage()),
             routes: [
               GoRoute(
                 path: ':goalId',
@@ -289,7 +298,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/profile',
             name: 'profile',
-            builder: (context, state) => const ProfilePage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: ProfilePage()),
             routes: [
               GoRoute(
                 path: 'edit',
@@ -329,7 +338,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/settings',
             name: 'settings',
-            builder: (context, state) => const SettingsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(child: SettingsPage()),
             routes: [
               GoRoute(
                 path: 'notifications',
@@ -339,7 +348,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'display',
                 name: 'display-settings',
-                builder: (context, state) => const DisplaySettingsPage(),
+                builder: (context, state) => DisplaySettingsPage(
+                  section: state.uri.queryParameters['section'],
+                ),
               ),
               GoRoute(
                 path: 'data-privacy',
