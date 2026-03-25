@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/router.dart';
@@ -14,11 +15,13 @@ import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
 // import 'core/services/payment_service.dart';
 import 'core/services/theme_provider.dart';
+import 'core/providers/display_format_provider.dart';
 import 'core/error/global_error_handler.dart';
 import 'shared/widgets/offline_indicator.dart';
 import 'features/transactions/data/datasources/reminder_remote_datasource.dart';
 import 'features/budgets/data/datasources/budget_remote_datasource.dart';
 import 'core/services/auto_backup_service.dart';
+import 'core/services/recurring_transaction_processor.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -97,8 +100,24 @@ void main() async {
         );
       };
 
+      // Read saved theme + display format before first frame to avoid flash
+      final prefs = await SharedPreferences.getInstance();
+      final savedTheme = prefs.getString('theme_mode') ?? 'dark';
+      final initialThemeMode = savedTheme == 'light'
+          ? ThemeMode.light
+          : savedTheme == 'system'
+              ? ThemeMode.system
+              : ThemeMode.dark;
+      final initialDisplayFormat = await loadInitialDisplayFormat();
+
       // Run app
-      runApp(const ProviderScope(child: FinMateApp()));
+      runApp(ProviderScope(
+        overrides: [
+          initialThemeModeProvider.overrideWithValue(initialThemeMode),
+          initialDisplayFormatProvider.overrideWithValue(initialDisplayFormat),
+        ],
+        child: const FinMateApp(),
+      ));
     },
     (error, stackTrace) {
       // Catch all uncaught async errors
@@ -135,6 +154,7 @@ class _FinMateAppState extends ConsumerState<FinMateApp> {
         unawaited(ReminderRemoteDatasource().processReminders().catchError((_) {}));
         unawaited(BudgetRemoteDataSource().applyCarryOvers().catchError((_) {}));
         unawaited(AutoBackupService().runIfDue().catchError((_) {}));
+        unawaited(RecurringTransactionProcessor().processOverdue().catchError((_) {}));
       }
     });
   }

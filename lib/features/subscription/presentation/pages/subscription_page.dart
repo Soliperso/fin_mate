@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -427,9 +426,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   void _showError(BuildContext context, String message) {
-    if (kDebugMode) {
-      print('🚨 Showing error dialog: $message');
-    }
+    debugPrint('[SubscriptionPage] Showing error dialog: $message');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

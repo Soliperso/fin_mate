@@ -1644,6 +1644,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       ref.invalidate(monthlyFlowDataProvider);
       ref.invalidate(netWorthSnapshotsProvider);
       ref.invalidate(budgetNotifierProvider);
+      ref.invalidate(categoryBreakdownProvider);
 
       if (mounted) {
         final ctx = loadingDialogContext;

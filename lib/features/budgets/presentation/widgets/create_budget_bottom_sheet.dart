@@ -65,62 +65,48 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
   @override
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider('expense'));
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-      ),
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.cardBackgroundDark.withValues(alpha: 0.95)
-                  : AppColors.white.withValues(alpha: 0.95),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-              border: Border.all(
-                color: isDark
-                    ? AppColors.white.withValues(alpha: 0.1)
-                    : AppColors.white.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                padding: const EdgeInsets.all(AppSizes.lg),
-                child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Handle
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: AppSizes.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.textTertiary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.textTertiary.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
+                ),
 
-                  // Title
-                  Text(
-                    widget.budget == null ? 'Create Budget' : 'Edit Budget',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: AppSizes.lg),
+                // Title row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.budget == null ? 'Create Budget' : 'Edit Budget',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(CupertinoIcons.xmark),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.md),
 
                   // Category Selection
                   Text(
@@ -136,6 +122,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                         decoration: const InputDecoration(
                           hintText: 'Select a category',
                           border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: categories.map((category) {
                           return DropdownMenuItem(
@@ -173,6 +161,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       hintText: '0.00',
                       prefixText: '\$ ',
                       border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
@@ -248,6 +238,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                       child: Text(
                         '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
@@ -296,6 +288,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                       child: Text(
                         _endDate != null
@@ -328,6 +322,10 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     children: [
                       Expanded(
                         child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: const StadiumBorder(),
+                          ),
                           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                           child: const Text('Cancel'),
                         ),
@@ -335,10 +333,12 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       const SizedBox(width: AppSizes.md),
                       Expanded(
                         child: widget.budget == null
-                            ? OutlinedButton(
-                                style: OutlinedButton.styleFrom(
+                            ? FilledButton(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(48),
                                   backgroundColor: AppColors.brandTeal,
                                   foregroundColor: AppColors.white,
+                                  shape: const StadiumBorder(),
                                 ),
                                 onPressed: _isLoading ? null : _saveBudget,
                                 child: _isLoading
@@ -349,7 +349,11 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                                       )
                                     : const Text('Create'),
                               )
-                            : OutlinedButton(
+                            : FilledButton(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(48),
+                                  shape: const StadiumBorder(),
+                                ),
                                 onPressed: _isLoading ? null : _saveBudget,
                                 child: _isLoading
                                     ? const SizedBox(
@@ -362,13 +366,10 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       ),
                     ],
                   ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                  ],
-                ),
-              ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

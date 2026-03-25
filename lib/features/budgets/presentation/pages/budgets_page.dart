@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -44,7 +45,7 @@ class BudgetsPage extends ConsumerWidget {
                         child: BudgetHeroCard(budgets: budgets),
                       );
                     }
-                    return _buildBudgetCard(context, ref, budgets[index - 1]);
+                    return _buildBudgetCard(context, budgets[index - 1], ref);
                   },
                 ),
               ),
@@ -165,7 +166,8 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBudgetCard(BuildContext context, WidgetRef ref, BudgetEntity budget) {
+  Widget _buildBudgetCard(BuildContext context, BudgetEntity budget, WidgetRef ref) {
+    final currencySymbol = ref.watch(currencySymbolProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.effectiveAmount;
     final percentage = budget.spentPercentage.clamp(0.0, 100.0) / 100;
@@ -267,8 +269,8 @@ class BudgetsPage extends ConsumerWidget {
                                         ),
                                         child: Text(
                                           budget.lastCarryOverAmount > 0
-                                              ? '+\$${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover'
-                                              : '-\$${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover',
+                                              ? '+$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover'
+                                              : '-$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover',
                                           style: TextStyle(
                                             color: budget.lastCarryOverAmount > 0
                                                 ? AppColors.systemGreen
@@ -347,7 +349,7 @@ class BudgetsPage extends ConsumerWidget {
                               Text('Spent', style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '\$${spent.toStringAsFixed(0)}',
+                                '$currencySymbol${spent.toStringAsFixed(0)}',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textSecondary,
@@ -364,7 +366,7 @@ class BudgetsPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '\$${remaining.abs().toStringAsFixed(0)}',
+                                '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       color: isOverBudget
                                           ? AppColors.error
@@ -380,7 +382,7 @@ class BudgetsPage extends ConsumerWidget {
                               Text('Budget', style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '\$${budget.effectiveAmount.toStringAsFixed(0)}',
+                                '$currencySymbol${budget.effectiveAmount.toStringAsFixed(0)}',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textSecondary,
@@ -409,6 +411,7 @@ class BudgetsPage extends ConsumerWidget {
   }
 
   void _showBudgetOptions(BuildContext context, WidgetRef ref, BudgetEntity budget) {
+    final currencySymbol = ref.watch(currencySymbolProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.amount;
     final percentage = (budget.spentPercentage.clamp(0.0, 100.0) / 100);
@@ -500,7 +503,7 @@ class BudgetsPage extends ConsumerWidget {
                                   ),
                             ),
                             Text(
-                              '\$${spent.toStringAsFixed(0)}',
+                              '$currencySymbol${spent.toStringAsFixed(0)}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textSecondary,
@@ -518,7 +521,7 @@ class BudgetsPage extends ConsumerWidget {
                                   ),
                             ),
                             Text(
-                              '\$${remaining.abs().toStringAsFixed(0)}',
+                              '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: isOverBudget

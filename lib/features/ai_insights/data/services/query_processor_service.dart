@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import 'balance_forecast_service.dart';
 import 'openai_chat_service.dart';
 import '../../domain/entities/query_response.dart';
@@ -21,6 +23,16 @@ class QueryProcessorService {
 
   /// Clear OpenAI session (called when user clears chat history)
   void clearOpenAiSession() => _openAiService.clearSession();
+
+  /// Helper to get the current currency format
+  NumberFormat _getCurrencyFormat({int decimalDigits = 2}) {
+    final fmt = getCachedDisplayFormat();
+    return NumberFormat.currency(
+      symbol: fmt.currencySymbol,
+      locale: fmt.numberLocale,
+      decimalDigits: decimalDigits,
+    );
+  }
 
   /// Context-aware suggested prompts based on user's live data
   Future<List<String>> getDynamicSuggestedPrompts(String userId) async {
@@ -63,7 +75,9 @@ class QueryProcessorService {
           }
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[QueryProcessorService] Failed to fetch budget prompts: $e');
+    }
 
     try {
       // Upcoming bills in next 7 days
@@ -80,7 +94,9 @@ class QueryProcessorService {
         final total = bills.fold(0.0, (sum, b) => sum + (b['amount'] as num).toDouble());
         prompts.add('I have \$${total.toStringAsFixed(0)} in bills due this week — can I afford them?');
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[QueryProcessorService] Failed to fetch upcoming bills prompt: $e');
+    }
 
     try {
       // Largest recent transaction (last 7 days)
@@ -100,7 +116,9 @@ class QueryProcessorService {
           prompts.add('I had a large $catName expense recently — is my budget on track?');
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[QueryProcessorService] Failed to fetch largest expense prompt: $e');
+    }
 
     // Fill remaining slots with static prompts
     for (final p in getSuggestedPrompts()) {
@@ -370,7 +388,7 @@ class QueryProcessorService {
     final sorted = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
     final buffer = StringBuffer('Here\'s your spending breakdown:\n\n');
 
     final total = sorted.fold<double>(0, (sum, e) => sum + e.value);
@@ -419,7 +437,7 @@ class QueryProcessorService {
     }
 
     double totalBalance = 0;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
     final buffer = StringBuffer('Your current balances:\n\n');
 
     for (final account in accounts) {
@@ -496,7 +514,7 @@ class QueryProcessorService {
       total += (tx['amount'] as num).toDouble();
     }
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
     final periodStr = period['label'] as String;
 
     final content = category != null
@@ -527,7 +545,7 @@ class QueryProcessorService {
     }
 
     final forecast = await _forecastService.generate30DayForecast();
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
     String content;
     List<String> suggestions;
@@ -580,7 +598,7 @@ class QueryProcessorService {
       );
     }
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
     final buffer = StringBuffer('Here are your upcoming bills:\n\n');
 
     double totalBills = 0;
@@ -608,7 +626,7 @@ class QueryProcessorService {
 
   Future<QueryResponse> _handleForecastQueryRich(String userId, String query) async {
     final forecast = await _forecastService.generate30DayForecast();
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
     int days = 7;
     if (query.contains('month')) {
@@ -670,7 +688,7 @@ class QueryProcessorService {
         );
       }
 
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
       final buffer = StringBuffer('Your recent transactions:\n\n');
 
       for (final tx in transactions) {
@@ -702,7 +720,7 @@ class QueryProcessorService {
   Future<QueryResponse> _handleComparisonQueryRich(String userId, String query) async {
     try {
       final category = _extractCategory(query);
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
       // Determine what to compare
       final isLastYear = query.contains('last year');
@@ -816,7 +834,7 @@ class QueryProcessorService {
   Future<QueryResponse> _handleTrendQueryRich(String userId, String query) async {
     try {
       final category = _extractCategory(query);
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
       // Get last 3 months of data
       final threeMonthsAgo = DateTime.now().subtract(const Duration(days: 90));
@@ -895,7 +913,7 @@ class QueryProcessorService {
   Future<QueryResponse> _handleAverageQueryRich(String userId, String query) async {
     try {
       final category = _extractCategory(query);
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
       // Get last 90 days
       final ninetyDaysAgo = DateTime.now().subtract(const Duration(days: 90));
@@ -960,7 +978,7 @@ class QueryProcessorService {
   /// Handle income-related queries
   Future<QueryResponse> _handleIncomeQueryRich(String userId, String query) async {
     try {
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
       final period = _extractTimePeriod(query);
       final startDate = period['start'] as DateTime;
       final endDate = period['end'] as DateTime;
@@ -1013,7 +1031,7 @@ class QueryProcessorService {
   Future<QueryResponse> _handleSavingsQueryRich(String userId, String query) async {
     try {
       final category = _extractCategory(query);
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
       // Get last 30 days
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
 
@@ -84,7 +85,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
   Widget _buildDetail(
       BuildContext context, WidgetRef ref, TransactionEntity transaction) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final dateFormat = DateFormat('MMMM d, yyyy • h:mm a');
     final isIncome = transaction.type == TransactionType.income;
     final isTransfer = transaction.type == TransactionType.transfer;

@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
@@ -915,7 +917,12 @@ class InsightsService {
 
       // Find dates with 2+ bills
       final collisions = <BillCollision>[];
-      final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+      final fmt = getCachedDisplayFormat();
+      final currencyFormat = NumberFormat.currency(
+        symbol: fmt.currencySymbol,
+        locale: fmt.numberLocale,
+        decimalDigits: 2,
+      );
 
       for (final entry in billsByDate.entries) {
         if (entry.value.length < 2) continue;
@@ -962,7 +969,9 @@ class InsightsService {
           createdAt: now,
         ));
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[InsightsService] Failed to build bill collision alerts: $e');
+    }
 
     try {
       final warnings = await detectCashFlowWarnings();
@@ -976,7 +985,9 @@ class InsightsService {
           createdAt: now,
         ));
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[InsightsService] Failed to build cash flow warning alerts: $e');
+    }
 
     try {
       final anomalies = await detectSpendingAnomalies(daysToAnalyze: 14);
@@ -992,7 +1003,9 @@ class InsightsService {
           createdAt: now,
         ));
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[InsightsService] Failed to build spending anomaly alerts: $e');
+    }
 
     // Sort: critical first, then by creation time
     alerts.sort((a, b) => b.severity.index.compareTo(a.severity.index));

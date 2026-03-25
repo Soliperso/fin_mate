@@ -91,7 +91,9 @@ class SettingsModel extends SettingsEntity {
       notificationPreferences: NotificationPreferencesModel.fromJson(
         (json['notification_preferences'] as Map<String, dynamic>?) ?? {},
       ),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -106,14 +107,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
     if (success) {
       ref.invalidate(debtsProvider);
       ref.invalidate(debtSummaryProvider);
-      SuccessDialog.show(
-        context,
-        title: 'Removed',
-        message: '${debt.name} has been removed',
-        autoDismissDuration: const Duration(milliseconds: 800),
-      );
+      SuccessSnackbar.show(context, message: '${debt.name} removed');
     } else {
-      showErrorDialog(context, 'Failed to delete debt');
+      ErrorSnackbar.show(context, message: 'Failed to delete debt');
     }
   }
 
@@ -128,7 +124,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
         extra > 0 && simResult != null ? simResult : payoffResult;
 
     final dateFormat = DateFormat('MMM yyyy');
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return Scaffold(
       appBar: AppBar(

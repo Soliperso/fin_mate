@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 
 /// Apple Wallet-style cash flow summary card
-class CashFlowCard extends StatelessWidget {
+class CashFlowCard extends ConsumerWidget {
   final double income;
   final double expenses;
 
@@ -16,8 +18,8 @@ class CashFlowCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyFormat = ref.watch(currencyFormat0Provider);
     final balance = income - expenses;
     final isPositive = balance >= 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;

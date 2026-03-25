@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../domain/entities/debt_entity.dart';
@@ -17,8 +18,7 @@ class PaymentHistorySheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentsAsync = ref.watch(debtPaymentsProvider(debt.id));
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final dateFormat = DateFormat('MMM d, yyyy');
     final maxHeight = MediaQuery.of(context).size.height * 0.75;
 

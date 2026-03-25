@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
 import '../../domain/services/payoff_calculator.dart';
 
@@ -16,7 +18,7 @@ const _kScheduleDebtColors = [
   AppColors.systemOrange,
 ];
 
-class MonthlyScheduleList extends StatefulWidget {
+class MonthlyScheduleList extends ConsumerStatefulWidget {
   final PayoffResult result;
   final List<DebtEntity> debts;
   final int monthsToShow;
@@ -29,10 +31,10 @@ class MonthlyScheduleList extends StatefulWidget {
   });
 
   @override
-  State<MonthlyScheduleList> createState() => _MonthlyScheduleListState();
+  ConsumerState<MonthlyScheduleList> createState() => _MonthlyScheduleListState();
 }
 
-class _MonthlyScheduleListState extends State<MonthlyScheduleList> {
+class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
   bool _expanded = false;
   final Set<int> _expandedRows = {};
 
@@ -114,9 +116,8 @@ class _MonthlyScheduleListState extends State<MonthlyScheduleList> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currencyLarge = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
-    final currencyDetail =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyLarge = ref.watch(currencyFormat0Provider);
+    final currencyDetail = ref.watch(currencyFormat2Provider);
     final dateFormat = DateFormat('MMM yyyy');
 
     final visibleCount =

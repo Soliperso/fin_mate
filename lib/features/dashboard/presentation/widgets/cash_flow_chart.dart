@@ -1,14 +1,16 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
 
 enum ChartType { line, bar }
 
-class CashFlowChart extends StatefulWidget {
+class CashFlowChart extends ConsumerStatefulWidget {
   final List<MonthlyFlowData> flowData;
 
   const CashFlowChart({
@@ -17,10 +19,10 @@ class CashFlowChart extends StatefulWidget {
   });
 
   @override
-  State<CashFlowChart> createState() => _CashFlowChartState();
+  ConsumerState<CashFlowChart> createState() => _CashFlowChartState();
 }
 
-class _CashFlowChartState extends State<CashFlowChart> {
+class _CashFlowChartState extends ConsumerState<CashFlowChart> {
   ChartType _selectedChartType = ChartType.line;
 
   @override
@@ -29,7 +31,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
       return const SizedBox.shrink();
     }
 
-    final currencyFormat = NumberFormat.compactCurrency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormatCompactProvider);
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -264,7 +266,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
-                final format = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+                final format = ref.read(currencyFormat0Provider);
                 final isIncome = spot.barIndex == 0;
                 return LineTooltipItem(
                   '${isIncome ? 'Income' : 'Expenses'}\n${format.format(spot.y)}',
@@ -291,7 +293,7 @@ class _CashFlowChartState extends State<CashFlowChart> {
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              final format = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+              final format = ref.watch(currencyFormat0Provider);
               final isIncome = rodIndex == 0;
               return BarTooltipItem(
                 '${isIncome ? 'Income' : 'Expenses'}\n${format.format(rod.toY)}',

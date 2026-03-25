@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../domain/services/payoff_calculator.dart' show DebtStrategy, PayoffResult;
 import '../providers/debt_providers.dart';
@@ -24,8 +25,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
     final interestDiff =
         snowballResult.totalInterestPaid - avalancheResult.totalInterestPaid;
     final monthDiff = snowballResult.totalMonths - avalancheResult.totalMonths;
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -184,7 +184,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
   }
 }
 
-class _StrategyCard extends StatelessWidget {
+class _StrategyCard extends ConsumerWidget {
   final DebtStrategy strategy;
   final PayoffResult result;
   final bool isSelected;
@@ -198,10 +198,9 @@ class _StrategyCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isAvalanche = strategy == DebtStrategy.avalanche;
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
     final dateFormat = DateFormat('MMM yyyy');
 
     return GlassContainer(

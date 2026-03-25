@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
 
-class RecurringTransactionListItem extends StatelessWidget {
+class RecurringTransactionListItem extends ConsumerWidget {
   final RecurringTransactionEntity transaction;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
@@ -52,9 +54,9 @@ class RecurringTransactionListItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final isIncome = transaction.type == 'income';
     final isExpense = transaction.type == 'expense';
     final typeColor = _typeColor();

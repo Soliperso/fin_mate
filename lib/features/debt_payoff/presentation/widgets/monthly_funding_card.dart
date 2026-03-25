@@ -1,19 +1,21 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
 
-class MonthlyFundingCard extends StatelessWidget {
+class MonthlyFundingCard extends ConsumerWidget {
   final List<DebtEntity> debts;
 
   const MonthlyFundingCard({super.key, required this.debts});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currency = ref.watch(currencyFormat2Provider);
     final total = debts.fold<double>(0, (s, d) => s + d.minimumPayment);
 
     return Container(

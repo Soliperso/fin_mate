@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
 
 class ExtraPaymentCard extends ConsumerWidget {
@@ -17,7 +18,7 @@ class ExtraPaymentCard extends ConsumerWidget {
     final baseResult = ref.watch(payoffResultProvider);
     final simResult = ref.watch(simulatedPayoffProvider);
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     int? monthsSaved;
     double? interestSaved;

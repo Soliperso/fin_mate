@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../recurring_transactions/domain/entities/recurring_transaction_entity.dart';
 import '../../../recurring_transactions/presentation/providers/recurring_transactions_providers.dart';
 
@@ -108,16 +109,16 @@ class UpcomingBillsCard extends ConsumerWidget {
   }
 }
 
-class _BillsList extends StatelessWidget {
+class _BillsList extends ConsumerWidget {
   final List<RecurringTransactionEntity> bills;
   final bool isDark;
 
   const _BillsList({required this.bills, required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final visible = bills.length > 3 ? bills.sublist(0, 3) : bills;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Column(
       children: [

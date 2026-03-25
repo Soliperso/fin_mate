@@ -150,6 +150,12 @@ class TransactionListState {
       minAmount != null ||
       maxAmount != null ||
       hideFutureTransactions;
+
+  int get activeFilterCount =>
+      (selectedCategory != null ? 1 : 0) +
+      (dateRange != null ? 1 : 0) +
+      (minAmount != null || maxAmount != null ? 1 : 0) +
+      (hideFutureTransactions ? 1 : 0);
 }
 
 /// Transaction list notifier with filtering and search
@@ -269,6 +275,20 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     try {
       await _repository.deleteTransaction(transactionId);
       final updated = state.transactions.where((t) => t.id != transactionId).toList();
+      state = state.copyWith(transactions: updated);
+      _applyFilters();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteMultipleTransactions(List<String> ids) async {
+    if (ids.isEmpty) return true;
+    try {
+      await _repository.deleteMultipleTransactions(ids);
+      final idSet = ids.toSet();
+      final updated = state.transactions.where((t) => !idSet.contains(t.id)).toList();
       state = state.copyWith(transactions: updated);
       _applyFilters();
       return true;

@@ -172,37 +172,6 @@ class _RecurringTransactionsPageState
 
           return Column(
             children: [
-              // Auto-generation coming soon banner
-              Container(
-                margin: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, 0),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.sm,
-                  vertical: AppSizes.xs + 2,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.systemBlue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                  border: Border.all(
-                    color: AppColors.systemBlue.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(CupertinoIcons.info_circle,
-                        color: AppColors.systemBlue, size: 16),
-                    const SizedBox(width: AppSizes.xs),
-                    Expanded(
-                      child: Text(
-                        'Automatic scheduling is coming soon. You\'ll be reminded when transactions are due.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.systemBlue,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSizes.sm),
               // Filter tabs
               SizedBox(
                 height: 50,

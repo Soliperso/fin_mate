@@ -14,6 +14,7 @@ abstract class TransactionRepository {
   Future<TransactionEntity> createTransaction(TransactionEntity transaction);
   Future<TransactionEntity> updateTransaction(String id, TransactionEntity transaction);
   Future<void> deleteTransaction(String id);
+  Future<void> deleteMultipleTransactions(List<String> ids);
 
   Future<List<AccountEntity>> getAccounts();
   Future<AccountEntity> createAccount(AccountEntity account);

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -50,7 +51,7 @@ class GoalDetailPage extends ConsumerWidget {
         },
         child: goalAsync.when(
           data: (goal) {
-            final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+            final currencyFormat = ref.watch(currencyFormat2Provider);
             final progress = goal.progress.clamp(0.0, 100.0);
             final remaining = goal.targetAmount - goal.currentAmount;
             final isCompleted = goal.isCompleted;

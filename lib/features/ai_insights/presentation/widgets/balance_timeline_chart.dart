@@ -1,13 +1,15 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../domain/entities/balance_forecast.dart';
 
-class BalanceTimelineChart extends StatelessWidget {
+class BalanceTimelineChart extends ConsumerWidget {
   final BalanceForecast forecast;
 
   const BalanceTimelineChart({
@@ -16,12 +18,12 @@ class BalanceTimelineChart extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (forecast.dailyForecasts.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final currencyFormat = NumberFormat.compactCurrency(symbol: '\$', decimalDigits: 0);
+    final currencyFormatCompact = ref.watch(currencyFormatCompactProvider);
     final hasCritical = forecast.dailyForecasts.any((f) => f.status == BalanceStatus.critical);
     final lineColor = hasCritical ? AppColors.error : AppColors.primaryTeal;
 
@@ -78,7 +80,7 @@ class BalanceTimelineChart extends StatelessWidget {
                       reservedSize: 52,
                       interval: _calculateInterval(),
                       getTitlesWidget: (value, meta) => Text(
-                        currencyFormat.format(value),
+                        currencyFormatCompact.format(value),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontSize: 10,
                               color: AppColors.textSecondary,
@@ -158,7 +160,7 @@ class BalanceTimelineChart extends StatelessWidget {
                         final index = spot.x.toInt();
                         if (index < 0 || index >= forecast.dailyForecasts.length) return null;
                         final day = forecast.dailyForecasts[index];
-                        final format = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+                        final format = ref.watch(currencyFormat0Provider);
                         final dateFormat = DateFormat('MMM d');
                         return LineTooltipItem(
                           '${dateFormat.format(day.date)}\n${format.format(day.projectedBalance)}',

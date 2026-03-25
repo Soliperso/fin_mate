@@ -98,6 +98,19 @@ class TransactionRemoteDataSource {
     await _supabase.from('transactions').delete().eq('id', id).eq('user_id', userId);
   }
 
+  /// Bulk-delete transactions by IDs (single DB round-trip)
+  Future<void> deleteMultipleTransactions(List<String> ids) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+    if (ids.isEmpty) return;
+
+    await _supabase
+        .from('transactions')
+        .delete()
+        .inFilter('id', ids)
+        .eq('user_id', userId);
+  }
+
   /// Get all accounts
   Future<List<AccountModel>> getAccounts() async {
     final userId = _supabase.auth.currentUser?.id;

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
@@ -113,7 +114,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildCategoryBreakdown(categories);
+                return _buildCategoryBreakdown(ref, categories);
               },
               loading: () => const SkeletonCard(height: 300),
               error: (error, stack) => ErrorRetryWidget(
@@ -138,7 +139,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildForecastSection(forecast);
+                return _buildForecastSection(ref, forecast);
               },
               loading: () => const SkeletonCard(height: 250),
               error: (error, stack) => ErrorRetryWidget(
@@ -163,7 +164,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     backgroundColor: AppColors.primaryTeal,
                   );
                 }
-                return _buildRecurringExpensesSection(patterns);
+                return _buildRecurringExpensesSection(ref, patterns);
               },
               loading: () => const SkeletonCard(height: 200),
               error: (error, stack) => ErrorRetryWidget(
@@ -213,7 +214,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     backgroundColor: AppColors.warning,
                   );
                 }
-                return _buildTopMerchantsSection(merchants.where((m) => m.isTopMerchant).toList());
+                return _buildTopMerchantsSection(ref, merchants.where((m) => m.isTopMerchant).toList());
               },
               loading: () => const SkeletonCard(height: 250),
               error: (error, stack) => ErrorRetryWidget(
@@ -399,8 +400,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
 
   // ─── Category breakdown ───────────────────────────────────────────────────
 
-  Widget _buildCategoryBreakdown(List<Map<String, dynamic>> categories) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget _buildCategoryBreakdown(WidgetRef ref, List<Map<String, dynamic>> categories) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final total = categories.fold(0.0, (sum, cat) => sum + (cat['total_amount'] as double));
 
     return Card(
@@ -454,8 +455,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
 
   // ─── Forecast section ─────────────────────────────────────────────────────
 
-  Widget _buildForecastSection(List<Map<String, dynamic>> forecast) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget _buildForecastSection(WidgetRef ref, List<Map<String, dynamic>> forecast) {
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return Card(
       child: Padding(
@@ -521,8 +522,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
 
   // ─── Recurring expenses ───────────────────────────────────────────────────
 
-  Widget _buildRecurringExpensesSection(List<RecurringExpensePattern> patterns) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget _buildRecurringExpensesSection(WidgetRef ref, List<RecurringExpensePattern> patterns) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Column(
       children: patterns.map((pattern) {
@@ -644,7 +645,9 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                         .eq('user_id', userId);
                     ref.invalidate(recurringExpensesProvider);
                   }
-                } catch (_) {}
+                } catch (e) {
+                  debugPrint('[InsightsTab] Failed to update recurring transaction amount: $e');
+                }
               }
               if (ctx.mounted) Navigator.pop(ctx);
             },
@@ -756,8 +759,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
 
   // ─── Top merchants ────────────────────────────────────────────────────────
 
-  Widget _buildTopMerchantsSection(List<MerchantInsight> merchants) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget _buildTopMerchantsSection(WidgetRef ref, List<MerchantInsight> merchants) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Column(
       children: merchants.take(5).map((merchant) {

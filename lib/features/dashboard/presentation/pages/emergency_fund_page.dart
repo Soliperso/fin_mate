@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/emergency_fund_provider.dart';
 
@@ -143,7 +144,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
   @override
   Widget build(BuildContext context) {
     final emergencyFundAsync = ref.watch(emergencyFundStatusProvider);
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Scaffold(
       appBar: AppBar(

@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/balance_forecast.dart';
 
-class BalanceForecastCard extends StatelessWidget {
+class BalanceForecastCard extends ConsumerWidget {
   final BalanceForecast forecast;
 
   const BalanceForecastCard({
@@ -14,8 +16,8 @@ class BalanceForecastCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Card(
       child: Padding(

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
+import '../../../../shared/widgets/hero_stat_badge.dart';
 import '../../domain/entities/budget_entity.dart';
 
-class BudgetHeroCard extends StatelessWidget {
+class BudgetHeroCard extends ConsumerWidget {
   final List<BudgetEntity> budgets;
 
   const BudgetHeroCard({super.key, required this.budgets});
 
   @override
-  Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormat0Provider);
 
     final totalBudgeted = budgets.fold<double>(0, (sum, b) => sum + b.effectiveAmount);
     final totalSpent = budgets.fold<double>(0, (sum, b) => sum + (b.spent ?? 0));
@@ -21,24 +24,9 @@ class BudgetHeroCard extends StatelessWidget {
         ? (totalSpent / totalBudgeted).clamp(0.0, 1.0)
         : 0.0;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.brandTeal, AppColors.brandTealDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brandTeal.withValues(alpha: 0.30),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSizes.lg),
+    return GradientHeroCard(
+      gradientColors: const [AppColors.brandTeal, AppColors.brandTealDark],
+      shadowColor: AppColors.brandTeal.withValues(alpha: 0.30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,11 +49,11 @@ class BudgetHeroCard extends StatelessWidget {
           const SizedBox(height: AppSizes.md),
           Row(
             children: [
-              _StatBadge(label: 'Spent', value: currency.format(totalSpent)),
+              HeroStatBadge(label: 'Spent', value: currency.format(totalSpent)),
               const SizedBox(width: AppSizes.sm),
-              _StatBadge(label: 'Remaining', value: currency.format(totalRemaining.abs())),
+              HeroStatBadge(label: 'Remaining', value: currency.format(totalRemaining.abs())),
               const SizedBox(width: AppSizes.sm),
-              _StatBadge(
+              HeroStatBadge(
                 label: 'At Risk',
                 value: atRisk == 0
                     ? 'None'
@@ -102,59 +90,6 @@ class BudgetHeroCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatBadge extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool highlight;
-
-  const _StatBadge({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.sm,
-          vertical: AppSizes.xs + 2,
-        ),
-        decoration: BoxDecoration(
-          color: highlight
-              ? AppColors.systemRed.withValues(alpha: 0.25)
-              : Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/env_config.dart';
@@ -50,7 +51,9 @@ class OpenAiChatService {
         }
         buffer.writeln('Total balance: \$${total.toStringAsFixed(2)}');
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch account balances: $e');
+    }
 
     try {
       // Top 5 spending categories this month
@@ -77,7 +80,9 @@ class OpenAiChatService {
           buffer.writeln('- ${e.key}: \$${e.value.toStringAsFixed(2)}');
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch spending categories: $e');
+    }
 
     try {
       // Upcoming recurring bills (next 14 days)
@@ -96,7 +101,9 @@ class OpenAiChatService {
           buffer.writeln('- ${b['description']}: \$${(b['amount'] as num).toStringAsFixed(2)} on ${b['next_occurrence']}');
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch upcoming bills: $e');
+    }
 
     return buffer.toString();
   }

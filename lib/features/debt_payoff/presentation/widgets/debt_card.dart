@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
 
-class DebtCard extends StatelessWidget {
+class DebtCard extends ConsumerWidget {
   final DebtEntity debt;
   final VoidCallback onLogPayment;
   final VoidCallback onEdit;
@@ -59,10 +61,9 @@ class DebtCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final monthsLeft = debt.monthsToPayoffAtMinimum;
 
     // ── Progress ──────────────────────────────────────────────────────────
@@ -446,10 +447,19 @@ class DebtCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          borderRadius: BorderRadius.circular(16),
         ),
+        icon: const Icon(CupertinoIcons.trash_fill, color: AppColors.error, size: 28),
         title: const Text('Delete Debt'),
-        content: Text('Remove "${debt.name}" from your debt tracker?'),
+        titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+        content: Text('Remove "${debt.name}" from your debt tracker? This cannot be undone.'),
+        contentTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),

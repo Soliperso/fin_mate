@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
 
-class NetWorthTrendChart extends StatelessWidget {
+class NetWorthTrendChart extends ConsumerWidget {
   final List<NetWorthSnapshot> snapshots;
 
   const NetWorthTrendChart({
@@ -15,12 +17,12 @@ class NetWorthTrendChart extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (snapshots.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final currencyFormat = NumberFormat.compactCurrency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormatCompactProvider);
     final isGrowth = _isOverallGrowth();
 
     return GlassContainer(
@@ -85,7 +87,7 @@ class NetWorthTrendChart extends StatelessWidget {
                         if (value.toInt() >= 0 && value.toInt() < snapshots.length) {
                           final snapshot = snapshots[value.toInt()];
                           return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
+                            padding: const EdgeInsets.only(top: AppSizes.sm),
                             child: Text(
                               DateFormat('MMM d').format(snapshot.date),
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -152,7 +154,7 @@ class NetWorthTrendChart extends StatelessWidget {
                         final index = spot.x.toInt();
                         if (index >= 0 && index < snapshots.length) {
                           final snapshot = snapshots[index];
-                          final format = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+                          final format = ref.watch(currencyFormat0Provider);
                           final dateFormat = DateFormat('MMM d, y');
                           return LineTooltipItem(
                             '${dateFormat.format(snapshot.date)}\n${format.format(snapshot.netWorth)}',

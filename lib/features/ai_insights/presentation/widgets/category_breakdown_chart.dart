@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import 'package:intl/intl.dart';
 
-class CategoryBreakdownChart extends StatefulWidget {
+class CategoryBreakdownChart extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> categoryData;
   final double maxHeight;
 
@@ -15,10 +17,10 @@ class CategoryBreakdownChart extends StatefulWidget {
   });
 
   @override
-  State<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
+  ConsumerState<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
 }
 
-class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> {
+class _CategoryBreakdownChartState extends ConsumerState<CategoryBreakdownChart> {
   int? _touchedIndex;
 
   @override
@@ -83,7 +85,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> {
           ),
           if (_touchedIndex != null) ...[
             const SizedBox(height: AppSizes.md),
-            _buildTouchedSectionDetails(context, total),
+            _buildTouchedSectionDetails(context, total, ref),
           ],
         ],
       ),
@@ -129,14 +131,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> {
     });
   }
 
-  Widget _buildTouchedSectionDetails(BuildContext context, double total) {
+  Widget _buildTouchedSectionDetails(BuildContext context, double total, WidgetRef ref) {
     if (_touchedIndex == null ||
         _touchedIndex! < 0 ||
         _touchedIndex! >= widget.categoryData.length) {
       return const SizedBox.shrink();
     }
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final colors = [
       AppColors.primaryTeal,
       AppColors.tealDark,

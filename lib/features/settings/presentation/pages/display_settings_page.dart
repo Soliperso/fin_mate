@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/theme_provider.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/settings_providers.dart';
 
 class DisplaySettingsPage extends ConsumerStatefulWidget {
@@ -21,9 +22,6 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
   final _currencyKey = GlobalKey();
   final _scrollController = ScrollController();
 
-  String _currency = 'USD';
-  String _dateFormat = 'MM/DD/YYYY';
-  String _numberFormat = '1,234.56';
   String _language = 'English (US)';
 
   @override
@@ -64,6 +62,7 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
   Widget build(BuildContext context) {
     final settingsState = ref.watch(settingsOperationsProvider);
     final currentThemeMode = ref.watch(themeModeProvider);
+    final displayFmt = ref.watch(displayFormatProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -140,9 +139,10 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   icon: CupertinoIcons.money_dollar,
                   title: 'Currency',
                   subtitle: 'Default currency for amounts',
-                  value: _currency,
+                  value: displayFmt.currencyCode,
                   options: const ['USD', 'EUR', 'GBP', 'JPY', 'INR'],
-                  onSelected: (v) => setState(() => _currency = v),
+                  onSelected: (v) =>
+                      ref.read(displayFormatProvider.notifier).setCurrency(v),
                 ),
                 _buildDivider(isDark),
                 _buildOptionTile(
@@ -151,9 +151,10 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   icon: CupertinoIcons.calendar,
                   title: 'Date Format',
                   subtitle: 'How dates are displayed',
-                  value: _dateFormat,
+                  value: displayFmt.dateFormat,
                   options: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
-                  onSelected: (v) => setState(() => _dateFormat = v),
+                  onSelected: (v) =>
+                      ref.read(displayFormatProvider.notifier).setDateFormat(v),
                 ),
                 _buildDivider(isDark),
                 _buildOptionTile(
@@ -162,9 +163,10 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   icon: CupertinoIcons.number,
                   title: 'Number Format',
                   subtitle: 'How numbers are formatted',
-                  value: _numberFormat,
+                  value: displayFmt.numberFormat,
                   options: const ['1,234.56', '1.234,56', '1 234.56'],
-                  onSelected: (v) => setState(() => _numberFormat = v),
+                  onSelected: (v) =>
+                      ref.read(displayFormatProvider.notifier).setNumberFormat(v),
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),
@@ -375,27 +377,34 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
   ) {
     showDialog(
       context: context,
-      builder: (_) => SimpleDialog(
-        title: Text(title),
-        children: options
-            .map(
-              (option) => SimpleDialogOption(
-                onPressed: () {
-                  onSelected(option);
-                  Navigator.pop(context);
-                },
-                child: Row(
-                  children: [
-                    Expanded(child: Text(option)),
-                    if (option == current)
-                      const Icon(CupertinoIcons.checkmark,
-                          size: 16, color: AppColors.primaryTeal),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
-      ),
+      builder: (dialogContext) {
+        String selected = current;
+        return StatefulBuilder(
+          builder: (_, setState) => SimpleDialog(
+            title: Text(title),
+            children: options
+                .map(
+                  (option) => SimpleDialogOption(
+                    onPressed: () async {
+                      setState(() => selected = option);
+                      await Future.delayed(const Duration(milliseconds: 300));
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                      onSelected(option);
+                    },
+                    child: Row(
+                      children: [
+                        Expanded(child: Text(option)),
+                        if (option == selected)
+                          const Icon(CupertinoIcons.checkmark,
+                              size: 16, color: AppColors.primaryTeal),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
     );
   }
 }

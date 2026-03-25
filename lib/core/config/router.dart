@@ -14,9 +14,6 @@ import '../../features/auth/presentation/pages/auth_callback_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/dashboard/presentation/pages/emergency_fund_page.dart';
-// [V1.1: Bill Splitting - Commented out]
-// import '../../features/bill_splitting/presentation/pages/bills_page.dart';
-// import '../../features/bill_splitting/presentation/pages/group_detail_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
@@ -184,22 +181,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // [V1.1: Bill Splitting - Commented out - Complex group feature, niche audience]
-          // GoRoute(
-          //   path: '/bills',
-          //   name: 'bills',
-          //   builder: (context, state) => const BillsPage(),
-          //   routes: [
-          //     GoRoute(
-          //       path: 'group/:groupId',
-          //       name: 'group-detail',
-          //       builder: (context, state) {
-          //         final groupId = state.pathParameters['groupId']!;
-          //         return GroupDetailPage(groupId: groupId);
-          //       },
-          //     ),
-          //   ],
-          // ),
           GoRoute(
             path: '/budgets',
             name: 'budgets',

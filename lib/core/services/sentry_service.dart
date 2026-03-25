@@ -176,9 +176,7 @@ class SentryService {
     SentryLevel level = SentryLevel.error,
   }) async {
     if (!_isInitialized) {
-      if (kDebugMode) {
-        print('Sentry not initialized. Error: $exception');
-      }
+      debugPrint('[SentryService] Not initialized. Error: $exception');
       return;
     }
 
@@ -195,9 +193,7 @@ class SentryService {
         },
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to capture exception in Sentry: $e');
-      }
+      debugPrint('[SentryService] Failed to capture exception: $e');
     }
   }
 

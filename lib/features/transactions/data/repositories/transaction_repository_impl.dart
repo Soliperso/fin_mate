@@ -49,6 +49,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
+  Future<void> deleteMultipleTransactions(List<String> ids) async {
+    await _dataSource.deleteMultipleTransactions(ids);
+  }
+
+  @override
   Future<List<AccountEntity>> getAccounts() async {
     final models = await _dataSource.getAccounts();
     return models.map((m) => m.toEntity()).toList();

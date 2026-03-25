@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
 
 /// Apple Wallet-style hero card showing total net worth
-class NetWorthCard extends StatelessWidget {
+class NetWorthCard extends ConsumerWidget {
   final double netWorth;
   final double changePercentage;
   final bool isPositive;
@@ -18,32 +20,17 @@ class NetWorthCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyFormat = ref.watch(currencyFormat0Provider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final gradientColors = netWorth >= 0
         ? [AppColors.brandTeal, AppColors.brandTealDark]
         : [AppColors.systemRed, AppColors.systemRedDeep];
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: [
-          BoxShadow(
-            color: gradientColors.first.withValues(alpha: isDark ? 0.3 : 0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSizes.lg),
+    return GradientHeroCard(
+      gradientColors: gradientColors,
+      shadowColor: gradientColors.first.withValues(alpha: isDark ? 0.3 : 0.25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

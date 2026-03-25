@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/emergency_fund_status.dart';
@@ -52,7 +53,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
     final levelColor = _getLevelColor();
 
     return Card(
@@ -268,7 +269,7 @@ class EmergencyFundCard extends ConsumerWidget {
   }
 
   void _showEmergencyFundDetails(BuildContext context, WidgetRef ref) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     GlassBottomSheet.show(
       context: context,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../savings_goals/domain/entities/savings_goal_entity.dart';
 import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
 
@@ -129,15 +130,15 @@ class GoalsSnapshotCard extends ConsumerWidget {
   }
 }
 
-class _GoalRow extends StatelessWidget {
+class _GoalRow extends ConsumerWidget {
   final SavingsGoal goal;
 
   const _GoalRow({required this.goal});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final progress = goal.progress / 100;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return InkWell(
       onTap: () => context.go('/goals/${goal.id}'),

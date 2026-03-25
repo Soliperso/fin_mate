@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
 
 class SpendingBreakdownCard extends ConsumerStatefulWidget {
@@ -186,7 +187,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                           ),
                     ),
                     Text(
-                      NumberFormat.currency(symbol: '\$', decimalDigits: 2)
+                      ref.watch(currencyFormat2Provider)
                           .format(total),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
@@ -207,7 +208,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
 
 // ── Category row ─────────────────────────────────────────────────────────────
 
-class _CategoryRow extends StatelessWidget {
+class _CategoryRow extends ConsumerWidget {
   final String name;
   final double amount;
   final double total;
@@ -223,11 +224,11 @@ class _CategoryRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fraction = total > 0 ? (amount / total).clamp(0.0, 1.0) : 0.0;
     final pct = (fraction * 100).toStringAsFixed(0);
     final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+        ref.watch(currencyFormat0Provider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

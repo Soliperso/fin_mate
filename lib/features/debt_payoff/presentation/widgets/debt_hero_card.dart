@@ -1,12 +1,16 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
+import '../../../../shared/widgets/hero_stat_badge.dart';
 import '../../domain/entities/debt_entity.dart';
 import '../../domain/services/payoff_calculator.dart';
 
-class DebtHeroCard extends StatelessWidget {
+class DebtHeroCard extends ConsumerWidget {
   final double totalBalance;
   final int debtCount;
   final PayoffResult? payoffResult;
@@ -23,15 +27,16 @@ class DebtHeroCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyFormat0 = ref.watch(currencyFormat0Provider);
+    final currencyFormat2 = ref.watch(currencyFormat2Provider);
     final monthFormat = DateFormat('MMM yyyy');
 
     final debtFreeLabel = payoffResult != null
         ? monthFormat.format(payoffResult!.debtFreeDate)
         : '—';
     final totalInterestLabel = payoffResult != null
-        ? currencyFormat.format(payoffResult!.totalInterestPaid)
+        ? currencyFormat0.format(payoffResult!.totalInterestPaid)
         : '—';
 
     // Overall progress — only shown when at least one debt has originalBalance
@@ -53,24 +58,9 @@ class DebtHeroCard extends StatelessWidget {
       overallProgress = (totalPaid / totalOriginal).clamp(0.0, 1.0);
     }
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.debtRedStart, AppColors.debtRedEnd],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.error.withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSizes.lg),
+    return GradientHeroCard(
+      gradientColors: const [AppColors.debtRedStart, AppColors.debtRedEnd],
+      shadowColor: AppColors.error.withValues(alpha: 0.35),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,7 +76,7 @@ class DebtHeroCard extends StatelessWidget {
 
           // Main balance
           Text(
-            NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(totalBalance),
+            currencyFormat2.format(totalBalance),
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -98,20 +88,11 @@ class DebtHeroCard extends StatelessWidget {
           // Stats row
           Row(
             children: [
-              _StatBadge(
-                label: 'Debt-Free',
-                value: debtFreeLabel,
-              ),
+              HeroStatBadge(label: 'Debt-Free', value: debtFreeLabel),
               const SizedBox(width: AppSizes.sm),
-              _StatBadge(
-                label: 'Total Interest',
-                value: totalInterestLabel,
-              ),
+              HeroStatBadge(label: 'Total Interest', value: totalInterestLabel),
               const SizedBox(width: AppSizes.sm),
-              _StatBadge(
-                label: 'Accounts',
-                value: '$debtCount',
-              ),
+              HeroStatBadge(label: 'Accounts', value: '$debtCount'),
             ],
           ),
 
@@ -179,52 +160,6 @@ class DebtHeroCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _StatBadge extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatBadge({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.sm,
-          vertical: AppSizes.xs + 2,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     );
   }

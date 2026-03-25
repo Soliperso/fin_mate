@@ -27,13 +27,12 @@ class SettingsRemoteDataSource {
   /// Update theme mode
   Future<SettingsModel> updateThemeMode(String userId, String themeMode) async {
     try {
-      final response = await _supabase.rpc(
-        'update_user_settings',
-        params: {
-          'p_user_id': userId,
-          'p_theme_mode': themeMode,
-        },
-      );
+      final response = await _supabase
+          .from('user_profiles')
+          .update({'theme_mode': themeMode})
+          .eq('id', userId)
+          .select()
+          .single();
 
       return SettingsModel.fromJson(response);
     } catch (e) {
@@ -44,13 +43,12 @@ class SettingsRemoteDataSource {
   /// Update language
   Future<SettingsModel> updateLanguage(String userId, String language) async {
     try {
-      final response = await _supabase.rpc(
-        'update_user_settings',
-        params: {
-          'p_user_id': userId,
-          'p_language': language,
-        },
-      );
+      final response = await _supabase
+          .from('user_profiles')
+          .update({'language': language})
+          .eq('id', userId)
+          .select()
+          .single();
 
       return SettingsModel.fromJson(response);
     } catch (e) {
@@ -64,13 +62,12 @@ class SettingsRemoteDataSource {
     NotificationPreferencesModel preferences,
   ) async {
     try {
-      final response = await _supabase.rpc(
-        'update_user_settings',
-        params: {
-          'p_user_id': userId,
-          'p_notification_preferences': preferences.toJson(),
-        },
-      );
+      final response = await _supabase
+          .from('user_profiles')
+          .update({'notification_preferences': preferences.toJson()})
+          .eq('id', userId)
+          .select()
+          .single();
 
       return SettingsModel.fromJson(response);
     } catch (e) {

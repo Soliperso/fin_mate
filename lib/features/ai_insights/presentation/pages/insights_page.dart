@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
@@ -97,7 +98,7 @@ class InsightsPage extends ConsumerWidget {
                       backgroundColor: AppColors.primaryTeal,
                     );
                   }
-                  return _buildCategoryBreakdown(context, categories);
+                  return _buildCategoryBreakdown(context, ref, categories);
                 },
                 loading: () => const SkeletonCard(height: 300),
                 error: (error, stack) => ErrorRetryWidget(
@@ -125,7 +126,7 @@ class InsightsPage extends ConsumerWidget {
                       backgroundColor: AppColors.primaryTeal,
                     );
                   }
-                  return _buildForecastSection(context, forecast);
+                  return _buildForecastSection(context, ref, forecast);
                 },
                 loading: () => const SkeletonCard(height: 250),
                 error: (error, stack) => ErrorRetryWidget(
@@ -227,8 +228,8 @@ class InsightsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryBreakdown(BuildContext context, List<Map<String, dynamic>> categories) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget _buildCategoryBreakdown(BuildContext context, WidgetRef ref, List<Map<String, dynamic>> categories) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final total = categories.fold(0.0, (sum, cat) => sum + (cat['total_amount'] as double));
 
     return Card(
@@ -289,8 +290,8 @@ class InsightsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildForecastSection(BuildContext context, List<Map<String, dynamic>> forecast) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  Widget _buildForecastSection(BuildContext context, WidgetRef ref, List<Map<String, dynamic>> forecast) {
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return Card(
       child: Padding(

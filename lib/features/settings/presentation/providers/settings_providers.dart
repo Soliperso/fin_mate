@@ -44,28 +44,30 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     try {
       final settings = await _repository.getSettings(_userId);
       state = AsyncValue.data(settings);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+    } catch (_) {
+      state = const AsyncValue.data(null);
     }
   }
 
   /// Update theme mode
   Future<void> updateThemeMode(String themeMode) async {
+    final previous = state;
     try {
       final settings = await _repository.updateThemeMode(_userId, themeMode);
       state = AsyncValue.data(settings);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+    } catch (_) {
+      state = previous;
     }
   }
 
   /// Update language
   Future<void> updateLanguage(String language) async {
+    final previous = state;
     try {
       final settings = await _repository.updateLanguage(_userId, language);
       state = AsyncValue.data(settings);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+    } catch (_) {
+      state = previous;
     }
   }
 
@@ -73,14 +75,15 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
   Future<void> updateNotificationPreferences(
     NotificationPreferences preferences,
   ) async {
+    final previous = state;
     try {
       final settings = await _repository.updateNotificationPreferences(
         _userId,
         preferences,
       );
       state = AsyncValue.data(settings);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+    } catch (_) {
+      state = previous;
     }
   }
 

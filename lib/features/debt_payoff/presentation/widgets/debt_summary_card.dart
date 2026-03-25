@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 
-class DebtSummaryCard extends StatelessWidget {
+class DebtSummaryCard extends ConsumerWidget {
   final double totalBalance;
   final double totalMinPayment;
   final int debtCount;
@@ -18,8 +20,8 @@ class DebtSummaryCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
     final dti = (monthlyIncome != null && monthlyIncome! > 0)
         ? totalMinPayment / monthlyIncome! * 100
         : null;

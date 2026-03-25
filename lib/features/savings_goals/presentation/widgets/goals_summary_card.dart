@@ -1,16 +1,18 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
 
-class GoalsSummaryCard extends StatelessWidget {
+class GoalsSummaryCard extends ConsumerWidget {
   final Map<String, dynamic> summary;
 
   const GoalsSummaryCard({super.key, required this.summary});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final totalGoals = summary['total_goals'] as int? ?? 0;
     final completedGoals = summary['completed_goals'] as int? ?? 0;
     final activeGoals = summary['active_goals'] as int? ?? 0;
@@ -18,26 +20,13 @@ class GoalsSummaryCard extends StatelessWidget {
     final totalSaved = (summary['total_saved'] as num?)?.toDouble() ?? 0.0;
     final overallProgress = (summary['overall_progress'] as num?)?.toDouble() ?? 0.0;
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.lg),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.brandTeal, AppColors.brandTealLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brandTeal.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return GradientHeroCard(
+      gradientColors: const [AppColors.brandTeal, AppColors.brandTealLight],
+      shadowColor: AppColors.brandTeal.withValues(alpha: 0.35),
+      shadowBlurRadius: 16,
+      shadowOffset: const Offset(0, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

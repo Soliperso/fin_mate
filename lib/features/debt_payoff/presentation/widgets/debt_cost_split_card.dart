@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/services/payoff_calculator.dart';
 
-class DebtCostSplitCard extends StatelessWidget {
+class DebtCostSplitCard extends ConsumerWidget {
   final PayoffResult payoffResult;
   final double totalCurrentBalance;
 
@@ -16,9 +18,9 @@ class DebtCostSplitCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currency = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currency = ref.watch(currencyFormat0Provider);
 
     final principal = totalCurrentBalance;
     final interest = payoffResult.totalInterestPaid;
