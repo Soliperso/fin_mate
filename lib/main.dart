@@ -29,8 +29,13 @@ void main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Load environment variables from .env file
-      await dotenv.load(fileName: ".env");
+      // Load environment variables from .env file (local dev only).
+      // Production builds inject values via --dart-define flags instead.
+      try {
+        await dotenv.load(fileName: ".env");
+      } catch (_) {
+        // .env not present — production build using --dart-define
+      }
 
       // Lock app to portrait mode
       await SystemChrome.setPreferredOrientations([
