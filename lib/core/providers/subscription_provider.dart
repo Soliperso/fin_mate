@@ -85,10 +85,10 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // ============================================================================
 
 /// Computed provider that returns true if user has premium subscription.
-/// During free MVP beta, all users have full access — no paywall.
-// TODO(monetization): replace `return true` with `ref.watch(stripePremiumProvider)`
-// before activating Stripe payments. Search for `isPremiumProvider` usages to
-// find all feature gates that will become paywalled.
+///
+/// MVP decision: all features are free during beta. When activating Stripe payments
+/// (V1.1), replace `return true` with `ref.watch(stripePremiumProvider)` and search
+/// for all `isPremiumProvider` usages to find the feature gates to enable.
 final isPremiumProvider = FutureProvider<bool>((ref) async {
   return true; // Free MVP: all features unlocked during beta
 });

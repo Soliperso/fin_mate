@@ -56,7 +56,6 @@ class AppConfig {
   // AI Insights
   static const int forecastMonths = 6;
   static const int maxInsightHistory = 100;
-  static const String aiModel = 'gpt-4';
 
   // UI/UX
   static const int splashScreenDurationMs = 2000;
