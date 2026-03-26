@@ -27,6 +27,18 @@ class EnvConfig {
   static const _openAiApiKey = String.fromEnvironment('OPENAI_API_KEY');
   static const _environment = String.fromEnvironment('ENVIRONMENT');
 
+  // AdMob (compile-time constants)
+  static const _admobAppIdAndroid =
+      String.fromEnvironment('ADMOB_APP_ID_ANDROID');
+  static const _admobAppIdIos = String.fromEnvironment('ADMOB_APP_ID_IOS');
+  static const _admobBannerAndroid =
+      String.fromEnvironment('ADMOB_BANNER_ANDROID');
+  static const _admobBannerIos = String.fromEnvironment('ADMOB_BANNER_IOS');
+  static const _admobInterstitialAndroid =
+      String.fromEnvironment('ADMOB_INTERSTITIAL_ANDROID');
+  static const _admobInterstitialIos =
+      String.fromEnvironment('ADMOB_INTERSTITIAL_IOS');
+
   // Supabase Configuration
   static String get supabaseUrl =>
       _supabaseUrl.isNotEmpty
@@ -63,6 +75,45 @@ class EnvConfig {
       _openAiApiKey.isNotEmpty
           ? _openAiApiKey
           : dotenv.env['OPENAI_API_KEY'] ?? '';
+
+  // AdMob
+  // Test App IDs: ca-app-pub-3940256099942544~3347511713 (Android), ~1458002511 (iOS)
+  // PRODUCTION: set ADMOB_APP_ID_ANDROID / ADMOB_APP_ID_IOS via --dart-define
+  static String get admobAppIdAndroid =>
+      _admobAppIdAndroid.isNotEmpty
+          ? _admobAppIdAndroid
+          : dotenv.env['ADMOB_APP_ID_ANDROID'] ??
+              'ca-app-pub-3940256099942544~3347511713';
+
+  static String get admobAppIdIos =>
+      _admobAppIdIos.isNotEmpty
+          ? _admobAppIdIos
+          : dotenv.env['ADMOB_APP_ID_IOS'] ??
+              'ca-app-pub-3940256099942544~1458002511';
+
+  static String get admobBannerAndroid =>
+      _admobBannerAndroid.isNotEmpty
+          ? _admobBannerAndroid
+          : dotenv.env['ADMOB_BANNER_ANDROID'] ??
+              'ca-app-pub-3940256099942544/6300978111';
+
+  static String get admobBannerIos =>
+      _admobBannerIos.isNotEmpty
+          ? _admobBannerIos
+          : dotenv.env['ADMOB_BANNER_IOS'] ??
+              'ca-app-pub-3940256099942544/2934735716';
+
+  static String get admobInterstitialAndroid =>
+      _admobInterstitialAndroid.isNotEmpty
+          ? _admobInterstitialAndroid
+          : dotenv.env['ADMOB_INTERSTITIAL_ANDROID'] ??
+              'ca-app-pub-3940256099942544/1033173712';
+
+  static String get admobInterstitialIos =>
+      _admobInterstitialIos.isNotEmpty
+          ? _admobInterstitialIos
+          : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ??
+              'ca-app-pub-3940256099942544/4411468910';
 
   // Environment
   static String get environment =>

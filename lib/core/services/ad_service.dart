@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../config/env_config.dart';
 
 /// Service for managing Google Mobile Ads
 /// Handles initialization, loading, and lifecycle of different ad types
@@ -22,28 +23,19 @@ class AdService {
     }
   }
 
-  /// Get the appropriate banner ad unit ID for the current platform
-  /// Using test IDs for development - replace with real IDs for production
+  /// Get the appropriate banner ad unit ID for the current platform.
+  /// Override via ADMOB_BANNER_ANDROID / ADMOB_BANNER_IOS in .env or --dart-define.
   String get bannerAdUnitId {
-    if (Platform.isAndroid) {
-      // Test ID - Replace with your AdMob unit ID for production
-      return 'ca-app-pub-3940256099942544/6300978111';
-    } else if (Platform.isIOS) {
-      // Test ID - Replace with your AdMob unit ID for production
-      return 'ca-app-pub-3940256099942544/2934735716';
-    }
+    if (Platform.isAndroid) return EnvConfig.admobBannerAndroid;
+    if (Platform.isIOS) return EnvConfig.admobBannerIos;
     throw UnsupportedError('Unsupported platform');
   }
 
-  /// Get the appropriate interstitial ad unit ID for the current platform
+  /// Get the appropriate interstitial ad unit ID for the current platform.
+  /// Override via ADMOB_INTERSTITIAL_ANDROID / ADMOB_INTERSTITIAL_IOS in .env or --dart-define.
   String get interstitialAdUnitId {
-    if (Platform.isAndroid) {
-      // Test ID - Replace with your AdMob unit ID for production
-      return 'ca-app-pub-3940256099942544/1033173712';
-    } else if (Platform.isIOS) {
-      // Test ID - Replace with your AdMob unit ID for production
-      return 'ca-app-pub-3940256099942544/4411468910';
-    }
+    if (Platform.isAndroid) return EnvConfig.admobInterstitialAndroid;
+    if (Platform.isIOS) return EnvConfig.admobInterstitialIos;
     throw UnsupportedError('Unsupported platform');
   }
 
