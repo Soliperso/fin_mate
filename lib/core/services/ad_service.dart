@@ -16,12 +16,24 @@ class AdService {
     if (_isInitialized) return;
 
     try {
+      // Register test devices to avoid policy violations during development.
+      // Find your device ID in the console log after first run:
+      // "To get test ads on this device, set testDeviceIdentifiers = @[ @"XXXX" ]"
+      // Then add it to the list below.
+      MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: _testDeviceIds),
+      );
       await MobileAds.instance.initialize();
       _isInitialized = true;
     } catch (e) {
       // Initialization failed silently
     }
   }
+
+  /// Add your physical device IDs here during development.
+  /// These IDs are printed in the console on first AdMob init.
+  /// Safe to leave empty — only affects dev/test builds.
+  static const List<String> _testDeviceIds = [];
 
   /// Get the appropriate banner ad unit ID for the current platform.
   /// Override via ADMOB_BANNER_ANDROID / ADMOB_BANNER_IOS in .env or --dart-define.
