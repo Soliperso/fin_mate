@@ -11,5 +11,5 @@ DELETE FROM public.accounts;
 
 -- Re-create default cash account for each user
 INSERT INTO public.accounts (user_id, name, type, balance, currency)
-SELECT DISTINCT user_id, 'Cash', 'cash', 0, 'USD'
+SELECT DISTINCT id, 'Cash', 'cash', 0, 'USD'
 FROM public.user_profiles;

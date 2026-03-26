@@ -6,6 +6,7 @@ VALUES ('backups', 'backups', false)
 ON CONFLICT DO NOTHING;
 
 -- Each user can only read/write inside their own folder (userId/*)
+DROP POLICY IF EXISTS "Users access own backups" ON storage.objects;
 CREATE POLICY "Users access own backups"
 ON storage.objects FOR ALL
 USING (

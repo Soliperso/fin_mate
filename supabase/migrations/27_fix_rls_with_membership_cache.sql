@@ -77,26 +77,32 @@ DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 -- ============================================================================
 
 -- Bill Groups Policies - Use cache for membership checks
+DROP POLICY IF EXISTS "Users can view groups they are members of" ON public.bill_groups;
 CREATE POLICY "Users can view groups they are members of" ON public.bill_groups
   FOR SELECT USING (
     id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Users can create groups" ON public.bill_groups;
 CREATE POLICY "Users can create groups" ON public.bill_groups
   FOR INSERT WITH CHECK (auth.uid() = created_by);
 
+DROP POLICY IF EXISTS "Group creators can update groups" ON public.bill_groups;
 CREATE POLICY "Group creators can update groups" ON public.bill_groups
   FOR UPDATE USING (auth.uid() = created_by);
 
+DROP POLICY IF EXISTS "Group creators can delete groups" ON public.bill_groups;
 CREATE POLICY "Group creators can delete groups" ON public.bill_groups
   FOR DELETE USING (auth.uid() = created_by);
 
 -- Group Members Policies - Check cache for membership
+DROP POLICY IF EXISTS "Users can view group members they have access to" ON public.group_members;
 CREATE POLICY "Users can view group members they have access to" ON public.group_members
   FOR SELECT USING (
     group_id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Group admins can add members" ON public.group_members;
 CREATE POLICY "Group admins can add members" ON public.group_members
   FOR INSERT WITH CHECK (
     auth.uid() IN (
@@ -109,6 +115,7 @@ CREATE POLICY "Group admins can add members" ON public.group_members
     )
   );
 
+DROP POLICY IF EXISTS "Group admins can remove members" ON public.group_members;
 CREATE POLICY "Group admins can remove members" ON public.group_members
   FOR DELETE USING (
     auth.uid() IN (
@@ -119,23 +126,28 @@ CREATE POLICY "Group admins can remove members" ON public.group_members
   );
 
 -- Group Expenses Policies - Use cache for membership
+DROP POLICY IF EXISTS "Users can view group expenses" ON public.group_expenses;
 CREATE POLICY "Users can view group expenses" ON public.group_expenses
   FOR SELECT USING (
     group_id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Group members can create expenses" ON public.group_expenses;
 CREATE POLICY "Group members can create expenses" ON public.group_expenses
   FOR INSERT WITH CHECK (
     group_id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Expense creators can update expenses" ON public.group_expenses;
 CREATE POLICY "Expense creators can update expenses" ON public.group_expenses
   FOR UPDATE USING (auth.uid() = paid_by);
 
+DROP POLICY IF EXISTS "Expense creators can delete expenses" ON public.group_expenses;
 CREATE POLICY "Expense creators can delete expenses" ON public.group_expenses
   FOR DELETE USING (auth.uid() = paid_by);
 
 -- Expense Splits Policies - Use cache for membership
+DROP POLICY IF EXISTS "Users can view expense splits" ON public.expense_splits;
 CREATE POLICY "Users can view expense splits" ON public.expense_splits
   FOR SELECT USING (
     expense_id IN (
@@ -144,6 +156,7 @@ CREATE POLICY "Users can view expense splits" ON public.expense_splits
     )
   );
 
+DROP POLICY IF EXISTS "Group members can create splits" ON public.expense_splits;
 CREATE POLICY "Group members can create splits" ON public.expense_splits
   FOR INSERT WITH CHECK (
     expense_id IN (
@@ -152,6 +165,7 @@ CREATE POLICY "Group members can create splits" ON public.expense_splits
     )
   );
 
+DROP POLICY IF EXISTS "Expense creators can update splits" ON public.expense_splits;
 CREATE POLICY "Expense creators can update splits" ON public.expense_splits
   FOR UPDATE USING (
     expense_id IN (
@@ -160,11 +174,13 @@ CREATE POLICY "Expense creators can update splits" ON public.expense_splits
   );
 
 -- Settlements Policies - Use cache for membership
+DROP POLICY IF EXISTS "Users can view group settlements" ON public.settlements;
 CREATE POLICY "Users can view group settlements" ON public.settlements
   FOR SELECT USING (
     group_id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 CREATE POLICY "Users can create settlements" ON public.settlements
   FOR INSERT WITH CHECK (
     group_id IN (SELECT group_id FROM public.group_membership_cache WHERE user_id = auth.uid())
@@ -172,6 +188,7 @@ CREATE POLICY "Users can create settlements" ON public.settlements
   );
 
 -- Membership Cache Policies - Allow users to see their own memberships
+DROP POLICY IF EXISTS "Users can view their own memberships" ON public.group_membership_cache;
 CREATE POLICY "Users can view their own memberships" ON public.group_membership_cache
   FOR SELECT USING (user_id = auth.uid());
 

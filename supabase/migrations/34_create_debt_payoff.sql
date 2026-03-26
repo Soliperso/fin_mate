@@ -33,9 +33,11 @@ ALTER TABLE debts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE debt_payments ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS debts_user_policy ON debts;
 CREATE POLICY debts_user_policy ON debts
   FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS debt_payments_user_policy ON debt_payments;
 CREATE POLICY debt_payments_user_policy ON debt_payments
   FOR ALL USING (auth.uid() = user_id);
 
@@ -48,6 +50,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS debts_updated_at ON debts;
 CREATE TRIGGER debts_updated_at
   BEFORE UPDATE ON debts
   FOR EACH ROW EXECUTE FUNCTION update_debts_updated_at();

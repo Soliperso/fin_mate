@@ -18,6 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_transaction_reminders_due ON transaction_reminder
 
 ALTER TABLE transaction_reminders ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users manage own reminders" ON transaction_reminders;
 CREATE POLICY "Users manage own reminders" ON transaction_reminders
     FOR ALL USING (auth.uid() = user_id);
 

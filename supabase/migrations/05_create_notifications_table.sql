@@ -1,20 +1,26 @@
 -- Create notification_types ENUM
-CREATE TYPE notification_type AS ENUM (
-    'budget_alert',
-    'bill_reminder',
-    'transaction_alert',
-    'money_health_update',
-    'goal_progress',
-    'system_message'
-);
+DO $$ BEGIN
+    CREATE TYPE notification_type AS ENUM (
+        'budget_alert',
+        'bill_reminder',
+        'transaction_alert',
+        'money_health_update',
+        'goal_progress',
+        'system_message'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Create notification_priority ENUM
-CREATE TYPE notification_priority AS ENUM (
-    'low',
-    'medium',
-    'high',
-    'urgent'
-);
+DO $$ BEGIN
+    CREATE TYPE notification_priority AS ENUM (
+        'low',
+        'medium',
+        'high',
+        'urgent'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Create notifications table
 CREATE TABLE IF NOT EXISTS notifications (
@@ -35,32 +41,36 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 -- Add indexes for performance
-CREATE INDEX idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;
-CREATE INDEX idx_notifications_user_type ON notifications(user_id, type);
-CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
-CREATE INDEX idx_notifications_priority ON notifications(priority) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_notifications_user_type ON notifications(user_id, type);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_priority ON notifications(priority) WHERE is_read = FALSE;
 
 -- Enable RLS
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Users can view their own notifications" ON notifications;
 CREATE POLICY "Users can view their own notifications"
     ON notifications
     FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own notifications" ON notifications;
 CREATE POLICY "Users can update their own notifications"
     ON notifications
     FOR UPDATE
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own notifications" ON notifications;
 CREATE POLICY "Users can delete their own notifications"
     ON notifications
     FOR DELETE
     USING (auth.uid() = user_id);
 
 -- System can insert notifications for users
+DROP POLICY IF EXISTS "System can insert notifications" ON notifications;
 CREATE POLICY "System can insert notifications"
     ON notifications
     FOR INSERT

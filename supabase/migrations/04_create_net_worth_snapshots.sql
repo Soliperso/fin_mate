@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS net_worth_snapshots (
 );
 
 -- Add indexes for performance
-CREATE INDEX idx_net_worth_snapshots_user_id ON net_worth_snapshots(user_id);
-CREATE INDEX idx_net_worth_snapshots_date ON net_worth_snapshots(snapshot_date DESC);
-CREATE INDEX idx_net_worth_snapshots_user_date ON net_worth_snapshots(user_id, snapshot_date DESC);
+CREATE INDEX IF NOT EXISTS idx_net_worth_snapshots_user_id ON net_worth_snapshots(user_id);
+CREATE INDEX IF NOT EXISTS idx_net_worth_snapshots_date ON net_worth_snapshots(snapshot_date DESC);
+CREATE INDEX IF NOT EXISTS idx_net_worth_snapshots_user_date ON net_worth_snapshots(user_id, snapshot_date DESC);
 
 -- Enable RLS
 ALTER TABLE net_worth_snapshots ENABLE ROW LEVEL SECURITY;

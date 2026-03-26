@@ -23,22 +23,22 @@ CREATE TABLE IF NOT EXISTS analytics_events (
 -- ============================================================================
 
 -- Index for querying by user
-CREATE INDEX idx_analytics_user_id ON analytics_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_user_id ON analytics_events(user_id);
 
 -- Index for querying by event name
-CREATE INDEX idx_analytics_event_name ON analytics_events(event_name);
+CREATE INDEX IF NOT EXISTS idx_analytics_event_name ON analytics_events(event_name);
 
 -- Index for querying by date (most common query)
-CREATE INDEX idx_analytics_created_at ON analytics_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics_events(created_at DESC);
 
 -- Composite index for user + date queries
-CREATE INDEX idx_analytics_user_date ON analytics_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_user_date ON analytics_events(user_id, created_at DESC);
 
 -- Index for screen analytics
-CREATE INDEX idx_analytics_screen ON analytics_events(screen_name) WHERE screen_name IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_analytics_screen ON analytics_events(screen_name) WHERE screen_name IS NOT NULL;
 
 -- GIN index for JSONB properties (for filtering by properties)
-CREATE INDEX idx_analytics_properties ON analytics_events USING GIN (event_properties);
+CREATE INDEX IF NOT EXISTS idx_analytics_properties ON analytics_events USING GIN (event_properties);
 
 -- ============================================================================
 -- Row Level Security (RLS)

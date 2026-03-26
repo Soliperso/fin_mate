@@ -9,6 +9,7 @@ DROP POLICY IF EXISTS "Users can view group settlements" ON public.settlements;
 DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 
 -- Recreate bill_groups SELECT policy (using EXISTS to avoid recursion)
+DROP POLICY IF EXISTS "Users can view groups they are members of" ON public.bill_groups;
 CREATE POLICY "Users can view groups they are members of" ON public.bill_groups
   FOR SELECT USING (
     EXISTS (
@@ -19,6 +20,7 @@ CREATE POLICY "Users can view groups they are members of" ON public.bill_groups
   );
 
 -- Recreate group_members INSERT policy (using EXISTS to avoid recursion)
+DROP POLICY IF EXISTS "Group admins can add members" ON public.group_members;
 CREATE POLICY "Group admins can add members" ON public.group_members
   FOR INSERT WITH CHECK (
     -- Either you're an admin in this group
@@ -38,6 +40,7 @@ CREATE POLICY "Group admins can add members" ON public.group_members
   );
 
 -- Fix settlements policies
+DROP POLICY IF EXISTS "Users can view group settlements" ON public.settlements;
 CREATE POLICY "Users can view group settlements" ON public.settlements
   FOR SELECT USING (
     EXISTS (
@@ -47,6 +50,7 @@ CREATE POLICY "Users can view group settlements" ON public.settlements
     )
   );
 
+DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 CREATE POLICY "Users can create settlements" ON public.settlements
   FOR INSERT WITH CHECK (
     EXISTS (

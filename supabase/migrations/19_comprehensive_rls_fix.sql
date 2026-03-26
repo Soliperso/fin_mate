@@ -36,6 +36,7 @@ DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 -- ============================================================================
 
 -- Bill Groups: Users can view groups they created or are members of
+DROP POLICY IF EXISTS "Users can view groups they are members of" ON public.bill_groups;
 CREATE POLICY "Users can view groups they are members of" ON public.bill_groups
   FOR SELECT USING (
     auth.uid() = created_by
@@ -47,16 +48,20 @@ CREATE POLICY "Users can view groups they are members of" ON public.bill_groups
     )
   );
 
+DROP POLICY IF EXISTS "Users can create groups" ON public.bill_groups;
 CREATE POLICY "Users can create groups" ON public.bill_groups
   FOR INSERT WITH CHECK (auth.uid() = created_by);
 
+DROP POLICY IF EXISTS "Group creators can update groups" ON public.bill_groups;
 CREATE POLICY "Group creators can update groups" ON public.bill_groups
   FOR UPDATE USING (auth.uid() = created_by);
 
+DROP POLICY IF EXISTS "Group creators can delete groups" ON public.bill_groups;
 CREATE POLICY "Group creators can delete groups" ON public.bill_groups
   FOR DELETE USING (auth.uid() = created_by);
 
 -- Group Members: Users can view group members if they are in the group
+DROP POLICY IF EXISTS "Users can view group members" ON public.group_members;
 CREATE POLICY "Users can view group members" ON public.group_members
   FOR SELECT USING (
     EXISTS (
@@ -67,6 +72,7 @@ CREATE POLICY "Users can view group members" ON public.group_members
   );
 
 -- Group Members: Allow adding members by group creator or admin
+DROP POLICY IF EXISTS "Group admins can add members" ON public.group_members;
 CREATE POLICY "Group admins can add members" ON public.group_members
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -84,6 +90,7 @@ CREATE POLICY "Group admins can add members" ON public.group_members
   );
 
 -- Group Members: Allow removing members by admin or self
+DROP POLICY IF EXISTS "Group admins can remove members" ON public.group_members;
 CREATE POLICY "Group admins can remove members" ON public.group_members
   FOR DELETE USING (
     auth.uid() = user_id
@@ -97,6 +104,7 @@ CREATE POLICY "Group admins can remove members" ON public.group_members
   );
 
 -- Group Expenses: Users can view expenses in groups they're members of
+DROP POLICY IF EXISTS "Users can view group expenses" ON public.group_expenses;
 CREATE POLICY "Users can view group expenses" ON public.group_expenses
   FOR SELECT USING (
     EXISTS (
@@ -107,6 +115,7 @@ CREATE POLICY "Users can view group expenses" ON public.group_expenses
   );
 
 -- Group Expenses: Users can create expenses in groups they're members of
+DROP POLICY IF EXISTS "Group members can create expenses" ON public.group_expenses;
 CREATE POLICY "Group members can create expenses" ON public.group_expenses
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -117,14 +126,17 @@ CREATE POLICY "Group members can create expenses" ON public.group_expenses
   );
 
 -- Group Expenses: Only expense creator can update
+DROP POLICY IF EXISTS "Expense creators can update expenses" ON public.group_expenses;
 CREATE POLICY "Expense creators can update expenses" ON public.group_expenses
   FOR UPDATE USING (auth.uid() = paid_by);
 
 -- Group Expenses: Only expense creator can delete
+DROP POLICY IF EXISTS "Expense creators can delete expenses" ON public.group_expenses;
 CREATE POLICY "Expense creators can delete expenses" ON public.group_expenses
   FOR DELETE USING (auth.uid() = paid_by);
 
 -- Expense Splits: Users can view splits for expenses in their groups
+DROP POLICY IF EXISTS "Users can view expense splits" ON public.expense_splits;
 CREATE POLICY "Users can view expense splits" ON public.expense_splits
   FOR SELECT USING (
     EXISTS (
@@ -136,6 +148,7 @@ CREATE POLICY "Users can view expense splits" ON public.expense_splits
   );
 
 -- Expense Splits: Users can create splits for expenses in their groups
+DROP POLICY IF EXISTS "Group members can create splits" ON public.expense_splits;
 CREATE POLICY "Group members can create splits" ON public.expense_splits
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -147,6 +160,7 @@ CREATE POLICY "Group members can create splits" ON public.expense_splits
   );
 
 -- Expense Splits: Only expense creator can update splits
+DROP POLICY IF EXISTS "Expense creators can update splits" ON public.expense_splits;
 CREATE POLICY "Expense creators can update splits" ON public.expense_splits
   FOR UPDATE USING (
     EXISTS (
@@ -157,6 +171,7 @@ CREATE POLICY "Expense creators can update splits" ON public.expense_splits
   );
 
 -- Settlements: Users can view settlements in groups they're members of
+DROP POLICY IF EXISTS "Users can view group settlements" ON public.settlements;
 CREATE POLICY "Users can view group settlements" ON public.settlements
   FOR SELECT USING (
     EXISTS (
@@ -167,6 +182,7 @@ CREATE POLICY "Users can view group settlements" ON public.settlements
   );
 
 -- Settlements: Users can create settlements in groups they're members of
+DROP POLICY IF EXISTS "Users can create settlements" ON public.settlements;
 CREATE POLICY "Users can create settlements" ON public.settlements
   FOR INSERT WITH CHECK (
     EXISTS (
