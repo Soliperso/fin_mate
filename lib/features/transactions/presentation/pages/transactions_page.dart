@@ -670,10 +670,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           state.searchQuery.isNotEmpty ||
           state.selectedFilter != 'All' ||
           state.selectedPeriod != 'All';
-      return Padding(
+      return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSizes.md),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             EmptyStateCard(
               icon: CupertinoIcons.doc_text,
@@ -977,14 +977,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     if (transaction.type == TransactionType.transfer) {
       return CupertinoIcons.arrow_right_arrow_left;
     }
-    if (cat.contains('food') || cat.contains('dining'))
+    if (cat.contains('food') || cat.contains('dining')) {
       return CupertinoIcons.cart;
-    if (cat.contains('transport') || cat.contains('gas'))
+    }
+    if (cat.contains('transport') || cat.contains('gas')) {
       return CupertinoIcons.car;
+    }
     if (cat.contains('shopping')) return CupertinoIcons.bag;
     if (cat.contains('entertainment')) return CupertinoIcons.film;
-    if (cat.contains('utilities') || cat.contains('bill'))
+    if (cat.contains('utilities') || cat.contains('bill')) {
       return CupertinoIcons.doc_text;
+    }
     if (cat.contains('health')) return CupertinoIcons.heart;
     if (cat.contains('education')) return CupertinoIcons.book;
     if (cat.contains('housing')) return CupertinoIcons.house;

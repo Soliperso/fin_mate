@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
-import 'package:intl/intl.dart';
 
 class CategoryBreakdownChart extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> categoryData;

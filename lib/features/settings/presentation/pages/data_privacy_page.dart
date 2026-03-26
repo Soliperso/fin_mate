@@ -376,6 +376,7 @@ class DataPrivacyPage extends ConsumerWidget {
       final jsonData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportDataAsJson();
+      if (!context.mounted) return;
       await _share(context, jsonData, subject: 'FinMate Data Export');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
@@ -387,6 +388,7 @@ class DataPrivacyPage extends ConsumerWidget {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportTransactionsAsCsv();
+      if (!context.mounted) return;
       await _share(context, csvData, subject: 'FinMate Transactions Export');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
@@ -398,6 +400,7 @@ class DataPrivacyPage extends ConsumerWidget {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportBudgetsAsCsv();
+      if (!context.mounted) return;
       await _share(context, csvData, subject: 'FinMate Budgets Export');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
