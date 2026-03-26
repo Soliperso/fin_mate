@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/app_config.dart';
 
 /// Service for managing automatic session timeout
 class SessionTimeoutService {
-  static const Duration _inactivityTimeout = Duration(minutes: 15);
+  static final Duration _inactivityTimeout =
+      Duration(minutes: AppConfig.sessionTimeoutMinutes);
   Timer? _inactivityTimer;
   DateTime _lastActivityTime = DateTime.now();
 
