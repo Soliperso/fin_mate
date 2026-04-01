@@ -67,7 +67,6 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.arrow_down_circle,
                 title: 'Export All Data',
                 subtitle: 'Download complete profile as JSON',
-                isLoading: _activeExport == 'all',
                 onTap: _activeExport != null ? null : _exportAllData,
               ),
               _buildDivider(context, isDark),
@@ -77,7 +76,6 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.table,
                 title: 'Export Transactions',
                 subtitle: 'Download transactions as CSV',
-                isLoading: _activeExport == 'transactions',
                 onTap: _activeExport != null ? null : _exportTransactions,
               ),
               _buildDivider(context, isDark),
@@ -87,7 +85,6 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.chart_bar,
                 title: 'Export Budgets',
                 subtitle: 'Download budgets as CSV',
-                isLoading: _activeExport == 'budgets',
                 onTap: _activeExport != null ? null : _exportBudgets,
               ),
               _buildDivider(context, isDark),
@@ -210,7 +207,6 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     required String subtitle,
     required VoidCallback? onTap,
     bool showChevron = true,
-    bool isLoading = false,
   }) {
     return InkWell(
       onTap: onTap,
@@ -253,13 +249,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 ],
               ),
             ),
-            if (isLoading)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else if (showChevron)
+            if (showChevron)
               const Icon(CupertinoIcons.chevron_right,
                   size: 16, color: AppColors.systemGray3),
           ],
@@ -389,49 +379,61 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     );
   }
 
-  Future<void> _exportAllData() async {
-    setState(() => _activeExport = 'all');
+  Future<void> _exportAllData() async =>
+      _runExport('all', 'Preparing full data export…', () async {
+        final data = await ref.read(settingsOperationsProvider.notifier).exportDataAsJson();
+        await _shareFile(data, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
+      });
+
+  Future<void> _exportTransactions() async =>
+      _runExport('transactions', 'Preparing transactions…', () async {
+        final data = await ref.read(settingsOperationsProvider.notifier).exportTransactionsAsCsv();
+        await _shareFile(data, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
+      });
+
+  Future<void> _exportBudgets() async =>
+      _runExport('budgets', 'Preparing budgets…', () async {
+        final data = await ref.read(settingsOperationsProvider.notifier).exportBudgetsAsCsv();
+        await _shareFile(data, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
+      });
+
+  Future<void> _runExport(
+    String key,
+    String loadingMessage,
+    Future<void> Function() work,
+  ) async {
+    setState(() => _activeExport = key);
+    _showLoadingDialog(loadingMessage);
     try {
-      final jsonData = await ref
-          .read(settingsOperationsProvider.notifier)
-          .exportDataAsJson();
+      await work();
       if (!mounted) return;
-      await _shareFile(jsonData, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
+      Navigator.of(context).pop(); // dismiss loading dialog
     } catch (e) {
-      if (mounted) _showErrorDialog(e);
+      if (!mounted) return;
+      Navigator.of(context).pop(); // dismiss loading dialog
+      _showErrorDialog(e);
     } finally {
       if (mounted) setState(() => _activeExport = null);
     }
   }
 
-  Future<void> _exportTransactions() async {
-    setState(() => _activeExport = 'transactions');
-    try {
-      final csvData = await ref
-          .read(settingsOperationsProvider.notifier)
-          .exportTransactionsAsCsv();
-      if (!mounted) return;
-      await _shareFile(csvData, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
-    } catch (e) {
-      if (mounted) _showErrorDialog(e);
-    } finally {
-      if (mounted) setState(() => _activeExport = null);
-    }
-  }
-
-  Future<void> _exportBudgets() async {
-    setState(() => _activeExport = 'budgets');
-    try {
-      final csvData = await ref
-          .read(settingsOperationsProvider.notifier)
-          .exportBudgetsAsCsv();
-      if (!mounted) return;
-      await _shareFile(csvData, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
-    } catch (e) {
-      if (mounted) _showErrorDialog(e);
-    } finally {
-      if (mounted) setState(() => _activeExport = null);
-    }
+  void _showLoadingDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Expanded(child: Text(message)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _shareFile(
@@ -457,7 +459,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Export Failed'),
-        content: Text(e.toString().replaceAll('Exception: ', '')),
+        content: Text(e.toString().replaceAll('Exception: ', '').replaceAll('Exception(', '').replaceAll(')', '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
