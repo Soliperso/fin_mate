@@ -108,12 +108,18 @@ class DataExportService {
 
     // Add rows with formatted data
     for (final tx in transactions) {
-      final date = tx['created_at'] ?? '';
+      final rawDate = tx['date'] ?? tx['created_at'] ?? '';
+      String date = rawDate;
+      if (rawDate is String && rawDate.isNotEmpty) {
+        try {
+          date = DateFormat('yyyy-MM-dd').format(DateTime.parse(rawDate));
+        } catch (_) {}
+      }
       final description = tx['description'] ?? '';
       final amount = tx['amount'] ?? '';
-      final category = tx['category'] ?? '';
+      final category = tx['category_id'] ?? tx['category'] ?? '';
       final type = tx['type'] ?? '';
-      final account = tx['account'] ?? '';
+      final account = tx['account_id'] ?? tx['account'] ?? '';
       final status = tx['status'] ?? 'completed';
 
       final row = [

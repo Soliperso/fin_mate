@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -10,11 +13,18 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
 
-class DataPrivacyPage extends ConsumerWidget {
+class DataPrivacyPage extends ConsumerStatefulWidget {
   const DataPrivacyPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DataPrivacyPage> createState() => _DataPrivacyPageState();
+}
+
+class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
+  bool _isExporting = false;
+
+  @override
+  Widget build(BuildContext context) {
     final settingsAsync = ref.watch(userSettingsProvider);
     final settings = settingsAsync.valueOrNull;
     final schedule = settings?.notificationPreferences.autoBackupSchedule ?? 'off';
@@ -57,7 +67,8 @@ class DataPrivacyPage extends ConsumerWidget {
                 icon: CupertinoIcons.arrow_down_circle,
                 title: 'Export All Data',
                 subtitle: 'Download complete profile as JSON',
-                onTap: () => _exportAllData(context, ref),
+                isLoading: _isExporting,
+                onTap: _isExporting ? null : () => _exportAllData(context),
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -66,7 +77,8 @@ class DataPrivacyPage extends ConsumerWidget {
                 icon: CupertinoIcons.table,
                 title: 'Export Transactions',
                 subtitle: 'Download transactions as CSV',
-                onTap: () => _exportTransactions(context, ref),
+                isLoading: _isExporting,
+                onTap: _isExporting ? null : () => _exportTransactions(context),
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -75,7 +87,8 @@ class DataPrivacyPage extends ConsumerWidget {
                 icon: CupertinoIcons.chart_bar,
                 title: 'Export Budgets',
                 subtitle: 'Download budgets as CSV',
-                onTap: () => _exportBudgets(context, ref),
+                isLoading: _isExporting,
+                onTap: _isExporting ? null : () => _exportBudgets(context),
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -197,6 +210,7 @@ class DataPrivacyPage extends ConsumerWidget {
     required String subtitle,
     required VoidCallback? onTap,
     bool showChevron = true,
+    bool isLoading = false,
   }) {
     return InkWell(
       onTap: onTap,
@@ -239,7 +253,13 @@ class DataPrivacyPage extends ConsumerWidget {
                 ],
               ),
             ),
-            if (showChevron)
+            if (isLoading)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else if (showChevron)
               const Icon(CupertinoIcons.chevron_right,
                   size: 16, color: AppColors.systemGray3),
           ],
@@ -374,54 +394,68 @@ class DataPrivacyPage extends ConsumerWidget {
     );
   }
 
-  void _exportAllData(BuildContext context, WidgetRef ref) async {
+  void _exportAllData(BuildContext context) async {
+    setState(() => _isExporting = true);
     try {
       final jsonData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportDataAsJson();
       if (!context.mounted) return;
-      await _share(context, jsonData, subject: 'FinMate Data Export');
+      await _shareFile(context, jsonData, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
     }
   }
 
-  void _exportTransactions(BuildContext context, WidgetRef ref) async {
+  void _exportTransactions(BuildContext context) async {
+    setState(() => _isExporting = true);
     try {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportTransactionsAsCsv();
       if (!context.mounted) return;
-      await _share(context, csvData, subject: 'FinMate Transactions Export');
+      await _shareFile(context, csvData, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
     }
   }
 
-  void _exportBudgets(BuildContext context, WidgetRef ref) async {
+  void _exportBudgets(BuildContext context) async {
+    setState(() => _isExporting = true);
     try {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportBudgetsAsCsv();
       if (!context.mounted) return;
-      await _share(context, csvData, subject: 'FinMate Budgets Export');
+      await _shareFile(context, csvData, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
     } catch (e) {
       if (context.mounted) _showErrorDialog(context, e);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
     }
   }
 
-  Future<void> _share(BuildContext context, String text,
-      {required String subject}) async {
-    try {
-      await Share.share(text, subject: subject);
-    } catch (_) {
-      // Share sheet unavailable or dismissed — show a non-intrusive message
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sharing is not available on this device')),
-        );
-      }
-    }
+  Future<void> _shareFile(
+    BuildContext context,
+    String content, {
+    required String filename,
+    required String ext,
+    required String mime,
+    required String subject,
+  }) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final file = File('${dir.path}/${filename}_$stamp.$ext');
+    await file.writeAsString(content);
+    if (!context.mounted) return;
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: mime)],
+      subject: subject,
+    );
   }
 
   void _showErrorDialog(BuildContext context, Object e) {
@@ -462,7 +496,7 @@ class DataPrivacyPage extends ConsumerWidget {
             SizedBox(height: AppSizes.xs),
             Text('• Permanently delete all your transactions'),
             Text('• Delete all budgets and goals'),
-            Text('• Remove you from bill splitting groups'),
+            Text('• Delete all savings goals and debt records'),
             Text('• Delete all uploaded documents'),
             SizedBox(height: AppSizes.md),
             Text(
