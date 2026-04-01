@@ -461,12 +461,12 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
   void _showErrorDialog(BuildContext context, Object e) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Export Failed'),
         content: Text('$e'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('OK'),
           ),
         ],
@@ -581,12 +581,12 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
       if (context.mounted) {
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             title: const Text('Deletion Failed'),
             content: Text('Failed to delete account: $e'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
                 child: const Text('OK'),
               ),
             ],
