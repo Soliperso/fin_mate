@@ -406,10 +406,11 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     _showLoadingDialog(loadingMessage);
     try {
       await work();
-      if (!mounted) return;
+      // User cancelled — dialog already dismissed, do nothing
+      if (!mounted || _activeExport == null) return;
       Navigator.of(context).pop(); // dismiss loading dialog
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || _activeExport == null) return;
       Navigator.of(context).pop(); // dismiss loading dialog
       _showErrorDialog(e);
     } finally {
@@ -421,7 +422,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => PopScope(
+      builder: (dialogContext) => PopScope(
         canPop: false,
         child: AlertDialog(
           content: Row(
@@ -431,6 +432,15 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
               Expanded(child: Text(message)),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                if (mounted) setState(() => _activeExport = null);
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
         ),
       ),
     );
