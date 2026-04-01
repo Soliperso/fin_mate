@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -157,12 +158,16 @@ class _RecurringTransactionsPageState
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Recurring Transactions'),
         centerTitle: false,
         actions: [
-          IconButton(
-            onPressed: () => _showAddForm(null),
-            icon: const Icon(CupertinoIcons.add),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.add,
+              onTap: () => _showAddForm(null),
+            ),
           ),
         ],
       ),
@@ -425,7 +430,7 @@ class _TransactionActionSheet extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: AppSizes.md),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+              color: Theme.of(context).dividerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -494,7 +499,7 @@ class _TransactionActionSheet extends StatelessWidget {
 
         Divider(
           height: 1,
-          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+          color: Theme.of(context).dividerColor,
         ),
 
         // Edit
@@ -507,7 +512,7 @@ class _TransactionActionSheet extends StatelessWidget {
         Divider(
           height: 1,
           indent: AppSizes.md + 44 + AppSizes.sm,
-          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+          color: Theme.of(context).dividerColor,
         ),
 
         // Activate / Deactivate
@@ -521,7 +526,7 @@ class _TransactionActionSheet extends StatelessWidget {
 
         Divider(
           height: 1,
-          color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+          color: Theme.of(context).dividerColor,
         ),
         const SizedBox(height: AppSizes.xs),
 

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
@@ -23,9 +24,11 @@ class DataPrivacyPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Data & Privacy'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -47,7 +50,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 trailingText: _scheduleLabel(schedule),
                 onTap: () => _showSchedulePicker(context, ref, settings, schedule),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildActionTile(
                 context,
                 isDark: isDark,
@@ -56,7 +59,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 subtitle: 'Download complete profile as JSON',
                 onTap: () => _exportAllData(context, ref),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildActionTile(
                 context,
                 isDark: isDark,
@@ -65,7 +68,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 subtitle: 'Download transactions as CSV',
                 onTap: () => _exportTransactions(context, ref),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildActionTile(
                 context,
                 isDark: isDark,
@@ -74,7 +77,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 subtitle: 'Download budgets as CSV',
                 onTap: () => _exportBudgets(context, ref),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildActionTile(
                 context,
                 isDark: isDark,
@@ -180,7 +183,6 @@ class DataPrivacyPage extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -311,12 +313,13 @@ class DataPrivacyPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider(BuildContext context, bool isDark) {
     return Divider(
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 

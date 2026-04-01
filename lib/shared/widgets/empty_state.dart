@@ -73,7 +73,7 @@ class _EmptyStateState extends State<EmptyState>
               scale: value,
               child: Icon(
                 widget.icon,
-                size: 120,
+                size: 64,
                 color: AppColors.textTertiary.withValues(alpha: 0.5),
               ),
             );

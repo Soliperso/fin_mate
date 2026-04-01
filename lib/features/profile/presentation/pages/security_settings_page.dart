@@ -9,6 +9,7 @@ import '../../../../core/services/biometric_provider.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/mfa_provider.dart';
 import '../../../../core/services/mfa_service.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -33,9 +34,11 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Security Settings'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: SingleChildScrollView(

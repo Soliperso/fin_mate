@@ -80,15 +80,6 @@ class RecurringTransactionListItem extends ConsumerWidget {
                 ? AppColors.separatorDark.withValues(alpha: 0.4)
                 : AppColors.borderLight,
           ),
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),

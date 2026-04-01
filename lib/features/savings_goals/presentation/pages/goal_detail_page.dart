@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
@@ -33,14 +34,17 @@ class GoalDetailPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Goal Details'),
         actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.pencil),
-            onPressed: () => _showEditGoalSheet(context, ref, goalAsync.value),
+          CircularIconButton(
+            icon: CupertinoIcons.pencil,
+            onTap: () => _showEditGoalSheet(context, ref, goalAsync.value),
           ),
-          IconButton(
-            icon: const Icon(CupertinoIcons.trash),
-            color: AppColors.brandTeal,
-            onPressed: () => _showDeleteConfirmation(context, ref),
+          const SizedBox(width: AppSizes.xs),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.trash,
+              onTap: () => _showDeleteConfirmation(context, ref),
+            ),
           ),
         ],
       ),
@@ -324,7 +328,6 @@ class GoalDetailPage extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.cardBackgroundDark : AppColors.white,
                           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                          boxShadow: AppColors.cardShadow(isDark),
                         ),
                         child: Column(
                           children: [
@@ -396,9 +399,7 @@ class GoalDetailPage extends ConsumerWidget {
                                   height: 1,
                                   indent: AppSizes.lg + AppSizes.iconContainer,
                                   endIndent: 0,
-                                  color: isDark
-                                      ? AppColors.separatorDark
-                                      : AppColors.separator,
+                                  color: Theme.of(context).dividerColor,
                                 ),
                             ],
                           ],
@@ -631,7 +632,6 @@ class _InfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardBackgroundDark : AppColors.white,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       child: Row(
         children: [
@@ -725,13 +725,9 @@ class _ContributionRow extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(
-              CupertinoIcons.trash,
-              size: AppSizes.iconSm,
-              color: AppColors.brandTeal,
-            ),
-            onPressed: onDelete,
+          CircularIconButton(
+            icon: CupertinoIcons.trash,
+            onTap: onDelete,
           ),
         ],
       ),

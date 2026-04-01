@@ -169,9 +169,7 @@ class PayoffTimelineChart extends StatelessWidget {
                         ? AppColors.tertiarySystemBackgroundDark
                         : AppColors.white,
                     tooltipBorder: BorderSide(
-                      color: isDark
-                          ? AppColors.separatorDark
-                          : AppColors.separator,
+                      color: Theme.of(context).dividerColor,
                       width: 0.5,
                     ),
                     tooltipRoundedRadius: AppSizes.radiusSm,

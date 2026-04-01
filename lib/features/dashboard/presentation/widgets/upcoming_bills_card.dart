@@ -31,7 +31,6 @@ class UpcomingBillsCard extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +132,8 @@ class _BillsList extends ConsumerWidget {
               height: 0,
               thickness: 0.5,
               indent: 60,
-              color: isDark ? AppColors.separatorDark : AppColors.separator,
+              endIndent: AppSizes.md,
+              color: Theme.of(context).dividerColor,
             ),
         ],
         const SizedBox(height: AppSizes.xs),
@@ -184,7 +184,7 @@ class _BillRow extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: AppColors.systemRed.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
             ),
             child: Icon(
               CupertinoIcons.arrow_up,

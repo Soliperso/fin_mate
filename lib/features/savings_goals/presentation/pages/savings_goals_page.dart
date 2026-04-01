@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
@@ -28,11 +29,12 @@ class SavingsGoalsPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Savings Goals'),
         actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.info_circle),
-            onPressed: () {
-              _showInfoDialog(context);
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.info_circle,
+              onTap: () => _showInfoDialog(context),
+            ),
           ),
         ],
       ),

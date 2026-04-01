@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/services/theme_provider.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../providers/settings_providers.dart';
@@ -69,9 +70,11 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Display Settings'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: settingsState.when(
@@ -227,7 +230,6 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -364,7 +366,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 

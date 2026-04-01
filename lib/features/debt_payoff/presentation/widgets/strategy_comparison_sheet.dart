@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../domain/services/payoff_calculator.dart' show DebtStrategy, PayoffResult;
 import '../providers/debt_providers.dart';
@@ -54,10 +55,9 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark_circle_fill),
-                  color: AppColors.systemGray3,
-                  onPressed: () => Navigator.pop(context),
+                CircularIconButton(
+                  icon: CupertinoIcons.xmark,
+                  onTap: () => Navigator.pop(context),
                 ),
               ],
             ),

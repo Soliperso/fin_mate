@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
@@ -67,24 +68,21 @@ class DashboardPage extends ConsumerWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              IconButton(
-                icon: Icon(
-                  unreadCount > 0
-                      ? CupertinoIcons.bell_fill
-                      : CupertinoIcons.bell,
-                  size: 22,
-                ),
-                onPressed: () => context.push('/notifications'),
+              CircularIconButton(
+                icon: unreadCount > 0
+                    ? CupertinoIcons.bell_fill
+                    : CupertinoIcons.bell,
+                onTap: () => context.push('/notifications'),
               ),
               if (unreadCount > 0)
                 Positioned(
-                  right: 6,
-                  top: 6,
+                  right: 0,
+                  top: 0,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                     decoration: BoxDecoration(
                       color: AppColors.systemRed,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                     ),
                     constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
@@ -101,6 +99,13 @@ class DashboardPage extends ConsumerWidget {
                 ),
             ],
           ),
+          const SizedBox(width: AppSizes.xs),
+          // Global search
+          CircularIconButton(
+            icon: CupertinoIcons.search,
+            onTap: () => context.go('/transactions?search=true'),
+          ),
+          const SizedBox(width: AppSizes.xs),
           // Avatar
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
@@ -152,6 +157,8 @@ class DashboardPage extends ConsumerWidget {
                   netWorth: stats.netWorth,
                   changePercentage: stats.netWorthChangePercentage,
                   isPositive: stats.isNetWorthPositive,
+                  monthlyIncome: stats.monthlyIncome,
+                  monthlyExpenses: stats.monthlyExpenses,
                 ),
                 const SizedBox(height: AppSizes.md),
 
@@ -391,15 +398,6 @@ class _RecentTransactionsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -414,7 +412,8 @@ class _RecentTransactionsCard extends StatelessWidget {
                 height: 0,
                 thickness: 0.5,
                 indent: 60,
-                color: isDark ? AppColors.separatorDark : AppColors.separator,
+                endIndent: AppSizes.md,
+                color: Theme.of(context).dividerColor,
               ),
           ],
         ],
@@ -468,7 +467,7 @@ class _TransactionRow extends ConsumerWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
               child: Icon(iconData, color: iconColor, size: 20),
             ),

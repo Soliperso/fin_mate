@@ -49,7 +49,6 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                 ? AppColors.secondarySystemBackgroundDark
                 : AppColors.systemBackground,
             borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-            boxShadow: AppColors.cardShadow(isDark),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +169,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                 thickness: 0.5,
                 indent: AppSizes.md,
                 endIndent: AppSizes.md,
-                color: isDark ? AppColors.separatorDark : AppColors.separator,
+                color: Theme.of(context).dividerColor,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(

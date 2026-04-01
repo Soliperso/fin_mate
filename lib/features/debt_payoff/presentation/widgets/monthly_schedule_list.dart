@@ -248,7 +248,7 @@ class _ColumnHeadersRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: isDark ? AppColors.separatorDark : AppColors.separator,
+            color: Theme.of(context).dividerColor,
             width: 0.5,
           ),
         ),
@@ -589,7 +589,7 @@ class _YearSeparatorRow extends StatelessWidget {
         children: [
           Expanded(
             child: Divider(
-              color: isDark ? AppColors.separatorDark : AppColors.separator,
+              color: Theme.of(context).dividerColor,
               thickness: 0.5,
               height: 1,
             ),
@@ -608,7 +608,7 @@ class _YearSeparatorRow extends StatelessWidget {
           ),
           Expanded(
             child: Divider(
-              color: isDark ? AppColors.separatorDark : AppColors.separator,
+              color: Theme.of(context).dividerColor,
               thickness: 0.5,
               height: 1,
             ),
@@ -692,7 +692,7 @@ class _SummaryFooter extends StatelessWidget {
             : AppColors.systemGray6,
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         border: Border.all(
-          color: isDark ? AppColors.separatorDark : AppColors.separator,
+          color: Theme.of(context).dividerColor,
           width: 0.5,
         ),
       ),
@@ -707,7 +707,7 @@ class _SummaryFooter extends StatelessWidget {
           VerticalDivider(
             width: 1,
             thickness: 0.5,
-            color: isDark ? AppColors.separatorDark : AppColors.separator,
+            color: Theme.of(context).dividerColor,
           ),
           _SummaryItem(
             label: 'Total Paid',

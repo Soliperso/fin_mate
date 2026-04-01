@@ -173,29 +173,36 @@ class DebtCard extends ConsumerWidget {
                             ?.copyWith(color: AppColors.textSecondary),
                       ),
                       if (isFocusDebt && focusReason.isNotEmpty) ...[
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSizes.sm,
-                            vertical: 2,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.brandTeal.withValues(alpha: 0.12),
+                            color: AppColors.brandTeal,
                             borderRadius:
                                 BorderRadius.circular(AppSizes.radiusFull),
-                            border: Border.all(
-                              color: AppColors.brandTeal.withValues(alpha: 0.35),
-                              width: 0.5,
-                            ),
                           ),
-                          child: Text(
-                            focusReason,
-                            style: const TextStyle(
-                              color: AppColors.brandTeal,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.3,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                CupertinoIcons.arrow_up_circle_fill,
+                                color: Colors.white,
+                                size: 10,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                'NEXT UP · $focusReason',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -235,9 +242,7 @@ class DebtCard extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                     side: BorderSide(
-                      color: isDark
-                          ? AppColors.separatorDark
-                          : AppColors.separator,
+                      color: Theme.of(context).dividerColor,
                       width: 0.5,
                     ),
                   ),
@@ -298,16 +303,21 @@ class DebtCard extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusFull),
-                      child: LinearProgressIndicator(
-                        value: progressValue,
-                        minHeight: 6,
-                        backgroundColor:
-                            AppColors.error.withValues(alpha: 0.12),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.success,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: progressValue),
+                      duration: const Duration(milliseconds: 700),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) => ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusFull),
+                        child: LinearProgressIndicator(
+                          value: value,
+                          minHeight: 6,
+                          backgroundColor:
+                              AppColors.error.withValues(alpha: 0.12),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.success,
+                          ),
                         ),
                       ),
                     ),

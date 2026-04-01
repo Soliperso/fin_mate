@@ -285,7 +285,7 @@ class _AddRecurringTransactionBottomSheetState
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.separatorDark : AppColors.borderLight,
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

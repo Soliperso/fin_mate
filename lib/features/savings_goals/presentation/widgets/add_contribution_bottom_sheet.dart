@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
 
@@ -117,9 +118,9 @@ class _AddContributionBottomSheetState
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.xmark),
-                    onPressed: () => Navigator.pop(context),
+                  CircularIconButton(
+                    icon: CupertinoIcons.xmark,
+                    onTap: () => Navigator.pop(context),
                   ),
                 ],
               ),

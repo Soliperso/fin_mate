@@ -1,16 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../core/services/search_history_service.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
@@ -20,26 +22,37 @@ import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 
 class TransactionsPage extends ConsumerStatefulWidget {
-  const TransactionsPage({super.key});
+  final bool openSearch;
+  const TransactionsPage({super.key, this.openSearch = false});
 
   @override
   ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
 }
 
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
-  bool _isSearching = false;
   bool _isSelecting = false;
   final Set<String> _selectedIds = {};
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _minAmountController = TextEditingController();
   final TextEditingController _maxAmountController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  Timer? _debounceTimer;
+  final _searchHistory = SearchHistoryService();
+  List<String> _recentSearches = [];
+  bool _searchFocused = false;
 
   @override
   void initState() {
     super.initState();
-    // Refresh transactions when page is opened
+    _searchHistory.load().then((h) => setState(() => _recentSearches = h));
+    _searchFocusNode.addListener(() {
+      setState(() => _searchFocused = _searchFocusNode.hasFocus);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(transactionListProvider.notifier).refresh();
+      if (widget.openSearch) {
+        _searchFocusNode.requestFocus();
+      }
     });
   }
 
@@ -48,6 +61,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     _searchController.dispose();
     _minAmountController.dispose();
     _maxAmountController.dispose();
+    _searchFocusNode.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -115,33 +130,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           fontWeight: FontWeight.w600,
                         ),
                   )
-                : _isSearching
-                    ? TextField(
-                        key: const ValueKey('search'),
-                        controller: _searchController,
-                        autofocus: true,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: 14,
-                            ),
-                        decoration: InputDecoration(
-                          hintText: 'Search transactions...',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Theme.of(context).cardTheme.color ??
-                              AppColors.cardBackground,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: AppSizes.md, vertical: AppSizes.md),
-                        ),
-                        onChanged: notifier.setSearchQuery,
-                      )
-                    : const Text('Transactions', key: ValueKey('title')),
+                : const Text('Transactions', key: ValueKey('title')),
           ),
           actions: [
             AnimatedSwitcher(
@@ -200,37 +189,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       key: const ValueKey('normal-actions'),
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            _isSearching
-                                ? CupertinoIcons.xmark
-                                : CupertinoIcons.search,
-                            size: 22,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (_isSearching) {
-                                _isSearching = false;
-                                _searchController.clear();
-                                notifier.setSearchQuery('');
-                              } else {
-                                _isSearching = true;
-                              }
-                            });
-                          },
-                        ),
-                        Badge(
-                          isLabelVisible: state.activeFilterCount > 0,
-                          label: Text('${state.activeFilterCount}'),
-                          child: IconButton(
-                            icon: Icon(
-                              CupertinoIcons.slider_horizontal_3,
-                              size: 22,
-                              color: state.hasActiveFilters
-                                  ? AppColors.brandTeal
-                                  : null,
+                        Padding(
+                          padding: const EdgeInsets.only(right: AppSizes.sm),
+                          child: Badge(
+                            isLabelVisible: state.activeFilterCount > 0,
+                            label: Text('${state.activeFilterCount}'),
+                            child: CircularIconButton(
+                              icon: CupertinoIcons.slider_horizontal_3,
+                              onTap: () => _showFilterBottomSheet(context),
                             ),
-                            onPressed: () => _showFilterBottomSheet(context),
                           ),
                         ),
                       ],
@@ -272,6 +239,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             : const SizedBox.shrink(),
         body: Column(
           children: [
+            if (!_isSelecting) _buildSearchBar(context, notifier),
             Expanded(
               child: state.isLoading
                   ? ListView(
@@ -393,10 +361,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
                             Divider(
                               height: 1,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? AppColors.separatorDark
-                                  : AppColors.separator,
+                              color: Theme.of(context).dividerColor,
                             ),
 
                             // Transactions list
@@ -412,6 +377,149 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
+  Widget _buildSearchBar(BuildContext context, TransactionListNotifier notifier) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showHistory = _searchFocused &&
+        _searchController.text.isEmpty &&
+        _recentSearches.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSizes.pagePadding, AppSizes.sm, AppSizes.pagePadding, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            style: Theme.of(context).textTheme.bodyMedium,
+            decoration: InputDecoration(
+              hintText: 'Search transactions…',
+              hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              prefixIcon: const Icon(CupertinoIcons.search, size: 18),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () {
+                        _searchController.clear();
+                        _debounceTimer?.cancel();
+                        notifier.setSearchQuery('');
+                        setState(() {});
+                      },
+                      child: const Icon(CupertinoIcons.xmark_circle_fill,
+                          size: 18, color: AppColors.systemGray3),
+                    )
+                  : null,
+              filled: true,
+              fillColor: isDark
+                  ? AppColors.secondarySystemBackgroundDark
+                  : AppColors.systemGray6,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.md, vertical: 10),
+            ),
+            onChanged: (value) {
+              setState(() {});
+              _debounceTimer?.cancel();
+              _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                notifier.setSearchQuery(value);
+              });
+            },
+            onSubmitted: (value) {
+              final q = value.trim();
+              if (q.length >= 2) {
+                _searchHistory.add(q).then((_) {
+                  _searchHistory
+                      .load()
+                      .then((h) => setState(() => _recentSearches = h));
+                });
+              }
+            },
+          ),
+          if (showHistory) ...[
+            const SizedBox(height: AppSizes.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    _searchHistory.clear();
+                    setState(() => _recentSearches = []);
+                  },
+                  child: Text(
+                    'Clear',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.brandTeal,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.xs),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _recentSearches
+                    .map((query) => Padding(
+                          padding: const EdgeInsets.only(right: AppSizes.xs),
+                          child: GestureDetector(
+                            onTap: () {
+                              _searchController.text = query;
+                              _searchController.selection =
+                                  TextSelection.collapsed(offset: query.length);
+                              notifier.setSearchQuery(query);
+                              _searchFocusNode.unfocus();
+                              setState(() {});
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.sm, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.secondarySystemBackgroundDark
+                                    : AppColors.systemGray6,
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusFull),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(CupertinoIcons.clock,
+                                      size: 12,
+                                      color: AppColors.textSecondary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    query,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildFilterChip(
     BuildContext context,
     String filter,
@@ -419,25 +527,30 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     TransactionListNotifier notifier,
   ) {
     final isSelected = filter == selectedFilter;
-    return FilterChip(
-      label: SizedBox(
-        width: double.infinity,
-        child: Text(filter, textAlign: TextAlign.center),
-      ),
-      selected: isSelected,
-      onSelected: (selected) {
-        notifier.setFilter(filter);
-      },
-      backgroundColor: Colors.transparent,
-      selectedColor: AppColors.brandTeal.withValues(alpha: 0.2),
-      checkmarkColor: Colors.transparent,
-      showCheckmark: false,
-      labelStyle: TextStyle(
-        color: isSelected ? AppColors.brandTeal : AppColors.textSecondary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      side: BorderSide(
-        color: isSelected ? AppColors.brandTeal : Colors.transparent,
+    return GestureDetector(
+      onTap: () => notifier.setFilter(filter),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.brandTeal : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.brandTeal
+                : AppColors.textSecondary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          filter,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -506,7 +619,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          boxShadow: AppColors.cardShadow(isDark),
         ),
         child: Row(
           children: [
@@ -562,9 +674,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             VerticalDivider(
               width: 1,
               thickness: 0.5,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppColors.separatorDark
-                  : AppColors.separator,
+              color: Theme.of(context).dividerColor,
             ),
             Expanded(
               child: Padding(
@@ -772,49 +882,60 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               ? AppColors.secondarySystemBackgroundDark
               : AppColors.systemBackground;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: AppSizes.sm,
-                  bottom: AppSizes.xs,
-                ),
-                child: Text(
-                  entry.key,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.systemGray,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                ),
+          return TweenAnimationBuilder<double>(
+            key: ValueKey(entry.key),
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOut,
+            builder: (context, value, child) => Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 12 * (1 - value)),
+                child: child,
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                  boxShadow: AppColors.cardShadow(isDark),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    for (int i = 0; i < txList.length; i++) ...[
-                      _buildTransactionCard(context, txList[i], notifier, ref),
-                      if (i < txList.length - 1)
-                        Divider(
-                          height: 0,
-                          thickness: 0.5,
-                          indent: 60,
-                          color: isDark
-                              ? AppColors.separatorDark
-                              : AppColors.separator,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: AppSizes.sm,
+                    bottom: AppSizes.xs,
+                  ),
+                  child: Text(
+                    entry.key,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: AppColors.systemGray,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
                         ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSizes.sm),
-            ],
+                Container(
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      for (int i = 0; i < txList.length; i++) ...[
+                        _buildTransactionCard(context, txList[i], notifier, ref),
+                        if (i < txList.length - 1)
+                          Divider(
+                            height: 0,
+                            thickness: 0.5,
+                            indent: 60,
+                            endIndent: AppSizes.md,
+                            color: Theme.of(context).dividerColor,
+                          ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSizes.sm),
+              ],
+            ),
           );
         },
       ),
@@ -893,7 +1014,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             }
           });
         } else {
-          _showTransactionDetails(context, transaction, notifier, ref);
+          context.push('/transactions/${transaction.id}');
         }
       },
       child: Padding(
@@ -921,7 +1042,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               height: 40,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
               child: Icon(_getTransactionIcon(transaction),
                   color: iconColor, size: 20),
@@ -994,224 +1115,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     return CupertinoIcons.creditcard;
   }
 
-  void _showTransactionDetails(
-    BuildContext context,
-    TransactionEntity transaction,
-    TransactionListNotifier notifier,
-    WidgetRef ref,
-  ) {
-    final currencyFormat = ref.watch(currencyFormat2Provider);
-    final dateFormat = DateFormat('MMMM d, yyyy • h:mm a');
-    final navigator = Navigator.of(context);
-
-    GlassBottomSheet.show(
-      context: context,
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: AppSizes.md),
-                decoration: BoxDecoration(
-                  color: AppColors.textTertiary.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Transaction Details',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark),
-                  onPressed: () => navigator.pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Amount
-            Text(
-              currencyFormat.format(transaction.amount.abs()),
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: transaction.type == TransactionType.income
-                        ? AppColors.success
-                        : transaction.type == TransactionType.transfer
-                            ? AppColors.slateBlue
-                            : AppColors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSizes.md),
-            // Type badge
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.md, vertical: AppSizes.xs),
-                decoration: BoxDecoration(
-                  color: (transaction.type == TransactionType.income
-                          ? AppColors.success
-                          : transaction.type == TransactionType.transfer
-                              ? AppColors.slateBlue
-                              : AppColors.error)
-                      .withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                ),
-                child: Text(
-                  transaction.type.toString().split('.').last.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: transaction.type == TransactionType.income
-                            ? AppColors.success
-                            : transaction.type == TransactionType.transfer
-                                ? AppColors.slateBlue
-                                : AppColors.error,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            // Details Section
-            Container(
-              padding: const EdgeInsets.all(AppSizes.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.tertiarySystemBackgroundDark
-                    : AppColors.systemGray5,
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDetailRow('Title', transaction.description ?? 'N/A',
-                      icon: CupertinoIcons.text_alignleft),
-                  if (transaction.accountName != null) ...[
-                    Divider(height: AppSizes.md * 1.5),
-                    _buildDetailRow('Account', transaction.accountName!,
-                        icon: CupertinoIcons.creditcard),
-                  ],
-                  if (transaction.type == TransactionType.transfer &&
-                      transaction.toAccountName != null) ...[
-                    Divider(height: AppSizes.md * 1.5),
-                    _buildDetailRow('To Account', transaction.toAccountName!,
-                        icon: CupertinoIcons.arrow_right),
-                  ],
-                  if (transaction.categoryName != null) ...[
-                    Divider(height: AppSizes.md * 1.5),
-                    _buildDetailRow('Category', transaction.categoryName!,
-                        icon: CupertinoIcons.tag),
-                  ],
-                  Divider(height: AppSizes.md * 1.5),
-                  _buildDetailRow('Date', dateFormat.format(transaction.date),
-                      icon: CupertinoIcons.calendar),
-                  if (transaction.notes != null &&
-                      transaction.notes!.isNotEmpty) ...[
-                    Divider(height: AppSizes.md * 1.5),
-                    _buildDetailRow('Notes', transaction.notes!,
-                        icon: CupertinoIcons.doc_text),
-                  ],
-                  if (transaction.isRecurring) ...[
-                    Divider(height: AppSizes.md * 1.5),
-                    _buildDetailRow(
-                        'Recurring', transaction.recurringInterval ?? 'Yes',
-                        icon: CupertinoIcons.repeat),
-                  ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.lg),
-
-            // Actions
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      navigator.pop();
-                      await context
-                          .push('/transactions/add?id=${transaction.id}');
-                      // Refresh after editing
-                      if (context.mounted) {
-                        notifier.refresh();
-                      }
-                    },
-                    icon: const Icon(CupertinoIcons.pencil),
-                    label: const Text('Edit'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.brandTeal,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      navigator.pop();
-                      _confirmDelete(context, transaction, notifier);
-                    },
-                    icon: const Icon(CupertinoIcons.trash),
-                    label: const Text('Delete'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, {IconData? icon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: AppColors.textSecondary),
-            const SizedBox(width: AppSizes.sm),
-          ],
-          SizedBox(
-            width: icon != null ? 65 : 80,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCategoryFilter(
     StateSetter setModalState,
@@ -1262,64 +1165,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  void _confirmDelete(
-    BuildContext context,
-    TransactionEntity transaction,
-    TransactionListNotifier notifier,
-  ) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content: const Text(
-          'Are you sure you want to delete this transaction? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final success = await notifier.deleteTransaction(transaction.id);
-
-              // Invalidate dashboard and related providers to refresh cached data
-              if (success) {
-                unawaited(
-                    ref.read(analyticsServiceProvider).trackTransactionDeleted(
-                          transactionId: transaction.id,
-                        ));
-                ref.invalidate(dashboardNotifierProvider);
-                ref.invalidate(recentTransactionsProvider);
-                ref.invalidate(monthlyFlowDataProvider);
-                ref.invalidate(netWorthSnapshotsProvider);
-                ref.invalidate(budgetNotifierProvider);
-                ref.invalidate(categoryBreakdownProvider);
-              }
-
-              if (context.mounted) {
-                if (success) {
-                  SuccessDialog.show(
-                    context,
-                    title: 'Deleted',
-                    message: 'Transaction deleted successfully',
-                    autoDismissDuration: const Duration(milliseconds: 800),
-                  );
-                } else {
-                  showErrorDialog(context, 'Failed to delete transaction');
-                }
-              }
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _exitSelectionMode() {
     setState(() {

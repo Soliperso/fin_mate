@@ -169,9 +169,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                   Container(
                     width: 0.5,
                     height: 32,
-                    color: isDark
-                        ? AppColors.separatorDark
-                        : AppColors.separator,
+                    color: Theme.of(context).dividerColor,
                   ),
                   _AmountColumn(
                     label: 'Interest',
@@ -181,9 +179,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                   Container(
                     width: 0.5,
                     height: 32,
-                    color: isDark
-                        ? AppColors.separatorDark
-                        : AppColors.separator,
+                    color: Theme.of(context).dividerColor,
                   ),
                   _AmountColumn(
                     label: 'Total',

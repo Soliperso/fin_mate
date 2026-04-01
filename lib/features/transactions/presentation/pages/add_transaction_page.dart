@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch, CupertinoPicker, CupertinoPickerDefaultSelectionOverlay, CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +11,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/analytics_provider.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
@@ -47,6 +48,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
   AccountEntity? _selectedAccount;
+
+  // Category wheel
+  late FixedExtentScrollController _categoryScrollController;
+  List<dynamic> _loadedCategories = [];
+
+  // Date strip
+  late ScrollController _dateStripController;
 
   // Recurring
   bool _isRecurring = false;
@@ -86,9 +94,18 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     }
   }
 
+  void _syncCategoryWheel(List<dynamic> categories) {
+    final idx = categories.indexWhere((c) => c.name == _selectedCategory);
+    if (idx != -1 && _categoryScrollController.hasClients) {
+      _categoryScrollController.jumpToItem(idx);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _categoryScrollController = FixedExtentScrollController(initialItem: 0);
+    _dateStripController = ScrollController();
     if (widget.transactionType != null) {
       _selectedType = widget.transactionType!;
     }
@@ -147,6 +164,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           if (transaction.recurringInterval != null) {
             _recurringInterval = transaction.recurringInterval!;
           }
+          _loadedCategories = categories;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _syncCategoryWheel(categories);
         });
       }
     } catch (e) {
@@ -162,6 +183,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     _amountController.dispose();
     _notesController.dispose();
     _reminderMessageController.dispose();
+    _categoryScrollController.dispose();
+    _dateStripController.dispose();
     super.dispose();
   }
 
@@ -215,9 +238,38 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ? AppColors.systemGroupedBackgroundDark
             : AppColors.systemGroupedBackground,
         title: Text(_isEditing ? 'Edit Transaction' : 'New Transaction'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.xmark),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.xmark,
+            onTap: () => context.pop(),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSizes.pagePadding, AppSizes.sm, AppSizes.pagePadding, AppSizes.md),
+          child: ElevatedButton.icon(
+            onPressed: _handleSubmit,
+            icon: Icon(
+              _isEditing ? CupertinoIcons.checkmark : CupertinoIcons.add,
+              size: 18,
+            ),
+            label: Text(
+              _isEditing
+                  ? 'Update Transaction'
+                  : (_selectedType == 'expense' ? 'Add Expense' : 'Add Income'),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              minimumSize: const Size(double.infinity, AppSizes.buttonHeightMd),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+            ),
+          ),
         ),
       ),
       body: Form(
@@ -264,15 +316,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                   decoration: BoxDecoration(
                                     color: cardColor,
                                     borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                                    boxShadow: isDark
-                                        ? []
-                                        : [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.06),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   padding: const EdgeInsets.symmetric(
@@ -318,34 +361,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 },
               ),
 
-              // ── Save button ────────────────────────────────────────────
-              ElevatedButton.icon(
-                onPressed: _handleSubmit,
-                icon: Icon(
-                  _isEditing ? CupertinoIcons.checkmark : CupertinoIcons.add,
-                  size: 18,
-                ),
-                label: Text(
-                  _isEditing
-                      ? 'Update Transaction'
-                      : (_selectedType == 'expense'
-                          ? 'Add Expense'
-                          : 'Add Income'),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryTeal,
-                  foregroundColor: Colors.white,
-                  elevation: 4,
-                  shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
-                  minimumSize:
-                      const Size(double.infinity, AppSizes.buttonHeightMd),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusFull),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.xl),
+              const SizedBox(height: AppSizes.lg),
             ],
           ),
         ),
@@ -551,6 +567,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         onTap: () => setState(() {
           _selectedType = type;
           _selectedCategory = null;
+          if (_categoryScrollController.hasClients) {
+            _categoryScrollController.jumpToItem(0);
+          }
         }),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
@@ -595,15 +614,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -657,46 +667,58 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSizes.md),
-                  child: Row(
-                    children: [
-                      _rowIcon(CupertinoIcons.tag, accentColor: _typeColor, isDark: isDark),
-                      const SizedBox(width: AppSizes.md),
-                      Text(
-                        'Category',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                      const Spacer(),
-                      if (_selectedCategory != null) ...[
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _showCategoryPicker(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md, vertical: AppSizes.sm),
+                    child: Row(
+                      children: [
+                        _rowIcon(CupertinoIcons.tag,
+                            accentColor: _typeColor, isDark: isDark),
+                        const SizedBox(width: AppSizes.md),
                         Text(
-                          _selectedCategory!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.secondaryLabel,
-                              ),
+                          'Category',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
-                        const SizedBox(width: 2),
+                        const Spacer(),
+                        if (_selectedCategory != null)
+                          Text(
+                            _selectedCategory!,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.secondaryLabel,
+                                    ),
+                          ),
+                        const SizedBox(width: 4),
+                        const Icon(CupertinoIcons.chevron_right,
+                            size: 14, color: AppColors.systemGray3),
                       ],
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSizes.xs),
                 FutureBuilder(
                   future: ref.watch(categoriesProvider(_selectedType).future),
                   builder: (context, snapshot) {
                     final categories = snapshot.data ?? [];
-                    if (_selectedCategory == null && categories.isNotEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() =>
-                              _selectedCategory = categories.first.name);
-                        }
-                      });
+                    if (categories.isNotEmpty) {
+                      if (_selectedCategory == null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() =>
+                                _selectedCategory = categories.first.name);
+                          }
+                        });
+                      }
+                      if (_loadedCategories != categories) {
+                        _loadedCategories = categories;
+                      }
                     }
-                    return _buildCategoryChips(categories, isDark);
+                    return const SizedBox.shrink();
                   },
                 ),
                 // Debt picker — inline row, visible for any expense
@@ -796,7 +818,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   ],
                 ),
                 const SizedBox(height: AppSizes.xs),
-                _buildDateShortcuts(context, isDark),
+                _buildDateStrip(isDark),
               ],
             ),
           ),
@@ -1043,168 +1065,285 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     }
   }
 
-  Widget _buildCategoryChips(List<dynamic> categories, bool isDark) {
-    if (categories.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: AppSizes.xs),
-        child: Text(
-          'Loading…',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.tertiaryLabel,
-              ),
-        ),
-      );
-    }
+  void _showCategoryPicker() {
+    final categories = _loadedCategories;
+    if (categories.isEmpty) return;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-      child: Row(
-        children: categories.map((category) {
-          final isSelected = category.name == _selectedCategory;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSizes.sm),
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _selectedCategory = category.name;
-                _autoLinkDebt(category.name);
-              }),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? _typeColor.withValues(alpha: 0.12)
-                      : (isDark
-                          ? AppColors.tertiarySystemBackgroundDark
-                          : AppColors.systemGray5),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                  border: isSelected
-                      ? Border.all(color: _typeColor, width: 1.5)
-                      : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _getCategoryIcon(category.name, category.icon),
-                      size: 14,
-                      color:
-                          isSelected ? _typeColor : AppColors.secondaryLabel,
+    final initialIndex =
+        categories.indexWhere((c) => c.name == _selectedCategory);
+    final controller = FixedExtentScrollController(
+      initialItem: initialIndex.clamp(0, categories.length - 1),
+    );
+    String tempCategory =
+        _selectedCategory ?? (categories.first.name as String);
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark =
+            MediaQuery.platformBrightnessOf(ctx) == Brightness.dark;
+        final bgColor = isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground;
+        final toolbarColor = isDark
+            ? AppColors.tertiarySystemBackgroundDark
+            : AppColors.secondarySystemBackground;
+        final dividerColor = Theme.of(context).dividerColor;
+        final labelColor =
+            isDark ? AppColors.labelDark : AppColors.label;
+
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSizes.radiusXl),
+          ),
+          child: Container(
+            color: bgColor,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 12),
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.systemGray4,
+                      borderRadius:
+                          BorderRadius.circular(AppSizes.radiusFull),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      category.name,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? _typeColor
-                            : AppColors.secondaryLabel,
+                  ),
+                ),
+                // Toolbar
+                Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: toolbarColor,
+                    border: Border(
+                      bottom: BorderSide(
+                          color: dividerColor, width: 0.5),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.md),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: AppColors.systemGray,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Category',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: labelColor,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _typeColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.md),
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategory = tempCategory;
+                            _autoLinkDebt(tempCategory);
+                          });
+                          Navigator.of(ctx).pop();
+                        },
+                        child: Text(
+                          'Done',
+                          style: TextStyle(
+                            color: _typeColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                // Picker
+                SizedBox(
+                  height: 216,
+                  child: CupertinoPicker(
+                    scrollController: controller,
+                    itemExtent: 48,
+                    backgroundColor: bgColor,
+                    selectionOverlay:
+                        CupertinoPickerDefaultSelectionOverlay(
+                      background:
+                          _typeColor.withValues(alpha: 0.15),
+                      capStartEdge: false,
+                      capEndEdge: false,
+                    ),
+                    onSelectedItemChanged: (index) {
+                      tempCategory =
+                          categories[index].name as String;
+                    },
+                    children: categories.map((cat) {
+                      return Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getCategoryIcon(cat.name, cat.icon),
+                              size: 18,
+                              color: AppColors.secondaryLabel,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              cat.name,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: labelColor,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                SizedBox(
+                    height: MediaQuery.of(ctx).padding.bottom),
+              ],
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildDateShortcuts(BuildContext context, bool isDark) {
-    final now = DateTime.now();
-    final todayDate = DateTime(now.year, now.month, now.day);
-    final yesterdayDate = todayDate.subtract(const Duration(days: 1));
-    final selDate =
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+  Widget _buildDateStrip(bool isDark) {
+    final today = DateTime.now();
+    const pastDays = 13;
+    final days = List.generate(pastDays + 1, (i) {
+      return DateTime(today.year, today.month, today.day - (pastDays - i));
+    });
 
-    final isToday = selDate == todayDate;
-    final isYesterday = selDate == yesterdayDate;
-    final isCustom = !isToday && !isYesterday;
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    Future<void> openPicker() async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: _selectedDate,
-        firstDate: DateTime(2020),
-        lastDate: DateTime.now(),
-      );
-      if (date != null) setState(() => _selectedDate = date);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_dateStripController.hasClients) return;
+      final selNorm = DateTime(
+          _selectedDate.year, _selectedDate.month, _selectedDate.day);
+      final idx = days.indexWhere((d) => d == selNorm);
+      if (idx != -1) {
+        const itemWidth = 52.0;
+        final offset = (idx * itemWidth) -
+            (MediaQuery.of(context).size.width / 2) +
+            (itemWidth / 2);
+        _dateStripController.jumpTo(offset.clamp(
+          _dateStripController.position.minScrollExtent,
+          _dateStripController.position.maxScrollExtent,
+        ));
+      }
+    });
 
     return Row(
       children: [
-        _datePill(
-          label: 'Today',
-          isSelected: isToday,
-          isDark: isDark,
-          onTap: () => setState(() => _selectedDate = todayDate),
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _dateStripController,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(right: AppSizes.md),
+            child: Row(
+              children: days.map((day) {
+                final selNorm = DateTime(
+                    _selectedDate.year, _selectedDate.month, _selectedDate.day);
+                final isSelected = day == selNorm;
+                final isToday = day ==
+                    DateTime(today.year, today.month, today.day);
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedDate = day),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 44,
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? _typeColor
+                          : (isDark
+                              ? AppColors.tertiarySystemBackgroundDark
+                              : AppColors.systemGray5),
+                      borderRadius:
+                          BorderRadius.circular(AppSizes.radiusSm),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dayNames[day.weekday - 1],
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white.withValues(alpha: 0.85)
+                                : AppColors.tertiaryLabel,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${day.day}',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: isSelected
+                                ? Colors.white
+                                : (isToday ? _typeColor : null),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         ),
-        const SizedBox(width: AppSizes.sm),
-        _datePill(
-          label: 'Yesterday',
-          isSelected: isYesterday,
-          isDark: isDark,
-          onTap: () => setState(() => _selectedDate = yesterdayDate),
-        ),
-        const SizedBox(width: AppSizes.sm),
-        _datePill(
-          label: _formatDateFull(_selectedDate),
-          isSelected: isCustom,
-          isDark: isDark,
-          icon: CupertinoIcons.calendar,
-          onTap: openPicker,
+        IconButton(
+          icon: const Icon(CupertinoIcons.calendar,
+              size: 20, color: AppColors.secondaryLabel),
+          onPressed: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: _selectedDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+            );
+            if (date != null) setState(() => _selectedDate = date);
+          },
         ),
       ],
-    );
-  }
-
-  Widget _datePill({
-    required String label,
-    required bool isSelected,
-    required bool isDark,
-    required VoidCallback onTap,
-    IconData? icon,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? _typeColor.withValues(alpha: 0.12)
-              : (isDark
-                  ? AppColors.tertiarySystemBackgroundDark
-                  : AppColors.systemGray5),
-          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-          border: isSelected ? Border.all(color: _typeColor, width: 1.5) : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon,
-                  size: 13,
-                  color: isSelected ? _typeColor : AppColors.secondaryLabel),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? _typeColor : AppColors.secondaryLabel,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1216,15 +1355,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -1271,15 +1401,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1318,7 +1439,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             Divider(
               height: 0,
               thickness: 0.5,
-              color: isDark ? AppColors.separatorDark : AppColors.separator,
+              color: Theme.of(context).dividerColor,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -1430,7 +1551,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 

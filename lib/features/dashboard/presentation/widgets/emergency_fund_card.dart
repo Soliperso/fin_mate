@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/emergency_fund_status.dart';
@@ -341,12 +342,9 @@ class EmergencyFundCard extends ConsumerWidget {
                   constraints: const BoxConstraints(),
                   tooltip: 'Set target amount',
                 ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark, size: 24),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Close',
+                CircularIconButton(
+                  icon: CupertinoIcons.xmark,
+                  onTap: () => Navigator.pop(context),
                 ),
               ],
             ),
@@ -426,9 +424,7 @@ class EmergencyFundCard extends ConsumerWidget {
                     : AppColors.lightGray,
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 border: Border.all(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.separatorDark
-                      : AppColors.borderLight,
+                  color: Theme.of(context).dividerColor,
                   width: 1,
                 ),
               ),

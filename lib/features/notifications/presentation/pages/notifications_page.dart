@@ -6,7 +6,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../widgets/notification_card.dart';
 
 /// Page for displaying all notifications
@@ -60,9 +62,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Notifications'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
         actions: [
           if (unreadCount > 0)
@@ -87,7 +91,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           await ref.read(notificationsProvider.notifier).loadNotifications();
         },
         child: isLoading && notifications.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const Padding(
+                padding: EdgeInsets.all(AppSizes.pagePadding),
+                child: SkeletonList(itemCount: 6, itemHeight: 72),
+              )
             : notifications.isEmpty
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),

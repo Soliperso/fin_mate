@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../transactions/domain/entities/category_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
@@ -100,9 +101,9 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                             fontWeight: FontWeight.bold,
                           ),
                     ),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.xmark),
-                      onPressed: () => Navigator.of(context).pop(),
+                    CircularIconButton(
+                      icon: CupertinoIcons.xmark,
+                      onTap: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),

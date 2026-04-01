@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -17,9 +18,11 @@ class SettingsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: settingsState.when(
@@ -65,7 +68,7 @@ class SettingsPage extends ConsumerWidget {
                   onTap: () => context.push('/settings/display?section=theme'),
                   trailingText: settings?.themeMode ?? 'System',
                 ),
-                _buildDivider(isDark),
+                _buildDivider(context, isDark),
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
@@ -75,7 +78,7 @@ class SettingsPage extends ConsumerWidget {
                   onTap: () => context.push('/settings/display?section=currency'),
                   trailingText: 'USD',
                 ),
-                _buildDivider(isDark),
+                _buildDivider(context, isDark),
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
@@ -115,7 +118,7 @@ class SettingsPage extends ConsumerWidget {
                   subtitle: 'Download your financial data',
                   onTap: () => context.push('/settings/data-privacy'),
                 ),
-                _buildDivider(isDark),
+                _buildDivider(context, isDark),
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
@@ -155,7 +158,6 @@ class SettingsPage extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -229,12 +231,13 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider(BuildContext context, bool isDark) {
     return Divider(
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 }

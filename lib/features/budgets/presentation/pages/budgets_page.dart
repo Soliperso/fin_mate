@@ -200,7 +200,6 @@ class BudgetsPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: IntrinsicHeight(
@@ -226,7 +225,7 @@ class BudgetsPage extends ConsumerWidget {
                             height: 40,
                             decoration: BoxDecoration(
                               color: categoryColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                             ),
                             child: Icon(
                               _getIconForCategory(budget.categoryIcon),
@@ -326,16 +325,21 @@ class BudgetsPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSizes.xs),
                       // Progress bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                        child: LinearProgressIndicator(
-                          value: percentage,
-                          minHeight: 6,
-                          backgroundColor: isDark
-                              ? AppColors.tertiarySystemBackgroundDark
-                              : AppColors.systemGray5,
-                          valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: percentage),
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, _) => ClipRRect(
                           borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          child: LinearProgressIndicator(
+                            value: value,
+                            minHeight: 6,
+                            backgroundColor: isDark
+                                ? AppColors.tertiarySystemBackgroundDark
+                                : AppColors.systemGray5,
+                            valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSizes.md),
@@ -643,7 +647,7 @@ class BudgetsPage extends ConsumerWidget {
               height: 36,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
               child: Icon(icon, color: iconColor, size: 18),
             ),

@@ -31,7 +31,6 @@ class CashFlowCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       child: Column(
         children: [
@@ -72,7 +71,7 @@ class CashFlowCard extends ConsumerWidget {
                 Container(
                   width: 0.5,
                   height: 56,
-                  color: isDark ? AppColors.separatorDark : AppColors.separator,
+                  color: Theme.of(context).dividerColor,
                 ),
                 Expanded(
                   child: _FlowCell(
@@ -93,7 +92,7 @@ class CashFlowCard extends ConsumerWidget {
             thickness: 0.5,
             indent: AppSizes.md,
             endIndent: AppSizes.md,
-            color: isDark ? AppColors.separatorDark : AppColors.separator,
+            color: Theme.of(context).dividerColor,
           ),
 
           // Net balance row

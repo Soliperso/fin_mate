@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
-import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../domain/entities/debt_entity.dart';
 import '../providers/debt_providers.dart';
@@ -60,9 +61,9 @@ class PaymentHistorySheet extends ConsumerWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark),
-                  onPressed: () => Navigator.pop(context),
+                CircularIconButton(
+                  icon: CupertinoIcons.xmark,
+                  onTap: () => Navigator.pop(context),
                 ),
               ],
             ),
@@ -101,11 +102,12 @@ class PaymentHistorySheet extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: AppSizes.xl),
-                    child: EmptyState(
+                    child: EmptyStateCard(
                       icon: CupertinoIcons.creditcard,
                       title: 'No Payments Yet',
                       message:
                           'Log your first payment to track your progress.',
+                      backgroundColor: AppColors.brandTeal,
                     ),
                   );
                 }

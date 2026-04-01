@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/profile_providers.dart';
@@ -19,16 +21,20 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Profile'),
         actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.settings, size: 22),
-            onPressed: () => context.push('/settings'),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.settings,
+              onTap: () => context.push('/settings'),
+            ),
           ),
         ],
       ),
       body: profile == null && profileState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildProfileSkeleton(context)
           : profile == null && profileState.errorMessage != null
               ? Center(
                   child: Column(
@@ -157,7 +163,7 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'Update your name, email, and phone',
                             onTap: () => context.push('/profile/edit'),
                           ),
-                          _buildDivider(isDark),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.lock,
@@ -165,7 +171,7 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'Password, biometric, 2FA',
                             onTap: () => context.push('/profile/security'),
                           ),
-                          _buildDivider(isDark),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.money_dollar_circle,
@@ -188,7 +194,7 @@ class ProfilePage extends ConsumerWidget {
                             onTap: () {},
                           ),
                           // TODO: Fix TextStyle interpolation issue when switching to light mode
-                          // _buildDivider(isDark),
+                          // _buildDivider(context, isDark),
                           // _buildSettingsTile(
                           //   context: context,
                           //   icon: CupertinoIcons.moon,
@@ -196,7 +202,7 @@ class ProfilePage extends ConsumerWidget {
                           //   subtitle: _getThemeModeLabel(themeMode),
                           //   onTap: () => _showThemeDialog(context, ref),
                           // ),
-                          // _buildDivider(isDark),
+                          // _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.globe,
@@ -204,7 +210,7 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'English (US)',
                             onTap: () {},
                           ),
-                          _buildDivider(isDark),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.money_dollar,
@@ -226,7 +232,7 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'FAQs and support articles',
                             onTap: () {},
                           ),
-                          _buildDivider(isDark),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.hand_raised,
@@ -234,7 +240,7 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'View privacy policy and terms',
                             onTap: () => context.push('/profile/legal'),
                           ),
-                          _buildDivider(isDark),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.info_circle,
@@ -324,15 +330,6 @@ class ProfilePage extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -399,15 +396,158 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider(BuildContext context, bool isDark) {
     return Divider(
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 
+
+  Widget _buildProfileSkeleton(BuildContext context) {
+    const rowHeight = 56.0;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.pagePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: AppSizes.lg),
+          // Avatar circle
+          Center(
+            child: LoadingSkeleton(
+              width: 90,
+              height: 90,
+              borderRadius: BorderRadius.circular(45),
+            ),
+          ),
+          const SizedBox(height: AppSizes.md),
+          // Name
+          Center(
+            child: LoadingSkeleton(
+              width: 140,
+              height: 20,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          // Email
+          Center(
+            child: LoadingSkeleton(
+              width: 200,
+              height: 14,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: AppSizes.md),
+          // Edit Profile button placeholder
+          Center(
+            child: LoadingSkeleton(
+              width: 120,
+              height: 36,
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            ),
+          ),
+          const SizedBox(height: AppSizes.xl),
+          // Section card — Account (3 rows)
+          LoadingSkeleton(
+            width: 80,
+            height: 12,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          _buildSkeletonCard(context, rows: 3, rowHeight: rowHeight),
+          const SizedBox(height: AppSizes.lg),
+          // Section card — Preferences (3 rows)
+          LoadingSkeleton(
+            width: 100,
+            height: 12,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          _buildSkeletonCard(context, rows: 3, rowHeight: rowHeight),
+          const SizedBox(height: AppSizes.lg),
+          // Section card — Support (2 rows)
+          LoadingSkeleton(
+            width: 70,
+            height: 12,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          _buildSkeletonCard(context, rows: 2, rowHeight: rowHeight),
+          const SizedBox(height: AppSizes.xl),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard(BuildContext context,
+      {required int rows, required double rowHeight}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: List.generate(rows, (i) {
+          return Column(
+            children: [
+              SizedBox(
+                height: rowHeight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md, vertical: 10),
+                  child: Row(
+                    children: [
+                      LoadingSkeleton(
+                        width: 32,
+                        height: 32,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      const SizedBox(width: AppSizes.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            LoadingSkeleton(
+                              width: double.infinity,
+                              height: 14,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            const SizedBox(height: 6),
+                            LoadingSkeleton(
+                              width: 140,
+                              height: 11,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (i < rows - 1)
+                Divider(
+                  height: 0,
+                  thickness: 0.5,
+                  indent: AppSizes.md + 32 + AppSizes.md,
+                  endIndent: AppSizes.md,
+                  color: Theme.of(context).dividerColor,
+                ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(

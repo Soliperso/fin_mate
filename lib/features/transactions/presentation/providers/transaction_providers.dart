@@ -149,13 +149,18 @@ class TransactionListState {
       dateRange != null ||
       minAmount != null ||
       maxAmount != null ||
-      hideFutureTransactions;
+      hideFutureTransactions ||
+      selectedPeriod != 'All' ||
+      selectedFilter != 'All';
 
   int get activeFilterCount =>
       (selectedCategory != null ? 1 : 0) +
-      (dateRange != null ? 1 : 0) +
+      // Only count dateRange if it was set manually (not via a period chip)
+      (dateRange != null && selectedPeriod == 'All' ? 1 : 0) +
       (minAmount != null || maxAmount != null ? 1 : 0) +
-      (hideFutureTransactions ? 1 : 0);
+      (hideFutureTransactions ? 1 : 0) +
+      (selectedPeriod != 'All' ? 1 : 0) +
+      (selectedFilter != 'All' ? 1 : 0);
 }
 
 /// Transaction list notifier with filtering and search

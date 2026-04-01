@@ -11,18 +11,24 @@ class NetWorthCard extends ConsumerWidget {
   final double netWorth;
   final double changePercentage;
   final bool isPositive;
+  final double monthlyIncome;
+  final double monthlyExpenses;
 
   const NetWorthCard({
     super.key,
     required this.netWorth,
     required this.changePercentage,
     required this.isPositive,
+    required this.monthlyIncome,
+    required this.monthlyExpenses,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat = ref.watch(currencyFormat0Provider);
+    final currencyFmt2 = ref.watch(currencyFormat2Provider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sign = isPositive ? '+' : '–';
 
     final gradientColors = netWorth >= 0
         ? [AppColors.brandTeal, AppColors.brandTealDark]
@@ -56,14 +62,14 @@ class NetWorthCard extends ConsumerWidget {
                   children: [
                     Icon(
                       isPositive
-                          ? CupertinoIcons.arrow_up
-                          : CupertinoIcons.arrow_down,
+                          ? CupertinoIcons.arrow_up_right
+                          : CupertinoIcons.arrow_down_right,
                       color: Colors.white,
-                      size: 12,
+                      size: 11,
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      '${changePercentage.abs().toStringAsFixed(1)}%',
+                      '$sign${changePercentage.abs().toStringAsFixed(1)}%',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -89,15 +95,82 @@ class NetWorthCard extends ConsumerWidget {
                 ),
           ),
 
-          const SizedBox(height: AppSizes.sm),
+          const SizedBox(height: AppSizes.md),
 
-          // Subtitle
-          Text(
-            isPositive ? 'Growing this month' : 'Declining this month',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white60,
+          // Monthly stats mini-row
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+            ),
+            child: Row(
+              children: [
+                _StatChip(
+                  icon: CupertinoIcons.arrow_up_circle_fill,
+                  label: 'Income',
+                  value: currencyFmt2.format(monthlyIncome),
                 ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  margin: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+                  color: Colors.white24,
+                ),
+                _StatChip(
+                  icon: CupertinoIcons.arrow_down_circle_fill,
+                  label: 'Expenses',
+                  value: currencyFmt2.format(monthlyExpenses),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70, size: 16),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white54,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
           ),
         ],
       ),

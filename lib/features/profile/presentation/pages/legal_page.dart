@@ -35,7 +35,7 @@ class LegalPage extends StatelessWidget {
                 subtitle: 'How we collect, use, and protect your data',
                 onTap: () => _showPrivacyPolicy(context),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildTile(
                 context,
                 icon: CupertinoIcons.doc_text,
@@ -43,7 +43,7 @@ class LegalPage extends StatelessWidget {
                 subtitle: 'Our terms and conditions for using FinMate',
                 onTap: () => _showTermsOfService(context),
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildTile(
                 context,
                 icon: CupertinoIcons.lock_shield,
@@ -62,10 +62,10 @@ class LegalPage extends StatelessWidget {
                 context,
                 icon: CupertinoIcons.info_circle,
                 title: 'Last Updated',
-                subtitle: 'October 21, 2025',
+                subtitle: 'April 1, 2026',
                 onTap: () {},
               ),
-              _buildDivider(isDark),
+              _buildDivider(context, isDark),
               _buildTile(
                 context,
                 icon: CupertinoIcons.envelope,
@@ -103,15 +103,6 @@ class LegalPage extends StatelessWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -178,12 +169,13 @@ class LegalPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider(BuildContext context, bool isDark) {
     return Divider(
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 

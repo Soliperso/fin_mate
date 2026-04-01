@@ -53,7 +53,6 @@ class SavingsRateCard extends ConsumerWidget {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       padding: const EdgeInsets.all(AppSizes.md),
       child: Row(

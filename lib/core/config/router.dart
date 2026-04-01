@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoPage;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../guards/admin_guard.dart';
@@ -189,7 +190,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/recurring-transactions',
             name: 'recurring-transactions',
-            pageBuilder: (context, state) => const NoTransitionPage(child: RecurringTransactionsPage()),
+            pageBuilder: (context, state) => const CupertinoPage(child: RecurringTransactionsPage()),
             routes: [
               GoRoute(
                 path: 'add',
@@ -203,7 +204,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/transactions',
             name: 'transactions',
-            pageBuilder: (context, state) => const NoTransitionPage(child: TransactionsPage()),
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: TransactionsPage(
+                openSearch: state.uri.queryParameters.containsKey('search'),
+              ),
+            ),
             routes: [
               GoRoute(
                 path: 'add',
@@ -211,7 +216,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 pageBuilder: (context, state) {
                   final type = state.uri.queryParameters['type'];
                   final id = state.uri.queryParameters['id'];
-                  return NoTransitionPage(
+                  return CupertinoPage(
                     child: AddTransactionPage(
                       transactionType: type,
                       transactionId: id,
@@ -247,12 +252,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/notifications',
             name: 'notifications',
-            pageBuilder: (context, state) => const NoTransitionPage(child: NotificationsPage()),
+            pageBuilder: (context, state) => const CupertinoPage(child: NotificationsPage()),
           ),
           GoRoute(
             path: '/goals',
             name: 'goals',
-            pageBuilder: (context, state) => const NoTransitionPage(child: SavingsGoalsPage()),
+            pageBuilder: (context, state) => const CupertinoPage(child: SavingsGoalsPage()),
             routes: [
               GoRoute(
                 path: ':goalId',
@@ -319,7 +324,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/settings',
             name: 'settings',
-            pageBuilder: (context, state) => const NoTransitionPage(child: SettingsPage()),
+            pageBuilder: (context, state) => const CupertinoPage(child: SettingsPage()),
             routes: [
               GoRoute(
                 path: 'notifications',
@@ -473,7 +478,10 @@ class _TabItem extends StatelessWidget {
 
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -488,7 +496,7 @@ class _TabItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected ? accent : inactive,
                 letterSpacing: -0.24,
               ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/profile_providers.dart';
@@ -99,7 +100,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: AppColors.cardShadow(isDark),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -134,7 +134,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       height: 0,
       thickness: 0.5,
       indent: AppSizes.md + 32 + AppSizes.md,
-      color: isDark ? AppColors.separatorDark : AppColors.separator,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
     );
   }
 
@@ -264,7 +265,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 height: 0,
                 thickness: 0.5,
                 color:
-                    isDark ? AppColors.separatorDark : AppColors.separator,
+                    Theme.of(context).dividerColor,
               ),
               ListTile(
                 leading: const Icon(CupertinoIcons.trash,
@@ -402,9 +403,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: const Text('Edit Profile'),
-          leading: IconButton(
-            icon: const Icon(CupertinoIcons.xmark),
-            onPressed: _handleClose,
+          leading: Center(
+            child: CircularIconButton(
+              icon: CupertinoIcons.xmark,
+              onTap: _handleClose,
+            ),
           ),
           actions: [
             TextButton(
