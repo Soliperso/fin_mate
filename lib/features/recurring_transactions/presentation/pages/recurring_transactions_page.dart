@@ -411,7 +411,6 @@ class _TransactionActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isIncome = transaction.type == 'income';
     final isExpense = transaction.type == 'expense';
     final typeColor = isIncome

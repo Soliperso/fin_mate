@@ -55,6 +55,21 @@ class SettingsPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Finances ──────────────────────────────────────────────
+              _sectionLabel(context, 'Finances'),
+              const SizedBox(height: AppSizes.sm),
+              _buildSettingsCard(context, isDark, children: [
+                _buildSettingsTile(
+                  context,
+                  isDark: isDark,
+                  icon: CupertinoIcons.repeat,
+                  title: 'Recurring Transactions',
+                  subtitle: 'Manage subscriptions, bills, and scheduled payments',
+                  onTap: () => context.push('/recurring-transactions'),
+                ),
+              ]),
+              const SizedBox(height: AppSizes.lg),
+
               // ── Display ───────────────────────────────────────────────
               _sectionLabel(context, 'Display'),
               const SizedBox(height: AppSizes.sm),
