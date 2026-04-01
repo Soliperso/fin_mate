@@ -441,19 +441,15 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     required String mime,
     required String subject,
   }) async {
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await getTemporaryDirectory();
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
     final file = File('${dir.path}/${filename}_$stamp.$ext');
     await file.writeAsString(content);
     if (!mounted) return;
-    try {
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: mime)],
-        subject: subject,
-      );
-    } catch (_) {
-      // Share sheet dismissed or unavailable — not an error worth surfacing
-    }
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: mime)],
+      subject: subject,
+    );
   }
 
   void _showErrorDialog(Object e) {
