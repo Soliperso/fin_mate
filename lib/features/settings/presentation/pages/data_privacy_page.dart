@@ -21,7 +21,7 @@ class DataPrivacyPage extends ConsumerStatefulWidget {
 }
 
 class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
-  bool _isExporting = false;
+  String? _activeExport; // 'all' | 'transactions' | 'budgets'
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +67,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.arrow_down_circle,
                 title: 'Export All Data',
                 subtitle: 'Download complete profile as JSON',
-                isLoading: _isExporting,
-                onTap: _isExporting ? null : () => _exportAllData(context),
+                isLoading: _activeExport == 'all',
+                onTap: _activeExport != null ? null : _exportAllData,
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -77,8 +77,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.table,
                 title: 'Export Transactions',
                 subtitle: 'Download transactions as CSV',
-                isLoading: _isExporting,
-                onTap: _isExporting ? null : () => _exportTransactions(context),
+                isLoading: _activeExport == 'transactions',
+                onTap: _activeExport != null ? null : _exportTransactions,
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -87,8 +87,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 icon: CupertinoIcons.chart_bar,
                 title: 'Export Budgets',
                 subtitle: 'Download budgets as CSV',
-                isLoading: _isExporting,
-                onTap: _isExporting ? null : () => _exportBudgets(context),
+                isLoading: _activeExport == 'budgets',
+                onTap: _activeExport != null ? null : _exportBudgets,
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -394,53 +394,52 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     );
   }
 
-  void _exportAllData(BuildContext context) async {
-    setState(() => _isExporting = true);
+  Future<void> _exportAllData() async {
+    setState(() => _activeExport = 'all');
     try {
       final jsonData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportDataAsJson();
-      if (!context.mounted) return;
-      await _shareFile(context, jsonData, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
+      if (!mounted) return;
+      await _shareFile(jsonData, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
     } catch (e) {
-      if (context.mounted) _showErrorDialog(context, e);
+      if (mounted) _showErrorDialog(e);
     } finally {
-      if (mounted) setState(() => _isExporting = false);
+      if (mounted) setState(() => _activeExport = null);
     }
   }
 
-  void _exportTransactions(BuildContext context) async {
-    setState(() => _isExporting = true);
+  Future<void> _exportTransactions() async {
+    setState(() => _activeExport = 'transactions');
     try {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportTransactionsAsCsv();
-      if (!context.mounted) return;
-      await _shareFile(context, csvData, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
+      if (!mounted) return;
+      await _shareFile(csvData, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
     } catch (e) {
-      if (context.mounted) _showErrorDialog(context, e);
+      if (mounted) _showErrorDialog(e);
     } finally {
-      if (mounted) setState(() => _isExporting = false);
+      if (mounted) setState(() => _activeExport = null);
     }
   }
 
-  void _exportBudgets(BuildContext context) async {
-    setState(() => _isExporting = true);
+  Future<void> _exportBudgets() async {
+    setState(() => _activeExport = 'budgets');
     try {
       final csvData = await ref
           .read(settingsOperationsProvider.notifier)
           .exportBudgetsAsCsv();
-      if (!context.mounted) return;
-      await _shareFile(context, csvData, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
+      if (!mounted) return;
+      await _shareFile(csvData, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
     } catch (e) {
-      if (context.mounted) _showErrorDialog(context, e);
+      if (mounted) _showErrorDialog(e);
     } finally {
-      if (mounted) setState(() => _isExporting = false);
+      if (mounted) setState(() => _activeExport = null);
     }
   }
 
   Future<void> _shareFile(
-    BuildContext context,
     String content, {
     required String filename,
     required String ext,
@@ -451,19 +450,23 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
     final file = File('${dir.path}/${filename}_$stamp.$ext');
     await file.writeAsString(content);
-    if (!context.mounted) return;
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: mime)],
-      subject: subject,
-    );
+    if (!mounted) return;
+    try {
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: mime)],
+        subject: subject,
+      );
+    } catch (_) {
+      // Share sheet dismissed or unavailable — not an error worth surfacing
+    }
   }
 
-  void _showErrorDialog(BuildContext context, Object e) {
+  void _showErrorDialog(Object e) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Export Failed'),
-        content: Text('$e'),
+        content: Text(e.toString().replaceAll('Exception: ', '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
