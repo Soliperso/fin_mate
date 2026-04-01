@@ -444,17 +444,24 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     required String subject,
   }) async {
     if (!mounted) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 100, 100);
     try {
       final dir = await getTemporaryDirectory();
       final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final file = File('${dir.path}/${filename}_$stamp.$ext');
       await file.writeAsString(content);
       if (!mounted) return;
-      await Share.shareXFiles([XFile(file.path, mimeType: mime)], subject: subject);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: mime)],
+        subject: subject,
+        sharePositionOrigin: origin,
+      );
     } catch (_) {
-      // File sharing unavailable — fall back to sharing raw text
       if (!mounted) return;
-      await Share.share(content, subject: subject);
+      await Share.share(content, subject: subject, sharePositionOrigin: origin);
     }
   }
 
