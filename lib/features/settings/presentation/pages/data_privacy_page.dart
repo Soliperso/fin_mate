@@ -25,7 +25,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settingsAsync = ref.watch(userSettingsProvider);
+    final settingsAsync = ref.watch(settingsOperationsProvider);
     final settings = settingsAsync.valueOrNull;
     final schedule = settings?.notificationPreferences.autoBackupSchedule ?? 'off';
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -58,7 +58,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 title: 'Backup Schedule',
                 subtitle: 'Automatically back up your data',
                 trailingText: _scheduleLabel(schedule),
-                onTap: () => _showSchedulePicker(context, ref, settings, schedule),
+                onTap: () => _showSchedulePicker(settings, schedule),
               ),
               _buildDivider(context, isDark),
               _buildActionTile(
@@ -356,12 +356,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     }
   }
 
-  void _showSchedulePicker(
-    BuildContext context,
-    WidgetRef ref,
-    SettingsEntity? settings,
-    String current,
-  ) {
+  void _showSchedulePicker(SettingsEntity? settings, String current) {
     final options = ['off', 'daily', 'weekly'];
     final labels = ['Off', 'Daily', 'Weekly'];
 
