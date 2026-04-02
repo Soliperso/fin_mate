@@ -53,6 +53,18 @@ import '../../features/recurring_transactions/domain/entities/recurring_transact
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Page used for the 5 bottom-nav tabs — fades in over 150 ms.
+/// Only one page lives in the tree at a time so there are no GlobalKey conflicts.
+class _FadeTransitionPage extends CustomTransitionPage<void> {
+  _FadeTransitionPage({required super.child})
+      : super(
+          transitionDuration: const Duration(milliseconds: 150),
+          reverseTransitionDuration: const Duration(milliseconds: 150),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        );
+}
+
 // Helper class for GoRouter refresh
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -173,7 +185,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
-            pageBuilder: (context, state) => const NoTransitionPage(child: DashboardPage()),
+            pageBuilder: (context, state) => _FadeTransitionPage(child: const DashboardPage()),
             routes: [
               GoRoute(
                 path: 'emergency-fund',
@@ -185,7 +197,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/budgets',
             name: 'budgets',
-            pageBuilder: (context, state) => const NoTransitionPage(child: BudgetsPage()),
+            pageBuilder: (context, state) => _FadeTransitionPage(child: const BudgetsPage()),
           ),
           GoRoute(
             path: '/recurring-transactions',
@@ -204,7 +216,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/transactions',
             name: 'transactions',
-            pageBuilder: (context, state) => NoTransitionPage(
+            pageBuilder: (context, state) => _FadeTransitionPage(
               child: TransactionsPage(
                 openSearch: state.uri.queryParameters.containsKey('search'),
               ),
@@ -241,7 +253,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/debt',
             name: 'debt',
-            pageBuilder: (context, state) => const NoTransitionPage(child: DebtPage()),
+            pageBuilder: (context, state) => _FadeTransitionPage(child: const DebtPage()),
           ),
           // [MVP: AI Insights - Commented out]
           // GoRoute(
@@ -284,7 +296,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/profile',
             name: 'profile',
-            pageBuilder: (context, state) => const NoTransitionPage(child: ProfilePage()),
+            pageBuilder: (context, state) => _FadeTransitionPage(child: const ProfilePage()),
             routes: [
               GoRoute(
                 path: 'edit',
@@ -369,10 +381,56 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 /// iOS-style tab bar shell — Apple Wallet / Pay aesthetic
-class MainShell extends StatelessWidget {
+class MainShell extends StatefulWidget {
   final Widget child;
 
   const MainShell({required this.child, super.key});
+
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeController;
+  String _currentTabRoot = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+      value: 1.0,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final path = GoRouterState.of(context).uri.path;
+    final tabRoot = _tabRoot(path);
+    if (_currentTabRoot.isNotEmpty && _currentTabRoot != tabRoot) {
+      _fadeController.value = 0.0;
+      _fadeController.forward();
+    }
+    _currentTabRoot = tabRoot;
+  }
+
+  String _tabRoot(String path) {
+    if (path.startsWith('/dashboard')) return '/dashboard';
+    if (path.startsWith('/transactions')) return '/transactions';
+    if (path.startsWith('/budgets')) return '/budgets';
+    if (path.startsWith('/debt')) return '/debt';
+    if (path.startsWith('/profile')) return '/profile';
+    return path;
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +438,10 @@ class MainShell extends StatelessWidget {
     final selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
-      body: child,
+      body: FadeTransition(
+        opacity: _fadeController,
+        child: widget.child,
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: isDark
