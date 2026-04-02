@@ -49,7 +49,7 @@ class BiometricService {
   /// Authenticate using biometrics
   /// Returns true if authentication successful, false otherwise
   Future<BiometricAuthResult> authenticate({
-    String localizedReason = 'Please authenticate to access FinMate',
+    String localizedReason = 'Please authenticate to access Finmate',
     bool useErrorDialogs = true,
     bool stickyAuth = true,
   }) async {

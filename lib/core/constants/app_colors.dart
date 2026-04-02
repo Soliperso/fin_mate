@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// FinMate color system — Apple Wallet / Pay inspired
+/// Finmate color system — Apple Wallet / Pay inspired
 /// Built on iOS system semantic colors for authentic iOS feel
 class AppColors {
   // ── Brand ──────────────────────────────────────────────────────────────────

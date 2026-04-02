@@ -397,7 +397,7 @@ class BillingHistoryPage extends ConsumerWidget {
       }
 
       // Create file name
-      final fileName = 'FinMate_$invoiceNumber.pdf';
+      final fileName = 'Finmate_$invoiceNumber.pdf';
       final filePath = '${directory.path}/$fileName';
 
       // Write the file

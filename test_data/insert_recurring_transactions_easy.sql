@@ -9,7 +9,7 @@
 -- 2. Make sure you're logged in as the user you want to test with
 -- 3. Copy and paste this entire script
 -- 4. Click "RUN"
--- 5. Refresh your FinMate dashboard to see the upcoming bills
+-- 5. Refresh your Finmate dashboard to see the upcoming bills
 -- ============================================================================
 
 DO $$
@@ -117,7 +117,7 @@ BEGIN
   RAISE NOTICE 'Inserted: Spotify Premium (due in 25 days)';
 
   RAISE NOTICE '✓ Successfully inserted 6 recurring transactions!';
-  RAISE NOTICE 'Refresh your FinMate dashboard to see the upcoming bills.';
+  RAISE NOTICE 'Refresh your Finmate dashboard to see the upcoming bills.';
 
 END $$;
 

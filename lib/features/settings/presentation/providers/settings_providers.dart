@@ -71,19 +71,28 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     }
   }
 
-  /// Update notification preferences
-  Future<void> updateNotificationPreferences(
+  /// Update notification preferences. Returns true on success, false on failure.
+  Future<bool> updateNotificationPreferences(
     NotificationPreferences preferences,
   ) async {
     final previous = state;
+    // Optimistic update — reflect change immediately so toggles feel instant
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncValue.data(
+        current.copyWith(notificationPreferences: preferences),
+      );
+    }
     try {
       final settings = await _repository.updateNotificationPreferences(
         _userId,
         preferences,
       );
       state = AsyncValue.data(settings);
+      return true;
     } catch (_) {
       state = previous;
+      return false;
     }
   }
 

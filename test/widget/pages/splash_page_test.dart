@@ -56,7 +56,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 20),
-            Text('FinMate'),
+            Text('Finmate'),
           ],
         ),
       ),

@@ -384,7 +384,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       // Authenticate with biometrics first
       final result = await biometricService.authenticate(
-        localizedReason: 'Authenticate to access FinMate',
+        localizedReason: 'Authenticate to access Finmate',
       );
 
       if (!result.success) {

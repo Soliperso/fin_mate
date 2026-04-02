@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>FinMate</string>
+	<string>Finmate</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -40,15 +40,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>FinMate uses this to show you relevant ads that help keep the app free.</string>
+	<string>Finmate uses this to show you relevant ads that help keep the app free.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>FinMate needs camera access to scan receipts and extract transaction details for easier expense tracking.</string>
+	<string>Finmate needs camera access to scan receipts and extract transaction details for easier expense tracking.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>FinMate needs Face ID permission to enable biometric login for secure and convenient access to your account.</string>
+	<string>Finmate needs Face ID permission to enable biometric login for secure and convenient access to your account.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>FinMate needs permission to save receipts and financial documents to your photo library.</string>
+	<string>Finmate needs permission to save receipts and financial documents to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FinMate needs photo library access to select receipt images for transaction scanning and document uploads.</string>
+	<string>Finmate needs photo library access to select receipt images for transaction scanning and document uploads.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

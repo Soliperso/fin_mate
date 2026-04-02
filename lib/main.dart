@@ -121,7 +121,7 @@ void main() async {
           initialThemeModeProvider.overrideWithValue(initialThemeMode),
           initialDisplayFormatProvider.overrideWithValue(initialDisplayFormat),
         ],
-        child: const FinMateApp(),
+        child: const FinmateApp(),
       ));
     },
     (error, stackTrace) {
@@ -136,14 +136,14 @@ void main() async {
   );
 }
 
-class FinMateApp extends ConsumerStatefulWidget {
-  const FinMateApp({super.key});
+class FinmateApp extends ConsumerStatefulWidget {
+  const FinmateApp({super.key});
 
   @override
-  ConsumerState<FinMateApp> createState() => _FinMateAppState();
+  ConsumerState<FinmateApp> createState() => _FinmateAppState();
 }
 
-class _FinMateAppState extends ConsumerState<FinMateApp> {
+class _FinmateAppState extends ConsumerState<FinmateApp> {
   @override
   void initState() {
     super.initState();
@@ -171,7 +171,7 @@ class _FinMateAppState extends ConsumerState<FinMateApp> {
 
     return OfflineIndicator(
       child: MaterialApp.router(
-        title: 'FinMate',
+        title: 'Finmate',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),

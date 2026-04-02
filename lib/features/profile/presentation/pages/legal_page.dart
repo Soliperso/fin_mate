@@ -40,7 +40,7 @@ class LegalPage extends StatelessWidget {
                 context,
                 icon: CupertinoIcons.doc_text,
                 title: 'Terms of Service',
-                subtitle: 'Our terms and conditions for using FinMate',
+                subtitle: 'Our terms and conditions for using Finmate',
                 onTap: () => _showTermsOfService(context),
               ),
               _buildDivider(context, isDark),

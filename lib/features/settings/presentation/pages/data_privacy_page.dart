@@ -382,19 +382,19 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
   Future<void> _exportAllData() async =>
       _runExport('all', 'Preparing full data export…', () async {
         final data = await ref.read(settingsOperationsProvider.notifier).exportDataAsJson();
-        await _shareFile(data, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'FinMate Data Export');
+        await _shareFile(data, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'Finmate Data Export');
       });
 
   Future<void> _exportTransactions() async =>
       _runExport('transactions', 'Preparing transactions…', () async {
         final data = await ref.read(settingsOperationsProvider.notifier).exportTransactionsAsCsv();
-        await _shareFile(data, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'FinMate Transactions');
+        await _shareFile(data, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'Finmate Transactions');
       });
 
   Future<void> _exportBudgets() async =>
       _runExport('budgets', 'Preparing budgets…', () async {
         final data = await ref.read(settingsOperationsProvider.notifier).exportBudgetsAsCsv();
-        await _shareFile(data, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'FinMate Budgets');
+        await _shareFile(data, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'Finmate Budgets');
       });
 
   Future<void> _runExport(

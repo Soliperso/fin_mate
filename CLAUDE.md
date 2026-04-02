@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**FinMate** is a cross-platform personal finance app built with Flutter. It covers transaction tracking, budgeting, savings goals, dashboard analytics (net worth, cash flow, money health), and AI-powered forecasting. The backend is Supabase (auth, Postgres, storage, realtime). No bank account linking — all data is manually entered or imported via CSV.
+**Finmate** is a cross-platform personal finance app built with Flutter. It covers transaction tracking, budgeting, savings goals, dashboard analytics (net worth, cash flow, money health), and AI-powered forecasting. The backend is Supabase (auth, Postgres, storage, realtime). No bank account linking — all data is manually entered or imported via CSV.
 
 ---
 

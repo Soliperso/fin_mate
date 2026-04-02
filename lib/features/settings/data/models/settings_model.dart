@@ -121,11 +121,27 @@ class SettingsModel extends SettingsEntity {
 
   /// Create from entity
   factory SettingsModel.fromEntity(SettingsEntity entity) {
+    final prefs = entity.notificationPreferences;
     return SettingsModel(
       userId: entity.userId,
       themeMode: entity.themeMode,
       language: entity.language,
-      notificationPreferences: entity.notificationPreferences as NotificationPreferencesModel,
+      notificationPreferences: prefs is NotificationPreferencesModel
+          ? prefs
+          : NotificationPreferencesModel(
+              pushEnabled: prefs.pushEnabled,
+              emailEnabled: prefs.emailEnabled,
+              soundEnabled: prefs.soundEnabled,
+              budgetAlerts: prefs.budgetAlerts,
+              budgetThreshold: prefs.budgetThreshold,
+              billReminders: prefs.billReminders,
+              billReminderDays: prefs.billReminderDays,
+              transactionAlerts: prefs.transactionAlerts,
+              transactionThreshold: prefs.transactionThreshold,
+              moneyHealthUpdates: prefs.moneyHealthUpdates,
+              goalNotifications: prefs.goalNotifications,
+              autoBackupSchedule: prefs.autoBackupSchedule,
+            ),
       updatedAt: entity.updatedAt,
     );
   }

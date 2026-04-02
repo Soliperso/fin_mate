@@ -4,15 +4,15 @@
 
 ## 1. Agreement to Terms
 
-By accessing and using FinMate ("Application," "we," "us," "our," or "Company"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to abide by the above, please do not use this service.
+By accessing and using Finmate ("Application," "we," "us," "our," or "Company"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to abide by the above, please do not use this service.
 
 ## 2. Use License
 
-Permission is granted to temporarily download one copy of the materials (information or software) on FinMate for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+Permission is granted to temporarily download one copy of the materials (information or software) on Finmate for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
 
 - Modify or copy the materials
 - Use the materials for any commercial purpose or for any public display
-- Attempt to decompile or reverse engineer any software contained on FinMate
+- Attempt to decompile or reverse engineer any software contained on Finmate
 - Remove any copyright or other proprietary notations from the materials
 - Transfer the materials to another person or "mirror" the materials on any other server
 - Use automated tools (bots, scrapers, etc.) to access the Application
@@ -20,21 +20,21 @@ Permission is granted to temporarily download one copy of the materials (informa
 
 ## 3. Disclaimer of Warranties
 
-The materials on FinMate are provided on an "as-is" basis. FinMate makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+The materials on Finmate are provided on an "as-is" basis. Finmate makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
 
 ## 4. Limitations of Liability
 
-In no event shall FinMate or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on FinMate, even if FinMate or an authorized representative has been notified orally or in writing of the possibility of such damage.
+In no event shall Finmate or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Finmate, even if Finmate or an authorized representative has been notified orally or in writing of the possibility of such damage.
 
 ## 5. Accuracy of Materials
 
-The materials appearing on FinMate could include technical, typographical, or photographic errors. FinMate does not warrant that any of the materials on FinMate are accurate, complete, or current. FinMate may make changes to the materials contained on FinMate at any time without notice.
+The materials appearing on Finmate could include technical, typographical, or photographic errors. Finmate does not warrant that any of the materials on Finmate are accurate, complete, or current. Finmate may make changes to the materials contained on Finmate at any time without notice.
 
 ## 6. Materials & Content Ownership
 
-The materials on FinMate are owned or controlled by FinMate. Unauthorized use of the materials may violate copyright, trademark, and other laws.
+The materials on Finmate are owned or controlled by Finmate. Unauthorized use of the materials may violate copyright, trademark, and other laws.
 
-Your content, including financial data and user-generated information, remains your property. However, by using FinMate, you grant us a limited license to use, store, process, and display your content as necessary to provide the Application services.
+Your content, including financial data and user-generated information, remains your property. However, by using Finmate, you grant us a limited license to use, store, process, and display your content as necessary to provide the Application services.
 
 ## 7. Limitations on Use
 
@@ -64,7 +64,7 @@ You are responsible for:
 
 ### 8.2 Account Termination
 
-FinMate reserves the right to suspend or terminate your account if:
+Finmate reserves the right to suspend or terminate your account if:
 - You violate these Terms
 - You engage in unlawful or fraudulent activity
 - You abuse other users or the service
@@ -79,7 +79,7 @@ You may terminate your account by:
 
 ### 9.1 Disclaimer Regarding Financial Data
 
-FinMate is a **personal finance tracking and management application**, not a financial advisory service. We do not provide:
+Finmate is a **personal finance tracking and management application**, not a financial advisory service. We do not provide:
 - Investment advice
 - Tax advice
 - Financial planning services
@@ -118,7 +118,7 @@ Users who create or participate in bill splitting agree to:
 
 ### 10.2 Limitation of Liability
 
-FinMate is not responsible for:
+Finmate is not responsible for:
 - Disputes between group members
 - Non-payment or delayed payment between users
 - Accuracy of split calculations (users should verify)
@@ -128,12 +128,12 @@ FinMate is not responsible for:
 
 For disputes between users regarding bill splitting:
 - Users should resolve directly between themselves
-- FinMate may provide mediation support but makes no guarantee of resolution
-- FinMate is not liable for unresolved disputes
+- Finmate may provide mediation support but makes no guarantee of resolution
+- Finmate is not liable for unresolved disputes
 
 ## 11. Third-Party Services & Links
 
-FinMate may integrate with or link to third-party services. We are not responsible for:
+Finmate may integrate with or link to third-party services. We are not responsible for:
 - Third-party content or services
 - Data shared with third parties
 - Third-party privacy practices or policies
@@ -143,9 +143,9 @@ By using third-party integrations, you agree to their terms and conditions.
 
 ## 12. Intellectual Property Rights
 
-### 12.1 FinMate Content
+### 12.1 Finmate Content
 
-The Application, including all code, design, text, graphics, and interactive features, is the exclusive property of FinMate and is protected by copyright, trademark, and other intellectual property laws.
+The Application, including all code, design, text, graphics, and interactive features, is the exclusive property of Finmate and is protected by copyright, trademark, and other intellectual property laws.
 
 ### 12.2 Limited License
 
@@ -153,11 +153,11 @@ We grant you a non-exclusive, non-transferable, revocable license to use the App
 
 ### 12.3 User Content
 
-By submitting content to FinMate (including feedback, bug reports, or suggestions), you grant FinMate a royalty-free, perpetual, irrevocable, worldwide license to use, reproduce, modify, and distribute such content.
+By submitting content to Finmate (including feedback, bug reports, or suggestions), you grant Finmate a royalty-free, perpetual, irrevocable, worldwide license to use, reproduce, modify, and distribute such content.
 
 ## 13. Indemnification
 
-You agree to indemnify and hold harmless FinMate, its officers, directors, employees, agents, and suppliers from any claims, damages, losses, or expenses arising from:
+You agree to indemnify and hold harmless Finmate, its officers, directors, employees, agents, and suppliers from any claims, damages, losses, or expenses arising from:
 - Your use of the Application
 - Your violation of these Terms
 - Your violation of any applicable laws
@@ -166,7 +166,7 @@ You agree to indemnify and hold harmless FinMate, its officers, directors, emplo
 
 ## 14. Modifications to Terms
 
-FinMate reserves the right to modify these Terms at any time. Changes will be effective immediately upon posting to the Application. Your continued use of FinMate after modifications constitutes acceptance of the updated Terms.
+Finmate reserves the right to modify these Terms at any time. Changes will be effective immediately upon posting to the Application. Your continued use of Finmate after modifications constitutes acceptance of the updated Terms.
 
 We will notify you of material changes by:
 - Posting updated Terms in the Application
@@ -185,11 +185,11 @@ While we strive to maintain continuous service, we do not guarantee:
 
 ### 15.2 Maintenance & Updates
 
-FinMate may perform maintenance, updates, or modifications that temporarily interrupt service. We will attempt to provide notice when possible.
+Finmate may perform maintenance, updates, or modifications that temporarily interrupt service. We will attempt to provide notice when possible.
 
 ### 15.3 Limitation of Liability
 
-FinMate is not liable for:
+Finmate is not liable for:
 - Service interruptions or downtime
 - Loss of data due to service unavailability
 - Service failures beyond our reasonable control
@@ -198,7 +198,7 @@ FinMate is not liable for:
 
 ### 16.1 Free Service
 
-FinMate is currently provided at no cost. Any future paid features will include clear pricing and terms.
+Finmate is currently provided at no cost. Any future paid features will include clear pricing and terms.
 
 ### 16.2 Future Charges
 
@@ -213,16 +213,16 @@ Refund policies for any paid features will be clearly stated at the time of purc
 
 ## 17. Privacy & Data Protection
 
-Your use of FinMate is governed by our Privacy Policy. Please review the Privacy Policy to understand our data practices.
+Your use of Finmate is governed by our Privacy Policy. Please review the Privacy Policy to understand our data practices.
 
-By using FinMate, you consent to:
+By using Finmate, you consent to:
 - Collection and processing of your information
 - Storage on our servers
 - Use of your data as described in the Privacy Policy
 
 ## 18. Export Controls & Compliance
 
-You agree not to use FinMate in violation of any export control laws or sanctions, including:
+You agree not to use Finmate in violation of any export control laws or sanctions, including:
 - Exporting data to restricted countries or individuals
 - Using the Application for restricted purposes
 - Violating any trade compliance requirements
@@ -233,7 +233,7 @@ If any provision of these Terms is found to be unenforceable, the remaining prov
 
 ## 20. Entire Agreement
 
-These Terms, along with the Privacy Policy and any other policies referenced herein, constitute the entire agreement between you and FinMate regarding your use of the Application and supersede all prior agreements and understandings.
+These Terms, along with the Privacy Policy and any other policies referenced herein, constitute the entire agreement between you and Finmate regarding your use of the Application and supersede all prior agreements and understandings.
 
 ## 21. Governing Law & Dispute Resolution
 
@@ -243,7 +243,7 @@ These Terms are governed by and construed in accordance with the laws of [Jurisd
 
 ### 21.2 Arbitration
 
-Any dispute arising out of or relating to these Terms or your use of FinMate will be resolved through binding arbitration, except:
+Any dispute arising out of or relating to these Terms or your use of Finmate will be resolved through binding arbitration, except:
 - Claims for injunctive relief to prevent infringement
 - Claims involving intellectual property rights
 - Small claims not exceeding $5,000
@@ -261,7 +261,7 @@ For questions or concerns regarding these Terms, please contact:
 **Email:** support@finmate.app
 
 **Mailing Address:**
-FinMate Support
+Finmate Support
 [Company Address]
 
 **Response Time:** We aim to respond to all inquiries within 5 business days.
@@ -287,7 +287,7 @@ FinMate Support
 
 ## 24. Feedback & Suggestions
 
-Any feedback, comments, or suggestions you provide regarding FinMate may be used by us without obligation. We may implement your suggestions without compensation to you.
+Any feedback, comments, or suggestions you provide regarding Finmate may be used by us without obligation. We may implement your suggestions without compensation to you.
 
 ---
 

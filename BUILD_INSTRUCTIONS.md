@@ -1,4 +1,4 @@
-# FinMate Build Instructions
+# Finmate Build Instructions
 
 ## Security Note
 **IMPORTANT:** Environment variables are now injected at build time using `--dart-define` flags. The `.env` file is NO LONGER bundled in the app to prevent credential exposure.

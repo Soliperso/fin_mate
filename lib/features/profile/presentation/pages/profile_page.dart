@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/services/theme_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -18,6 +19,7 @@ class ProfilePage extends ConsumerWidget {
     final profileState = ref.watch(currentUserProfileProvider);
     final profile = profileState.profile;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -190,25 +192,29 @@ class ProfilePage extends ConsumerWidget {
                             context: context,
                             icon: CupertinoIcons.bell,
                             title: 'Notifications',
-                            subtitle: 'Manage notification preferences',
-                            onTap: () {},
+                            subtitle: 'View alerts, budget warnings, and reminders',
+                            onTap: () => context.push('/notifications'),
                           ),
-                          // TODO: Fix TextStyle interpolation issue when switching to light mode
-                          // _buildDivider(context, isDark),
-                          // _buildSettingsTile(
-                          //   context: context,
-                          //   icon: CupertinoIcons.moon,
-                          //   title: 'Appearance',
-                          //   subtitle: _getThemeModeLabel(themeMode),
-                          //   onTap: () => _showThemeDialog(context, ref),
-                          // ),
-                          // _buildDivider(context, isDark),
+                          _buildDivider(context, isDark),
+                          _buildSettingsTile(
+                            context: context,
+                            icon: CupertinoIcons.moon,
+                            title: 'Appearance',
+                            subtitle: _getThemeModeLabel(themeMode),
+                            onTap: () => context.push('/settings/display?section=theme'),
+                          ),
+                          _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.globe,
                             title: 'Language',
                             subtitle: 'English (US)',
-                            onTap: () {},
+                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Coming soon'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            ),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
@@ -230,7 +236,12 @@ class ProfilePage extends ConsumerWidget {
                             icon: CupertinoIcons.question_circle,
                             title: 'Help Center',
                             subtitle: 'FAQs and support articles',
-                            onTap: () {},
+                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Coming soon'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            ),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
@@ -547,6 +558,17 @@ class ProfilePage extends ConsumerWidget {
         }),
       ),
     );
+  }
+
+  String _getThemeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System';
+    }
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {

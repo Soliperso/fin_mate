@@ -1,4 +1,4 @@
-# FinMate Launch Checklist
+# Finmate Launch Checklist
 
 **App Version:** 1.0.0+1
 **Target:** Beta Launch

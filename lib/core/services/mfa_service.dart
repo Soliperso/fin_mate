@@ -56,11 +56,11 @@ class MfaService {
   }
 
   /// Generate TOTP URI for QR code
-  /// Format: otpauth://totp/FinMate:user@email.com?secret=SECRET&issuer=FinMate
+  /// Format: otpauth://totp/Finmate:user@email.com?secret=SECRET&issuer=Finmate
   String generateTotpUri({
     required String email,
     required String secret,
-    String issuer = 'FinMate',
+    String issuer = 'Finmate',
   }) {
     final encodedIssuer = Uri.encodeComponent(issuer);
     final encodedEmail = Uri.encodeComponent(email);

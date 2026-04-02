@@ -129,7 +129,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   }
 
   Widget _buildDivider() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Divider(
       height: 0,
       thickness: 0.5,
@@ -237,8 +236,6 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final profile = ref.read(currentUserProfileProvider).profile;
     final hasPersistedAvatar = (profile?.avatarUrl ?? '').isNotEmpty;
     final hasLocalPick = _selectedAvatarPath != null;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     GlassBottomSheet.show(
       context: context,
       child: SafeArea(

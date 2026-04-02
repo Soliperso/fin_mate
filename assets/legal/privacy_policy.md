@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** October 21, 2025
+**Last Updated:** April 1, 2026
 
 ## 1. Introduction
 
@@ -19,12 +19,12 @@ Please read this Privacy Policy carefully. If you do not agree with our policies
 - Full name
 
 **Financial Information:**
-- Bank account details (account names and types, not account numbers)
+- Account details (account names, types, and balances)
 - Transaction history and details
 - Budget information
 - Savings goals
 - Income and expense data
-- Bill splitting details and group information
+- Debt payoff information
 - Net worth snapshots
 
 **Profile Information:**
@@ -70,8 +70,7 @@ We use the collected information for:
 1. **Service Delivery:**
    - Creating and maintaining your account
    - Processing transactions and financial data
-   - Providing bill splitting and settlement services
-   - Managing savings goals and budgets
+   - Managing savings goals, budgets, and debt payoff plans
    - Delivering personalized financial insights
 
 2. **Authentication & Security:**
@@ -132,9 +131,7 @@ If Finmate is involved in a merger, acquisition, bankruptcy, or sale of assets, 
 
 ### 4.4 User Consent
 
-We will not share your financial information with other users or third parties without your explicit consent, except:
-- Bill splitting group members (only relevant transaction data)
-- Your designated contacts in shared features
+We will not share your financial information with other users or third parties without your explicit consent.
 
 ## 5. Data Retention
 

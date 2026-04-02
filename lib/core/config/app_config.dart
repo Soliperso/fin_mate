@@ -4,7 +4,7 @@
 /// across environments (unlike EnvConfig which has environment-specific values)
 class AppConfig {
   // App Information
-  static const String appName = 'FinMate';
+  static const String appName = 'Finmate';
   static const String appVersion = '1.0.0';
   static const String appBuildNumber = '1';
 

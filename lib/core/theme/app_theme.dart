@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
 
-/// Apple Wallet / Pay inspired theme for FinMate
+/// Apple Wallet / Pay inspired theme for Finmate
 /// Built on iOS Human Interface Guidelines design tokens
 class AppTheme {
   static ThemeData lightTheme() {

@@ -1,9 +1,9 @@
 # App Store Connect - App Privacy Details
 
-**Document Version:** 1.0
-**Last Updated:** October 21, 2025
+**Document Version:** 1.1
+**Last Updated:** April 1, 2026
 **App Name:** Finmate
-**Bundle ID:** com.finmate.app
+**Bundle ID:** com.chebli.finmate
 **Platform:** iOS
 
 ---
@@ -182,15 +182,6 @@ This document provides the comprehensive privacy details required for App Store 
 - Optional/Required: Optional
 
 ### 3.5 Sensitive Information
-
-**Bill Splitting Data**
-- Purpose: Group expense tracking and settlements
-- Data: Group names, member information, expense details
-- Required: No
-- Linked to User ID: Yes
-- Tracking: No
-- Third-Party Sharing: Yes (to other group members)
-- Optional/Required: Optional (user-provided)
 
 **MFA Configuration**
 - Purpose: Account security
@@ -656,6 +647,7 @@ For privacy questions or requests:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | Oct 21, 2025 | Initial creation for App Store submission |
+| 1.1 | Apr 1, 2026 | Removed bill splitting references; updated bundle ID to com.chebli.finmate |
 
 ---
 

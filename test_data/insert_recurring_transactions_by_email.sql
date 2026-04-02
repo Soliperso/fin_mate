@@ -9,7 +9,7 @@
 -- 2. Go to: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/sql/new
 -- 3. Copy and paste this entire script
 -- 4. Click "RUN"
--- 5. Refresh your FinMate dashboard to see the upcoming bills
+-- 5. Refresh your Finmate dashboard to see the upcoming bills
 -- ============================================================================
 
 DO $$
@@ -122,7 +122,7 @@ BEGIN
   RAISE NOTICE '';
   RAISE NOTICE '========================================';
   RAISE NOTICE '✓ Successfully inserted 6 recurring transactions!';
-  RAISE NOTICE 'Refresh your FinMate dashboard to see the upcoming bills.';
+  RAISE NOTICE 'Refresh your Finmate dashboard to see the upcoming bills.';
   RAISE NOTICE '========================================';
 
 END $$;

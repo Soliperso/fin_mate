@@ -116,7 +116,7 @@ class PaymentService {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'FinMate',
+          merchantDisplayName: 'Finmate',
           style: ThemeMode.system,
           // Optional: Enable Apple Pay / Google Pay
           googlePay: const PaymentSheetGooglePay(
@@ -353,7 +353,7 @@ class PaymentService {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           setupIntentClientSecret: setupData['clientSecret'],
-          merchantDisplayName: 'FinMate',
+          merchantDisplayName: 'Finmate',
           style: ThemeMode.system,
           customerId: setupData['customerId'],
           billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(
@@ -519,7 +519,7 @@ class PaymentService {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           setupIntentClientSecret: clientSecret,
-          merchantDisplayName: 'FinMate',
+          merchantDisplayName: 'Finmate',
           style: ThemeMode.system,
           customerId: customerId,
           billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(

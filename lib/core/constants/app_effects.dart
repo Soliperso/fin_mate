@@ -1,7 +1,7 @@
 /// Visual effects constants for the app
 ///
 /// This file contains constants for glassmorphism and other visual effects
-/// used throughout the FinMate application.
+/// used throughout the Finmate application.
 class AppEffects {
   // Glassmorphism Blur Values
   /// Subtle blur for minimal frosted glass effect

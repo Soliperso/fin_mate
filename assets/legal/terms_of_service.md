@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated:** October 21, 2025
+**Last Updated:** April 1, 2026
 
 ## 1. Agreement to Terms
 
@@ -47,7 +47,6 @@ Prohibited uses include, but are not limited to:
 - Violating any applicable laws or regulations
 - Attempting to gain unauthorized access to the Application or user accounts
 - Using the Application for illegal purposes
-- Abusing the bill splitting or group features to defraud others
 - Providing false financial information
 - Impersonating other users
 
@@ -106,32 +105,7 @@ While we strive to maintain accurate records, we do not guarantee:
 
 Users should independently verify all important financial information.
 
-## 10. Bill Splitting & Group Expenses
-
-### 10.1 Settlement Obligations
-
-Users who create or participate in bill splitting agree to:
-- Reimburse other group members for legitimate shared expenses
-- Settle outstanding balances in a timely manner
-- Provide accurate expense information
-- Cooperate in dispute resolution
-
-### 10.2 Limitation of Liability
-
-Finmate is not responsible for:
-- Disputes between group members
-- Non-payment or delayed payment between users
-- Accuracy of split calculations (users should verify)
-- Enforcement of settlements
-
-### 10.3 Dispute Resolution
-
-For disputes between users regarding bill splitting:
-- Users should resolve directly between themselves
-- Finmate may provide mediation support but makes no guarantee of resolution
-- Finmate is not liable for unresolved disputes
-
-## 11. Third-Party Services & Links
+## 10. Third-Party Services & Links
 
 Finmate may integrate with or link to third-party services. We are not responsible for:
 - Third-party content or services
@@ -141,30 +115,29 @@ Finmate may integrate with or link to third-party services. We are not responsib
 
 By using third-party integrations, you agree to their terms and conditions.
 
-## 12. Intellectual Property Rights
+## 11. Intellectual Property Rights
 
-### 12.1 Finmate Content
+### 11.1 Finmate Content
 
 The Application, including all code, design, text, graphics, and interactive features, is the exclusive property of Finmate and is protected by copyright, trademark, and other intellectual property laws.
 
-### 12.2 Limited License
+### 11.2 Limited License
 
 We grant you a non-exclusive, non-transferable, revocable license to use the Application for personal purposes only.
 
-### 12.3 User Content
+### 11.3 User Content
 
 By submitting content to Finmate (including feedback, bug reports, or suggestions), you grant Finmate a royalty-free, perpetual, irrevocable, worldwide license to use, reproduce, modify, and distribute such content.
 
-## 13. Indemnification
+## 12. Indemnification
 
 You agree to indemnify and hold harmless Finmate, its officers, directors, employees, agents, and suppliers from any claims, damages, losses, or expenses arising from:
 - Your use of the Application
 - Your violation of these Terms
 - Your violation of any applicable laws
 - Your infringement of third-party rights
-- Disputes with other users regarding bill splitting or shared features
 
-## 14. Modifications to Terms
+## 13. Modifications to Terms
 
 Finmate reserves the right to modify these Terms at any time. Changes will be effective immediately upon posting to the Application. Your continued use of Finmate after modifications constitutes acceptance of the updated Terms.
 
@@ -173,9 +146,9 @@ We will notify you of material changes by:
 - Updating the "Last Updated" date
 - Requesting your consent if required by law
 
-## 15. Service Availability & Interruptions
+## 14. Service Availability & Interruptions
 
-### 15.1 Availability
+### 14.1 Availability
 
 While we strive to maintain continuous service, we do not guarantee:
 - Uninterrupted availability of the Application
@@ -183,35 +156,35 @@ While we strive to maintain continuous service, we do not guarantee:
 - Freedom from errors or bugs
 - Specific performance levels
 
-### 15.2 Maintenance & Updates
+### 14.2 Maintenance & Updates
 
 Finmate may perform maintenance, updates, or modifications that temporarily interrupt service. We will attempt to provide notice when possible.
 
-### 15.3 Limitation of Liability
+### 14.3 Limitation of Liability
 
 Finmate is not liable for:
 - Service interruptions or downtime
 - Loss of data due to service unavailability
 - Service failures beyond our reasonable control
 
-## 16. Payment Terms
+## 15. Payment Terms
 
-### 16.1 Free Service
+### 15.1 Free Service
 
 Finmate is currently provided at no cost. Any future paid features will include clear pricing and terms.
 
-### 16.2 Future Charges
+### 15.2 Future Charges
 
 If we introduce paid features, you will:
 - Receive clear notice before charging
 - Be able to decline and continue using free features
 - Have the ability to cancel paid subscriptions
 
-### 16.3 Refunds
+### 15.3 Refunds
 
 Refund policies for any paid features will be clearly stated at the time of purchase.
 
-## 17. Privacy & Data Protection
+## 16. Privacy & Data Protection
 
 Your use of Finmate is governed by our Privacy Policy. Please review the Privacy Policy to understand our data practices.
 
@@ -220,28 +193,28 @@ By using Finmate, you consent to:
 - Storage on our servers
 - Use of your data as described in the Privacy Policy
 
-## 18. Export Controls & Compliance
+## 17. Export Controls & Compliance
 
 You agree not to use Finmate in violation of any export control laws or sanctions, including:
 - Exporting data to restricted countries or individuals
 - Using the Application for restricted purposes
 - Violating any trade compliance requirements
 
-## 19. Severability
+## 18. Severability
 
 If any provision of these Terms is found to be unenforceable, the remaining provisions will continue in full force and effect. The invalid provision will be modified to the minimum extent necessary to make it valid.
 
-## 20. Entire Agreement
+## 19. Entire Agreement
 
 These Terms, along with the Privacy Policy and any other policies referenced herein, constitute the entire agreement between you and Finmate regarding your use of the Application and supersede all prior agreements and understandings.
 
-## 21. Governing Law & Dispute Resolution
+## 20. Governing Law & Dispute Resolution
 
-### 21.1 Governing Law
+### 20.1 Governing Law
 
 These Terms are governed by and construed in accordance with the laws of [Jurisdiction], without regard to conflicts of law principles.
 
-### 21.2 Arbitration
+### 20.2 Arbitration
 
 Any dispute arising out of or relating to these Terms or your use of Finmate will be resolved through binding arbitration, except:
 - Claims for injunctive relief to prevent infringement
@@ -250,11 +223,11 @@ Any dispute arising out of or relating to these Terms or your use of Finmate wil
 
 Arbitration will be conducted according to the rules of [Arbitration Organization].
 
-### 21.3 Informal Resolution
+### 20.3 Informal Resolution
 
 Before initiating arbitration or legal proceedings, you agree to attempt to resolve disputes informally by contacting us at support@finmate.app.
 
-## 22. Contact & Support
+## 21. Contact & Support
 
 For questions or concerns regarding these Terms, please contact:
 
@@ -266,26 +239,26 @@ Finmate Support
 
 **Response Time:** We aim to respond to all inquiries within 5 business days.
 
-## 23. Specific Notices for Various Jurisdictions
+## 22. Specific Notices for Various Jurisdictions
 
-### 23.1 European Union Users
+### 22.1 European Union Users
 
 - These Terms comply with EU consumer protection regulations
 - You have the right to cancel your account within 14 days of creation (if applicable)
 - Consumer rights under the EU Consumer Rights Directive are preserved
 
-### 23.2 California Users
+### 22.2 California Users
 
 - These Terms comply with California consumer protection laws
 - Under California Civil Code Section 1798.100, you have the right to know what personal information is collected about you
 - Under California Civil Code Section 1798.105, you have the right to request deletion of personal information
 
-### 23.3 United Kingdom Users
+### 22.3 United Kingdom Users
 
 - These Terms comply with UK consumer protection laws
 - Consumer rights under the Consumer Rights Act 2015 are preserved
 
-## 24. Feedback & Suggestions
+## 23. Feedback & Suggestions
 
 Any feedback, comments, or suggestions you provide regarding Finmate may be used by us without obligation. We may implement your suggestions without compensation to you.
 

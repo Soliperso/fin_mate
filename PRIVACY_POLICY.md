@@ -4,7 +4,7 @@
 
 ## 1. Introduction
 
-FinMate ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application, FinMate (the "Application").
+Finmate ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application, Finmate (the "Application").
 
 Please read this Privacy Policy carefully. If you do not agree with our policies and practices, please do not use our Application.
 
@@ -128,7 +128,7 @@ We may disclose information when required by law or when we believe in good fait
 
 ### 4.3 Business Transfers
 
-If FinMate is involved in a merger, acquisition, bankruptcy, or sale of assets, your information may be transferred as part of that transaction. We will notify you of such changes.
+If Finmate is involved in a merger, acquisition, bankruptcy, or sale of assets, your information may be transferred as part of that transaction. We will notify you of such changes.
 
 ### 4.4 User Consent
 
@@ -216,13 +216,13 @@ We will respond within 30 days (or required timeframe per applicable law).
 
 ## 8. Children's Privacy
 
-FinMate is not intended for individuals under 18 years of age. We do not knowingly collect information from children under 18. If we become aware that a child under 18 has provided us with information, we will delete such information and terminate the child's account.
+Finmate is not intended for individuals under 18 years of age. We do not knowingly collect information from children under 18. If we become aware that a child under 18 has provided us with information, we will delete such information and terminate the child's account.
 
 ## 9. International Data Transfers
 
 Your information may be transferred to, stored in, and processed in countries other than your country of residence. These countries may have different data protection laws than your home country.
 
-By using FinMate, you consent to the transfer of your information to countries outside your country of residence, which may have different privacy laws.
+By using Finmate, you consent to the transfer of your information to countries outside your country of residence, which may have different privacy laws.
 
 **EU/UK Users:** We ensure appropriate safeguards for international transfers, including:
 - Standard Contractual Clauses (SCCs)
@@ -230,7 +230,7 @@ By using FinMate, you consent to the transfer of your information to countries o
 
 ## 10. Third-Party Links
 
-FinMate may contain links to third-party websites and applications. This Privacy Policy does not apply to third-party services, and we are not responsible for their privacy practices. Please review their privacy policies before providing information.
+Finmate may contain links to third-party websites and applications. This Privacy Policy does not apply to third-party services, and we are not responsible for their privacy practices. Please review their privacy policies before providing information.
 
 ## 11. California Privacy Rights
 
@@ -244,7 +244,7 @@ We do not respond to "Do Not Track" signals. However, most browsers provide the 
 
 ## 12. Cookie & Tracking Technologies
 
-FinMate uses cookies and similar tracking technologies to:
+Finmate uses cookies and similar tracking technologies to:
 - Remember user preferences
 - Understand usage patterns
 - Improve application performance
@@ -276,7 +276,7 @@ We may update this Privacy Policy periodically to reflect changes in our practic
 - Updating the "Last Updated" date
 - Requesting your consent if required by law
 
-Your continued use of FinMate after changes constitutes your acceptance of the updated Privacy Policy.
+Your continued use of Finmate after changes constitutes your acceptance of the updated Privacy Policy.
 
 ## 15. Contact Us
 
@@ -285,7 +285,7 @@ If you have questions, concerns, or requests regarding this Privacy Policy or ou
 **Email:** privacy@finmate.app
 
 **Mailing Address:**
-FinMate
+Finmate
 Privacy & Compliance Team
 [Company Address]
 

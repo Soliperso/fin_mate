@@ -112,11 +112,9 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   /// Mark all notifications as read
   Future<void> markAllAsRead() async {
     try {
-      final count = await _service.markAllAsRead();
-      if (count > 0) {
-        await loadNotifications();
-        state = state.copyWith(unreadCount: 0);
-      }
+      await _service.markAllAsRead();
+      await loadNotifications();
+      state = state.copyWith(unreadCount: 0);
     } catch (e) {
       // Handle error silently
     }
@@ -150,9 +148,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
             .toList();
 
         // Update unread count if the deleted notification was unread
-        final wasUnread = state.notifications
-            .firstWhere((n) => n.id == notificationId)
-            .isRead == false;
+        final deleted = state.notifications
+            .where((n) => n.id == notificationId)
+            .firstOrNull;
+        final wasUnread = deleted != null && !deleted.isRead;
 
         state = state.copyWith(
           notifications: updatedNotifications,

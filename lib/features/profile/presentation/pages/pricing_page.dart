@@ -381,7 +381,7 @@ class PricingPage extends ConsumerWidget {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Welcome to FinMate Premium!'),
+              content: Text('Welcome to Finmate Premium!'),
               backgroundColor: AppColors.success,
               duration: Duration(seconds: 3),
             ),

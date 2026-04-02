@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# FinMate iOS Build Script
+# Finmate iOS Build Script
 # Builds the app with environment variables injected via --dart-define
 
 set -e
@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo "${GREEN}🚀 Building FinMate for iOS...${NC}"
+echo "${GREEN}🚀 Building Finmate for iOS...${NC}"
 
 # Check if .env file exists
 if [ ! -f ".env" ]; then

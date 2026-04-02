@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 
 ## Product Name
-**FinMate** (final branding TBD)
+**Finmate** (final branding TBD)
 
 ---
 

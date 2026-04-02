@@ -1,6 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Environment configuration for FinMate
+/// Environment configuration for Finmate
 ///
 /// Values are resolved in priority order:
 ///   1. Compile-time constants via `--dart-define` (used in production CI/CD builds)
@@ -101,7 +101,7 @@ class EnvConfig {
       _admobBannerIos.isNotEmpty
           ? _admobBannerIos
           : dotenv.env['ADMOB_BANNER_IOS'] ??
-              'ca-app-pub-3849377083349686/5584600488';
+              'ca-app-pub-3940256099942544/2934735716'; // Google test ID — replace with real ID after 24h activation
 
   static String get admobInterstitialAndroid =>
       _admobInterstitialAndroid.isNotEmpty

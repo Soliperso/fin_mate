@@ -27,7 +27,7 @@ class OpenAiChatService {
   Future<String> _buildSystemPrompt(String userId) async {
     final buffer = StringBuffer();
     buffer.writeln(
-      'You are FinMate\'s AI financial assistant. '
+      'You are Finmate\'s AI financial assistant. '
       'Be concise (under 150 words per response), helpful, and use the user\'s actual financial data below. '
       'Never invent numbers. Only discuss personal finance topics. '
       'Format amounts as \$X,XXX.XX.',

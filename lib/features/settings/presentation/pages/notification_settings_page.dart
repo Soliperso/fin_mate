@@ -5,14 +5,41 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
 
-class NotificationSettingsPage extends ConsumerWidget {
+class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationSettingsPage> createState() =>
+      _NotificationSettingsPageState();
+}
+
+class _NotificationSettingsPageState
+    extends ConsumerState<NotificationSettingsPage> {
+  // Local slider values so the slider and subtitle update smoothly while
+  // dragging, without firing a DB write on every position.
+  double? _budgetThreshold;
+  double? _billReminderDays;
+  double? _transactionThreshold;
+
+  Future<void> _updatePreferences(NotificationPreferences newPrefs) async {
+    final success = await ref
+        .read(settingsOperationsProvider.notifier)
+        .updateNotificationPreferences(newPrefs);
+
+    if (!mounted) return;
+    if (success) {
+      SuccessSnackbar.show(context, message: 'Preferences saved');
+    } else {
+      ErrorSnackbar.show(context, message: 'Failed to save preferences');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settingsState = ref.watch(settingsOperationsProvider);
 
     return Scaffold(
@@ -28,8 +55,21 @@ class NotificationSettingsPage extends ConsumerWidget {
       ),
       body: settingsState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text('Error: $error'),
+        error: (error, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(CupertinoIcons.exclamationmark_circle,
+                  size: 48, color: AppColors.error),
+              const SizedBox(height: AppSizes.md),
+              const Text('Failed to load settings'),
+              const SizedBox(height: AppSizes.md),
+              FilledButton(
+                onPressed: () => ref.invalidate(settingsOperationsProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
         data: (settings) {
           final prefs = settings?.notificationPreferences;
@@ -37,168 +77,191 @@ class NotificationSettingsPage extends ConsumerWidget {
             return const Center(child: Text('No settings found'));
           }
 
+          // Initialise local slider values on first build
+          _budgetThreshold ??= prefs.budgetThreshold.toDouble();
+          _billReminderDays ??= prefs.billReminderDays.toDouble();
+          _transactionThreshold ??= prefs.transactionThreshold.toDouble();
+
+          final pushOn = prefs.pushEnabled;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSizes.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // General Notifications
-                _buildSectionTitle(context, 'General Notifications'),
+                // ── General ───────────────────────────────────────────────
+                _sectionTitle(context, 'General'),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Push Notifications',
-                  subtitle: 'Receive push notifications on your device',
-                  value: prefs.pushEnabled,
-                  onChanged: (value) {
-                    _updatePreferences(ref, prefs.copyWith(pushEnabled: value));
-                  },
+                  subtitle: 'Receive notifications on this device',
+                  value: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(pushEnabled: v)),
                 ),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Email Notifications',
                   subtitle: 'Receive important updates via email',
                   value: prefs.emailEnabled,
-                  onChanged: (value) {
-                    _updatePreferences(ref, prefs.copyWith(emailEnabled: value));
-                  },
+                  enabled: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(emailEnabled: v)),
                 ),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Sound',
                   subtitle: 'Play sound for notifications',
                   value: prefs.soundEnabled,
-                  onChanged: (value) {
-                    _updatePreferences(ref, prefs.copyWith(soundEnabled: value));
-                  },
+                  enabled: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(soundEnabled: v)),
                 ),
                 const SizedBox(height: AppSizes.lg),
 
-                // Budget Alerts
-                _buildSectionTitle(context, 'Budget Alerts'),
+                // ── Budget Alerts ─────────────────────────────────────────
+                _sectionTitle(context, 'Budget Alerts'),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Budget Alerts',
-                  subtitle: 'Get notified when nearing budget limit',
+                  subtitle: 'Get notified when nearing a budget limit',
                   value: prefs.budgetAlerts,
-                  onChanged: (value) {
-                    _updatePreferences(ref, prefs.copyWith(budgetAlerts: value));
-                  },
+                  enabled: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(budgetAlerts: v)),
                 ),
-                if (prefs.budgetAlerts) ...[
+                if (prefs.budgetAlerts && pushOn) ...[
                   const SizedBox(height: AppSizes.sm),
-                  _buildSliderTile(
+                  _sliderTile(
                     context,
-                    title: 'Budget Threshold',
-                    subtitle: 'Alert when budget is ${prefs.budgetThreshold}% spent',
-                    value: prefs.budgetThreshold.toDouble(),
-                    onChanged: (value) {
-                      _updatePreferences(
-                        ref,
-                        prefs.copyWith(budgetThreshold: value.toInt()),
-                      );
-                    },
+                    title: 'Alert Threshold',
+                    subtitle: 'Alert when ${_budgetThreshold!.toInt()}% of budget is spent',
+                    value: _budgetThreshold!,
+                    min: 10,
+                    max: 100,
+                    divisions: 9,
+                    label: '${_budgetThreshold!.toInt()}%',
+                    onChanged: (v) => setState(() => _budgetThreshold = v),
+                    onChangeEnd: (v) => _updatePreferences(
+                      prefs.copyWith(budgetThreshold: v.toInt()),
+                    ),
                   ),
                 ],
                 const SizedBox(height: AppSizes.lg),
 
-                // Bill Reminders
-                _buildSectionTitle(context, 'Bill Reminders'),
+                // ── Bill Reminders ────────────────────────────────────────
+                _sectionTitle(context, 'Bill Reminders'),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Bill Reminders',
                   subtitle: 'Get reminded about upcoming bills',
                   value: prefs.billReminders,
-                  onChanged: (value) {
-                    _updatePreferences(ref, prefs.copyWith(billReminders: value));
-                  },
+                  enabled: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(billReminders: v)),
                 ),
-                if (prefs.billReminders) ...[
+                if (prefs.billReminders && pushOn) ...[
                   const SizedBox(height: AppSizes.sm),
-                  _buildSliderTile(
+                  _sliderTile(
                     context,
-                    title: 'Reminder Days Before',
-                    subtitle: 'Remind me ${prefs.billReminderDays} day(s) before bill due',
-                    value: prefs.billReminderDays.toDouble(),
-                    onChanged: (value) {
-                      _updatePreferences(
-                        ref,
-                        prefs.copyWith(billReminderDays: value.toInt()),
-                      );
-                    },
+                    title: 'Days Before Due',
+                    subtitle: 'Remind me ${_billReminderDays!.toInt()} day(s) before bill is due',
+                    value: _billReminderDays!,
+                    min: 1,
+                    max: 7,
+                    divisions: 6,
+                    label: '${_billReminderDays!.toInt()}d',
+                    onChanged: (v) => setState(() => _billReminderDays = v),
+                    onChangeEnd: (v) => _updatePreferences(
+                      prefs.copyWith(billReminderDays: v.toInt()),
+                    ),
                   ),
                 ],
                 const SizedBox(height: AppSizes.lg),
 
-                // Transaction Alerts
-                _buildSectionTitle(context, 'Transaction Alerts'),
+                // ── Transaction Alerts ────────────────────────────────────
+                _sectionTitle(context, 'Transaction Alerts'),
                 const SizedBox(height: AppSizes.sm),
-                _buildSwitchTile(
+                _switchTile(
                   context,
                   title: 'Large Transaction Alerts',
                   subtitle: 'Get notified for large expenses',
                   value: prefs.transactionAlerts,
-                  onChanged: (value) {
-                    _updatePreferences(
-                      ref,
-                      prefs.copyWith(transactionAlerts: value),
-                    );
-                  },
+                  enabled: pushOn,
+                  onChanged: (v) =>
+                      _updatePreferences(prefs.copyWith(transactionAlerts: v)),
                 ),
-                if (prefs.transactionAlerts) ...[
+                if (prefs.transactionAlerts && pushOn) ...[
                   const SizedBox(height: AppSizes.sm),
-                  _buildSliderTile(
+                  _sliderTile(
                     context,
                     title: 'Amount Threshold',
-                    subtitle: 'Alert for transactions over \$${prefs.transactionThreshold}',
-                    value: prefs.transactionThreshold.toDouble(),
-                    onChanged: (value) {
-                      _updatePreferences(
-                        ref,
-                        prefs.copyWith(transactionThreshold: value.toInt()),
-                      );
-                    },
+                    subtitle: 'Alert for transactions over \$${_transactionThreshold!.toInt()}',
+                    value: _transactionThreshold!,
+                    min: 100,
+                    max: 10000,
+                    divisions: 99,
+                    label: '\$${_transactionThreshold!.toInt()}',
+                    onChanged: (v) => setState(() => _transactionThreshold = v),
+                    onChangeEnd: (v) => _updatePreferences(
+                      prefs.copyWith(transactionThreshold: v.toInt()),
+                    ),
                   ),
                 ],
                 const SizedBox(height: AppSizes.lg),
 
-                // Money Health & Goals
-                _buildSectionTitle(context, 'Money Health & Goals'),
+                // ── Money Health & Goals ──────────────────────────────────
+                _sectionTitle(context, 'Money Health & Goals'),
                 const SizedBox(height: AppSizes.sm),
-                _buildDropdownTile(
+                _dropdownTile(
                   context,
                   title: 'Money Health Updates',
                   subtitle: 'How often to receive money health insights',
                   value: prefs.moneyHealthUpdates,
                   items: const ['weekly', 'monthly', 'off'],
                   labels: const ['Weekly', 'Monthly', 'Off'],
-                  onChanged: (value) {
-                    if (value != null) {
-                      _updatePreferences(
-                        ref,
-                        prefs.copyWith(moneyHealthUpdates: value),
-                      );
+                  enabled: pushOn,
+                  onChanged: (v) {
+                    if (v != null) {
+                      _updatePreferences(prefs.copyWith(moneyHealthUpdates: v));
                     }
                   },
                 ),
                 const SizedBox(height: AppSizes.sm),
-                _buildDropdownTile(
+                _dropdownTile(
                   context,
                   title: 'Goal Notifications',
-                  subtitle: 'When to be notified about goals',
+                  subtitle: 'When to be notified about savings goals',
                   value: prefs.goalNotifications,
                   items: const ['milestones', 'all', 'off'],
                   labels: const ['Milestones Only', 'All Updates', 'Off'],
-                  onChanged: (value) {
-                    if (value != null) {
-                      _updatePreferences(
-                        ref,
-                        prefs.copyWith(goalNotifications: value),
-                      );
+                  enabled: pushOn,
+                  onChanged: (v) {
+                    if (v != null) {
+                      _updatePreferences(prefs.copyWith(goalNotifications: v));
+                    }
+                  },
+                ),
+                const SizedBox(height: AppSizes.lg),
+
+                // ── Data & Backup ─────────────────────────────────────────
+                _sectionTitle(context, 'Data & Backup'),
+                const SizedBox(height: AppSizes.sm),
+                _dropdownTile(
+                  context,
+                  title: 'Auto Backup',
+                  subtitle: 'Automatically back up your financial data',
+                  value: prefs.autoBackupSchedule,
+                  items: const ['off', 'daily', 'weekly'],
+                  labels: const ['Off', 'Daily', 'Weekly'],
+                  onChanged: (v) {
+                    if (v != null) {
+                      _updatePreferences(prefs.copyWith(autoBackupSchedule: v));
                     }
                   },
                 ),
@@ -211,7 +274,7 @@ class NotificationSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -221,68 +284,80 @@ class NotificationSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSwitchTile(
+  Widget _switchTile(
     BuildContext context, {
     required String title,
     required String subtitle,
     required bool value,
+    bool enabled = true,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.xs),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.4,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: AppSizes.sm,
           ),
-          const SizedBox(width: AppSizes.md),
-          Transform.scale(
-            scale: 0.8,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeThumbColor: Colors.white,
-              activeTrackColor: AppColors.primaryTeal,
-            ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.xs),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSizes.md),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeThumbColor: Colors.white,
+                  activeTrackColor: AppColors.primaryTeal,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSliderTile(
+  Widget _sliderTile(
     BuildContext context, {
     required String title,
     required String subtitle,
     required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required String label,
     required ValueChanged<double> onChanged,
+    required ValueChanged<double> onChangeEnd,
   }) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
@@ -295,107 +370,81 @@ class NotificationSettingsPage extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: AppSizes.xs),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
-          const SizedBox(height: AppSizes.md),
           Slider(
             value: value,
-            onChanged: onChanged,
-            min: title.contains('Budget') || title.contains('Health')
-                ? 10
-                : title.contains('Reminder')
-                    ? 1
-                    : 100,
-            max: title.contains('Budget') || title.contains('Health')
-                ? 100
-                : title.contains('Reminder')
-                    ? 7
-                    : 10000,
-            divisions: title.contains('Budget') || title.contains('Health')
-                ? 9
-                : title.contains('Reminder')
-                    ? 6
-                    : 99,
-            label: title.contains('Budget') || title.contains('Health')
-                ? '${value.toInt()}%'
-                : title.contains('Reminder')
-                    ? '${value.toInt()} days'
-                    : '\$${value.toInt()}',
+            min: min,
+            max: max,
+            divisions: divisions,
+            label: label,
             activeColor: AppColors.primaryTeal,
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDropdownTile(
+  Widget _dropdownTile(
     BuildContext context, {
     required String title,
     required String subtitle,
     required String value,
     required List<String> items,
     required List<String> labels,
+    bool enabled = true,
     required ValueChanged<String?> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.4,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: AppSizes.sm,
           ),
-          const SizedBox(height: AppSizes.xs),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           ),
-          const SizedBox(height: AppSizes.md),
-          DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            onChanged: onChanged,
-            items: List.generate(
-              items.length,
-              (index) => DropdownMenuItem(
-                value: items[index],
-                child: Text(labels[index]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-            ),
+              const SizedBox(height: AppSizes.xs),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 14),
+              ),
+              const SizedBox(height: AppSizes.sm),
+              DropdownButton<String>(
+                value: value,
+                isExpanded: true,
+                onChanged: onChanged,
+                items: List.generate(
+                  items.length,
+                  (i) => DropdownMenuItem(
+                    value: items[i],
+                    child: Text(labels[i]),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
-  }
-
-  void _updatePreferences(WidgetRef ref, NotificationPreferences newPrefs) {
-    ref.read(settingsOperationsProvider.notifier).updateNotificationPreferences(
-          newPrefs,
-        );
   }
 }

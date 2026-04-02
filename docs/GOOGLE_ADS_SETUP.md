@@ -2,7 +2,7 @@
 
 ## Overview
 
-Google Mobile Ads have been successfully integrated into FinMate. Ads are automatically shown **only to freemium users** and hidden for premium subscribers.
+Google Mobile Ads have been successfully integrated into Finmate. Ads are automatically shown **only to freemium users** and hidden for premium subscribers.
 
 ## Current Status
 

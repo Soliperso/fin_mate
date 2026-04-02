@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/providers/subscription_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
-import '../../../../shared/widgets/premium_feature_dialog.dart';
 import '../../../documents/presentation/widgets/upload_document_bottom_sheet.dart';
 
 /// Widget to show receipt attachments and allow uploading receipts
@@ -23,99 +21,10 @@ class ReceiptAttachmentSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPremium = ref.watch(isPremiumProvider);
-
-    return isPremium.when(
-      data: (premium) => premium
-          ? _buildPremiumContent(context, ref)
-          : _buildFreemiumContent(context),
-      loading: () => const SizedBox.shrink(),
-      error: (error, stack) => const SizedBox.shrink(),
-    );
+    return _buildContent(context, ref);
   }
 
-  Widget _buildFreemiumContent(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: AppSizes.md,
-        right: AppSizes.md,
-        bottom: AppSizes.md,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTeal.withValues(alpha: 0.05),
-          border: Border.all(
-            color: AppColors.primaryTeal.withValues(alpha: 0.2),
-          ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  CupertinoIcons.doc_text,
-                  size: 20,
-                  color: AppColors.primaryTeal,
-                ),
-                const SizedBox(width: AppSizes.sm),
-                Expanded(
-                  child: Text(
-                    'Receipt Scanning',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.sm,
-                    vertical: AppSizes.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTeal,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: const Text(
-                    'Premium',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              'Unlock receipt scanning to organize your receipts and extract expense details automatically.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: AppSizes.md),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _showPremiumDialog(context),
-                icon: const Icon(CupertinoIcons.star),
-                label: const Text('Learn More'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryTeal,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPremiumContent(BuildContext context, WidgetRef ref) {
+  Widget _buildContent(BuildContext context, WidgetRef ref) {
     final hasDocuments = attachedDocuments != null && attachedDocuments!.isNotEmpty;
 
     return Column(
@@ -287,16 +196,4 @@ class ReceiptAttachmentSection extends ConsumerWidget {
     );
   }
 
-  void _showPremiumDialog(BuildContext context) {
-    PremiumFeatureDialog.show(
-      context,
-      featureName: 'Receipt Scanning',
-      benefits: const [
-        'Scan and organize receipts',
-        'Extract expense details automatically',
-        'Tax-deductible expense tracking',
-        'Digital receipt storage',
-      ],
-    );
-  }
 }

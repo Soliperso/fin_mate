@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
-import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -302,63 +301,51 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               _buildReminderSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
 
-              // ── Receipt scan (premium) ──────────────────────────────────
-              Consumer(
-                builder: (context, ref, _) {
-                  final isPremium = ref.watch(isPremiumProvider);
-                  return isPremium.when(
-                    data: (premium) => premium
-                        ? Column(
-                            children: [
-                              GestureDetector(
-                                onTap: _openScanReceipt,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: cardColor,
-                                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSizes.md, vertical: AppSizes.md),
-                                  child: Row(
-                                    children: [
-                                      _rowIcon(CupertinoIcons.camera,
-                                          accentColor: AppColors.brandTeal, isDark: isDark),
-                                      const SizedBox(width: AppSizes.md),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text('Scan Receipt'),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Use camera to extract transaction details',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodySmall
-                                                  ?.copyWith(
-                                                      color: AppColors.textSecondary),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.chevron_right,
-                                        size: 14,
-                                        color: AppColors.systemGray3,
-                                      ),
-                                    ],
-                                  ),
+              // ── Receipt scan ────────────────────────────────────────────
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: _openScanReceipt,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.md, vertical: AppSizes.md),
+                      child: Row(
+                        children: [
+                          _rowIcon(CupertinoIcons.camera,
+                              accentColor: AppColors.brandTeal, isDark: isDark),
+                          const SizedBox(width: AppSizes.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Scan Receipt'),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Use camera to extract transaction details',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: AppColors.textSecondary),
                                 ),
-                              ),
-                              const SizedBox(height: AppSizes.md),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (e, _) => const SizedBox.shrink(),
-                  );
-                },
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 14,
+                            color: AppColors.systemGray3,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                ],
               ),
 
               const SizedBox(height: AppSizes.lg),

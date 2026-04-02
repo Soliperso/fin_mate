@@ -84,13 +84,13 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // Premium Status Provider
 // ============================================================================
 
-/// Computed provider that returns true if user has premium subscription.
+/// Computed provider that returns true if user has an active premium subscription.
 ///
-/// MVP decision: all features are free during beta. When activating Stripe payments
-/// (V1.1), replace `return true` with `ref.watch(stripePremiumProvider)` and search
-/// for all `isPremiumProvider` usages to find the feature gates to enable.
+/// Reads `subscription_tier` from `user_profiles`. Returns `true` only when the
+/// tier is 'premium'. Freemium users (or null) see ads and hit feature gates.
 final isPremiumProvider = FutureProvider<bool>((ref) async {
-  return true; // Free MVP: all features unlocked during beta
+  final tier = await ref.watch(subscriptionTierProvider.future);
+  return tier == 'premium';
 });
 
 // ============================================================================
