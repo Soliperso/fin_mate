@@ -262,6 +262,38 @@ class ProfilePage extends ConsumerWidget {
                         ]),
                         const SizedBox(height: AppSizes.lg),
 
+                        // ── Admin ─────────────────────────────────────────
+                        if (profile?.isAdmin == true) ...[
+                          _sectionLabel(context, 'Admin'),
+                          const SizedBox(height: AppSizes.sm),
+                          _buildSettingsCard(context, isDark, children: [
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.person_2,
+                              title: 'User Management',
+                              subtitle: 'View and manage app users',
+                              onTap: () => context.push('/admin/users'),
+                            ),
+                            _buildDivider(context, isDark),
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.chart_bar,
+                              title: 'System Analytics',
+                              subtitle: 'App-wide usage and financial stats',
+                              onTap: () => context.push('/admin/analytics'),
+                            ),
+                            _buildDivider(context, isDark),
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.gear_alt,
+                              title: 'System Settings',
+                              subtitle: 'Configure system-wide options',
+                              onTap: () => context.push('/admin/settings'),
+                            ),
+                          ]),
+                          const SizedBox(height: AppSizes.lg),
+                        ],
+
                         // ── Log Out ───────────────────────────────────────
                         _buildSettingsCard(context, isDark, children: [
                           InkWell(

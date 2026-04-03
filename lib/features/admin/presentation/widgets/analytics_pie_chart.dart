@@ -26,14 +26,15 @@ class AnalyticsPieChart extends StatelessWidget {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorsList = colors ??
         [
-          AppColors.primaryTeal,
+          AppColors.brandTeal,
           AppColors.tealBlue,
-          AppColors.slateBlue,
-          AppColors.warning,
-          AppColors.error,
-          AppColors.info,
+          AppColors.systemBlue,
+          AppColors.systemOrange,
+          AppColors.systemRed,
+          AppColors.systemPurple,
         ];
 
     return Column(
@@ -42,7 +43,10 @@ class AnalyticsPieChart extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.secondaryLabelDark
+                    : AppColors.secondaryLabel,
               ),
         ),
         const SizedBox(height: AppSizes.md),
@@ -110,6 +114,9 @@ class AnalyticsPieChart extends StatelessWidget {
                           _formatValue(values[index]),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? AppColors.secondaryLabelDark
+                                    : AppColors.secondaryLabel,
                               ),
                         ),
                       ],

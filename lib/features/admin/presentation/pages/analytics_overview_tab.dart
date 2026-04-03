@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../providers/admin_providers.dart';
 
 class AnalyticsOverviewTab extends ConsumerWidget {
@@ -13,137 +14,145 @@ class AnalyticsOverviewTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(systemStatsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return statsAsync.when(
       data: (stats) => SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSizes.md),
+        padding: const EdgeInsets.all(AppSizes.pagePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Users Section
-            _buildSectionHeader(context, 'Users'),
-            const SizedBox(height: AppSizes.md),
+            // ── Users ────────────────────────────────────────────────────
+            _sectionLabel(context, 'Users'),
+            const SizedBox(height: AppSizes.sm),
             Row(
               children: [
                 Expanded(
-                  child: _buildCleanStatCard(
+                  child: _statCard(
                     context,
+                    isDark: isDark,
                     icon: CupertinoIcons.person_2,
+                    iconColor: AppColors.brandTeal,
                     label: 'Total Users',
                     value: stats.totalUsers.toString(),
-                    iconColor: AppColors.primaryTeal,
                   ),
                 ),
-                const SizedBox(width: AppSizes.md),
+                const SizedBox(width: AppSizes.sm),
                 Expanded(
-                  child: _buildCleanStatCard(
+                  child: _statCard(
                     context,
+                    isDark: isDark,
                     icon: CupertinoIcons.checkmark_circle_fill,
+                    iconColor: AppColors.systemGreen,
                     label: 'Active Users',
                     value: stats.activeUsers.toString(),
-                    subtitle: '${stats.activeUserPercentage.toStringAsFixed(0)}%',
-                    iconColor: AppColors.primaryTeal,
+                    badge: '${stats.activeUserPercentage.toStringAsFixed(0)}%',
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSizes.md),
-            _buildCleanStatCard(
+            const SizedBox(height: AppSizes.sm),
+            _statCard(
               context,
+              isDark: isDark,
               icon: CupertinoIcons.person_add,
+              iconColor: AppColors.tealBlue,
               label: 'New This Month',
               value: stats.newUsersThisMonth.toString(),
-              iconColor: AppColors.primaryTeal,
+              fullWidth: true,
             ),
-            const SizedBox(height: AppSizes.xl),
+            const SizedBox(height: AppSizes.lg),
 
-            // Financial Section
-            _buildSectionHeader(context, 'Financial Overview'),
-            const SizedBox(height: AppSizes.md),
-            _buildPremiumNetWorthCard(
+            // ── Financial Overview ────────────────────────────────────────
+            _sectionLabel(context, 'Financial Overview'),
+            const SizedBox(height: AppSizes.sm),
+            _heroCard(
               context,
               icon: CupertinoIcons.money_dollar_circle,
               label: 'Total Net Worth',
-              value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalNetWorth),
+              value: NumberFormat.compactCurrency(symbol: '\$')
+                  .format(stats.totalNetWorth),
             ),
-            const SizedBox(height: AppSizes.md),
+            const SizedBox(height: AppSizes.sm),
             Row(
               children: [
                 Expanded(
-                  child: _buildCleanStatCard(
+                  child: _statCard(
                     context,
-                    icon: CupertinoIcons.arrow_up,
-                    label: 'Total Income',
-                    value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalIncome),
-                    iconColor: AppColors.success,
-                    valueColor: AppColors.success,
+                    isDark: isDark,
+                    icon: CupertinoIcons.arrow_up_circle_fill,
+                    iconColor: AppColors.systemGreen,
+                    label: 'Income',
+                    value: NumberFormat.compactCurrency(symbol: '\$')
+                        .format(stats.totalIncome),
+                    valueColor: AppColors.systemGreen,
                   ),
                 ),
-                const SizedBox(width: AppSizes.md),
+                const SizedBox(width: AppSizes.sm),
                 Expanded(
-                  child: _buildCleanStatCard(
+                  child: _statCard(
                     context,
-                    icon: CupertinoIcons.arrow_down,
-                    label: 'Total Expense',
-                    value: NumberFormat.compactCurrency(symbol: '\$').format(stats.totalExpense),
-                    iconColor: AppColors.error,
-                    valueColor: AppColors.error,
+                    isDark: isDark,
+                    icon: CupertinoIcons.arrow_down_circle_fill,
+                    iconColor: AppColors.systemRed,
+                    label: 'Expenses',
+                    value: NumberFormat.compactCurrency(symbol: '\$')
+                        .format(stats.totalExpense),
+                    valueColor: AppColors.systemRed,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── System Data ───────────────────────────────────────────────
+            _sectionLabel(context, 'System Data'),
+            const SizedBox(height: AppSizes.sm),
+            _statCard(
+              context,
+              isDark: isDark,
+              icon: CupertinoIcons.arrow_right_arrow_left,
+              iconColor: AppColors.brandTeal,
+              label: 'Total Transactions',
+              value: NumberFormat.decimalPattern()
+                  .format(stats.totalTransactions),
+              badge:
+                  '${stats.averageTransactionsPerUser.toStringAsFixed(1)} avg/user',
+              fullWidth: true,
+            ),
+            const SizedBox(height: AppSizes.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: _statCard(
+                    context,
+                    isDark: isDark,
+                    icon: CupertinoIcons.creditcard,
+                    iconColor: AppColors.systemBlue,
+                    label: 'Accounts',
+                    value: stats.totalAccounts.toString(),
+                  ),
+                ),
+                const SizedBox(width: AppSizes.sm),
+                Expanded(
+                  child: _statCard(
+                    context,
+                    isDark: isDark,
+                    icon: CupertinoIcons.chart_pie_fill,
+                    iconColor: AppColors.systemOrange,
+                    label: 'Budgets',
+                    value: stats.totalBudgets.toString(),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppSizes.xl),
-
-            // System Data Section
-            _buildSectionHeader(context, 'System Data'),
-            const SizedBox(height: AppSizes.md),
-            _buildCleanStatCard(
-              context,
-              icon: CupertinoIcons.doc_text,
-              label: 'Total Transactions',
-              value: NumberFormat.decimalPattern().format(stats.totalTransactions),
-              subtitle: '${stats.averageTransactionsPerUser.toStringAsFixed(1)} avg per user',
-              iconColor: AppColors.primaryTeal,
-            ),
-            const SizedBox(height: AppSizes.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCleanStatCard(
-                    context,
-                    icon: CupertinoIcons.building_2_fill,
-                    label: 'Accounts',
-                    value: stats.totalAccounts.toString(),
-                    iconColor: AppColors.primaryTeal,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.md),
-                Expanded(
-                  child: _buildCleanStatCard(
-                    context,
-                    icon: CupertinoIcons.chart_pie_fill,
-                    label: 'Budgets',
-                    value: stats.totalBudgets.toString(),
-                    iconColor: AppColors.primaryTeal,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildCleanStatCard(
-              context,
-              icon: CupertinoIcons.person_3,
-              label: 'Bill Groups',
-              value: stats.totalBillGroups.toString(),
-              iconColor: AppColors.primaryTeal,
-            ),
-            const SizedBox(height: AppSizes.lg),
           ],
         ),
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
+      loading: () => _buildSkeleton(context),
+      error: (error, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.lg),
           child: EmptyStateCard(
@@ -157,146 +166,211 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-            letterSpacing: 0.5,
-          ),
-    );
-  }
+  // ── Hero gradient card (net worth) ─────────────────────────────────────────
 
-  Widget _buildPremiumNetWorthCard(
+  Widget _heroCard(
     BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
   }) {
-    return Card(
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSizes.lg),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryTeal, AppColors.tealBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSizes.lg),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.brandTeal, AppColors.tealBlue],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            ),
+            child: Icon(icon, color: Colors.white, size: 22),
           ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: AppColors.white,
-                    size: 24,
-                  ),
+          const SizedBox(height: AppSizes.md),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w500,
                 ),
-                const Spacer(),
-              ],
-            ),
-            const SizedBox(height: AppSizes.md),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-            const SizedBox(height: AppSizes.xs),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSizes.xs),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -1,
+                ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCleanStatCard(
+  // ── Stat card ──────────────────────────────────────────────────────────────
+
+  Widget _statCard(
     BuildContext context, {
+    required bool isDark,
     required IconData icon,
+    required Color iconColor,
     required String label,
     required String value,
-    String? subtitle,
-    required Color iconColor,
+    String? badge,
     Color? valueColor,
+    bool fullWidth = false,
   }) {
-    return Card(
-      child: SizedBox(
-        height: 140,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return Container(
+      width: fullWidth ? double.infinity : null,
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSizes.sm),
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                    ),
-                    child: Icon(
-                      icon,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              if (badge != null) ...[
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.sm, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                  ),
+                  child: Text(
+                    badge,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                       color: iconColor,
-                      size: 20,
                     ),
                   ),
-                  const Spacer(),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                  const SizedBox(height: AppSizes.xs),
-                  Text(
-                    value,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: valueColor ?? Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: AppSizes.xs),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ],
           ),
-        ),
+          const SizedBox(height: AppSizes.md),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? AppColors.secondaryLabelDark
+                      : AppColors.secondaryLabel,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                  color: valueColor,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Section label ──────────────────────────────────────────────────────────
+
+  Widget _sectionLabel(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+      ),
+    );
+  }
+
+  // ── Loading skeleton ───────────────────────────────────────────────────────
+
+  Widget _buildSkeleton(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSizes.pagePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LoadingSkeleton(
+              width: 60, height: 12, borderRadius: BorderRadius.circular(4)),
+          const SizedBox(height: AppSizes.sm),
+          Row(children: [
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 100,
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusCard))),
+            const SizedBox(width: AppSizes.sm),
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 100,
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusCard))),
+          ]),
+          const SizedBox(height: AppSizes.sm),
+          LoadingSkeleton(
+              height: 100,
+              borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
+          const SizedBox(height: AppSizes.lg),
+          LoadingSkeleton(
+              width: 80, height: 12, borderRadius: BorderRadius.circular(4)),
+          const SizedBox(height: AppSizes.sm),
+          LoadingSkeleton(
+              height: 120,
+              borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
+          const SizedBox(height: AppSizes.sm),
+          Row(children: [
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 100,
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusCard))),
+            const SizedBox(width: AppSizes.sm),
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 100,
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusCard))),
+          ]),
+        ],
       ),
     );
   }

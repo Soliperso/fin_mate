@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/user_list_item.dart';
 
@@ -38,78 +39,72 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User Management'),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: const Text('User Management'),
       ),
       body: Column(
         children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(AppSizes.md),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark
-                      ? AppColors.borderDark.withValues(alpha: 0.3)
-                      : AppColors.borderLight,
-                  width: 1,
-                ),
-              ),
+          // ── Search Bar ──────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.pagePadding,
+              AppSizes.sm,
+              AppSizes.pagePadding,
+              AppSizes.md,
             ),
-            child: TextField(
-              controller: _searchController,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: InputDecoration(
-                hintText: 'Search users by name or email...',
-                hintStyle: TextStyle(color: AppColors.textSecondary),
-                prefixIcon: Icon(CupertinoIcons.search, color: AppColors.textSecondary),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(CupertinoIcons.xmark),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearch('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                  borderSide: BorderSide(
-                    color: AppColors.primaryTeal,
-                    width: 2,
-                  ),
-                ),
-                filled: true,
-                fillColor: isDark
-                    ? AppColors.cardBackgroundDark
-                    : AppColors.lightGray,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.md,
-                  vertical: AppSizes.sm,
-                ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.secondarySystemBackgroundDark
+                    : AppColors.systemBackground,
+                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
               ),
-              onChanged: _onSearch,
+              child: TextField(
+                controller: _searchController,
+                style: Theme.of(context).textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: 'Search by name or email…',
+                  hintStyle: TextStyle(
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                  ),
+                  prefixIcon: Icon(
+                    CupertinoIcons.search,
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                    size: 20,
+                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            CupertinoIcons.xmark_circle_fill,
+                            color: isDark
+                                ? AppColors.secondaryLabelDark
+                                : AppColors.secondaryLabel,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearch('');
+                          },
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.md,
+                    vertical: 12,
+                  ),
+                ),
+                onChanged: _onSearch,
+              ),
             ),
           ),
 
-          // Users List
+          // ── Users List ──────────────────────────────────────────────────
           Expanded(
             child: usersAsync.when(
               data: (users) {
@@ -120,27 +115,41 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            CupertinoIcons.person_2,
-                            size: 80,
-                            color: AppColors.textSecondary.withValues(alpha: 0.5),
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: AppColors.brandTeal.withValues(alpha: 0.1),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.person_2,
+                              size: 32,
+                              color: AppColors.brandTeal,
+                            ),
                           ),
                           const SizedBox(height: AppSizes.lg),
                           Text(
                             _searchQuery != null
                                 ? 'No users found'
                                 : 'No users yet',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           if (_searchQuery != null) ...[
                             const SizedBox(height: AppSizes.sm),
                             Text(
                               'Try a different search term',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: isDark
+                                        ? AppColors.secondaryLabelDark
+                                        : AppColors.secondaryLabel,
                                   ),
                             ),
                           ],
@@ -151,21 +160,25 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(usersListProvider);
-                  },
+                  color: AppColors.brandTeal,
+                  onRefresh: () async => ref.invalidate(usersListProvider),
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSizes.md),
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSizes.pagePadding,
+                      0,
+                      AppSizes.pagePadding,
+                      AppSizes.xl,
+                    ),
                     itemCount: users.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: AppSizes.md),
-                    itemBuilder: (context, index) {
-                      return UserListItem(user: users[index]);
-                    },
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSizes.sm),
+                    itemBuilder: (context, index) =>
+                        UserListItem(user: users[index]),
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
+              loading: () => _buildSkeleton(isDark),
+              error: (error, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.lg),
                   child: Column(
@@ -173,29 +186,38 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                     children: [
                       const Icon(
                         CupertinoIcons.exclamationmark_circle,
-                        size: 64,
+                        size: 48,
                         color: AppColors.error,
                       ),
-                      const SizedBox(height: AppSizes.lg),
+                      const SizedBox(height: AppSizes.md),
                       Text(
                         'Failed to load users',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         error.toString(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.secondaryLabelDark
+                                  : AppColors.secondaryLabel,
                             ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: AppSizes.lg),
                       ElevatedButton.icon(
                         onPressed: () => ref.invalidate(usersListProvider),
-                        icon: const Icon(CupertinoIcons.arrow_counterclockwise),
+                        icon: const Icon(
+                            CupertinoIcons.arrow_counterclockwise,
+                            size: 16),
                         label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brandTeal,
+                          foregroundColor: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -204,6 +226,73 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSkeleton(bool isDark) {
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.pagePadding,
+        0,
+        AppSizes.pagePadding,
+        AppSizes.xl,
+      ),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSizes.sm),
+      itemBuilder: (_, __) => Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
+        child: Row(
+          children: [
+            LoadingSkeleton(
+              width: 56,
+              height: 56,
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LoadingSkeleton(
+                    width: 140,
+                    height: 14,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  LoadingSkeleton(
+                    width: 200,
+                    height: 12,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    children: [
+                      LoadingSkeleton(
+                        width: 60,
+                        height: 20,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      ),
+                      const SizedBox(width: AppSizes.xs),
+                      LoadingSkeleton(
+                        width: 70,
+                        height: 20,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -42,10 +42,10 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/notification_settings_page.dart';
 import '../../features/settings/presentation/pages/display_settings_page.dart';
 import '../../features/settings/presentation/pages/data_privacy_page.dart';
-// [MVP: Admin Panel - Commented out for initial launch]
-// import '../../features/admin/presentation/pages/user_management_page.dart';
-// import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
-// import '../../features/admin/presentation/pages/system_settings_page.dart';
+import '../../features/admin/presentation/pages/user_management_page.dart';
+import '../../features/admin/presentation/pages/user_detail_page.dart';
+import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
+import '../../features/admin/presentation/pages/system_settings_page.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
@@ -360,22 +360,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // [MVP: Admin Panel - Commented out for initial launch]
-      // GoRoute(
-      //   path: '/admin/users',
-      //   name: 'admin-users',
-      //   builder: (context, state) => const UserManagementPage(),
-      // ),
-      // GoRoute(
-      //   path: '/admin/analytics',
-      //   name: 'admin-analytics',
-      //   builder: (context, state) => const SystemAnalyticsPageEnhanced(),
-      // ),
-      // GoRoute(
-      //   path: '/admin/settings',
-      //   name: 'admin-settings',
-      //   builder: (context, state) => const SystemSettingsPage(),
-      // ),
+      GoRoute(
+        path: '/admin/users',
+        name: 'admin-users',
+        builder: (context, state) => const UserManagementPage(),
+        routes: [
+          GoRoute(
+            path: ':userId',
+            name: 'admin-user-detail',
+            builder: (context, state) => UserDetailPage(
+              userId: state.pathParameters['userId']!,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/admin/analytics',
+        name: 'admin-analytics',
+        builder: (context, state) => const SystemAnalyticsPageEnhanced(),
+      ),
+      GoRoute(
+        path: '/admin/settings',
+        name: 'admin-settings',
+        builder: (context, state) => const SystemSettingsPage(),
+      ),
     ],
   );
 });

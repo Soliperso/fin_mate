@@ -28,7 +28,7 @@ class AppTheme {
       textTheme: _buildTextTheme(),
       appBarTheme: const AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: 0.5,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         backgroundColor: AppColors.systemGroupedBackground,
         foregroundColor: AppColors.label,
@@ -301,7 +301,7 @@ class AppTheme {
       textTheme: _buildTextTheme(isDark: true),
       appBarTheme: const AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: 0.5,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         backgroundColor: AppColors.systemGroupedBackgroundDark,
         foregroundColor: AppColors.labelDark,

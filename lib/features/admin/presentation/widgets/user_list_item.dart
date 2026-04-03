@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -13,22 +14,20 @@ class UserListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? AppColors.cardBackgroundDark : AppColors.cardBackground;
-    final borderColor = isDark ? AppColors.borderDark.withValues(alpha: 0.3) : AppColors.borderLight;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        border: Border.all(color: borderColor, width: 1),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          onTap: () {
-            // User details navigation placeholder
-          },
+          onTap: () => context.push('/admin/users/${user.id}'),
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.md),
             child: Row(
@@ -36,7 +35,7 @@ class UserListItem extends StatelessWidget {
                 // Avatar
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: AppColors.primaryTeal.withValues(alpha: 0.15),
+                  backgroundColor: AppColors.brandTeal.withValues(alpha: 0.15),
                   backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
                       ? NetworkImage(user.avatarUrl!)
                       : null,
@@ -44,7 +43,7 @@ class UserListItem extends StatelessWidget {
                       ? Text(
                           user.initials,
                           style: const TextStyle(
-                            color: AppColors.primaryTeal,
+                            color: AppColors.brandTeal,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
@@ -78,7 +77,7 @@ class UserListItem extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryTeal.withValues(alpha: 0.15),
+                                color: AppColors.brandTeal.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                               ),
                               child: Row(
@@ -87,7 +86,7 @@ class UserListItem extends StatelessWidget {
                                   const Icon(
                                     CupertinoIcons.shield,
                                     size: 14,
-                                    color: AppColors.primaryTeal,
+                                    color: AppColors.brandTeal,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -96,7 +95,7 @@ class UserListItem extends StatelessWidget {
                                         .textTheme
                                         .labelSmall
                                         ?.copyWith(
-                                          color: AppColors.primaryTeal,
+                                          color: AppColors.brandTeal,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -109,7 +108,7 @@ class UserListItem extends StatelessWidget {
                       Text(
                         user.email,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
                             ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -121,19 +120,19 @@ class UserListItem extends StatelessWidget {
                         children: [
                           _buildStatChip(
                             icon: CupertinoIcons.doc_text,
-                            label: '${user.transactionCount} txns',
+                            label: '${user.transactionCount} Trans',
                             color: AppColors.tealBlue,
                           ),
                           _buildStatChip(
                             icon: CupertinoIcons.money_dollar_circle,
                             label: NumberFormat.compactCurrency(symbol: '\$').format(user.netWorth),
-                            color: AppColors.info,
+                            color: AppColors.systemBlue,
                           ),
                           if (user.isActive)
                             _buildStatChip(
                               icon: CupertinoIcons.checkmark_circle_fill,
                               label: 'Active',
-                              color: AppColors.success,
+                              color: AppColors.systemGreen,
                             ),
                         ],
                       ),
@@ -144,8 +143,8 @@ class UserListItem extends StatelessWidget {
                 // Arrow Icon
                 Icon(
                   CupertinoIcons.chevron_right,
-                  color: AppColors.textSecondary,
-                  size: 20,
+                  color: isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3,
+                  size: 16,
                 ),
               ],
             ),

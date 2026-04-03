@@ -33,6 +33,11 @@ class AnalyticsLineChart extends StatelessWidget {
 
     final maxValue = values.reduce((a, b) => a > b ? a : b);
     final minValue = values.reduce((a, b) => a < b ? a : b);
+    final range = (maxValue - minValue).abs();
+    final safeMinY = range > 0 ? minValue * 0.9 : -1.0;
+    final safeMaxY = range > 0 ? maxValue * 1.1 : 1.0;
+
+    final interval = _calculateInterval(safeMaxY);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +45,10 @@ class AnalyticsLineChart extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.secondaryLabelDark
+                    : AppColors.secondaryLabel,
               ),
         ),
         const SizedBox(height: AppSizes.md),
@@ -51,13 +59,11 @@ class AnalyticsLineChart extends StatelessWidget {
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: (maxValue - minValue) / 4,
-                getDrawingHorizontalLine: (value) {
-                  return FlLine(
-                    color: AppColors.borderLight.withValues(alpha: 0.2),
-                    strokeWidth: 1,
-                  );
-                },
+                horizontalInterval: interval,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: AppColors.textTertiary.withValues(alpha: 0.06),
+                  strokeWidth: 1,
+                ),
               ),
               titlesData: FlTitlesData(
                 show: true,
@@ -70,21 +76,21 @@ class AnalyticsLineChart extends StatelessWidget {
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 30,
-                    interval: dates.length > 10 ? dates.length / 5 : 1,
+                    reservedSize: 24,
+                    interval: dates.length > 10 ? (dates.length / 5).ceilToDouble() : 1,
                     getTitlesWidget: (value, meta) {
                       final index = value.toInt();
                       if (index < 0 || index >= dates.length) {
-                        return const Text('');
+                        return const SizedBox.shrink();
                       }
                       return Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: 6.0),
                         child: Text(
                           DateFormat('MM/dd').format(dates[index]),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textSecondary,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontSize: 9,
+                                color: AppColors.textSecondary,
+                              ),
                         ),
                       );
                     },
@@ -93,15 +99,15 @@ class AnalyticsLineChart extends StatelessWidget {
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 40,
-                    interval: (maxValue - minValue) / 4,
+                    reservedSize: 52,
+                    interval: interval,
                     getTitlesWidget: (value, meta) {
                       return Text(
                         '$valuePrefix${_formatValue(value)}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textSecondary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              color: AppColors.textSecondary,
+                            ),
                       );
                     },
                   ),
@@ -110,8 +116,8 @@ class AnalyticsLineChart extends StatelessWidget {
               borderData: FlBorderData(show: false),
               minX: 0,
               maxX: (dates.length - 1).toDouble(),
-              minY: minValue * 0.9,
-              maxY: maxValue * 1.1,
+              minY: safeMinY,
+              maxY: safeMaxY,
               lineBarsData: [
                 LineChartBarData(
                   spots: List.generate(
@@ -119,26 +125,17 @@ class AnalyticsLineChart extends StatelessWidget {
                     (index) => FlSpot(index.toDouble(), values[index]),
                   ),
                   isCurved: true,
+                  curveSmoothness: 0.3,
                   color: lineColor,
-                  barWidth: 3,
+                  barWidth: 2.5,
                   isStrokeCapRound: true,
-                  dotData: FlDotData(
-                    show: dates.length <= 7,
-                    getDotPainter: (spot, percent, barData, index) {
-                      return FlDotCirclePainter(
-                        radius: 4,
-                        color: lineColor,
-                        strokeWidth: 2,
-                        strokeColor: Colors.white,
-                      );
-                    },
-                  ),
+                  dotData: const FlDotData(show: false),
                   belowBarData: showGradient
                       ? BarAreaData(
                           show: true,
                           gradient: LinearGradient(
                             colors: [
-                              lineColor.withValues(alpha: 0.3),
+                              lineColor.withValues(alpha: 0.2),
                               lineColor.withValues(alpha: 0.0),
                             ],
                             begin: Alignment.topCenter,
@@ -170,6 +167,16 @@ class AnalyticsLineChart extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  double _calculateInterval(double maxY) {
+    final raw = maxY / 4;
+    if (raw <= 0) return 1;
+    if (raw < 100) return 100;
+    if (raw < 500) return 500;
+    if (raw < 1000) return 1000;
+    if (raw < 5000) return 5000;
+    return (raw / 1000).ceilToDouble() * 1000;
   }
 
   String _formatValue(double value) {
