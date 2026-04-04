@@ -9,6 +9,9 @@ import '../../domain/entities/feature_adoption_entity.dart';
 import '../../domain/entities/category_breakdown_entity.dart';
 import '../../domain/entities/engagement_metric_entity.dart';
 import '../../domain/entities/net_worth_percentile_entity.dart';
+import '../../domain/entities/churn_metric_entity.dart';
+import '../../domain/entities/subscription_cohort_entity.dart';
+import '../../domain/entities/subscription_timeline_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
 
 // ============================================================================
@@ -231,3 +234,34 @@ final netWorthPercentilesProvider =
   final repository = ref.watch(adminRepositoryProvider);
   return await repository.getNetWorthPercentiles();
 });
+
+/// Churn Metrics Provider
+final churnMetricsProvider =
+    FutureProvider.autoDispose.family<List<ChurnMetricEntity>, AnalyticsDateRange>(
+  (ref, dateRange) async {
+    final repository = ref.watch(adminRepositoryProvider);
+    return await repository.getChurnMetrics(
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    );
+  },
+);
+
+/// Subscription Cohorts Provider
+final subscriptionCohortsProvider =
+    FutureProvider.autoDispose<List<SubscriptionCohortEntity>>((ref) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.getSubscriptionCohorts();
+});
+
+/// Subscription Timeline Provider
+final subscriptionTimelineProvider =
+    FutureProvider.autoDispose.family<List<SubscriptionTimelineEntity>, AnalyticsDateRange>(
+  (ref, dateRange) async {
+    final repository = ref.watch(adminRepositoryProvider);
+    return await repository.getSubscriptionTimeline(
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    );
+  },
+);

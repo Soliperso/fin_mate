@@ -32,7 +32,7 @@ class _SystemAnalyticsPageEnhancedState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _refreshController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -254,6 +254,9 @@ class _SystemAnalyticsPageEnhancedState
     ref.invalidate(categoryBreakdownProvider);
     ref.invalidate(engagementMetricsProvider);
     ref.invalidate(netWorthPercentilesProvider);
+    ref.invalidate(churnMetricsProvider);
+    ref.invalidate(subscriptionCohortsProvider);
+    ref.invalidate(subscriptionTimelineProvider);
     Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted) _refreshController.stop();
     });
@@ -349,6 +352,7 @@ class _SystemAnalyticsPageEnhancedState
                 _AdminTab(icon: CupertinoIcons.person_2, label: 'Engagement'),
                 _AdminTab(icon: CupertinoIcons.checkmark_seal, label: 'Features'),
                 _AdminTab(icon: CupertinoIcons.lightbulb, label: 'Insights'),
+                _AdminTab(icon: CupertinoIcons.creditcard, label: 'Subscription'),
               ] as List<Widget>,
             ),
           ),
@@ -362,6 +366,7 @@ class _SystemAnalyticsPageEnhancedState
           _buildEngagementTab(),
           _buildFeaturesTab(),
           _buildInsightsTab(),
+          _buildSubscriptionTab(),
         ],
       ),
     );
@@ -813,6 +818,434 @@ class _SystemAnalyticsPageEnhancedState
             backgroundColor: AppColors.error,
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Subscription Tab ───────────────────────────────────────────────────────
+
+  Widget _buildSubscriptionTab() {
+    final churnAsync = ref.watch(churnMetricsProvider(_dateRange));
+    final cohortsAsync = ref.watch(subscriptionCohortsProvider);
+    final timelineAsync = ref.watch(subscriptionTimelineProvider(_dateRange));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return RefreshIndicator(
+      color: AppColors.brandTeal,
+      onRefresh: () async {
+        ref.invalidate(churnMetricsProvider);
+        ref.invalidate(subscriptionCohortsProvider);
+        ref.invalidate(subscriptionTimelineProvider);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSizes.pagePadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── KPI Cards ──────────────────────────────────────────────
+            _sectionLabel('Key Metrics'),
+            const SizedBox(height: AppSizes.sm),
+            churnAsync.when(
+              data: (metrics) => metrics.isEmpty
+                  ? EmptyStateCard(
+                      icon: CupertinoIcons.creditcard,
+                      title: 'No Subscription Data',
+                      message:
+                          'Subscription metrics will appear once users subscribe',
+                      backgroundColor: AppColors.systemPurple,
+                    )
+                  : Column(
+                      children: metrics
+                          .map((m) => _buildChurnKpiCard(
+                                m.metricLabel,
+                                m.isPercent
+                                    ? '${m.metricValue.toStringAsFixed(1)}%'
+                                    : NumberFormat.compact()
+                                        .format(m.metricValue),
+                                m.metricChange,
+                                m.lowerIsBetter,
+                                cardColor,
+                                isDark,
+                              ))
+                          .toList(),
+                    ),
+              loading: () => Column(
+                children: List.generate(
+                  6,
+                  (_) => Container(
+                    margin: const EdgeInsets.only(bottom: AppSizes.sm),
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        LoadingSkeleton(
+                            width: 140,
+                            height: 14,
+                            borderRadius: BorderRadius.circular(4)),
+                        LoadingSkeleton(
+                            width: 60,
+                            height: 14,
+                            borderRadius: BorderRadius.circular(4)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              error: (e, _) => EmptyStateCard(
+                icon: CupertinoIcons.exclamationmark_circle,
+                title: 'Error',
+                message: e.toString(),
+                backgroundColor: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Subscription Timeline ──────────────────────────────────
+            _sectionLabel('Subscription Events'),
+            const SizedBox(height: AppSizes.sm),
+            timelineAsync.when(
+              data: (timeline) {
+                final hasData = timeline.any((t) =>
+                    t.newSubs > 0 ||
+                    t.cancellations > 0 ||
+                    t.renewals > 0 ||
+                    t.trials > 0);
+                if (!hasData) {
+                  return EmptyStateCard(
+                    icon: CupertinoIcons.chart_bar,
+                    title: 'No Event Data',
+                    message:
+                        'Subscription events will appear as users subscribe or cancel',
+                    backgroundColor: AppColors.brandTeal,
+                  );
+                }
+                return Column(
+                  children: [
+                    _chartCard(
+                      child: AnalyticsLineChart(
+                        dates: timeline.map((t) => t.periodDate).toList(),
+                        values: timeline
+                            .map((t) => t.newSubs.toDouble())
+                            .toList(),
+                        title: 'New Subscriptions',
+                        lineColor: AppColors.systemGreen,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    _chartCard(
+                      child: AnalyticsLineChart(
+                        dates: timeline.map((t) => t.periodDate).toList(),
+                        values: timeline
+                            .map((t) => t.cancellations.toDouble())
+                            .toList(),
+                        title: 'Cancellations',
+                        lineColor: AppColors.systemRed,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    _chartCard(
+                      child: AnalyticsLineChart(
+                        dates: timeline.map((t) => t.periodDate).toList(),
+                        values:
+                            timeline.map((t) => t.renewals.toDouble()).toList(),
+                        title: 'Renewals',
+                        lineColor: AppColors.brandTeal,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    _chartCard(
+                      child: AnalyticsLineChart(
+                        dates: timeline.map((t) => t.periodDate).toList(),
+                        values:
+                            timeline.map((t) => t.trials.toDouble()).toList(),
+                        title: 'Trial Starts',
+                        lineColor: AppColors.systemPurple,
+                      ),
+                    ),
+                  ],
+                );
+              },
+              loading: () => _chartCardLoading(),
+              error: (e, _) => EmptyStateCard(
+                icon: CupertinoIcons.exclamationmark_circle,
+                title: 'Error',
+                message: e.toString(),
+                backgroundColor: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Cohorts by Signup Month ────────────────────────────────
+            _sectionLabel('Cohorts by Signup Month'),
+            const SizedBox(height: AppSizes.sm),
+            cohortsAsync.when(
+              data: (cohorts) => cohorts.isEmpty
+                  ? EmptyStateCard(
+                      icon: CupertinoIcons.person_3,
+                      title: 'No Cohort Data',
+                      message: 'Cohort data will appear as users sign up',
+                      backgroundColor: AppColors.tealBlue,
+                    )
+                  : Column(
+                      children: [
+                        _chartCard(
+                          child: AnalyticsBarChart(
+                            labels: cohorts
+                                .map((c) => c.cohortMonth)
+                                .toList()
+                                .reversed
+                                .toList(),
+                            values: cohorts
+                                .map((c) => c.conversionRate)
+                                .toList()
+                                .reversed
+                                .toList(),
+                            title: 'Trial-to-Paid Conversion by Signup Month (%)',
+                            barColor: AppColors.systemPurple,
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.md),
+                        // Cohort table
+                        Container(
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusCard),
+                          ),
+                          child: Column(
+                            children: [
+                              // Header row
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.md, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        'Cohort',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark
+                                                  ? AppColors.secondaryLabelDark
+                                                  : AppColors.secondaryLabel,
+                                            ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'Signups',
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark
+                                                  ? AppColors.secondaryLabelDark
+                                                  : AppColors.secondaryLabel,
+                                            ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'Premium',
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark
+                                                  ? AppColors.secondaryLabelDark
+                                                  : AppColors.secondaryLabel,
+                                            ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'Conv. %',
+                                        textAlign: TextAlign.right,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark
+                                                  ? AppColors.secondaryLabelDark
+                                                  : AppColors.secondaryLabel,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 0, thickness: 0.5),
+                              ...cohorts.map((c) => Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSizes.md,
+                                            vertical: 11),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text(
+                                                c.cohortMonth,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                '${c.totalSignups}',
+                                                textAlign: TextAlign.center,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                '${c.premiumCount}',
+                                                textAlign: TextAlign.center,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                '${c.conversionRate.toStringAsFixed(1)}%',
+                                                textAlign: TextAlign.right,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          AppColors.brandTeal,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (c != cohorts.last)
+                                        const Divider(
+                                            height: 0, thickness: 0.5),
+                                    ],
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+              loading: () => _chartCardLoading(),
+              error: (e, _) => EmptyStateCard(
+                icon: CupertinoIcons.exclamationmark_circle,
+                title: 'Error',
+                message: e.toString(),
+                backgroundColor: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: AppSizes.xl),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChurnKpiCard(
+    String label,
+    String value,
+    double change,
+    bool lowerIsBetter,
+    Color cardColor,
+    bool isDark,
+  ) {
+    final isPositiveChange = change > 0;
+    // For lower-is-better metrics, a positive change is bad (red)
+    final changeColor = change == 0
+        ? (isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel)
+        : (lowerIsBetter
+            ? (isPositiveChange ? AppColors.systemRed : AppColors.systemGreen)
+            : (isPositiveChange ? AppColors.systemGreen : AppColors.systemRed));
+
+    final changeIcon = change == 0
+        ? CupertinoIcons.minus
+        : (isPositiveChange
+            ? CupertinoIcons.arrow_up_right
+            : CupertinoIcons.arrow_down_right);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSizes.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md, vertical: 14),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                  ),
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.brandTeal,
+                ),
+          ),
+          const SizedBox(width: AppSizes.sm),
+          if (change != 0)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(changeIcon, size: 12, color: changeColor),
+                const SizedBox(width: 2),
+                Text(
+                  change.abs().toStringAsFixed(1),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: changeColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

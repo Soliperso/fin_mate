@@ -8,6 +8,9 @@ import '../models/feature_adoption_model.dart';
 import '../models/category_breakdown_model.dart';
 import '../models/engagement_metric_model.dart';
 import '../models/net_worth_percentile_model.dart';
+import '../models/churn_metric_model.dart';
+import '../models/subscription_cohort_model.dart';
+import '../models/subscription_timeline_model.dart';
 
 /// Remote datasource for admin operations
 class AdminRemoteDataSource {
@@ -207,6 +210,66 @@ class AdminRemoteDataSource {
       return data.map((json) => NetWorthPercentileModel.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to fetch net worth percentiles: $e');
+    }
+  }
+
+  /// Get churn and subscription KPI metrics
+  Future<List<ChurnMetricModel>> getChurnMetrics({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_churn_metrics',
+        params: {
+          'p_start_date': startDate.toIso8601String().split('T')[0],
+          'p_end_date': endDate.toIso8601String().split('T')[0],
+        },
+      );
+
+      if (response == null) return [];
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((json) => ChurnMetricModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch churn metrics: $e');
+    }
+  }
+
+  /// Get subscription cohorts by signup month
+  Future<List<SubscriptionCohortModel>> getSubscriptionCohorts() async {
+    try {
+      final response = await _supabase.rpc('get_subscription_cohorts');
+
+      if (response == null) return [];
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((json) => SubscriptionCohortModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch subscription cohorts: $e');
+    }
+  }
+
+  /// Get day-by-day subscription event timeline
+  Future<List<SubscriptionTimelineModel>> getSubscriptionTimeline({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_subscription_timeline',
+        params: {
+          'p_start_date': startDate.toIso8601String().split('T')[0],
+          'p_end_date': endDate.toIso8601String().split('T')[0],
+        },
+      );
+
+      if (response == null) return [];
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((json) => SubscriptionTimelineModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch subscription timeline: $e');
     }
   }
 }

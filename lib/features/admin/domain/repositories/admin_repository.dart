@@ -6,6 +6,9 @@ import '../entities/feature_adoption_entity.dart';
 import '../entities/category_breakdown_entity.dart';
 import '../entities/engagement_metric_entity.dart';
 import '../entities/net_worth_percentile_entity.dart';
+import '../entities/churn_metric_entity.dart';
+import '../entities/subscription_cohort_entity.dart';
+import '../entities/subscription_timeline_entity.dart';
 
 /// Repository interface for admin operations
 abstract class AdminRepository {
@@ -57,4 +60,19 @@ abstract class AdminRepository {
 
   /// Get net worth distribution percentiles
   Future<List<NetWorthPercentileEntity>> getNetWorthPercentiles();
+
+  /// Get churn and subscription KPI metrics for a date range
+  Future<List<ChurnMetricEntity>> getChurnMetrics({
+    required DateTime startDate,
+    required DateTime endDate,
+  });
+
+  /// Get subscription cohorts by signup month (last 12 months)
+  Future<List<SubscriptionCohortEntity>> getSubscriptionCohorts();
+
+  /// Get day-by-day subscription event timeline
+  Future<List<SubscriptionTimelineEntity>> getSubscriptionTimeline({
+    required DateTime startDate,
+    required DateTime endDate,
+  });
 }

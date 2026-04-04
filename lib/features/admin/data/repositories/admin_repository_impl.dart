@@ -6,6 +6,9 @@ import '../../domain/entities/feature_adoption_entity.dart';
 import '../../domain/entities/category_breakdown_entity.dart';
 import '../../domain/entities/engagement_metric_entity.dart';
 import '../../domain/entities/net_worth_percentile_entity.dart';
+import '../../domain/entities/churn_metric_entity.dart';
+import '../../domain/entities/subscription_cohort_entity.dart';
+import '../../domain/entities/subscription_timeline_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
 import '../datasources/admin_remote_datasource.dart';
 
@@ -99,5 +102,32 @@ class AdminRepositoryImpl implements AdminRepository {
   @override
   Future<List<NetWorthPercentileEntity>> getNetWorthPercentiles() async {
     return await remoteDataSource.getNetWorthPercentiles();
+  }
+
+  @override
+  Future<List<ChurnMetricEntity>> getChurnMetrics({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    return await remoteDataSource.getChurnMetrics(
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  @override
+  Future<List<SubscriptionCohortEntity>> getSubscriptionCohorts() async {
+    return await remoteDataSource.getSubscriptionCohorts();
+  }
+
+  @override
+  Future<List<SubscriptionTimelineEntity>> getSubscriptionTimeline({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    return await remoteDataSource.getSubscriptionTimeline(
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 }
