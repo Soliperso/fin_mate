@@ -249,6 +249,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Re-reads the current user from Supabase — call this after email confirmation
+  /// so the router reflects the newly authenticated state.
+  Future<void> refreshCurrentUser() async {
+    try {
+      final user = await _repository.getCurrentUser();
+      state = AuthState(user: user, isLoading: false);
+      if (user != null) {
+        await _setUserContext(user);
+      }
+    } catch (_) {
+      // Keep existing state on error; do not wipe out a valid session.
+    }
+  }
+
   Future<void> resendOTP(String email) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {

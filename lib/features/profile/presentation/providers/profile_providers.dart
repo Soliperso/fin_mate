@@ -168,9 +168,11 @@ final profileNotifierProvider =
 
 final currentUserProfileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  final authState = ref.read(authNotifierProvider); // Use read instead of watch
+  // Must use watch so the provider rebuilds when the user logs in or out.
+  // Using read caused new users to permanently get _UnauthenticatedProfileNotifier
+  // because the provider was created before OTP verification completed.
+  final authState = ref.watch(authNotifierProvider);
 
-  // Return a notifier with empty state when user is not authenticated
   if (authState.user == null) {
     return _UnauthenticatedProfileNotifier(
       ref.watch(profileRepositoryProvider),

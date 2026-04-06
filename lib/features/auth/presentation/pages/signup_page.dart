@@ -293,7 +293,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton(
-                  onPressed: authState.isLoading ? null : _handleSignup,
+                  onPressed: (authState.isLoading || !_acceptedTerms) ? null : _handleSignup,
                   child: authState.isLoading
                       ? const SizedBox(
                           height: 20,

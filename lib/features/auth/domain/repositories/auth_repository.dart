@@ -80,4 +80,7 @@ abstract class AuthRepository {
 
   /// Get current MFA method
   Future<String?> getMfaMethod();
+
+  /// Update password for the currently authenticated user
+  Future<void> updatePassword(String newPassword);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -20,154 +21,96 @@ class VerifyEmailPage extends ConsumerStatefulWidget {
 }
 
 class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
+  final List<TextEditingController> _controllers =
+      List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+
+  bool _isVerifying = false;
   bool _isResending = false;
   String? _errorMessage;
 
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSizes.xl),
-              Center(
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primaryTeal.withValues(alpha: 0.15),
-                        AppColors.primaryTeal.withValues(alpha: 0.08),
-                      ],
-                    ),
-                  ),
-                  child: Icon(
-                    CupertinoIcons.envelope_badge,
-                    size: 58,
-                    color: AppColors.primaryTeal.withValues(alpha: 0.7),
-                    weight: 210,
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.lg),
-              Text(
-                'Verify Your Email',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.md),
-              Text(
-                'Check your email at',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.xs),
-              Text(
-                widget.email,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.md),
-              Container(
-                padding: const EdgeInsets.all(AppSizes.md),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppSizes.sm),
-                  border: Border.all(color: AppColors.primaryTeal.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(CupertinoIcons.envelope, color: AppColors.primaryTeal, size: 20),
-                        const SizedBox(width: AppSizes.sm),
-                        Text(
-                          'Check your email',
-                          style: TextStyle(
-                            color: AppColors.primaryTeal,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.sm),
-                    Text(
-                      'We sent a confirmation link to your email. Click the link in the email to verify your account, then return to the app and log in.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSizes.xxl),
-              if (_errorMessage != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.sm),
-                    border: Border.all(color: AppColors.error),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
-                      const SizedBox(width: AppSizes.sm),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: AppColors.error),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSizes.md),
-              ],
-              ElevatedButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Go to Login'),
-              ),
-              const SizedBox(height: AppSizes.lg),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Didn\'t receive the email? ',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  TextButton(
-                    onPressed: _isResending ? null : _handleResend,
-                    child: _isResending
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Resend'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  String get _otpCode => _controllers.map((c) => c.text).join();
+
+  bool get _isComplete => _otpCode.length == 6;
+
+  void _onDigitChanged(int index, String value) {
+    if (value.length == 6) {
+      // User pasted a full code — distribute across boxes
+      for (var i = 0; i < 6; i++) {
+        _controllers[i].text = value[i];
+      }
+      _focusNodes[5].requestFocus();
+      setState(() => _errorMessage = null);
+      _handleVerify();
+      return;
+    }
+
+    if (value.isNotEmpty && index < 5) {
+      _focusNodes[index + 1].requestFocus();
+    }
+
+    setState(() => _errorMessage = null);
+
+    if (_isComplete) {
+      _handleVerify();
+    }
+  }
+
+  void _onKeyDown(int index, KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.backspace &&
+        _controllers[index].text.isEmpty &&
+        index > 0) {
+      _focusNodes[index - 1].requestFocus();
+      _controllers[index - 1].clear();
+    }
+  }
+
+  Future<void> _handleVerify() async {
+    if (!_isComplete || _isVerifying) return;
+
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ref.read(authNotifierProvider.notifier).verifyEmailOTP(
+            email: widget.email,
+            token: _otpCode,
+          );
+
+      if (mounted) {
+        SuccessSnackbar.show(
+          context,
+          message: 'Email verified! Welcome to Finmate.',
+        );
+        context.go('/dashboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+          _errorMessage = 'Invalid or expired code. Please try again.';
+          // Clear boxes so user can re-enter
+          for (final c in _controllers) {
+            c.clear();
+          }
+          _focusNodes[0].requestFocus();
+        });
+      }
+    }
   }
 
   Future<void> _handleResend() async {
@@ -181,25 +124,239 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       if (mounted) {
         SuccessSnackbar.show(
           context,
-          message: 'Confirmation email sent to ${widget.email}',
+          message: 'A new code was sent to ${widget.email}',
           duration: const Duration(seconds: 4),
         );
+        for (final c in _controllers) {
+          c.clear();
+        }
+        _focusNodes[0].requestFocus();
       }
     } catch (e) {
       if (mounted) {
-        final errorMsg = e.toString().replaceAll('Exception: ', '');
         ErrorSnackbar.show(
           context,
-          message: errorMsg.contains('Failed to resend')
-              ? 'Failed to resend confirmation email. Please check your email address or try again later.'
-              : errorMsg,
+          message: e.toString().replaceAll('Exception: ', ''),
           duration: const Duration(seconds: 5),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isResending = false);
-      }
+      if (mounted) setState(() => _isResending = false);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSizes.xl),
+                Center(
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primaryTeal.withValues(alpha: 0.15),
+                          AppColors.primaryTeal.withValues(alpha: 0.08),
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.envelope_badge,
+                      size: 58,
+                      color: AppColors.primaryTeal.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.lg),
+                Text(
+                  'Check Your Email',
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Text(
+                  'We sent a 6-digit code to',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.xs),
+                Text(
+                  widget.email,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.xxl),
+
+                // OTP boxes
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (i) => _OtpBox(
+                    controller: _controllers[i],
+                    focusNode: _focusNodes[i],
+                    isDark: isDark,
+                    onChanged: (v) => _onDigitChanged(i, v),
+                    onKey: (e) => _onKeyDown(i, e),
+                  )),
+                ),
+
+                const SizedBox(height: AppSizes.md),
+
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: AppSizes.sm),
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.sm),
+                      border: Border.all(color: AppColors.error),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(CupertinoIcons.exclamationmark_circle,
+                            color: AppColors.error, size: 18),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: AppColors.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: AppSizes.xl),
+
+                ElevatedButton(
+                  onPressed: (_isComplete && !_isVerifying) ? _handleVerify : null,
+                  child: _isVerifying
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Verify Email'),
+                ),
+
+                const SizedBox(height: AppSizes.lg),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Didn\'t receive a code? ',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    TextButton(
+                      onPressed: _isResending ? null : _handleResend,
+                      child: _isResending
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Resend'),
+                    ),
+                  ],
+                ),
+
+                TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text(
+                    'Already confirmed? Log in',
+                    style: TextStyle(
+                      color: AppColors.textTertiary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OtpBox extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isDark;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<KeyEvent> onKey;
+
+  const _OtpBox({
+    required this.controller,
+    required this.focusNode,
+    required this.isDark,
+    required this.onChanged,
+    required this.onKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 46,
+      height: 56,
+      child: KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: onKey,
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          maxLength: 6, // allows paste of full code
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0,
+          ),
+          decoration: InputDecoration(
+            counterText: '',
+            filled: true,
+            fillColor: isDark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFF2F2F7),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: AppColors.primaryTeal,
+                width: 2,
+              ),
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          onChanged: onChanged,
+        ),
+      ),
+    );
   }
 }

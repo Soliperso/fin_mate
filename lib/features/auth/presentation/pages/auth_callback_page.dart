@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../providers/auth_providers.dart';
 
 /// Page to handle email confirmation and password reset callbacks from Supabase
 class AuthCallbackPage extends ConsumerStatefulWidget {
@@ -31,7 +32,9 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
       final session = supabase.auth.currentSession;
 
       if (session != null) {
-        // User is authenticated after email confirmation
+        // Refresh auth state so the router recognises the confirmed user
+        await ref.read(authNotifierProvider.notifier).refreshCurrentUser();
+
         setState(() {
           _isSuccess = true;
           _message = 'Email confirmed successfully!';

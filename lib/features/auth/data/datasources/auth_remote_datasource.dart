@@ -24,6 +24,9 @@ class AuthRemoteDataSource {
     final authUser = _supabase.auth.currentUser;
     if (authUser == null) return null;
 
+    // Treat users who have not confirmed their email as unauthenticated
+    if (authUser.emailConfirmedAt == null) return null;
+
     // Fetch user profile from database
     final response = await _supabase
         .from('user_profiles')
@@ -182,6 +185,9 @@ class AuthRemoteDataSource {
       final user = event.session?.user;
       if (user == null) return null;
 
+      // Treat unconfirmed users as unauthenticated
+      if (user.emailConfirmedAt == null) return null;
+
       final profile = await _supabase
           .from('user_profiles')
           .select()
@@ -198,7 +204,7 @@ class AuthRemoteDataSource {
     required String token,
   }) async {
     final response = await _supabase.auth.verifyOTP(
-      type: OtpType.email,
+      type: OtpType.signup,
       email: email,
       token: token,
     );
@@ -219,29 +225,25 @@ class AuthRemoteDataSource {
 
   /// Resend confirmation email
   Future<void> resendOTP(String email) async {
-    // For signup email confirmation, we need to use the resend method with signup type
-    // This will resend the email confirmation link
     try {
-      // Remove emailRedirectTo to avoid web redirects on mobile
       await _supabase.auth.resend(
         type: OtpType.signup,
         email: email,
       );
     } on AuthException catch (e) {
-      // Handle specific Supabase auth errors
-      if (e.message.contains('User not found') || e.message.contains('not found')) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('user not found') || msg.contains('not found')) {
         throw Exception('No account found with this email. Please sign up first.');
-      } else if (e.message.contains('already confirmed') || e.message.contains('Email already verified')) {
-        throw Exception('Email already confirmed. Please try logging in.');
-      } else if (e.message.contains('rate limit') || e.message.contains('too many')) {
-        throw Exception('Too many requests. Please wait a few minutes before trying again.');
-      } else if (e.message.contains('Anonymous sign-ins are disabled')) {
-        throw Exception('Email confirmation is not properly configured. Please contact support.');
+      } else if (msg.contains('already confirmed') || msg.contains('already verified')) {
+        throw Exception('Your email is already confirmed. Please log in.');
+      } else if (msg.contains('for security purposes') || msg.contains('rate limit') || msg.contains('too many')) {
+        throw Exception('Please wait a moment before requesting a new code.');
       } else {
-        throw Exception('Failed to resend confirmation email. Please try again later.');
+        // Surface the real Supabase message so it's actionable
+        throw Exception(e.message);
       }
     } catch (e) {
-      throw Exception('Failed to resend confirmation email. Please try again later.');
+      rethrow;
     }
   }
 
@@ -416,6 +418,20 @@ class AuthRemoteDataSource {
         .maybeSingle();
 
     return profile?['mfa_enabled'] == true;
+  }
+
+  /// Update password for the currently authenticated user
+  Future<void> updatePassword(String newPassword) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    final response = await _supabase.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+
+    if (response.user == null) {
+      throw Exception('Password update failed');
+    }
   }
 
   /// Get current MFA method

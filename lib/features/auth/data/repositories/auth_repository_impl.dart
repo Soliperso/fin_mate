@@ -144,7 +144,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remoteDataSource.resendOTP(email);
     } catch (e) {
-      throw Exception('Failed to resend OTP: $e');
+      rethrow;
     }
   }
 
@@ -223,6 +223,15 @@ class AuthRepositoryImpl implements AuthRepository {
       return await _remoteDataSource.getMfaMethod();
     } catch (e) {
       throw Exception('Failed to get MFA method: $e');
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _remoteDataSource.updatePassword(newPassword);
+    } catch (e) {
+      throw Exception('Failed to update password: $e');
     }
   }
 }
