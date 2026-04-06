@@ -11,6 +11,7 @@ class SecureStorageService {
 
   // Keys for stored values
   static const _keyEmail = 'saved_email';
+  static const _keyPassword = 'saved_password';
   static const _keyBiometricEnabled = 'biometric_enabled';
   static const _keyMfaEnabled = 'mfa_enabled';
   static const _keyMfaMethod = 'mfa_method';
@@ -29,6 +30,21 @@ class SecureStorageService {
   /// Clear saved email
   Future<void> clearEmail() async {
     await _storage.delete(key: _keyEmail);
+  }
+
+  /// Save password for biometric login
+  Future<void> savePassword(String password) async {
+    await _storage.write(key: _keyPassword, value: password);
+  }
+
+  /// Get saved password
+  Future<String?> getSavedPassword() async {
+    return await _storage.read(key: _keyPassword);
+  }
+
+  /// Clear saved password
+  Future<void> clearPassword() async {
+    await _storage.delete(key: _keyPassword);
   }
 
   /// Clear all stored data

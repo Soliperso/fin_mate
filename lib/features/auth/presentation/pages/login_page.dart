@@ -29,10 +29,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void initState() {
     super.initState();
     _loadSavedCredentials();
-    // Auto-focus email field when page loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _emailFocusNode.requestFocus();
-    });
 
     // Clear errors when user types
     _emailController.addListener(_clearError);
@@ -54,6 +50,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() {
         _emailController.text = email;
         _rememberMe = true;
+      });
+      // Email is already filled — jump straight to the password field
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _passwordFocusNode.requestFocus();
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _emailFocusNode.requestFocus();
       });
     }
   }
@@ -210,14 +214,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       onChanged: authState.isLoading
                           ? null
                           : (value) {
-                              setState(() {
-                                _rememberMe = value ?? false;
-                                // Clear fields when remember me is unchecked
-                                if (!_rememberMe) {
-                                  _emailController.clear();
-                                  _passwordController.clear();
-                                }
-                              });
+                              setState(() => _rememberMe = value ?? false);
                             },
                     ),
                     Text(
@@ -237,15 +234,63 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: AppSizes.lg),
-                ElevatedButton(
-                  onPressed: authState.isLoading ? null : _handleLogin,
-                  child: authState.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Log In'),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
+
+                    final showBiometric = isBiometricAvailable.maybeWhen(
+                      data: (v) => v,
+                      orElse: () => false,
+                    );
+
+                    return FutureBuilder<bool>(
+                      future: showBiometric
+                          ? ref.read(secureStorageServiceProvider).getSavedPassword().then((p) => p != null)
+                          : Future.value(false),
+                      builder: (context, credSnapshot) {
+                        final hasCreds = credSnapshot.data ?? false;
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: authState.isLoading ? null : _handleLogin,
+                                child: authState.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Text('Log In'),
+                              ),
+                            ),
+                            if (showBiometric && hasCreds) ...[
+                              const SizedBox(width: AppSizes.sm),
+                              FutureBuilder<String?>(
+                                future: ref.read(biometricServiceProvider).getPrimaryBiometricType(),
+                                builder: (context, typeSnapshot) {
+                                  final isFace = typeSnapshot.data == 'Face ID';
+                                  return SizedBox(
+                                    width: 52,
+                                    child: ElevatedButton(
+                                      onPressed: authState.isLoading ? null : _handleBiometricLogin,
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: Icon(
+                                        isFace ? Icons.face_unlock_outlined : Icons.fingerprint,
+                                        size: 26,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: AppSizes.md),
                 Row(
@@ -266,51 +311,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSizes.lg),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.textTertiary.withValues(alpha: 0.3))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-                      child: Text(
-                        'OR',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    Expanded(child: Divider(color: AppColors.textTertiary.withValues(alpha: 0.3))),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
-                Consumer(
-                  builder: (context, ref, child) {
-                    final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
-
-                    return isBiometricAvailable.when(
-                      data: (isAvailable) {
-                        if (!isAvailable) return const SizedBox.shrink();
-
-                        // Check if email is saved
-                        return FutureBuilder<String?>(
-                          future: ref.read(secureStorageServiceProvider).getSavedEmail(),
-                          builder: (context, snapshot) {
-                            // Only show if user has saved email
-                            if (!snapshot.hasData || snapshot.data == null) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return OutlinedButton.icon(
-                              onPressed: authState.isLoading ? null : _handleBiometricLogin,
-                              icon: const Icon(CupertinoIcons.lock_circle),
-                              label: const Text('Use Biometric Login'),
-                            );
-                          },
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (e, _) => const SizedBox.shrink(),
-                    );
-                  },
-                ),
               ],
             ),
           ),
@@ -330,6 +330,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         // Save or clear credentials based on remember me
         if (_rememberMe) {
           await storageService.saveEmail(email);
+          await storageService.savePassword(password);
 
           // Check if biometric is available and enable it
           final biometricService = ref.read(biometricServiceProvider);
@@ -339,6 +340,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         } else {
           await storageService.clearEmail();
+          await storageService.clearPassword();
           await storageService.setBiometricEnabled(false);
         }
 
@@ -371,12 +373,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
 
       final email = await storageService.getSavedEmail();
+      final password = await storageService.getSavedPassword();
 
-      if (email == null) {
+      if (email == null || password == null) {
         if (mounted) {
           showErrorDialog(
             context,
-            'No saved email found. Please log in first.',
+            'No saved credentials found. Please log in with your password first.',
           );
         }
         return;
@@ -397,11 +400,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      // Pre-fill email and focus password field
-      _emailController.text = email;
-      if (mounted) {
-        _passwordFocusNode.requestFocus();
-      }
+      // Sign in with saved credentials
+      await ref.read(authNotifierProvider.notifier).signInWithEmail(
+            email: email,
+            password: password,
+          );
     } catch (e) {
       if (mounted) {
         showErrorDialog(context, 'Biometric authentication failed');
