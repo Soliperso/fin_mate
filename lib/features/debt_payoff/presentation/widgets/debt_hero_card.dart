@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -30,7 +30,7 @@ class DebtHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat0 = ref.watch(currencyFormat0Provider);
     final currencyFormat2 = ref.watch(currencyFormat2Provider);
-    final monthFormat = DateFormat('MMM yyyy');
+    final monthFormat = DateFormat('MMM yyyy', context.locale.languageCode);
 
     final debtFreeLabel = payoffResult != null
         ? monthFormat.format(payoffResult!.debtFreeDate)
@@ -66,9 +66,9 @@ class DebtHeroCard extends ConsumerWidget {
         children: [
           // Label
           Text(
-            'Total Debt',
+            'debtHero.totalDebt'.tr(),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: Colors.white.withValues(alpha: 0.9),
                   letterSpacing: 0.5,
                 ),
           ),
@@ -88,11 +88,11 @@ class DebtHeroCard extends ConsumerWidget {
           // Stats row
           Row(
             children: [
-              HeroStatBadge(label: 'Debt-Free', value: debtFreeLabel),
+              HeroStatBadge(label: 'debtHero.debtFree'.tr(), value: debtFreeLabel),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'Total Interest', value: totalInterestLabel),
+              HeroStatBadge(label: 'debtHero.totalInterest'.tr(), value: totalInterestLabel),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'Accounts', value: '$debtCount'),
+              HeroStatBadge(label: 'debtHero.accounts'.tr(), value: '$debtCount'),
             ],
           ),
 
@@ -118,10 +118,9 @@ class DebtHeroCard extends ConsumerWidget {
                   const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: 11),
                   const SizedBox(width: 4),
                   Text(
-                    'Includes +\$${extraMonthly.toStringAsFixed(0)}/mo extra payment',
-                    style: const TextStyle(
+                    'debtHero.extraPayment'.tr(namedArgs: {'amount': '\$${extraMonthly.toStringAsFixed(0)}'}),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.white,
-                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -149,7 +148,7 @@ class DebtHeroCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSizes.sm),
                 Text(
-                  '${(overallProgress * 100).toStringAsFixed(0)}% paid off',
+                  '${(overallProgress * 100).toStringAsFixed(0)}${'debtHero.percentPaid'.tr()}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 11,

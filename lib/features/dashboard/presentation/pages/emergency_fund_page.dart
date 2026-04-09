@@ -1,10 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/emergency_fund_provider.dart';
 
@@ -34,7 +37,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
       if (mounted) {
         ErrorSnackbar.show(
           context,
-          message: 'Please enter a valid amount',
+          message: 'emergency.invalidAmount'.tr(),
         );
       }
       return;
@@ -117,7 +120,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
 
         SuccessSnackbar.show(
           context,
-          message: 'Emergency fund contribution added!',
+          message: 'emergency.addedSuccess'.tr(),
         );
 
         // Navigate back after a short delay
@@ -130,7 +133,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
       if (mounted) {
         ErrorSnackbar.show(
           context,
-          message: 'Failed to add contribution: ${e.toString()}',
+          message: 'emergency.failedToAdd'.tr(namedArgs: {'error': e.toString()}),
         );
       }
     } finally {
@@ -147,8 +150,14 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add to Emergency Fund'),
+        title: Text('emergency.title'.tr()),
         centerTitle: true,
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
+        ),
       ),
       body: emergencyFundAsync.when(
         data: (status) => SingleChildScrollView(
@@ -164,7 +173,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Current Status',
+                        'emergency.currentStatus'.tr(),
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -177,7 +186,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Current Amount',
+                                'emergency.currentAmount'.tr(),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -202,7 +211,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                'Target (6 months)',
+                                'emergency.targetSixMonths'.tr(),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -274,7 +283,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
 
               // Add Contribution Form
               Text(
-                'Add Contribution',
+                'emergency.addContribution'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -288,7 +297,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                     const TextInputType.numberWithOptions(decimal: true),
                 enabled: !_isLoading,
                 decoration: InputDecoration(
-                  labelText: 'Amount',
+                  labelText: 'emergency.amount'.tr(),
                   prefixText: '\$ ',
                   border: OutlineInputBorder(
                     borderRadius:
@@ -306,14 +315,13 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                 enabled: !_isLoading,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Description (optional)',
+                  labelText: 'emergency.description'.tr(),
                   border: OutlineInputBorder(
                     borderRadius:
                         BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   filled: true,
-                  hintText:
-                      'e.g., Monthly savings, Bonus, etc.',
+                  hintText: 'emergency.descriptionHint'.tr(),
                 ),
               ),
               const SizedBox(height: AppSizes.lg),
@@ -338,8 +346,8 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                       : const Icon(CupertinoIcons.add_circled),
                   label: Text(
                     _isLoading
-                        ? 'Adding...'
-                        : 'Add Contribution',
+                        ? 'emergency.adding'.tr()
+                        : 'emergency.add'.tr(),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryTeal,
@@ -381,7 +389,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                         const SizedBox(width: AppSizes.sm),
                         Expanded(
                           child: Text(
-                            'Emergency Fund Tips',
+                            'emergency.tipsTitle'.tr(),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -395,10 +403,10 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                     ),
                     const SizedBox(height: AppSizes.md),
                     ...[
-                      'Aim for 3-6 months of living expenses',
-                      'Start with small regular contributions',
-                      'Keep funds easily accessible',
-                      'Only use for true emergencies',
+                      'emergency.tip1'.tr(),
+                      'emergency.tip2'.tr(),
+                      'emergency.tip3'.tr(),
+                      'emergency.tip4'.tr(),
                     ].map(
                       (tip) => Padding(
                         padding:
@@ -454,12 +462,12 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
               ),
               const SizedBox(height: AppSizes.md),
               Text(
-                'Failed to load emergency fund',
+                'emergency.failedToLoad'.tr(),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: AppSizes.sm),
               Text(
-                'Please try again later',
+                'emergency.tryAgain'.tr(),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -469,7 +477,7 @@ class _EmergencyFundPageState extends ConsumerState<EmergencyFundPage> {
                 onPressed: () {
                   ref.invalidate(emergencyFundStatusProvider);
                 },
-                child: const Text('Retry'),
+                child: Text('common.retry'.tr()),
               ),
             ],
           ),

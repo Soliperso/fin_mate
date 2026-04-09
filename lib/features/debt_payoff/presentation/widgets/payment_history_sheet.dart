@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -20,7 +20,7 @@ class PaymentHistorySheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentsAsync = ref.watch(debtPaymentsProvider(debt.id));
     final currencyFormat = ref.watch(currencyFormat2Provider);
-    final dateFormat = DateFormat('MMM d, yyyy');
+    final dateFormat = DateFormat('MMM d, yyyy', context.locale.languageCode);
     final maxHeight = MediaQuery.of(context).size.height * 0.75;
 
     return ConstrainedBox(
@@ -42,7 +42,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Payment History',
+                        'paymentHistory.title'.tr(),
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge
@@ -90,7 +90,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSizes.lg),
                 child: Center(
                   child: Text(
-                    'Failed to load payments',
+                    'paymentHistory.failedToLoad'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -104,9 +104,8 @@ class PaymentHistorySheet extends ConsumerWidget {
                         vertical: AppSizes.xl),
                     child: EmptyStateCard(
                       icon: CupertinoIcons.creditcard,
-                      title: 'No Payments Yet',
-                      message:
-                          'Log your first payment to track your progress.',
+                      title: 'paymentHistory.noPayments'.tr(),
+                      message: 'paymentHistory.noPaymentsMessage'.tr(),
                       backgroundColor: AppColors.brandTeal,
                     ),
                   );
@@ -143,7 +142,9 @@ class PaymentHistorySheet extends ConsumerWidget {
                           const SizedBox(width: AppSizes.sm),
                           Expanded(
                             child: Text(
-                              '${payments.length} payment${payments.length == 1 ? '' : 's'} logged',
+                              payments.length == 1
+                                  ? 'paymentHistory.paymentsLogged'.tr(namedArgs: {'count': '${payments.length}'})
+                                  : 'paymentHistory.paymentsLoggedPlural'.tr(namedArgs: {'count': '${payments.length}'}),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -152,7 +153,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            '${currencyFormat.format(totalPaid)} total',
+                            'paymentHistory.totalPaid'.tr(namedArgs: {'amount': currencyFormat.format(totalPaid)}),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall

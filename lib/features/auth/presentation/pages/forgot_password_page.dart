@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +34,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconBg = isDark ? const Color(0xFF2C2C2E) : AppColors.brandTeal.withValues(alpha: 0.12);
+    final iconColor = isDark ? Colors.white : AppColors.brandTeal;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -58,7 +63,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     child: Icon(
                       _emailSent
                           ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.question_circle,
+                          : CupertinoIcons.lock_rotation,
                       size: 44,
                       color: _emailSent ? AppColors.success : AppColors.brandTeal,
                     ),
@@ -66,7 +71,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 Text(
-                  _emailSent ? 'Check Your Email' : 'Forgot Password?',
+                  _emailSent
+                      ? 'auth.forgotPassword.titleSent'.tr()
+                      : 'auth.forgotPassword.title'.tr(),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -75,8 +82,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 const SizedBox(height: AppSizes.sm),
                 Text(
                   _emailSent
-                      ? 'We\'ve sent a password reset link to your email address. Please check your inbox and follow the instructions.'
-                      : 'No worries! Enter your email address and we\'ll send you a link to reset your password.',
+                      ? 'auth.forgotPassword.subtitleSent'.tr()
+                      : 'auth.forgotPassword.subtitle'.tr(),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -88,25 +95,25 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'Enter your email address',
+                      labelText: 'auth.forgotPassword.emailLabel'.tr(),
+                      hintText: 'auth.forgotPassword.emailHint'.tr(),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Container(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: const Icon(CupertinoIcons.mail, size: 17, color: Colors.white),
+                          child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
                         ),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return 'auth.forgotPassword.emailRequired'.tr();
                       }
                       if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                        return 'auth.forgotPassword.emailInvalid'.tr();
                       }
                       return null;
                     },
@@ -120,23 +127,23 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Send Reset Link'),
+                        : Text('auth.forgotPassword.sendButton'.tr()),
                   ),
                   const SizedBox(height: AppSizes.md),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Remember your password? ',
+                        'auth.forgotPassword.rememberPassword'.tr(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppColors.textTertiary,
                             ),
                       ),
                       TextButton(
                         onPressed: () => context.go('/login'),
-                        child: const Text(
-                          'Log In',
-                          style: TextStyle(color: AppColors.brandTeal),
+                        child: Text(
+                          'auth.forgotPassword.logIn'.tr(),
+                          style: const TextStyle(color: AppColors.brandTeal),
                         ),
                       ),
                     ],
@@ -157,7 +164,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                             const SizedBox(width: AppSizes.sm),
                             Expanded(
                               child: Text(
-                                'Didn\'t receive the email?',
+                                'auth.forgotPassword.didntReceive'.tr(),
                                 style: TextStyle(
                                   color: AppColors.success,
                                   fontWeight: FontWeight.w600,
@@ -168,7 +175,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                         ),
                         const SizedBox(height: AppSizes.sm),
                         Text(
-                          'Check your spam folder or try resending the email.',
+                          'auth.forgotPassword.checkSpam'.tr(),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -186,12 +193,12 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Resend Email'),
+                        : Text('auth.forgotPassword.resendEmail'.tr()),
                   ),
                   const SizedBox(height: AppSizes.md),
                   TextButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Back to Login'),
+                    child: Text('auth.forgotPassword.backToLogin'.tr()),
                   ),
                 ],
               ],
@@ -222,7 +229,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           setState(() => _isLoading = false);
           ErrorSnackbar.show(
             context,
-            message: 'Failed to send reset link. Please try again.',
+            message: 'auth.forgotPassword.failedToSend'.tr(),
           );
         }
       }
@@ -240,7 +247,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         setState(() => _isLoading = false);
         SuccessSnackbar.show(
           context,
-          message: 'Reset link sent again. Please check your email.',
+          message: 'auth.forgotPassword.resentSuccess'.tr(),
         );
       }
     } catch (e) {
@@ -248,7 +255,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         setState(() => _isLoading = false);
         ErrorSnackbar.show(
           context,
-          message: 'Failed to resend link. Please try again.',
+          message: 'auth.forgotPassword.failedToResend'.tr(),
         );
       }
     }

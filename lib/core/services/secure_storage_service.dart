@@ -13,11 +13,12 @@ class SecureStorageService {
   static const _keyEmail = 'saved_email';
   static const _keyPassword = 'saved_password';
   static const _keyBiometricEnabled = 'biometric_enabled';
+  static const _keyRefreshToken = 'biometric_refresh_token';
   static const _keyMfaEnabled = 'mfa_enabled';
   static const _keyMfaMethod = 'mfa_method';
   static const _keyTotpSecret = 'totp_secret';
 
-  /// Save email only (password removed for security)
+  /// Save email for auto-fill
   Future<void> saveEmail(String email) async {
     await _storage.write(key: _keyEmail, value: email);
   }
@@ -32,7 +33,16 @@ class SecureStorageService {
     await _storage.delete(key: _keyEmail);
   }
 
-  /// Save password for biometric login
+  /// Clear all stored data
+  Future<void> clearAll() async {
+    await _storage.deleteAll();
+  }
+
+  // ============================================================================
+  // Biometric Settings
+  // ============================================================================
+
+  /// Save password for biometric re-authentication (stored in platform keychain)
   Future<void> savePassword(String password) async {
     await _storage.write(key: _keyPassword, value: password);
   }
@@ -47,15 +57,6 @@ class SecureStorageService {
     await _storage.delete(key: _keyPassword);
   }
 
-  /// Clear all stored data
-  Future<void> clearAll() async {
-    await _storage.deleteAll();
-  }
-
-  // ============================================================================
-  // Biometric Settings
-  // ============================================================================
-
   /// Enable/disable biometric authentication
   Future<void> setBiometricEnabled(bool enabled) async {
     await _storage.write(key: _keyBiometricEnabled, value: enabled.toString());
@@ -65,6 +66,21 @@ class SecureStorageService {
   Future<bool> isBiometricEnabled() async {
     final value = await _storage.read(key: _keyBiometricEnabled);
     return value == 'true';
+  }
+
+  /// Save refresh token for biometric re-authentication
+  Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: _keyRefreshToken, value: token);
+  }
+
+  /// Get saved refresh token
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _keyRefreshToken);
+  }
+
+  /// Clear saved refresh token
+  Future<void> clearRefreshToken() async {
+    await _storage.delete(key: _keyRefreshToken);
   }
 
   // ============================================================================

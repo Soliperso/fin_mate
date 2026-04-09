@@ -1,12 +1,15 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/services/theme_provider.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../providers/settings_providers.dart';
 
 class DisplaySettingsPage extends ConsumerStatefulWidget {
@@ -23,7 +26,16 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
   final _currencyKey = GlobalKey();
   final _scrollController = ScrollController();
 
-  String _language = 'English (US)';
+  static const _langCodes = ['en', 'es', 'fr', 'ar'];
+
+  String _langCodeToLabel(String code) {
+    switch (code) {
+      case 'es': return 'display.langEs'.tr();
+      case 'fr': return 'display.langFr'.tr();
+      case 'ar': return 'display.langAr'.tr();
+      default:   return 'display.langEn'.tr();
+    }
+  }
 
   @override
   void initState() {
@@ -69,7 +81,7 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Display Settings'),
+        title: Text('display.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -88,15 +100,15 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Theme ────────────────────────────────────────────────
-              _sectionLabel(context, 'Theme', key: _themeKey),
+              _sectionLabel(context, 'display.themeSection'.tr(), key: _themeKey),
               const SizedBox(height: AppSizes.sm),
               _buildCard(context, isDark, children: [
                 _buildThemeTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.sun_max,
-                  title: 'Light',
-                  subtitle: 'Use light theme',
+                  title: 'display.light'.tr(),
+                  subtitle: 'display.lightSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.light,
                   onTap: () {
                     ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
@@ -108,8 +120,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.moon,
-                  title: 'Dark',
-                  subtitle: 'Use dark theme',
+                  title: 'display.dark'.tr(),
+                  subtitle: 'display.darkSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.dark,
                   onTap: () {
                     ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
@@ -121,8 +133,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.device_phone_portrait,
-                  title: 'System',
-                  subtitle: 'Follow device settings',
+                  title: 'display.system'.tr(),
+                  subtitle: 'display.systemSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.system,
                   onTap: () {
                     ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
@@ -133,15 +145,15 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
               const SizedBox(height: AppSizes.lg),
 
               // ── Currency & Format ─────────────────────────────────────
-              _sectionLabel(context, 'Currency & Format', key: _currencyKey),
+              _sectionLabel(context, 'display.currencyFormat'.tr(), key: _currencyKey),
               const SizedBox(height: AppSizes.sm),
               _buildCard(context, isDark, children: [
                 _buildOptionTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.money_dollar,
-                  title: 'Currency',
-                  subtitle: 'Default currency for amounts',
+                  title: 'display.currency'.tr(),
+                  subtitle: 'display.currencySub'.tr(),
                   value: displayFmt.currencyCode,
                   options: const ['USD', 'EUR', 'GBP', 'JPY', 'INR'],
                   onSelected: (v) =>
@@ -152,8 +164,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.calendar,
-                  title: 'Date Format',
-                  subtitle: 'How dates are displayed',
+                  title: 'display.dateFormat'.tr(),
+                  subtitle: 'display.dateFormatSub'.tr(),
                   value: displayFmt.dateFormat,
                   options: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
                   onSelected: (v) =>
@@ -164,8 +176,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.number,
-                  title: 'Number Format',
-                  subtitle: 'How numbers are formatted',
+                  title: 'display.numberFormat'.tr(),
+                  subtitle: 'display.numberFormatSub'.tr(),
                   value: displayFmt.numberFormat,
                   options: const ['1,234.56', '1.234,56', '1 234.56'],
                   onSelected: (v) =>
@@ -175,27 +187,33 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
               const SizedBox(height: AppSizes.lg),
 
               // ── Language ──────────────────────────────────────────────
-              _sectionLabel(context, 'Language'),
+              _sectionLabel(context, 'display.language'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildCard(context, isDark, children: [
                 _buildOptionTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.globe,
-                  title: 'Language',
-                  subtitle: 'App display language',
-                  value: _language,
-                  options: const ['English (US)', 'Spanish', 'French', 'German'],
-                  onSelected: (v) {
-                    setState(() => _language = v);
-                    final lang = v.toLowerCase().contains('spanish')
-                        ? 'es'
-                        : v.toLowerCase().contains('french')
-                            ? 'fr'
-                            : v.toLowerCase().contains('german')
-                                ? 'de'
-                                : 'en';
-                    ref.read(settingsOperationsProvider.notifier).updateLanguage(lang);
+                  title: 'display.language'.tr(),
+                  subtitle: 'display.languageSub'.tr(),
+                  value: _langCodeToLabel(
+                    settingsState.valueOrNull?.language ?? 'en',
+                  ),
+                  options: _langCodes.map(_langCodeToLabel).toList(),
+                  onSelected: (v) async {
+                    final idx = _langCodes.map(_langCodeToLabel).toList().indexOf(v);
+                    if (idx < 0) return;
+                    final code = _langCodes[idx];
+                    await context.setLocale(Locale(code));
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('saved_locale', code);
+                    ref.read(settingsOperationsProvider.notifier).updateLanguage(code);
+                    if (context.mounted) {
+                      SuccessSnackbar.show(
+                        context,
+                        message: 'display.languageChanged'.tr(namedArgs: {'lang': v}),
+                      );
+                    }
                   },
                 ),
               ]),

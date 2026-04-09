@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,7 @@ class ProfilePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Profile'),
+        title: Text('profile.title'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
@@ -59,7 +60,7 @@ class ProfilePage extends ConsumerWidget {
                         onPressed: () => ref
                             .read(currentUserProfileProvider.notifier)
                             .loadProfile(),
-                        child: const Text('Retry'),
+                        child: Text('common.retry'.tr()),
                       ),
                     ],
                   ),
@@ -86,7 +87,7 @@ class ProfilePage extends ConsumerWidget {
                               _buildProfilePicture(profile),
                               const SizedBox(height: AppSizes.md),
                               Text(
-                                profile?.displayName ?? 'User',
+                                profile?.displayName ?? 'profile.user'.tr(),
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineSmall
@@ -120,13 +121,13 @@ class ProfilePage extends ConsumerWidget {
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Icon(CupertinoIcons.shield,
+                                    children: [
+                                      const Icon(CupertinoIcons.shield,
                                           size: 14, color: AppColors.brandTeal),
-                                      SizedBox(width: AppSizes.xs),
+                                      const SizedBox(width: AppSizes.xs),
                                       Text(
-                                        'Admin',
-                                        style: TextStyle(
+                                        'profile.admin'.tr(),
+                                        style: const TextStyle(
                                           fontSize: 13,
                                           color: AppColors.brandTeal,
                                           fontWeight: FontWeight.w600,
@@ -142,7 +143,7 @@ class ProfilePage extends ConsumerWidget {
                                     context.push('/profile/edit'),
                                 icon:
                                     const Icon(CupertinoIcons.pencil, size: 16),
-                                label: const Text('Edit Profile'),
+                                label: Text('profile.editProfile'.tr()),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.brandTeal,
                                   side: const BorderSide(
@@ -155,51 +156,51 @@ class ProfilePage extends ConsumerWidget {
                         const SizedBox(height: AppSizes.xl),
 
                         // ── Account ───────────────────────────────────────
-                        _sectionLabel(context, 'Account'),
+                        _sectionLabel(context, 'profile.sectionAccount'.tr()),
                         const SizedBox(height: AppSizes.sm),
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.person,
-                            title: 'Personal Information',
-                            subtitle: 'Update your name, email, and phone',
+                            title: 'profile.personalInfo'.tr(),
+                            subtitle: 'profile.personalInfoSub'.tr(),
                             onTap: () => context.push('/profile/edit'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.lock,
-                            title: 'Security',
-                            subtitle: 'Password, biometric, 2FA',
+                            title: 'profile.security'.tr(),
+                            subtitle: 'profile.securitySub'.tr(),
                             onTap: () => context.push('/profile/security'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.money_dollar_circle,
-                            title: 'Savings Goals',
-                            subtitle: 'Track and manage your savings goals',
+                            title: 'profile.savingsGoals'.tr(),
+                            subtitle: 'profile.savingsGoalsSub'.tr(),
                             onTap: () => context.push('/goals'),
                           ),
                         ]),
                         const SizedBox(height: AppSizes.lg),
 
                         // ── Preferences ───────────────────────────────────
-                        _sectionLabel(context, 'Preferences'),
+                        _sectionLabel(context, 'profile.sectionPreferences'.tr()),
                         const SizedBox(height: AppSizes.sm),
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.bell,
-                            title: 'Notifications',
-                            subtitle: 'View alerts, budget warnings, and reminders',
+                            title: 'profile.notifications'.tr(),
+                            subtitle: 'profile.notificationsSub'.tr(),
                             onTap: () => context.push('/notifications'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.moon,
-                            title: 'Appearance',
+                            title: 'profile.appearance'.tr(),
                             subtitle: _getThemeModeLabel(themeMode),
                             onTap: () => context.push('/settings/display?section=theme'),
                           ),
@@ -207,20 +208,15 @@ class ProfilePage extends ConsumerWidget {
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.globe,
-                            title: 'Language',
-                            subtitle: 'English (US)',
-                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Coming soon'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            ),
+                            title: 'profile.language'.tr(),
+                            subtitle: 'profile.languageSub'.tr(),
+                            onTap: () => context.push('/settings/display'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.money_dollar,
-                            title: 'Currency',
+                            title: 'profile.currency'.tr(),
                             subtitle: profile?.currency ?? 'USD',
                             onTap: () => context.push('/profile/edit'),
                           ),
@@ -228,18 +224,18 @@ class ProfilePage extends ConsumerWidget {
                         const SizedBox(height: AppSizes.lg),
 
                         // ── Support ───────────────────────────────────────
-                        _sectionLabel(context, 'Support'),
+                        _sectionLabel(context, 'profile.sectionSupport'.tr()),
                         const SizedBox(height: AppSizes.sm),
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.question_circle,
-                            title: 'Help Center',
-                            subtitle: 'FAQs and support articles',
+                            title: 'profile.helpCenter'.tr(),
+                            subtitle: 'profile.helpCenterSub'.tr(),
                             onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Coming soon'),
-                                duration: Duration(seconds: 2),
+                              SnackBar(
+                                content: Text('common.comingSoon'.tr()),
+                                duration: const Duration(seconds: 2),
                               ),
                             ),
                           ),
@@ -247,16 +243,16 @@ class ProfilePage extends ConsumerWidget {
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.hand_raised,
-                            title: 'Legal & Compliance',
-                            subtitle: 'View privacy policy and terms',
+                            title: 'profile.legal'.tr(),
+                            subtitle: 'profile.legalSub'.tr(),
                             onTap: () => context.push('/profile/legal'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
                             context: context,
                             icon: CupertinoIcons.info_circle,
-                            title: 'About',
-                            subtitle: 'Version 1.0.0',
+                            title: 'profile.about'.tr(),
+                            subtitle: 'profile.aboutVersion'.tr(),
                             onTap: () {},
                           ),
                         ]),
@@ -264,30 +260,30 @@ class ProfilePage extends ConsumerWidget {
 
                         // ── Admin ─────────────────────────────────────────
                         if (profile?.isAdmin == true) ...[
-                          _sectionLabel(context, 'Admin'),
+                          _sectionLabel(context, 'profile.sectionAdmin'.tr()),
                           const SizedBox(height: AppSizes.sm),
                           _buildSettingsCard(context, isDark, children: [
                             _buildSettingsTile(
                               context: context,
                               icon: CupertinoIcons.person_2,
-                              title: 'User Management',
-                              subtitle: 'View and manage app users',
+                              title: 'profile.userManagement'.tr(),
+                              subtitle: 'profile.userManagementSub'.tr(),
                               onTap: () => context.push('/admin/users'),
                             ),
                             _buildDivider(context, isDark),
                             _buildSettingsTile(
                               context: context,
                               icon: CupertinoIcons.chart_bar,
-                              title: 'System Analytics',
-                              subtitle: 'App-wide usage and financial stats',
+                              title: 'profile.systemAnalytics'.tr(),
+                              subtitle: 'profile.systemAnalyticsSub'.tr(),
                               onTap: () => context.push('/admin/analytics'),
                             ),
                             _buildDivider(context, isDark),
                             _buildSettingsTile(
                               context: context,
                               icon: CupertinoIcons.gear_alt,
-                              title: 'System Settings',
-                              subtitle: 'Configure system-wide options',
+                              title: 'profile.systemSettings'.tr(),
+                              subtitle: 'profile.systemSettingsSub'.tr(),
                               onTap: () => context.push('/admin/settings'),
                             ),
                           ]),
@@ -298,18 +294,18 @@ class ProfilePage extends ConsumerWidget {
                         _buildSettingsCard(context, isDark, children: [
                           InkWell(
                             onTap: () => _showLogoutDialog(context, ref),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: AppSizes.md, vertical: 14),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(CupertinoIcons.square_arrow_left,
+                                  const Icon(CupertinoIcons.square_arrow_left,
                                       color: AppColors.systemRed, size: 18),
-                                  SizedBox(width: AppSizes.sm),
+                                  const SizedBox(width: AppSizes.sm),
                                   Text(
-                                    'Log Out',
-                                    style: TextStyle(
+                                    'profile.logOut'.tr(),
+                                    style: const TextStyle(
                                       color: AppColors.systemRed,
                                       fontWeight: FontWeight.w500,
                                       fontSize: 17,
@@ -401,7 +397,7 @@ class ProfilePage extends ConsumerWidget {
                 color: isDark
                     ? AppColors.tertiarySystemBackgroundDark
                     : AppColors.secondarySystemBackground,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
               child: Icon(icon,
                   color: isDark ? AppColors.labelDark : AppColors.label,
@@ -472,7 +468,7 @@ class ProfilePage extends ConsumerWidget {
             child: LoadingSkeleton(
               width: 140,
               height: 20,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
             ),
           ),
           const SizedBox(height: AppSizes.sm),
@@ -481,7 +477,7 @@ class ProfilePage extends ConsumerWidget {
             child: LoadingSkeleton(
               width: 200,
               height: 14,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
             ),
           ),
           const SizedBox(height: AppSizes.md),
@@ -498,7 +494,7 @@ class ProfilePage extends ConsumerWidget {
           LoadingSkeleton(
             width: 80,
             height: 12,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
           ),
           const SizedBox(height: AppSizes.sm),
           _buildSkeletonCard(context, rows: 3, rowHeight: rowHeight),
@@ -507,7 +503,7 @@ class ProfilePage extends ConsumerWidget {
           LoadingSkeleton(
             width: 100,
             height: 12,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
           ),
           const SizedBox(height: AppSizes.sm),
           _buildSkeletonCard(context, rows: 3, rowHeight: rowHeight),
@@ -516,7 +512,7 @@ class ProfilePage extends ConsumerWidget {
           LoadingSkeleton(
             width: 70,
             height: 12,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
           ),
           const SizedBox(height: AppSizes.sm),
           _buildSkeletonCard(context, rows: 2, rowHeight: rowHeight),
@@ -551,7 +547,7 @@ class ProfilePage extends ConsumerWidget {
                       LoadingSkeleton(
                         width: 32,
                         height: 32,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       const SizedBox(width: AppSizes.md),
                       Expanded(
@@ -562,13 +558,13 @@ class ProfilePage extends ConsumerWidget {
                             LoadingSkeleton(
                               width: double.infinity,
                               height: 14,
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
                             ),
                             const SizedBox(height: 6),
                             LoadingSkeleton(
                               width: 140,
                               height: 11,
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
                             ),
                           ],
                         ),
@@ -595,11 +591,11 @@ class ProfilePage extends ConsumerWidget {
   String _getThemeModeLabel(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.light:
-        return 'Light';
+        return 'settings.themeLight'.tr();
       case ThemeMode.dark:
-        return 'Dark';
+        return 'settings.themeDark'.tr();
       case ThemeMode.system:
-        return 'System';
+        return 'settings.themeSystem'.tr();
     }
   }
 
@@ -607,12 +603,12 @@ class ProfilePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to log out?'),
+        title: Text('profile.logOut'.tr()),
+        content: Text('profile.logOutConfirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -626,9 +622,9 @@ class ProfilePage extends ConsumerWidget {
                 }
               }
             },
-            child: const Text(
-              'Log Out',
-              style: TextStyle(color: AppColors.systemRed),
+            child: Text(
+              'profile.logOut'.tr(),
+              style: const TextStyle(color: AppColors.systemRed),
             ),
           ),
         ],

@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -33,7 +33,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Data & Privacy'),
+        title: Text('dataPrivacy.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -48,15 +48,15 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Data Management ───────────────────────────────────────
-            _sectionLabel(context, 'Data Management'),
+            _sectionLabel(context, 'dataPrivacy.dataManagement'.tr()),
             const SizedBox(height: AppSizes.sm),
             _buildCard(context, isDark, children: [
               _buildOptionTile(
                 context,
                 isDark: isDark,
                 icon: CupertinoIcons.cloud_upload,
-                title: 'Backup Schedule',
-                subtitle: 'Automatically back up your data',
+                title: 'dataPrivacy.backupSchedule'.tr(),
+                subtitle: 'dataPrivacy.backupSub'.tr(),
                 trailingText: _scheduleLabel(schedule),
                 onTap: () => _showSchedulePicker(settings, schedule),
               ),
@@ -65,8 +65,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 context,
                 isDark: isDark,
                 icon: CupertinoIcons.arrow_down_circle,
-                title: 'Export All Data',
-                subtitle: 'Download complete profile as JSON',
+                title: 'dataPrivacy.exportAll'.tr(),
+                subtitle: 'dataPrivacy.exportAllSub'.tr(),
                 onTap: _activeExport != null ? null : _exportAllData,
               ),
               _buildDivider(context, isDark),
@@ -74,8 +74,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 context,
                 isDark: isDark,
                 icon: CupertinoIcons.table,
-                title: 'Export Transactions',
-                subtitle: 'Download transactions as CSV',
+                title: 'dataPrivacy.exportTransactions'.tr(),
+                subtitle: 'dataPrivacy.exportTransactionsSub'.tr(),
                 onTap: _activeExport != null ? null : _exportTransactions,
               ),
               _buildDivider(context, isDark),
@@ -83,8 +83,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 context,
                 isDark: isDark,
                 icon: CupertinoIcons.chart_bar,
-                title: 'Export Budgets',
-                subtitle: 'Download budgets as CSV',
+                title: 'dataPrivacy.exportBudgets'.tr(),
+                subtitle: 'dataPrivacy.exportBudgetsSub'.tr(),
                 onTap: _activeExport != null ? null : _exportBudgets,
               ),
               _buildDivider(context, isDark),
@@ -92,8 +92,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 context,
                 isDark: isDark,
                 icon: CupertinoIcons.lock_shield,
-                title: 'Data Protection',
-                subtitle: 'Your data is encrypted and never shared',
+                title: 'dataPrivacy.dataProtection'.tr(),
+                subtitle: 'dataPrivacy.dataProtectionSub'.tr(),
                 showChevron: false,
                 onTap: null,
               ),
@@ -101,7 +101,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
             const SizedBox(height: AppSizes.lg),
 
             // ── Danger Zone ───────────────────────────────────────────
-            _sectionLabel(context, 'Danger Zone', isDanger: true),
+            _sectionLabel(context, 'dataPrivacy.dangerZone'.tr(), isDanger: true),
             const SizedBox(height: AppSizes.sm),
             Container(
               decoration: BoxDecoration(
@@ -131,21 +131,21 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                             color: AppColors.error, size: 17),
                       ),
                       const SizedBox(width: AppSizes.md),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Delete Account',
-                              style: TextStyle(
+                              'dataPrivacy.deleteAccount'.tr(),
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.error,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              'Permanently delete your account and all data',
-                              style: TextStyle(
+                              'dataPrivacy.deleteAccountSub'.tr(),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.error,
                               ),
@@ -353,7 +353,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => SimpleDialog(
-        title: const Text('Backup Schedule'),
+        title: Text('dataPrivacy.backupSchedule'.tr()),
         children: List.generate(options.length, (i) {
           return SimpleDialogOption(
             onPressed: () {
@@ -381,47 +381,57 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
 
   Future<void> _exportAllData() async =>
       _runExport('all', 'Preparing full data export…', () async {
-        final data = await ref.read(settingsOperationsProvider.notifier).exportDataAsJson();
-        await _shareFile(data, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'Finmate Data Export');
-      });
+        return ref.read(settingsOperationsProvider.notifier).exportDataAsJson();
+      }, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'Finmate Data Export');
 
   Future<void> _exportTransactions() async =>
       _runExport('transactions', 'Preparing transactions…', () async {
-        final data = await ref.read(settingsOperationsProvider.notifier).exportTransactionsAsCsv();
-        await _shareFile(data, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'Finmate Transactions');
-      });
+        return ref.read(settingsOperationsProvider.notifier).exportTransactionsAsCsv();
+      }, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'Finmate Transactions');
 
   Future<void> _exportBudgets() async =>
       _runExport('budgets', 'Preparing budgets…', () async {
-        final data = await ref.read(settingsOperationsProvider.notifier).exportBudgetsAsCsv();
-        await _shareFile(data, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'Finmate Budgets');
-      });
+        return ref.read(settingsOperationsProvider.notifier).exportBudgetsAsCsv();
+      }, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'Finmate Budgets');
 
+  /// Fetches export data, dismisses the loading dialog, THEN opens share sheet.
+  /// This way the dialog is never left hanging if Share.shareXFiles doesn't resolve.
   Future<void> _runExport(
     String key,
     String loadingMessage,
-    Future<void> Function() work,
-  ) async {
+    Future<String> Function() fetchData, {
+    required String filename,
+    required String ext,
+    required String mime,
+    required String subject,
+  }) async {
     setState(() => _activeExport = key);
     _showLoadingDialog(loadingMessage);
+    String data;
     try {
-      await work();
-      // User cancelled — dialog already dismissed, do nothing
-      if (!mounted || _activeExport == null) return;
-      Navigator.of(context).pop(); // dismiss loading dialog
+      data = await fetchData();
     } catch (e) {
       if (!mounted || _activeExport == null) return;
       Navigator.of(context).pop(); // dismiss loading dialog
+      setState(() => _activeExport = null);
       _showErrorDialog(e);
-    } finally {
-      if (mounted) setState(() => _activeExport = null);
+      return;
     }
+
+    // Data is ready — dismiss loading dialog before opening share sheet
+    if (!mounted || _activeExport == null) return;
+    Navigator.of(context).pop();
+    setState(() => _activeExport = null);
+
+    // Share (fire-and-forget — share_plus future may not resolve on iOS)
+    await _shareFile(data, filename: filename, ext: ext, mime: mime, subject: subject);
   }
 
   void _showLoadingDialog(String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: false,
       builder: (dialogContext) => PopScope(
         canPop: false,
         child: AlertDialog(
@@ -438,7 +448,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
                 Navigator.of(dialogContext).pop();
                 if (mounted) setState(() => _activeExport = null);
               },
-              child: const Text('Cancel'),
+              child: Text('common.cancel'.tr()),
             ),
           ],
         ),
@@ -479,12 +489,12 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Export Failed'),
+        title: Text('dataPrivacy.exportFailed'.tr()),
         content: Text(e.toString().replaceAll('Exception: ', '').replaceAll('Exception(', '').replaceAll(')', '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('OK'),
+            child: Text('common.done'.tr()),
           ),
         ],
       ),
@@ -495,30 +505,30 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account?'),
-        content: const Column(
+        title: Text('dataPrivacy.deleteAccountTitle'.tr()),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Warning: This action cannot be undone!',
-              style: TextStyle(
+              'dataPrivacy.deleteAccountWarning'.tr(),
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 color: AppColors.error,
               ),
             ),
-            SizedBox(height: AppSizes.md),
-            Text('Deleting your account will:',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            SizedBox(height: AppSizes.xs),
-            Text('• Permanently delete all your transactions'),
-            Text('• Delete all budgets and goals'),
-            Text('• Delete all savings goals and debt records'),
-            Text('• Delete all uploaded documents'),
-            SizedBox(height: AppSizes.md),
+            const SizedBox(height: AppSizes.md),
+            Text('dataPrivacy.deleteAccountWill'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: AppSizes.xs),
+            Text('dataPrivacy.deleteAccountBullet1'.tr()),
+            Text('dataPrivacy.deleteAccountBullet2'.tr()),
+            Text('dataPrivacy.deleteAccountBullet3'.tr()),
+            Text('dataPrivacy.deleteAccountBullet4'.tr()),
+            const SizedBox(height: AppSizes.md),
             Text(
-              'This action cannot be reversed.',
-              style: TextStyle(
+              'dataPrivacy.deleteAccountIrreversible'.tr(),
+              style: const TextStyle(
                   color: AppColors.error, fontWeight: FontWeight.w600),
             ),
           ],
@@ -526,15 +536,15 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _showPasswordConfirmationDialog(context, ref);
             },
-            child: const Text('Delete My Account',
-                style: TextStyle(color: AppColors.error)),
+            child: Text('dataPrivacy.deleteMyAccount'.tr(),
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -547,20 +557,20 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Account Deletion'),
+        title: Text('dataPrivacy.confirmDeletion'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Please enter your password to confirm account deletion:',
-              style: TextStyle(fontSize: 14),
+            Text(
+              'dataPrivacy.confirmDeletionPrompt'.tr(),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: AppSizes.lg),
             TextField(
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'Password',
+                hintText: 'dataPrivacy.passwordHint'.tr(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
@@ -571,15 +581,15 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               await _performAccountDeletion(context, ref);
             },
-            child: const Text('Delete Account',
-                style: TextStyle(color: AppColors.error)),
+            child: Text('dataPrivacy.deleteAccount'.tr(),
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -599,12 +609,12 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
         showDialog(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Deletion Failed'),
-            content: Text('Failed to delete account: $e'),
+            title: Text('dataPrivacy.deletionFailed'.tr()),
+            content: Text('dataPrivacy.deletionFailedMessage'.tr(namedArgs: {'error': e.toString()})),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('OK'),
+                child: Text('common.done'.tr()),
               ),
             ],
           ),

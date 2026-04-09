@@ -3,6 +3,7 @@ import '../../domain/repositories/settings_repository.dart';
 import '../datasources/settings_remote_datasource.dart';
 import '../models/settings_model.dart';
 import '../../../../core/services/data_export_service.dart';
+import '../../../../core/providers/display_format_provider.dart';
 
 /// Implementation of SettingsRepository
 class SettingsRepositoryImpl implements SettingsRepository {
@@ -108,7 +109,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<String> exportTransactionsAsCsv(String userId) async {
     try {
       final transactions = await _remoteDataSource.exportTransactions(userId);
-      return _exportService.generateCsvExport(transactions, filename: 'transactions');
+      final datePattern = getCachedDisplayFormat().datePattern;
+      return _exportService.generateTransactionsCsv(
+        transactions,
+        dateFormat: datePattern,
+      );
     } catch (e) {
       throw Exception('Failed to export transactions as CSV: $e');
     }

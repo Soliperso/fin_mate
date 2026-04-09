@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch, CupertinoPicker, CupertinoPickerDefaultSelectionOverlay, CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -236,7 +237,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         backgroundColor: isDark
             ? AppColors.systemGroupedBackgroundDark
             : AppColors.systemGroupedBackground,
-        title: Text(_isEditing ? 'Edit Transaction' : 'New Transaction'),
+        title: Text(_isEditing ? 'addTransaction.editTitle'.tr() : 'addTransaction.newTitle'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.xmark,
@@ -256,8 +257,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ),
             label: Text(
               _isEditing
-                  ? 'Update Transaction'
-                  : (_selectedType == 'expense' ? 'Add Expense' : 'Add Income'),
+                  ? 'addTransaction.updateButton'.tr()
+                  : (_selectedType == 'expense' ? 'addTransaction.addExpense'.tr() : 'addTransaction.addIncome'.tr()),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryTeal,
@@ -284,19 +285,19 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               const SizedBox(height: AppSizes.xl),
 
               // ── Details ────────────────────────────────────────────────
-              _sectionLabel(context, 'Details'),
+              _sectionLabel(context, 'addTransaction.details'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildDetailsSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
 
               // ── Notes ──────────────────────────────────────────────────
-              _sectionLabel(context, 'Notes'),
+              _sectionLabel(context, 'addTransaction.notes'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildNotesSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
 
               // ── Reminder ───────────────────────────────────────────────
-              _sectionLabel(context, 'Reminder'),
+              _sectionLabel(context, 'addTransaction.reminder'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildReminderSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
@@ -323,10 +324,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Scan Receipt'),
+                                Text('addTransaction.scanReceipt'.tr()),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Use camera to extract transaction details',
+                                  'addTransaction.scanReceiptSub'.tr(),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall
@@ -378,8 +379,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           padding: const EdgeInsets.all(3),
           child: Row(
             children: [
-              _typeTab('expense', 'Expense', isDark),
-              _typeTab('income', 'Income', isDark),
+              _typeTab('expense', 'addTransaction.expenseType'.tr(), isDark),
+              _typeTab('income', 'addTransaction.incomeType'.tr(), isDark),
             ],
           ),
         ),
@@ -421,7 +422,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              'Enter a valid amount',
+              'addTransaction.amountInvalid'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.systemRed,
                   ),
@@ -623,8 +624,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         ),
                     decoration: InputDecoration(
                       hintText: _selectedType == 'expense'
-                          ? 'Grocery shopping, Gas…'
-                          : 'Salary, Freelance…',
+                          ? 'addTransaction.titleHintExpense'.tr()
+                          : 'addTransaction.titleHintIncome'.tr(),
                       hintStyle:
                           Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: AppColors.tertiaryLabel,
@@ -636,7 +637,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Title is required';
+                        return 'addTransaction.titleRequired'.tr();
                       }
                       return null;
                     },
@@ -666,7 +667,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             accentColor: _typeColor, isDark: isDark),
                         const SizedBox(width: AppSizes.md),
                         Text(
-                          'Category',
+                          'addTransaction.categoryLabel'.tr(),
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
@@ -731,7 +732,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                     child: DropdownButton<DebtEntity>(
                                       value: _linkedDebt,
                                       hint: Text(
-                                        'Link to debt (optional)',
+                                        'addTransaction.linkDebt'.tr(),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyMedium
@@ -751,7 +752,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                       items: [
                                         DropdownMenuItem(
                                           value: null,
-                                          child: Text('None',
+                                          child: Text('common.none'.tr(),
                                               style: TextStyle(
                                                   color:
                                                       AppColors.tertiaryLabel)),
@@ -789,7 +790,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     _rowIcon(CupertinoIcons.calendar, accentColor: _typeColor, isDark: isDark),
                     const SizedBox(width: AppSizes.md),
                     Text(
-                      'Date',
+                      'addTransaction.dateLabel'.tr(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -896,7 +897,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Text(
-                  'Repeat',
+                  'addTransaction.repeatLabel'.tr(),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -1007,7 +1008,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     child: Row(
                       children: [
                         Text(
-                          'Attach a receipt or file',
+                          'addTransaction.attachFile'.tr(),
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
@@ -1068,8 +1069,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final isDark =
-            MediaQuery.platformBrightnessOf(ctx) == Brightness.dark;
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final bgColor = isDark
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground;
@@ -1121,8 +1121,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             horizontal: AppSizes.md),
                         onPressed: () => Navigator.of(ctx).pop(),
                         child: Text(
-                          'Cancel',
-                          style: TextStyle(
+                          'common.cancel'.tr(),
+                          style: const TextStyle(
                             color: AppColors.systemGray,
                             fontSize: 16,
                           ),
@@ -1133,7 +1133,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Category',
+                            'addTransaction.categoryLabel'.tr(),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -1163,7 +1163,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                           Navigator.of(ctx).pop();
                         },
                         child: Text(
-                          'Done',
+                          'common.done'.tr(),
                           style: TextStyle(
                             color: _typeColor,
                             fontWeight: FontWeight.w700,
@@ -1362,7 +1362,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 minLines: 2,
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: InputDecoration(
-                  hintText: 'Add a note (optional)',
+                  hintText: 'addTransaction.noteHint'.tr(),
                   hintStyle:
                       Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.tertiaryLabel,
@@ -1401,7 +1401,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Set Reminder'),
+                      Text('addTransaction.reminder'.tr()),
                       const SizedBox(height: 4),
                       Text(
                         'Get notified before this transaction\'s date',
@@ -1484,7 +1484,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       minLines: 1,
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
-                        hintText: 'Custom reminder message (optional)',
+                        hintText: 'addTransaction.reminderHint'.tr(),
                         hintStyle:
                             Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: AppColors.tertiaryLabel,

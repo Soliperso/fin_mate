@@ -1,11 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../domain/entities/savings_goal_entity.dart';
@@ -27,7 +30,13 @@ class SavingsGoalsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Savings Goals'),
+        title: Text('savings.title'.tr()),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
@@ -38,6 +47,34 @@ class SavingsGoalsPage extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButtonAnimator: const InstantFabAnimator(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: goalsAsync.value?.isNotEmpty == true
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSizes.buttonHeightMd,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showCreateGoalSheet(context, ref),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                  icon: const Icon(CupertinoIcons.add, size: 20),
+                  label: Text(
+                    'savings.newGoal'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
+              ),
+            )
+          : const SizedBox.shrink(),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(savingsGoalsProvider);
@@ -53,8 +90,8 @@ class SavingsGoalsPage extends ConsumerWidget {
                   children: [
                     EmptyStateCard(
                       icon: CupertinoIcons.money_dollar,
-                      title: 'No Savings Goals Yet',
-                      message: 'Start planning for your future by creating your first savings goal',
+                      title: 'savings.noGoals'.tr(),
+                      message: 'savings.noGoalsMessage'.tr(),
                       backgroundColor: AppColors.brandTeal,
                     ),
                     const SizedBox(height: AppSizes.lg),
@@ -73,9 +110,9 @@ class SavingsGoalsPage extends ConsumerWidget {
                           ),
                         ),
                         icon: const Icon(CupertinoIcons.add, size: 20),
-                        label: const Text(
-                          'New Goal',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        label: Text(
+                          'savings.newGoal'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                         ),
                       ),
                     ),
@@ -86,7 +123,7 @@ class SavingsGoalsPage extends ConsumerWidget {
 
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSizes.md),
+              padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,7 +137,7 @@ class SavingsGoalsPage extends ConsumerWidget {
 
                   // Active Goals
                   Text(
-                    'Active Goals',
+                    'savings.activeGoals'.tr(),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSizes.md),
@@ -113,7 +150,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                   if (goals.any((g) => g.isCompleted)) ...[
                     const SizedBox(height: AppSizes.lg),
                     Text(
-                      'Completed Goals',
+                      'savings.completedGoals'.tr(),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppSizes.md),
@@ -144,8 +181,8 @@ class SavingsGoalsPage extends ConsumerWidget {
               child: SizedBox(
                 height: MediaQuery.of(context).size.height - 200,
                 child: ErrorRetryWidget(
-                  title: 'Failed to load goals',
-                  message: 'Unable to fetch your savings goals. Please try again.',
+                  title: 'savings.failedToLoad'.tr(),
+                  message: 'savings.failedMessage'.tr(),
                   onRetry: () => ref.invalidate(savingsGoalsProvider),
                 ),
               ),
@@ -198,33 +235,201 @@ class SavingsGoalsPage extends ConsumerWidget {
   }
 
   void _showInfoDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Widget stepRow({
+      required IconData icon,
+      required Color color,
+      required String text,
+    }) {
+      final label = text.startsWith('• ') ? text.substring(2) : text;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: AppSizes.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              ),
+              child: Icon(icon, color: color, size: 19),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isDark ? AppColors.labelDark : AppColors.label,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About Savings Goals'),
-        content: const SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Set and track your financial goals with ease.'),
-              SizedBox(height: AppSizes.md),
-              Text('Features:', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: AppSizes.sm),
-              Text('• Create goals with target amounts'),
-              Text('• Set optional deadlines'),
-              Text('• Track progress with contributions'),
-              Text('• Categorize your goals'),
-              Text('• Celebrate when you achieve them!'),
+      barrierColor: Colors.black54,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md,
+          vertical: AppSizes.xxl,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.cardBackgroundDark : Colors.white,
+            borderRadius: BorderRadius.circular(AppSizes.radiusXl),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 28,
+                offset: const Offset(0, 10),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radiusXl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Gradient header ────────────────────────────────────
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.lg, AppSizes.xl, AppSizes.lg, AppSizes.lg,
+                  ),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.brandTeal, AppColors.brandTealLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 68,
+                        height: 68,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.money_dollar,
+                          color: Colors.white,
+                          size: 34,
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.md),
+                      Text(
+                        'savings.aboutTitle'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.xs),
+                      Text(
+                        'savings.aboutContent'.tr(),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Feature steps ──────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.xs,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'savings.featuresLabel'.tr(),
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.sm),
+                      stepRow(
+                        icon: CupertinoIcons.flag_fill,
+                        color: AppColors.systemBlue,
+                        text: 'savings.feature1'.tr(),
+                      ),
+                      stepRow(
+                        icon: CupertinoIcons.calendar,
+                        color: AppColors.systemOrange,
+                        text: 'savings.feature2'.tr(),
+                      ),
+                      stepRow(
+                        icon: CupertinoIcons.chart_bar_alt_fill,
+                        color: AppColors.brandTeal,
+                        text: 'savings.feature3'.tr(),
+                      ),
+                      stepRow(
+                        icon: CupertinoIcons.tag_fill,
+                        color: AppColors.systemPurple,
+                        text: 'savings.feature4'.tr(),
+                      ),
+                      stepRow(
+                        icon: CupertinoIcons.rosette,
+                        color: AppColors.systemYellow,
+                        text: 'savings.feature5'.tr(),
+                      ),
+                      const SizedBox(height: AppSizes.md),
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeightMd,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.brandTeal,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                            ),
+                          ),
+                          child: Text(
+                            'common.gotIt'.tr(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.md),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

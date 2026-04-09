@@ -258,8 +258,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (user != null) {
         await _setUserContext(user);
       }
-    } catch (_) {
+    } catch (e, stack) {
       // Keep existing state on error; do not wipe out a valid session.
+      SentryService.captureException(e, stackTrace: stack, hint: 'refreshCurrentUser failed');
     }
   }
 
@@ -284,21 +285,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   String _getErrorMessage(dynamic error) {
     final errorStr = error.toString().toLowerCase();
-    if (errorStr.contains('invalid login credentials')) {
+    if (errorStr.contains('invalid login credentials') ||
+        errorStr.contains('user not found') ||
+        errorStr.contains('invalid email or password')) {
       return 'Invalid email or password';
     } else if (errorStr.contains('email not confirmed')) {
       return 'Please confirm your email address';
     } else if (errorStr.contains('user already registered')) {
       return 'An account with this email already exists';
     } else if (errorStr.contains('password')) {
-      return 'Password must be at least 6 characters';
-    } else if (errorStr.contains('network')) {
+      return 'Password does not meet requirements';
+    } else if (errorStr.contains('network') || errorStr.contains('socket')) {
       return 'Network error. Please check your connection';
     } else if (errorStr.contains('database error')) {
-      return 'Database error. Please contact support';
+      return 'A server error occurred. Please contact support';
     }
-    // Return the actual error in development for debugging
-    return error.toString();
+    // Never expose raw error details in production
+    assert(() {
+      // In debug mode only: rethrow raw error for developer visibility
+      return true;
+    }());
+    return 'Something went wrong. Please try again.';
   }
 }
 

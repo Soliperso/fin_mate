@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,13 +66,13 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Spending by Category',
+                        'spending.title'.tr(),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Row(
                         children: [
                           Text(
-                            'This month',
+                            'spending.thisMonth'.tr(),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(width: AppSizes.xs),
@@ -117,7 +118,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                       ],
                       const SizedBox(width: AppSizes.sm),
                       Text(
-                        '${top.length} categories',
+                        'spending.categories'.tr(namedArgs: {'count': '${top.length}'}),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
@@ -179,7 +180,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total expenses',
+                      'spending.totalExpenses'.tr(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.secondaryLabel,
                           ),

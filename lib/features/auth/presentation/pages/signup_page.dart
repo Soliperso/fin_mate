@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconBg = isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.brandTeal.withValues(alpha: 0.12);
+    final iconColor = isDark ? Colors.white : AppColors.brandTeal;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -54,7 +58,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       color: AppColors.brandTeal.withValues(alpha: 0.12),
                     ),
                     child: const Icon(
-                      CupertinoIcons.person_crop_circle,
+                      CupertinoIcons.person_crop_circle_badge_plus,
                       size: 44,
                       color: AppColors.brandTeal,
                     ),
@@ -62,7 +66,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 Text(
-                  'Create Account',
+                  'auth.signup.title'.tr(),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -70,7 +74,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
-                  'Start your journey to better financial management',
+                  'auth.signup.subtitle'.tr(),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -106,21 +110,21 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
                   decoration: InputDecoration(
-                    labelText: 'Full Name',
+                    labelText: 'auth.signup.fullNameLabel'.tr(),
                     prefixIcon: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2C2C2E),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                         ),
-                        child: const Icon(CupertinoIcons.person, size: 17, color: Colors.white),
+                        child: Icon(CupertinoIcons.person, size: 17, color: iconColor),
                       ),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return 'auth.signup.nameRequired'.tr();
                     }
                     return null;
                   },
@@ -133,24 +137,24 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'auth.signup.emailLabel'.tr(),
                     prefixIcon: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2C2C2E),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                         ),
-                        child: const Icon(CupertinoIcons.mail, size: 17, color: Colors.white),
+                        child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
                       ),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'auth.signup.emailRequired'.tr();
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'auth.signup.emailInvalid'.tr();
                     }
                     return null;
                   },
@@ -164,15 +168,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   onFieldSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
                   onChanged: (value) => setState(() {}), // Trigger rebuild for strength indicator
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: 'auth.signup.passwordLabel'.tr(),
                     prefixIcon: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2C2C2E),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                         ),
-                        child: const Icon(CupertinoIcons.lock, size: 17, color: Colors.white),
+                        child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
                       ),
                     ),
                     suffixIcon: Padding(
@@ -180,14 +184,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       child: GestureDetector(
                         onTap: () => setState(() => _obscurePassword = !_obscurePassword),
                         child: Container(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
                           ),
                           child: Icon(
                             _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
                             size: 17,
-                            color: Colors.white,
+                            color: iconColor,
                           ),
                         ),
                       ),
@@ -195,10 +199,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return 'auth.signup.passwordRequired'.tr();
                     }
                     if (value.length < 8) {
-                      return 'Password must be at least 8 characters';
+                      return 'auth.signup.passwordTooShort'.tr();
+                    }
+                    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                      return 'auth.signup.passwordNeedsUppercase'.tr();
+                    }
+                    if (!RegExp(r'[0-9]').hasMatch(value)) {
+                      return 'auth.signup.passwordNeedsNumber'.tr();
+                    }
+                    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\\/]').hasMatch(value)) {
+                      return 'auth.signup.passwordNeedsSpecial'.tr();
                     }
                     return null;
                   },
@@ -214,15 +227,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     if (_acceptedTerms) _handleSignup();
                   },
                   decoration: InputDecoration(
-                    labelText: 'Confirm Password',
+                    labelText: 'auth.signup.confirmPasswordLabel'.tr(),
                     prefixIcon: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2C2C2E),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                         ),
-                        child: const Icon(CupertinoIcons.lock, size: 17, color: Colors.white),
+                        child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
                       ),
                     ),
                     suffixIcon: Padding(
@@ -230,14 +243,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       child: GestureDetector(
                         onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                         child: Container(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2C2C2E),
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
                           ),
                           child: Icon(
                             _obscureConfirmPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
                             size: 17,
-                            color: Colors.white,
+                            color: iconColor,
                           ),
                         ),
                       ),
@@ -245,7 +258,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   ),
                   validator: (value) {
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return 'auth.signup.passwordMismatch'.tr();
                     }
                     return null;
                   },
@@ -258,30 +271,30 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   contentPadding: EdgeInsets.zero,
                   title: Wrap(
                     children: [
-                      const Text(
-                        'I agree to the ',
-                        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      Text(
+                        'auth.signup.acceptTerms'.tr(),
+                        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
                       ),
                       GestureDetector(
                         onTap: () => context.push('/profile/legal'),
-                        child: const Text(
-                          'Terms of Service',
-                          style: TextStyle(
+                        child: Text(
+                          'auth.signup.termsOfService'.tr(),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.brandTeal,
                             decoration: TextDecoration.none,
                           ),
                         ),
                       ),
-                      const Text(
-                        ' and ',
-                        style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      Text(
+                        'auth.signup.and'.tr(),
+                        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
                       ),
                       GestureDetector(
                         onTap: () => context.push('/profile/legal'),
-                        child: const Text(
-                          'Privacy Policy',
-                          style: TextStyle(
+                        child: Text(
+                          'auth.signup.privacyPolicy'.tr(),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.brandTeal,
                             decoration: TextDecoration.none,
@@ -300,23 +313,23 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Sign Up'),
+                      : Text('auth.signup.createButton'.tr()),
                 ),
                 const SizedBox(height: AppSizes.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      'auth.signup.haveAccount'.tr(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textTertiary,
                           ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(color: AppColors.brandTeal),
+                      child: Text(
+                        'auth.signup.signIn'.tr(),
+                        style: const TextStyle(color: AppColors.brandTeal),
                       ),
                     ),
                   ],
@@ -332,7 +345,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
   Future<void> _handleSignup() async {
     if (!_acceptedTerms) {
-      ErrorSnackbar.show(context, message: 'Please accept the Terms of Service and Privacy Policy to continue.');
+      ErrorSnackbar.show(context, message: 'auth.signup.mustAcceptTerms'.tr());
       return;
     }
     if (_formKey.currentState!.validate()) {
@@ -352,7 +365,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           ErrorSnackbar.show(
             context,
             message: ref.read(authNotifierProvider).errorMessage ??
-                'Failed to create account. Please try again.',
+                'auth.signup.failedToCreate'.tr(),
           );
         }
       }

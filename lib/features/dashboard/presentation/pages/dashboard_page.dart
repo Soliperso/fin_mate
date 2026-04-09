@@ -1,11 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/section_header.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
@@ -52,7 +53,7 @@ class DashboardPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Dashboard',
+              'nav.dashboard'.tr(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
@@ -194,7 +195,17 @@ class DashboardPage extends ConsumerWidget {
                     final flowDataAsync = ref.watch(monthlyFlowDataProvider);
                     return flowDataAsync.when(
                       data: (flowData) {
-                        if (flowData.isEmpty) return const SizedBox.shrink();
+                        if (flowData.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+                            child: Center(
+                              child: Text(
+                                'dashboard.noFlowData'.tr(),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          );
+                        }
                         return Column(
                           children: [
                             CashFlowChart(flowData: flowData),
@@ -213,7 +224,17 @@ class DashboardPage extends ConsumerWidget {
                     final snapshotsAsync = ref.watch(netWorthSnapshotsProvider);
                     return snapshotsAsync.when(
                       data: (snapshots) {
-                        if (snapshots.isEmpty) return const SizedBox.shrink();
+                        if (snapshots.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+                            child: Center(
+                              child: Text(
+                                'dashboard.noWorthData'.tr(),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          );
+                        }
                         return Column(
                           children: [
                             NetWorthTrendChart(snapshots: snapshots),
@@ -232,9 +253,9 @@ class DashboardPage extends ConsumerWidget {
                 const SizedBox(height: AppSizes.md),
 
                 // ── Recent Transactions ───────────────────────────────────
-                _SectionHeader(
-                  title: 'Recent Transactions',
-                  action: 'See All',
+                SectionHeader(
+                  title: 'dashboard.recentTransactions'.tr(),
+                  actionLabel: 'dashboard.seeAll'.tr(),
                   onAction: () => context.go('/transactions'),
                 ),
                 const SizedBox(height: AppSizes.xs),
@@ -280,9 +301,8 @@ class DashboardPage extends ConsumerWidget {
                 children: [
                   EmptyState(
                     icon: CupertinoIcons.exclamationmark_circle,
-                    title: 'Failed to load dashboard',
-                    message:
-                        'Unable to fetch your financial data. Please check your connection and try again.',
+                    title: 'dashboard.failedToLoad'.tr(),
+                    message: 'dashboard.failedMessage'.tr(),
                   ),
                   Center(
                     child: FilledButton.icon(
@@ -292,7 +312,7 @@ class DashboardPage extends ConsumerWidget {
                             .loadDashboard();
                       },
                       icon: const Icon(CupertinoIcons.arrow_counterclockwise),
-                      label: const Text('Retry'),
+                      label: Text('common.retry'.tr()),
                     ),
                   ),
                 ],
@@ -306,40 +326,6 @@ class DashboardPage extends ConsumerWidget {
 }
 
 // ── Section header ────────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final String? action;
-  final VoidCallback? onAction;
-
-  const _SectionHeader({required this.title, this.action, this.onAction});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        if (action != null)
-          GestureDetector(
-            onTap: onAction,
-            child: Text(
-              action!,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-                color: AppColors.brandTeal,
-                letterSpacing: -0.24,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
 
 // ── Recent transactions card ──────────────────────────────────────────────────
 
@@ -364,8 +350,8 @@ class _RecentTransactionsCard extends StatelessWidget {
         children: [
           EmptyStateCard(
             icon: CupertinoIcons.doc_text,
-            title: 'No Recent Transactions',
-            message: 'Start tracking your finances by adding transactions.',
+            title: 'dashboard.noTransactions'.tr(),
+            message: 'dashboard.noTransactionsMessage'.tr(),
             backgroundColor: AppColors.brandTeal,
           ),
           const SizedBox(height: AppSizes.md),
@@ -384,9 +370,9 @@ class _RecentTransactionsCard extends StatelessWidget {
                 ),
               ),
               icon: const Icon(CupertinoIcons.add, size: 20),
-              label: const Text(
-                'Add Transaction',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              label: Text(
+                'dashboard.addTransaction'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
           ),
@@ -440,11 +426,11 @@ class _TransactionRow extends ConsumerWidget {
         transaction.date.year, transaction.date.month, transaction.date.day);
     final diff = today.difference(txDate).inDays;
     final dateText = diff == 0
-        ? 'Today'
+        ? 'common.today'.tr()
         : diff == 1
-            ? 'Yesterday'
+            ? 'common.yesterday'.tr()
             : diff < 7
-                ? '$diff days ago'
+                ? 'common.daysAgo'.tr(namedArgs: {'count': '$diff'})
                 : DateFormat('MMM d').format(transaction.date);
 
     final iconData = _iconForTransaction(transaction);
@@ -457,7 +443,7 @@ class _TransactionRow extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.md,
-          vertical: 12,
+          vertical: AppSizes.sm + 4,
         ),
         child: Row(
           children: [
@@ -478,7 +464,7 @@ class _TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    transaction.description ?? 'No description',
+                    transaction.description ?? 'dashboard.noDescription'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: Theme.of(context)
@@ -491,7 +477,7 @@ class _TransactionRow extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    transaction.categoryName ?? 'Uncategorized',
+                    transaction.categoryName ?? 'dashboard.uncategorized'.tr(),
                     style: Theme.of(context).textTheme.bodySmall,
                     maxLines: 1,
                   ),

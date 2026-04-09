@@ -89,13 +89,43 @@ class SettingsRemoteDataSource {
   /// Export all user transactions
   Future<List<Map<String, dynamic>>> exportTransactions(String userId) async {
     try {
-      final response = await _supabase
+      // Fetch transactions with plain select (no joins — safer with RLS)
+      final txResponse = await _supabase
           .from('transactions')
           .select()
           .eq('user_id', userId)
-          .order('created_at', ascending: false);
+          .order('date', ascending: false);
 
-      return List<Map<String, dynamic>>.from(response);
+      // Resolve account and category names with separate simple queries
+      final accountsResponse = await _supabase
+          .from('accounts')
+          .select('id, name')
+          .eq('user_id', userId);
+
+      final categoriesResponse = await _supabase
+          .from('categories')
+          .select('id, name')
+          .or('user_id.eq.$userId,is_default.eq.true');
+
+      final accountMap = <String, String>{
+        for (final a in accountsResponse as List)
+          (a as Map<String, dynamic>)['id'] as String:
+              a['name'] as String,
+      };
+      final categoryMap = <String, String>{
+        for (final c in categoriesResponse as List)
+          (c as Map<String, dynamic>)['id'] as String:
+              c['name'] as String,
+      };
+
+      return (txResponse as List).map((row) {
+        final data = Map<String, dynamic>.from(row as Map);
+        data['account_name'] = accountMap[data['account_id'] as String?];
+        data['category_name'] = data['category_id'] != null
+            ? categoryMap[data['category_id'] as String]
+            : null;
+        return data;
+      }).toList();
     } catch (e) {
       throw Exception('Failed to export transactions: $e');
     }

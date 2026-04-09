@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +52,7 @@ class GoalsSnapshotCard extends ConsumerWidget {
                         ),
                         const SizedBox(width: AppSizes.xs),
                         Text(
-                          'Savings Goals',
+                          'goalsSnapshot.title'.tr(),
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -65,7 +66,7 @@ class GoalsSnapshotCard extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                             ),
                             child: Text(
-                              '+${activeGoals.length - 3} more',
+                              'goalsSnapshot.moreBadge'.tr(namedArgs: {'count': '${activeGoals.length - 3}'}),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.brandTeal,
@@ -86,9 +87,9 @@ class GoalsSnapshotCard extends ConsumerWidget {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
-                        'See All',
-                        style: TextStyle(
+                      child: Text(
+                        'goalsSnapshot.seeAll'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: AppColors.brandTeal,
                           fontWeight: FontWeight.w400,
@@ -184,7 +185,7 @@ class _GoalRow extends ConsumerWidget {
                       ),
                 ),
                 Text(
-                  'of ${currencyFormat.format(goal.targetAmount)}',
+                  'goalsSnapshot.ofAmount'.tr(namedArgs: {'amount': currencyFormat.format(goal.targetAmount)}),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),

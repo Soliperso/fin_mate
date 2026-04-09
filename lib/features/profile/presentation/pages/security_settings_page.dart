@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,11 +30,12 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
   Widget build(BuildContext context) {
     final storage = ref.watch(secureStorageServiceProvider);
     final isBiometricAvailableAsync = ref.watch(isBiometricAvailableProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Security Settings'),
+        title: Text('security.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -42,192 +44,291 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.md),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.pagePadding, vertical: AppSizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Authentication Methods',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
-                  ),
-            ),
-            const SizedBox(height: AppSizes.md),
-
-            // Biometric Authentication
-            isBiometricAvailableAsync.when(
-              data: (isAvailable) {
-                if (!isAvailable) return const SizedBox.shrink();
-
-                return FutureBuilder<bool>(
-                  future: storage.isBiometricEnabled(),
-                  builder: (context, snapshot) {
-                    final isEnabled = snapshot.data ?? false;
-
-                    return Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.fingerprint), // keep as-is (platform-specific)
-                        title: Text(
-                          'Biometric Login',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
-                          ),
-                        ),
-                        subtitle: FutureBuilder<String?>(
-                          future: ref.read(biometricServiceProvider).getPrimaryBiometricType(),
-                          builder: (context, typeSnapshot) {
-                            final type = typeSnapshot.data ?? 'Biometric';
-                            return Text(
-                              'Use $type to sign in quickly',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
-                              ),
-                            );
-                          },
-                        ),
-                        trailing: Transform.scale(
-                          scale: 0.8,
-                          child: Switch(
+            // ── Authentication Methods ─────────────────────────────────
+            _sectionLabel(context, 'security.authMethods'.tr()),
+            const SizedBox(height: AppSizes.sm),
+            _buildCard(context, isDark, children: [
+              // Biometric tile (only if hardware is available)
+              isBiometricAvailableAsync.when(
+                data: (isAvailable) {
+                  if (!isAvailable) return const SizedBox.shrink();
+                  return FutureBuilder<bool>(
+                    future: storage.isBiometricEnabled(),
+                    builder: (context, snapshot) {
+                      final isEnabled = snapshot.data ?? false;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildSwitchTile(
+                            context,
+                            isDark: isDark,
+                            icon: Icons.fingerprint,
+                            iconBg: AppColors.brandTeal.withValues(alpha: 0.14),
+                            iconColor: AppColors.brandTeal,
+                            title: 'security.biometricLogin'.tr(),
+                            subtitle: FutureBuilder<String?>(
+                              future: ref
+                                  .read(biometricServiceProvider)
+                                  .getPrimaryBiometricType(),
+                              builder: (context, typeSnapshot) {
+                                final type = typeSnapshot.data ?? 'Biometric';
+                                return Text(
+                                  'security.biometricSub'.tr(namedArgs: {'type': type}),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                );
+                              },
+                            ),
                             value: isEnabled,
-                            activeThumbColor: Colors.white,
-                            activeTrackColor: AppColors.primaryTeal,
                             onChanged: _isLoadingBiometric
                                 ? null
-                                : (value) => _handleBiometricToggle(value),
+                                : _handleBiometricToggle,
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (e, _) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: AppSizes.md),
+                          _buildDivider(context, isDark),
+                        ],
+                      );
+                    },
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (e, _) => const SizedBox.shrink(),
+              ),
 
-            // Multi-Factor Authentication
-            FutureBuilder<bool>(
-              future: storage.isMfaEnabled(),
-              builder: (context, snapshot) {
-                final isMfaEnabled = snapshot.data ?? false;
-
-                return Card(
-                  child: Column(
+              // MFA tile
+              FutureBuilder<bool>(
+                future: storage.isMfaEnabled(),
+                builder: (context, snapshot) {
+                  final isMfaEnabled = snapshot.data ?? false;
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      ListTile(
-                        leading: const Icon(CupertinoIcons.shield),
-                        title: Text(
-                          'Multi-Factor Authentication',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
-                          ),
-                        ),
+                      _buildSwitchTile(
+                        context,
+                        isDark: isDark,
+                        icon: CupertinoIcons.shield_fill,
+                        iconBg: AppColors.systemBlue.withValues(alpha: 0.14),
+                        iconColor: AppColors.systemBlue,
+                        title: 'security.mfa'.tr(),
                         subtitle: Text(
                           isMfaEnabled
-                              ? 'MFA is enabled for extra security'
-                              : 'Add an extra layer of security',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
-                          ),
+                              ? 'security.mfaEnabled'.tr()
+                              : 'security.mfaSub'.tr(),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        trailing: Transform.scale(
-                          scale: 0.8,
-                          child: Switch(
-                          value: isMfaEnabled,
-                          thumbColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected) ? Colors.white : null,
-                          ),
-                          trackColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected) ? AppColors.primaryTeal : null,
-                          ),
-                          onChanged: _isLoadingMfa
-                              ? null
-                              : (value) {
-                                  if (value) {
-                                    _showMfaSetupOptions();
-                                  } else {
-                                    _handleDisableMfa();
-                                  }
-                                },
-                          ),
-                        ),
+                        value: isMfaEnabled,
+                        onChanged: _isLoadingMfa
+                            ? null
+                            : (value) {
+                                if (value) {
+                                  _showMfaSetupOptions();
+                                } else {
+                                  _handleDisableMfa();
+                                }
+                              },
                       ),
                       if (isMfaEnabled) ...[
-                        const Divider(height: 1),
+                        _buildDivider(context, isDark),
                         FutureBuilder<String?>(
                           future: storage.getMfaMethod(),
                           builder: (context, methodSnapshot) {
                             final method = methodSnapshot.data;
-                            final mfaMethodEnum = MfaMethodExtension.fromString(method);
-
-                            return ListTile(
-                              leading: Icon(
-                                method == 'email' ? CupertinoIcons.envelope : CupertinoIcons.qrcode,
-                                size: 20,
-                              ),
-                              title: Text(
-                                mfaMethodEnum?.displayName ?? 'Unknown Method',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
-                                    ),
-                              ),
+                            final mfaMethodEnum =
+                                MfaMethodExtension.fromString(method);
+                            return _buildActionTile(
+                              context,
+                              isDark: isDark,
+                              icon: method == 'email'
+                                  ? CupertinoIcons.envelope_fill
+                                  : CupertinoIcons.qrcode,
+                              iconBg: AppColors.systemPurple.withValues(alpha: 0.14),
+                              iconColor: AppColors.systemPurple,
+                              title: mfaMethodEnum?.displayName ?? 'Unknown Method',
+                              subtitle: 'security.mfaChangeSub'.tr(),
                               trailing: TextButton(
                                 onPressed: _showMfaSetupOptions,
-                                child: const Text('Change'),
+                                child: Text('security.mfaChange'.tr()),
                               ),
                             );
                           },
                         ),
                       ],
                     ],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: AppSizes.lg),
-
-            Text(
-              'Password',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
-                  ),
-            ),
-            const SizedBox(height: AppSizes.md),
-
-            Card(
-              child: ListTile(
-                leading: const Icon(CupertinoIcons.lock),
-                title: Text(
-                  'Change Password',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
-                  ),
-                ),
-                subtitle: Text(
-                  'Update your account password',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
-                  ),
-                ),
-                trailing: const Icon(CupertinoIcons.chevron_right),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Coming Soon'),
-                      content: const Text('Password change feature coming soon.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
                   );
                 },
               ),
+            ]),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Password ──────────────────────────────────────────────
+            _sectionLabel(context, 'security.changePassword'.tr()),
+            const SizedBox(height: AppSizes.sm),
+            _buildCard(context, isDark, children: [
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.lock_fill,
+                iconBg: AppColors.systemOrange.withValues(alpha: 0.14),
+                iconColor: AppColors.systemOrange,
+                title: 'security.changePassword'.tr(),
+                subtitle: 'security.changePasswordSub'.tr(),
+                trailing: const Icon(CupertinoIcons.chevron_right,
+                    size: 16, color: AppColors.systemGray3),
+                onTap: _showChangePasswordDialog,
+              ),
+            ]),
+            const SizedBox(height: AppSizes.xl),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Layout helpers (match Settings page style) ────────────────────────────
+
+  Widget _sectionLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.secondaryLabel,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
             ),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, bool isDark,
+      {required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+
+  Widget _buildDivider(BuildContext context, bool isDark) {
+    return Divider(
+      height: 0,
+      thickness: 0.5,
+      indent: AppSizes.md + 32 + AppSizes.md,
+      endIndent: AppSizes.md,
+      color: Theme.of(context).dividerColor,
+    );
+  }
+
+  Widget _buildSwitchTile(
+    BuildContext context, {
+    required bool isDark,
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String title,
+    required Widget subtitle,
+    required bool value,
+    required ValueChanged<bool>? onChanged,
+  }) {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            ),
+            child: Icon(icon, color: iconColor, size: 17),
+          ),
+          const SizedBox(width: AppSizes.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                subtitle,
+              ],
+            ),
+          ),
+          Transform.scale(
+            scale: 0.85,
+            child: Switch(
+              value: value,
+              activeThumbColor: Colors.white,
+              activeTrackColor: AppColors.primaryTeal,
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionTile(
+    BuildContext context, {
+    required bool isDark,
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required Widget trailing,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 17),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            trailing,
           ],
         ),
       ),
@@ -259,17 +360,26 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         }
 
         // Check if email is saved (required for biometric login)
-        final email = await storage.getSavedEmail();
+        var email = await storage.getSavedEmail();
 
         if (email == null) {
-          if (mounted) {
-            showErrorDialog(
-              context,
-              'Please enable "Remember me" when logging in to use biometric authentication',
-            );
+          // Fall back to the currently authenticated user's email
+          final authState = ref.read(authNotifierProvider);
+          email = authState.user?.email;
+
+          if (email == null) {
+            if (mounted) {
+              showErrorDialog(
+                context,
+                'Unable to retrieve your email. Please sign out and sign in again.',
+              );
+            }
+            setState(() => _isLoadingBiometric = false);
+            return;
           }
-          setState(() => _isLoadingBiometric = false);
-          return;
+
+          // Save so the login screen can use it for biometric sign-in
+          await storage.saveEmail(email);
         }
 
         await storage.setBiometricEnabled(true);
@@ -318,7 +428,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Choose MFA Method',
+              'security.chooseMfaMethod'.tr(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -357,7 +467,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
             OutlinedButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('common.cancel'.tr()),
             ),
           ],
         ),
@@ -429,14 +539,12 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Setup Authenticator App'),
+        title: Text('security.totpSetupTitle'.tr()),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                '1. Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)',
-              ),
+              Text('security.totpSetupStep1'.tr()),
               const SizedBox(height: AppSizes.md),
               QrImageView(
                 data: uri,
@@ -445,9 +553,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 backgroundColor: Colors.white,
               ),
               const SizedBox(height: AppSizes.md),
-              const Text(
-                'Or enter this key manually:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                'security.totpSetupManual'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: AppSizes.sm),
               SelectableText(
@@ -455,9 +563,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 style: const TextStyle(fontFamily: 'monospace'),
               ),
               const SizedBox(height: AppSizes.lg),
-              const Text(
-                '2. Enter the 6-digit code from your app:',
-              ),
+              Text('security.totpSetupStep2'.tr()),
               const SizedBox(height: AppSizes.sm),
               TextField(
                 controller: codeController,
@@ -483,7 +589,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
               Navigator.pop(context);
               codeController.dispose();
             },
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -516,7 +622,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 codeController.dispose();
               }
             },
-            child: const Text('Verify'),
+            child: Text('security.totpVerify'.tr()),
           ),
         ],
       ),
@@ -528,21 +634,19 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Disable MFA'),
-        content: const Text(
-          'Are you sure you want to disable multi-factor authentication? This will make your account less secure.',
-        ),
+        title: Text('security.disableMfaTitle'.tr()),
+        content: Text('security.disableMfaContent'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
             ),
-            child: const Text('Disable'),
+            child: Text('security.disableMfaConfirm'.tr()),
           ),
         ],
       ),
@@ -573,5 +677,298 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     } finally {
       setState(() => _isLoadingMfa = false);
     }
+  }
+
+  void _showChangePasswordDialog() {
+    final newPwController = TextEditingController();
+    final confirmPwController = TextEditingController();
+
+    int calcStrength(String pw) {
+      int score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.contains(RegExp(r'[A-Z]'))) score++;
+      if (pw.contains(RegExp(r'[0-9]'))) score++;
+      if (pw.contains(RegExp(r'[^A-Za-z0-9]'))) score++;
+      return score;
+    }
+
+    bool isLoading = false;
+    bool showNewPw = false;
+    bool showConfirmPw = false;
+
+    GlassBottomSheet.show(
+      context: context,
+      isDismissible: true,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final String newPw = newPwController.text;
+          final String confirmPw = confirmPwController.text;
+
+          final strength = calcStrength(newPw);
+          final hasMin8 = newPw.length >= 8;
+          final hasUpper = newPw.contains(RegExp(r'[A-Z]'));
+          final hasNumber = newPw.contains(RegExp(r'[0-9]'));
+          final hasSpecial = newPw.contains(RegExp(r'[^A-Za-z0-9]'));
+          final passwordsMatch = confirmPw.isNotEmpty && newPw == confirmPw;
+          final confirmMismatch = confirmPw.isNotEmpty && newPw != confirmPw;
+
+          final strengthColor = strength == 0
+              ? AppColors.systemGray4
+              : strength == 1
+                  ? AppColors.error
+                  : strength == 2
+                      ? AppColors.warning
+                      : strength == 3
+                          ? AppColors.systemBlue
+                          : AppColors.success;
+
+          final strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'][strength];
+
+          Widget reqRow(bool met, String label) => Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      met
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.circle,
+                      size: 13,
+                      color: met ? AppColors.success : AppColors.systemGray3,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: met
+                            ? AppColors.success
+                            : isDark
+                                ? AppColors.systemGray
+                                : AppColors.systemGray2,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: AppSizes.lg,
+              right: AppSizes.lg,
+              top: AppSizes.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSizes.xl,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Header ───────────────────────────────────────────
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.systemOrange.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.lock_fill,
+                        color: AppColors.systemOrange,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'security.changePassword'.tr(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'security.changePasswordHint'.tr(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.lg),
+
+                // ── New Password ──────────────────────────────────────
+                TextField(
+                  controller: newPwController,
+                  obscureText: !showNewPw,
+                  onChanged: (v) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'security.newPassword'.tr(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        showNewPw
+                            ? CupertinoIcons.eye_slash
+                            : CupertinoIcons.eye,
+                        size: 18,
+                        color: AppColors.systemGray,
+                      ),
+                      onPressed: () => setState(() => showNewPw = !showNewPw),
+                    ),
+                  ),
+                ),
+
+                // ── Strength bar ──────────────────────────────────────
+                if (newPw.isNotEmpty) ...[
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    children: List.generate(4, (i) {
+                      final filled = i < strength;
+                      return Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: i < 3 ? 4 : 0),
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: filled
+                                ? strengthColor
+                                : (isDark
+                                    ? AppColors.systemGray3
+                                        .withValues(alpha: 0.2)
+                                    : AppColors.systemGray5),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  if (strengthLabel.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      strengthLabel,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: strengthColor,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSizes.sm),
+                  reqRow(hasMin8, 'At least 8 characters'),
+                  reqRow(hasUpper, 'Uppercase letter'),
+                  reqRow(hasNumber, 'Number'),
+                  reqRow(hasSpecial, 'Special character'),
+                ],
+
+                // ── Confirm Password ──────────────────────────────────
+                const SizedBox(height: AppSizes.md),
+                TextField(
+                  controller: confirmPwController,
+                  obscureText: !showConfirmPw,
+                  onChanged: (v) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'security.confirmNewPassword'.tr(),
+                    errorText:
+                        confirmMismatch ? 'security.passwordMismatch'.tr() : null,
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (confirmPw.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Icon(
+                              passwordsMatch
+                                  ? CupertinoIcons.checkmark_circle_fill
+                                  : CupertinoIcons.xmark_circle_fill,
+                              size: 16,
+                              color: passwordsMatch
+                                  ? AppColors.success
+                                  : AppColors.error,
+                            ),
+                          ),
+                        IconButton(
+                          icon: Icon(
+                            showConfirmPw
+                                ? CupertinoIcons.eye_slash
+                                : CupertinoIcons.eye,
+                            size: 18,
+                            color: AppColors.systemGray,
+                          ),
+                          onPressed: () =>
+                              setState(() => showConfirmPw = !showConfirmPw),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Actions ───────────────────────────────────────────
+                const SizedBox(height: AppSizes.lg),
+                ElevatedButton(
+                  onPressed: isLoading || !hasMin8 || confirmMismatch || !passwordsMatch
+                      ? null
+                      : () async {
+                          setState(() => isLoading = true);
+                          try {
+                            await ref
+                                .read(authRepositoryProvider)
+                                .updatePassword(newPw);
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+                            newPwController.dispose();
+                            confirmPwController.dispose();
+                            SuccessDialog.show(
+                              context,
+                              title: 'Updated',
+                              message: 'Password changed successfully',
+                              autoDismissDuration:
+                                  const Duration(milliseconds: 800),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            setState(() => isLoading = false);
+                            showErrorDialog(
+                              context,
+                              'Failed to change password: ${e.toString()}',
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(AppSizes.buttonHeightMd),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text('security.updatePassword'.tr()),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                OutlinedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                          newPwController.dispose();
+                          confirmPwController.dispose();
+                        },
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(AppSizes.buttonHeightMd),
+                  ),
+                  child: Text('common.cancel'.tr()),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }

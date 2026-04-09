@@ -415,7 +415,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF141414),
+        fillColor: AppColors.inputFillDark,
         suffixIconColor: AppColors.tertiaryLabelDark,
         prefixIconColor: AppColors.tertiaryLabelDark,
         hintStyle: TextStyle(

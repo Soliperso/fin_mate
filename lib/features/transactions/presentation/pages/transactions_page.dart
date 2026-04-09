@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/config/supabase_client.dart';
+import '../../data/services/csv_import_service.dart';
+import '../widgets/import_preview_bottom_sheet.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -105,7 +110,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    child: const Text('Cancel'),
+                    child: Text('common.cancel'.tr()),
                   )
                 : const SizedBox.shrink(key: ValueKey('leading-empty')),
           ),
@@ -130,7 +135,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           fontWeight: FontWeight.w600,
                         ),
                   )
-                : const Text('Transactions', key: ValueKey('title')),
+                : Text('nav.transactions'.tr(), key: const ValueKey('title')),
           ),
           actions: [
             AnimatedSwitcher(
@@ -191,6 +196,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(right: AppSizes.sm),
+                          child: CircularIconButton(
+                            icon: CupertinoIcons.arrow_down_to_line,
+                            onTap: () => _importCsv(context),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: AppSizes.sm),
                           child: Badge(
                             isLabelVisible: state.activeFilterCount > 0,
                             label: Text('${state.activeFilterCount}'),
@@ -228,10 +240,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       ),
                     ),
                     icon: const Icon(CupertinoIcons.add, size: 20),
-                    label: const Text(
-                      'Add Transaction',
+                    label: Text(
+                      'addTransaction.newTitle'.tr(),
                       style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                     ),
                   ),
                 ),
@@ -264,7 +276,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             children: [
                               EmptyStateCard(
                                 icon: CupertinoIcons.doc_text,
-                                title: 'No Transactions Yet',
+                                title: 'transactions.noTransactions'.tr(),
                                 message:
                                     'Start by adding your first transaction to begin tracking your finances.',
                                 backgroundColor: AppColors.brandTeal,
@@ -289,9 +301,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   ),
                                   icon:
                                       const Icon(CupertinoIcons.add, size: 20),
-                                  label: const Text(
-                                    'Add Transaction',
-                                    style: TextStyle(
+                                  label: Text(
+                                    'addTransaction.newTitle'.tr(),
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16),
                                   ),
@@ -340,16 +352,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                 children: [
                                   Expanded(
                                       child: _buildFilterChip(context, 'All',
-                                          state.selectedFilter, notifier)),
+                                          'transactions.filterAll'.tr(), state.selectedFilter, notifier)),
                                   const SizedBox(width: AppSizes.sm),
                                   Expanded(
                                       child: _buildFilterChip(context, 'Income',
-                                          state.selectedFilter, notifier)),
+                                          'transactions.filterIncome'.tr(), state.selectedFilter, notifier)),
                                   const SizedBox(width: AppSizes.sm),
                                   Expanded(
                                       child: _buildFilterChip(
                                           context,
                                           'Expense',
+                                          'transactions.filterExpense'.tr(),
                                           state.selectedFilter,
                                           notifier)),
                                 ],
@@ -394,7 +407,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             focusNode: _searchFocusNode,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: InputDecoration(
-              hintText: 'Search transactions…',
+              hintText: 'transactions.searchHint'.tr(),
               hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               prefixIcon: const Icon(CupertinoIcons.search, size: 18),
               suffixIcon: _searchController.text.isNotEmpty
@@ -457,7 +470,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     setState(() => _recentSearches = []);
                   },
                   child: Text(
-                    'Clear',
+                    'common.cancel'.tr(),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.brandTeal,
                           fontWeight: FontWeight.w500,
@@ -523,6 +536,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget _buildFilterChip(
     BuildContext context,
     String filter,
+    String label,
     String selectedFilter,
     TransactionListNotifier notifier,
   ) {
@@ -543,7 +557,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ),
         child: Text(
-          filter,
+          label,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
@@ -644,7 +658,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Income',
+                            'transactions.filterIncome'.tr(),
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
@@ -698,7 +712,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Expenses',
+                            'transactions.filterExpense'.tr(),
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
@@ -787,7 +801,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           children: [
             EmptyStateCard(
               icon: CupertinoIcons.doc_text,
-              title: 'No Transactions Found',
+              title: 'transactions.noTransactionsFound'.tr(),
               message: hasAnyFilter
                   ? 'Try adjusting your filters or search query to find transactions.'
                   : 'No transactions found.',
@@ -816,9 +830,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ),
                   icon: const Icon(CupertinoIcons.arrow_counterclockwise,
                       size: 20),
-                  label: const Text(
-                    'Clear Filters',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  label: Text(
+                    'common.cancel'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -838,9 +852,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     ),
                   ),
                   icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'Add Transaction',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  label: Text(
+                    'addTransaction.newTitle'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -989,9 +1003,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         }
         if (context.mounted) {
           if (success) {
-            SuccessSnackbar.show(context, message: 'Transaction deleted');
+            SuccessSnackbar.show(context, message: 'transactions.deleted'.tr());
           } else {
-            ErrorSnackbar.show(context, message: 'Failed to delete transaction');
+            ErrorSnackbar.show(context, message: 'transactions.failedToDelete'.tr());
           }
         }
       },
@@ -1212,7 +1226,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -1236,13 +1250,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 if (success) {
                   SuccessSnackbar.show(
                     context,
-                    message:
-                        '$count transaction${count == 1 ? '' : 's'} deleted',
+                    message: 'transactions.deleted'.tr(),
                   );
                 } else {
                   ErrorSnackbar.show(
                     context,
-                    message: 'Failed to delete transactions',
+                    message: 'transactions.failedToDeleteMultiple'.tr(),
                   );
                 }
               }
@@ -1250,11 +1263,69 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,
             ),
-            child: const Text('Delete'),
+            child: Text('common.delete'.tr()),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _importCsv(BuildContext context) async {
+    // 1. Pick CSV file
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+    if (result == null || result.files.single.path == null) return;
+
+    // 2. Read content
+    final content =
+        await File(result.files.single.path!).readAsString();
+
+    // 3. Load accounts + categories
+    final repo = ref.read(transactionRepositoryProvider);
+    final accounts = await repo.getAccounts();
+    final categories = await repo.getCategories();
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // 4. Parse
+    CsvImportResult importResult;
+    try {
+      importResult =
+          CsvImportService().parse(content, accounts, categories, userId);
+    } on FormatException catch (e) {
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Invalid File'),
+          content: Text(e.message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (importResult.transactions.isEmpty && importResult.errors.isEmpty) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No valid transactions found in the file.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // 5. Show preview sheet
+    if (!context.mounted) return;
+    await ImportPreviewBottomSheet.show(context, ref, importResult);
   }
 
   void _showFilterBottomSheet(BuildContext context) {
@@ -1395,7 +1466,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           child: TextField(
                             controller: _minAmountController,
                             decoration: InputDecoration(
-                              labelText: 'Min Amount',
+                              labelText: 'transactions.minAmount'.tr(),
                               prefixText: '\$ ',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -1414,7 +1485,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           child: TextField(
                             controller: _maxAmountController,
                             decoration: InputDecoration(
-                              labelText: 'Max Amount',
+                              labelText: 'transactions.maxAmount'.tr(),
                               prefixText: '\$ ',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),

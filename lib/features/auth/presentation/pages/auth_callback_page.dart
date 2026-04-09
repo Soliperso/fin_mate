@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,7 @@ class AuthCallbackPage extends ConsumerStatefulWidget {
 
 class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
   bool _isProcessing = true;
-  String _message = 'Processing...';
+  String _message = '';
   bool _isSuccess = false;
 
   @override
@@ -37,7 +38,7 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
 
         setState(() {
           _isSuccess = true;
-          _message = 'Email confirmed successfully!';
+          _message = 'auth.callback.emailConfirmed'.tr();
           _isProcessing = false;
         });
 
@@ -52,7 +53,7 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
         // No session found - might be password reset or expired link
         setState(() {
           _isSuccess = false;
-          _message = 'Email confirmed! Please log in to continue.';
+          _message = 'auth.callback.emailConfirmedLogin'.tr();
           _isProcessing = false;
         });
 
@@ -66,7 +67,7 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
     } catch (e) {
       setState(() {
         _isSuccess = false;
-        _message = 'Verification failed. Please try again.';
+        _message = 'auth.callback.verificationFailed'.tr();
         _isProcessing = false;
       });
 
@@ -99,7 +100,7 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
                   ),
                 const SizedBox(height: AppSizes.xl),
                 Text(
-                  _message,
+                  _isProcessing ? 'auth.callback.processing'.tr() : _message,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -109,8 +110,8 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
                 if (!_isProcessing) ...[
                   Text(
                     _isSuccess
-                        ? 'Redirecting to dashboard...'
-                        : 'Redirecting to login...',
+                        ? 'auth.callback.redirectDashboard'.tr()
+                        : 'auth.callback.redirectLogin'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -125,7 +126,11 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
                         context.go('/login');
                       }
                     },
-                    child: Text(_isSuccess ? 'Go to Dashboard' : 'Go to Login'),
+                    child: Text(
+                      _isSuccess
+                          ? 'auth.callback.goToDashboard'.tr()
+                          : 'auth.callback.goToLogin'.tr(),
+                    ),
                   ),
                 ],
               ],

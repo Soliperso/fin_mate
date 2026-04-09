@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/subscription_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
 
@@ -32,7 +33,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
         return GlassContainer(
           padding: const EdgeInsets.all(20),
           enableGlass: false,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -97,7 +98,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
                           color: isPremium
                               ? AppColors.warning.withValues(alpha: isDark ? 0.2 : 0.1)
                               : (isDark ? AppColors.cardBackgroundDark : AppColors.lightGray),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                         ),
                         child: Text(
                           tier.toUpperCase(),
@@ -180,7 +181,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
       error: (error, stack) => GlassContainer(
         padding: const EdgeInsets.all(20),
         enableGlass: false,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         child: Column(
           children: [
             const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
@@ -265,7 +266,7 @@ class _LoadingCard extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.all(20),
       enableGlass: false,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       child: const Center(
         child: CircularProgressIndicator(),
       ),

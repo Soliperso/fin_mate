@@ -1,8 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -44,18 +44,16 @@ class UpcomingBillsCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Upcoming Bills',
+                  'upcomingBills.title'.tr(),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 GestureDetector(
                   onTap: () => context.push('/recurring-transactions'),
                   child: Text(
-                    'View All',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
+                    'upcomingBills.viewAll'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: AppColors.brandTeal,
-                      letterSpacing: -0.24,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -92,7 +90,7 @@ class UpcomingBillsCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSizes.xs),
                     Text(
-                      'No upcoming bills in the next 30 days',
+                      'upcomingBills.noBills'.tr(),
                       style: Theme.of(context).textTheme.bodySmall,
                       textAlign: TextAlign.center,
                     ),
@@ -159,12 +157,12 @@ class _BillRow extends StatelessWidget {
     return AppColors.systemGreen;
   }
 
-  String _dueLabel() {
-    if (bill.isOverdue) return 'Overdue';
+  String _dueLabel(BuildContext context) {
+    if (bill.isOverdue) return 'upcomingBills.overdue'.tr();
     final days = bill.daysUntilDue;
-    if (days == 0) return 'Due today';
-    if (days == 1) return 'Due tomorrow';
-    return 'Due in $days days';
+    if (days == 0) return 'upcomingBills.dueToday'.tr();
+    if (days == 1) return 'upcomingBills.dueTomorrow'.tr();
+    return 'upcomingBills.dueInDays'.tr(namedArgs: {'days': '$days'});
   }
 
   @override
@@ -218,7 +216,7 @@ class _BillRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                   ),
                   child: Text(
-                    _dueLabel(),
+                    _dueLabel(context),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

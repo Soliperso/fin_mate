@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/services/payment_service.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../widgets/subscription_status_card.dart';
@@ -27,9 +28,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Subscription'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: subscriptionStatus.when(

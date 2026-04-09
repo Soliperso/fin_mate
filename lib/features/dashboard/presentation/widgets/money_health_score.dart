@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -15,10 +16,10 @@ class MoneyHealthScore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _hasNoData ? AppColors.systemGray : _getScoreColor(score);
-    final label = _hasNoData ? 'No Data Yet' : _getScoreLabel(score);
+    final label = _hasNoData ? 'moneyHealth.noDataYet'.tr() : _getScoreLabel(score);
     final subtitle = _hasNoData
-        ? 'Add income & expense transactions to get your score'
-        : 'Based on your spending & savings (last 30 days)';
+        ? 'moneyHealth.addTransactionsMsg'.tr()
+        : 'moneyHealth.basedOnMsg'.tr();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
@@ -69,14 +70,14 @@ class MoneyHealthScore extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Money Health Score',
+                  'moneyHealth.title'.tr(),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSizes.xs),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm + 2, vertical: AppSizes.xs - 1),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull),
@@ -89,7 +90,7 @@ class MoneyHealthScore extends StatelessWidget {
                         ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSizes.xs + 2),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall,
@@ -109,9 +110,9 @@ class MoneyHealthScore extends StatelessWidget {
   }
 
   String _getScoreLabel(int score) {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Fair';
-    return 'Needs Improvement';
+    if (score >= 80) return 'moneyHealth.excellent'.tr();
+    if (score >= 60) return 'moneyHealth.good'.tr();
+    if (score >= 40) return 'moneyHealth.fair'.tr();
+    return 'moneyHealth.needsImprovement'.tr();
   }
 }

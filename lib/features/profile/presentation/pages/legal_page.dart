@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../widgets/legal_document_view.dart';
 
 class LegalPage extends StatelessWidget {
@@ -16,6 +18,12 @@ class LegalPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Legal & Compliance'),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.pagePadding),

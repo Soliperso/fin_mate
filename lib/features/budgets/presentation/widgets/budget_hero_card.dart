@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -31,9 +32,9 @@ class BudgetHeroCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total Budgeted',
+            'budgetHero.totalBudgeted'.tr(),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: Colors.white.withValues(alpha: 0.9),
                   letterSpacing: 0.5,
                 ),
           ),
@@ -49,17 +50,17 @@ class BudgetHeroCard extends ConsumerWidget {
           const SizedBox(height: AppSizes.md),
           Row(
             children: [
-              HeroStatBadge(label: 'Spent', value: currency.format(totalSpent)),
+              HeroStatBadge(label: 'budgetHero.spent'.tr(), value: currency.format(totalSpent)),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'Remaining', value: currency.format(totalRemaining.abs())),
+              HeroStatBadge(label: 'budgetHero.remaining'.tr(), value: currency.format(totalRemaining.abs())),
               const SizedBox(width: AppSizes.sm),
               HeroStatBadge(
-                label: 'At Risk',
+                label: 'budgetHero.atRisk'.tr(),
                 value: atRisk == 0
-                    ? 'None'
+                    ? 'budgetHero.none'.tr()
                     : atRisk == 1
-                        ? '1 budget'
-                        : '$atRisk budgets',
+                        ? 'budgetHero.oneBudget'.tr()
+                        : 'budgetHero.budgetsAtRisk'.tr(namedArgs: {'count': '$atRisk'}),
                 highlight: atRisk > 0,
               ),
             ],
@@ -80,10 +81,9 @@ class BudgetHeroCard extends ConsumerWidget {
               ),
               const SizedBox(width: AppSizes.sm),
               Text(
-                '${(overallProgress * 100).toStringAsFixed(0)}% used',
-                style: const TextStyle(
+                '${(overallProgress * 100).toStringAsFixed(0)}${'budgets.percentUsed'.tr()}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: Colors.white,
-                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
               ),

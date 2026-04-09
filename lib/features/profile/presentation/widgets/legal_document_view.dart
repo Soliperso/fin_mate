@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 
 class LegalDocumentView extends StatelessWidget {
   final String title;
@@ -24,6 +27,12 @@ class LegalDocumentView extends StatelessWidget {
         title: Text(title),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(

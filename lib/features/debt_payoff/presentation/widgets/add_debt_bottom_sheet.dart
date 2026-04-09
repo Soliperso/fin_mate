@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Add Debt',
+                      'addDebt.title'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -122,44 +123,44 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                 // Name
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Debt Name',
-                    hintText: 'e.g., Chase Sapphire, Car Loan',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'addDebt.debtNameLabel'.tr(),
+                    hintText: 'addDebt.debtNameHint'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Please enter a name' : null,
+                      (v == null || v.trim().isEmpty) ? 'addDebt.nameRequired'.tr() : null,
                 ),
                 const SizedBox(height: AppSizes.md),
 
                 // Debt Type
                 DropdownButtonFormField<String>(
                   initialValue: _selectedDebtType,
-                  decoration: const InputDecoration(
-                    labelText: 'Debt Type',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'addDebt.debtType'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   items: _debtTypes
                       .map((t) => DropdownMenuItem(value: t.$1, child: Text(t.$2)))
                       .toList(),
-                  onChanged: (v) => setState(() => _selectedDebtType = v!),
+                  onChanged: (v) { if (v != null) setState(() => _selectedDebtType = v); },
                 ),
                 const SizedBox(height: AppSizes.md),
 
                 // Balance
                 TextFormField(
                   controller: _balanceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Balance (\$)',
+                  decoration: InputDecoration(
+                    labelText: 'addDebt.balance'.tr(),
                     prefixText: '\$ ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Required';
-                    if (double.tryParse(v) == null) return 'Invalid number';
-                    if (double.parse(v) < 0) return 'Must be 0 or more';
+                    if (v == null || v.isEmpty) return 'common.required'.tr();
+                    if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0) return 'addDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -171,15 +172,15 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     Expanded(
                       child: TextFormField(
                         controller: _interestRateController,
-                        decoration: const InputDecoration(
-                          labelText: 'Interest Rate (%)',
+                        decoration: InputDecoration(
+                          labelText: 'addDebt.interestRate'.tr(),
                           suffixText: '%',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (double.tryParse(v) == null) return 'Invalid';
+                          if (v == null || v.isEmpty) return 'common.required'.tr();
+                          if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
                           return null;
                         },
                       ),
@@ -189,16 +190,16 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     Expanded(
                       child: TextFormField(
                         controller: _minimumPaymentController,
-                        decoration: const InputDecoration(
-                          labelText: 'Min. Payment (\$)',
+                        decoration: InputDecoration(
+                          labelText: 'addDebt.minPayment'.tr(),
                           prefixText: '\$ ',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (double.tryParse(v) == null) return 'Invalid';
-                          if (double.parse(v) <= 0) return 'Must be > 0';
+                          if (v == null || v.isEmpty) return 'common.required'.tr();
+                          if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
+                          if (double.parse(v) <= 0) return 'addDebt.mustBeGreaterThanZero'.tr();
                           return null;
                         },
                       ),
@@ -210,16 +211,16 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                 // Due Day (optional)
                 TextFormField(
                   controller: _dueDayController,
-                  decoration: const InputDecoration(
-                    labelText: 'Due Day (optional)',
-                    hintText: '1–31',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'addDebt.dueDay'.tr(),
+                    hintText: 'addDebt.dueDayHint'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final day = int.tryParse(v);
-                    if (day == null || day < 1 || day > 31) return 'Must be 1–31';
+                    if (day == null || day < 1 || day > 31) return 'addDebt.mustBe1to31'.tr();
                     return null;
                   },
                 ),
@@ -228,9 +229,9 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                 // Notes (optional)
                 TextFormField(
                   controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'addDebt.notes'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
                 ),
@@ -246,7 +247,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                           shape: const StadiumBorder(),
                         ),
                         onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text('common.cancel'.tr()),
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),
@@ -265,7 +266,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                               )
-                            : const Text('Add Debt'),
+                            : Text('addDebt.addButton'.tr()),
                       ),
                     ),
                   ],

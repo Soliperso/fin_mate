@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -38,7 +39,7 @@ class DebtSummaryCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Total Debt',
+              'debtSummary.totalDebt'.tr(),
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -57,14 +58,14 @@ class DebtSummaryCard extends ConsumerWidget {
                 Expanded(
                   child: _buildStat(
                     context,
-                    label: 'Accounts',
+                    label: 'debtSummary.accounts'.tr(),
                     value: '$debtCount',
                   ),
                 ),
                 Expanded(
                   child: _buildStat(
                     context,
-                    label: 'Min. Monthly',
+                    label: 'debtSummary.minMonthly'.tr(),
                     value: currencyFormat.format(totalMinPayment),
                   ),
                 ),
@@ -74,7 +75,7 @@ class DebtSummaryCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'DTI Ratio',
+                          'debtSummary.dtiRatio'.tr(),
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),

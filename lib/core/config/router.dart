@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoPage;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
@@ -473,35 +474,35 @@ class _MainShellState extends State<MainShell>
                 _TabItem(
                   icon: CupertinoIcons.square_grid_2x2,
                   activeIcon: CupertinoIcons.square_grid_2x2_fill,
-                  label: 'Dashboard',
+                  label: 'nav.dashboard'.tr(),
                   isSelected: selectedIndex == 0,
                   onTap: () => context.go('/dashboard'),
                 ),
                 _TabItem(
                   icon: CupertinoIcons.arrow_right_arrow_left,
                   activeIcon: CupertinoIcons.arrow_right_arrow_left,
-                  label: 'Transactions',
+                  label: 'nav.transactions'.tr(),
                   isSelected: selectedIndex == 1,
                   onTap: () => context.go('/transactions'),
                 ),
                 _TabItem(
                   icon: CupertinoIcons.chart_pie,
                   activeIcon: CupertinoIcons.chart_pie_fill,
-                  label: 'Budgets',
+                  label: 'nav.budgets'.tr(),
                   isSelected: selectedIndex == 2,
                   onTap: () => context.go('/budgets'),
                 ),
                 _TabItem(
                   icon: CupertinoIcons.creditcard,
                   activeIcon: CupertinoIcons.creditcard_fill,
-                  label: 'Debt',
+                  label: 'nav.debt'.tr(),
                   isSelected: selectedIndex == 3,
                   onTap: () => context.go('/debt'),
                 ),
                 _TabItem(
                   icon: CupertinoIcons.person,
                   activeIcon: CupertinoIcons.person_fill,
-                  label: 'Profile',
+                  label: 'nav.profile'.tr(),
                   isSelected: selectedIndex == 4,
                   onTap: () => context.go('/profile'),
                 ),

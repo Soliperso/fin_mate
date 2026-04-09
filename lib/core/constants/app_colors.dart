@@ -48,6 +48,7 @@ class AppColors {
 
   // ── System Backgrounds — Dark ──────────────────────────────────────────────
   static const systemBackgroundDark = Color(0xFF000000);
+  static const inputFillDark = Color(0xFF141414); // slightly elevated input surface in dark mode
   static const secondarySystemBackgroundDark = Color(0xFF1C1C1E);
   static const tertiarySystemBackgroundDark = Color(0xFF2C2C2E);
   static const systemGroupedBackgroundDark = Color(0xFF000000);

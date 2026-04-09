@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -43,11 +43,11 @@ class CashFlowCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Monthly Cash Flow',
+                  'cashFlowCard.title'.tr(),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  'This month',
+                  'cashFlowCard.thisMonth'.tr(),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -61,7 +61,7 @@ class CashFlowCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _FlowCell(
-                    label: 'Income',
+                    label: 'cashFlowCard.income'.tr(),
                     amount: income,
                     color: AppColors.systemGreen,
                     icon: CupertinoIcons.arrow_down,
@@ -75,7 +75,7 @@ class CashFlowCard extends ConsumerWidget {
                 ),
                 Expanded(
                   child: _FlowCell(
-                    label: 'Expenses',
+                    label: 'cashFlowCard.expenses'.tr(),
                     amount: expenses,
                     color: AppColors.systemRed,
                     icon: CupertinoIcons.arrow_up,
@@ -104,7 +104,7 @@ class CashFlowCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Net Balance',
+                  'cashFlowCard.netBalance'.tr(),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.secondaryLabel,
                       ),

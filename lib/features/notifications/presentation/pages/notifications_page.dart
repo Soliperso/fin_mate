@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,14 @@ class NotificationsPage extends ConsumerStatefulWidget {
 
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   /// Groups notifications into Today / Yesterday / Earlier buckets.
+  String _translateGroup(String key) {
+    switch (key) {
+      case 'Today': return 'common.today'.tr();
+      case 'Yesterday': return 'common.yesterday'.tr();
+      default: return 'common.earlier'.tr();
+    }
+  }
+
   Map<String, List<AppNotification>> _groupByDate(
       List<AppNotification> notifications) {
     final groups = <String, List<AppNotification>>{};
@@ -61,7 +70,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Notifications'),
+        title: Text('notifPage.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -76,9 +85,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     .read(notificationsProvider.notifier)
                     .markAllAsRead();
               },
-              child: const Text(
-                'Mark all read',
-                style: TextStyle(
+              child: Text(
+                'notifPage.markAllRead'.tr(),
+                style: const TextStyle(
                   color: AppColors.brandTeal,
                   fontWeight: FontWeight.w600,
                 ),
@@ -99,13 +108,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(AppSizes.lg),
-                    children: const [
-                      SizedBox(height: 100),
+                    children: [
+                      const SizedBox(height: 100),
                       EmptyStateCard(
                         icon: CupertinoIcons.bell,
-                        title: 'No notifications',
-                        message:
-                            'You\'re all caught up! Notifications about budgets, bills, and financial insights will appear here.',
+                        title: 'notifPage.emptyTitle'.tr(),
+                        message: 'notifPage.emptyMessage'.tr(),
                         backgroundColor: AppColors.brandTeal,
                       ),
                     ],
@@ -145,7 +153,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: Row(
         children: [
-          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          Text(_translateGroup(label), style: Theme.of(context).textTheme.titleLarge),
           if (unread > 0) ...[
             const SizedBox(width: AppSizes.sm),
             Container(

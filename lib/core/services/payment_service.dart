@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/env_config.dart';
@@ -11,8 +8,6 @@ class PaymentService {
   static final PaymentService _instance = PaymentService._internal();
   factory PaymentService() => _instance;
   PaymentService._internal();
-
-  bool _isInitialized = false;
 
   /// Your Supabase Edge Function URL for creating payment intents/subscriptions
   /// Example: https://your-project.supabase.co/functions/v1/create-subscription
@@ -24,22 +19,7 @@ class PaymentService {
 
   /// Initialize Stripe SDK
   Future<void> initialize() async {
-    if (_isInitialized) {
-      return;
-    }
-
-    try {
-      Stripe.publishableKey = EnvConfig.stripePublishableKey;
-
-      // Merchant identifier removed - Apple Pay disabled for beta testing
-      // When enabling Apple Pay, set: Stripe.merchantIdentifier = 'merchant.com.finmate.app';
-
-      await Stripe.instance.applySettings();
-
-      _isInitialized = true;
-    } catch (e) {
-      rethrow;
-    }
+    // No-op — Stripe SDK disabled until post-MVP
   }
 
   /// Create a subscription checkout session
@@ -109,39 +89,8 @@ class PaymentService {
     }
   }
 
-  /// Process a payment with the payment sheet
-  Future<bool> presentPaymentSheet(String clientSecret) async {
-    try {
-      // Initialize the payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'Finmate',
-          style: ThemeMode.system,
-          // Optional: Enable Apple Pay / Google Pay
-          googlePay: const PaymentSheetGooglePay(
-            merchantCountryCode: 'US',
-            currencyCode: 'USD',
-            testEnv: kDebugMode,
-          ),
-          // Apple Pay disabled for beta testing (requires Apple Developer merchant ID)
-          // applePay: const PaymentSheetApplePay(
-          //   merchantCountryCode: 'US',
-          // ),
-        ),
-      );
-
-      // Present the payment sheet
-      await Stripe.instance.presentPaymentSheet();
-
-      return true;
-    } catch (e) {
-      if (e is StripeException) {
-      } else {
-      }
-      return false;
-    }
-  }
+  /// Stubbed — requires flutter_stripe SDK (post-MVP).
+  Future<bool> presentPaymentSheet(String clientSecret) async => false;
 
   /// Get subscription status from Supabase
   /// This queries your database which is kept in sync via Stripe webhooks
@@ -341,48 +290,8 @@ class PaymentService {
   }
 
   /// Present Payment Sheet for adding a payment method
-  Future<bool> presentPaymentMethodSheet() async {
-    try {
-      // Create setup intent
-      final setupData = await createSetupIntent();
-      if (setupData == null || setupData['clientSecret'] == null) {
-        return false;
-      }
-
-      // Initialize the payment sheet for setup
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          setupIntentClientSecret: setupData['clientSecret'],
-          merchantDisplayName: 'Finmate',
-          style: ThemeMode.system,
-          customerId: setupData['customerId'],
-          billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(
-            name: CollectionMode.always,
-            email: CollectionMode.always,
-          ),
-          // Apple Pay disabled for beta testing (requires Apple Developer merchant ID)
-          // applePay: const PaymentSheetApplePay(
-          //   merchantCountryCode: 'US',
-          // ),
-          googlePay: const PaymentSheetGooglePay(
-            merchantCountryCode: 'US',
-            currencyCode: 'USD',
-            testEnv: kDebugMode,
-          ),
-        ),
-      );
-
-      // Present the payment sheet
-      await Stripe.instance.presentPaymentSheet();
-
-      return true;
-    } catch (e) {
-      if (e is StripeException) {
-      } else {
-      }
-      return false;
-    }
-  }
+  /// Stubbed — requires flutter_stripe SDK (post-MVP).
+  Future<bool> presentPaymentMethodSheet() async => false;
 
   /// Get all payment methods for the user
   Future<List<Map<String, dynamic>>> getPaymentMethods() async {
@@ -486,67 +395,6 @@ class PaymentService {
 
   /// Create subscription and present Payment Sheet (in-app purchase)
   /// Returns true if subscription was created successfully
-  Future<bool> createSubscriptionWithPaymentSheet({
-    required String priceId,
-  }) async {
-    try {
-
-      // Create subscription via Edge Function
-      final response = await http.post(
-        Uri.parse('$_functionsUrl/create-subscription-payment-sheet'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
-        },
-        body: jsonEncode({
-          'priceId': priceId,
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        return false;
-      }
-
-      final data = jsonDecode(response.body);
-      final clientSecret = data['clientSecret'] as String?;
-      final customerId = data['customerId'] as String?;
-
-      if (clientSecret == null) {
-        return false;
-      }
-
-      // Initialize the payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          setupIntentClientSecret: clientSecret,
-          merchantDisplayName: 'Finmate',
-          style: ThemeMode.system,
-          customerId: customerId,
-          billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(
-            name: CollectionMode.always,
-            email: CollectionMode.always,
-          ),
-          // Apple Pay disabled for beta testing (requires Apple Developer merchant ID)
-          // applePay: const PaymentSheetApplePay(
-          //   merchantCountryCode: 'US',
-          // ),
-          googlePay: const PaymentSheetGooglePay(
-            merchantCountryCode: 'US',
-            currencyCode: 'USD',
-            testEnv: kDebugMode,
-          ),
-        ),
-      );
-
-      // Present the payment sheet
-      await Stripe.instance.presentPaymentSheet();
-
-      return true;
-    } catch (e) {
-      if (e is StripeException) {
-      } else {
-      }
-      return false;
-    }
-  }
+  /// Stubbed — requires flutter_stripe SDK (post-MVP).
+  Future<bool> createSubscriptionWithPaymentSheet({required String priceId}) async => false;
 }

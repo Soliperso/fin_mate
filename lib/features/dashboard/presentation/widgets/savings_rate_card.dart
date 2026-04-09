@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,16 +34,16 @@ class SavingsRateCard extends ConsumerWidget {
     String rateLabel;
     if (income <= 0) {
       rateColor = AppColors.systemGray;
-      rateLabel = 'No income recorded';
+      rateLabel = 'savingsRate.noIncome'.tr();
     } else if (rate >= 20) {
       rateColor = AppColors.systemGreen;
-      rateLabel = 'On track';
+      rateLabel = 'savingsRate.onTrack'.tr();
     } else if (rate >= 0) {
       rateColor = AppColors.systemOrange;
-      rateLabel = 'Could improve';
+      rateLabel = 'savingsRate.couldImprove'.tr();
     } else {
       rateColor = AppColors.systemRed;
-      rateLabel = 'Overspending';
+      rateLabel = 'savingsRate.overspending'.tr();
     }
 
     return GestureDetector(
@@ -78,7 +79,7 @@ class SavingsRateCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Savings Rate',
+                  'savingsRate.label'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.secondaryLabel,
                       ),

@@ -1,8 +1,8 @@
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/glass_container.dart';
@@ -35,13 +35,17 @@ class PayoffTimelineChart extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (result.schedule.isEmpty) return const SizedBox.shrink();
 
+    final locale = context.locale.languageCode;
+    final dateFormatFull = DateFormat('MMM yyyy', locale);
+    final dateFormatShort = DateFormat('MMM yy', locale);
+
     final initialBalance = debts.fold(0.0, (s, d) => s + d.balance);
     final maxY = max(
           initialBalance,
           result.schedule.map((s) => s.totalBalance).reduce(max),
         ) *
         1.1;
-    final debtFreeLabel = DateFormat('MMM yyyy').format(result.debtFreeDate);
+    final debtFreeLabel = dateFormatFull.format(result.debtFreeDate);
 
     final lines = _buildStackedAreas();
     if (lines.isEmpty) return const SizedBox.shrink();
@@ -58,7 +62,7 @@ class PayoffTimelineChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Debt Payoff Breakdown',
+            'payoffChart.title'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -112,7 +116,7 @@ class PayoffTimelineChart extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
-                            DateFormat('MMM yy')
+                            dateFormatShort
                                 .format(result.schedule[snapIdx].date),
                             style: Theme.of(context)
                                 .textTheme
@@ -199,7 +203,7 @@ class PayoffTimelineChart extends StatelessWidget {
 
                         // First item carries the date header on its own line
                         final datePrefix = i == 0
-                            ? '${DateFormat('MMM yyyy').format(snap.date)}\n'
+                            ? '${dateFormatFull.format(snap.date)}\n'
                             : '';
 
                         return LineTooltipItem(
@@ -211,7 +215,7 @@ class PayoffTimelineChart extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.start,
                           children: const [],
                         );
                       }).toList();
@@ -265,7 +269,7 @@ class PayoffTimelineChart extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Debt-free: $debtFreeLabel',
+                  'payoffChart.debtFreeLabel'.tr(namedArgs: {'date': debtFreeLabel}),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.success,
                         fontWeight: FontWeight.w600,

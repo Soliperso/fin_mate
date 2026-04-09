@@ -1,8 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -37,7 +37,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 Icon(CupertinoIcons.exclamationmark_circle,
                     size: 48, color: AppColors.error.withValues(alpha: 0.5)),
                 const SizedBox(height: AppSizes.md),
-                Text('Failed to load transaction',
+                Text('transactionDetail.failedToLoad'.tr(),
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium
@@ -46,7 +46,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 TextButton(
                   onPressed: () =>
                       ref.invalidate(_transactionDetailProvider(transactionId)),
-                  child: const Text('Retry'),
+                  child: Text('common.retry'.tr()),
                 ),
               ],
             ),
@@ -63,12 +63,12 @@ class TransactionDetailPage extends ConsumerWidget {
                         size: 48,
                         color: AppColors.textSecondary.withValues(alpha: 0.5)),
                     const SizedBox(height: AppSizes.md),
-                    Text('Transaction not found',
+                    Text('transactionDetail.notFound'.tr(),
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: AppSizes.sm),
                     TextButton(
                       onPressed: () => context.pop(),
-                      child: const Text('Go back'),
+                      child: Text('transactionDetail.goBack'.tr()),
                     ),
                   ],
                 ),
@@ -170,26 +170,26 @@ class TransactionDetailPage extends ConsumerWidget {
                   _panelRow(
                     context,
                     label: transaction.type == TransactionType.transfer
-                        ? 'From'
-                        : 'Account',
+                        ? 'transactionDetail.from'.tr()
+                        : 'transactionDetail.account'.tr(),
                     value: transaction.accountName!,
                   ),
                 if (transaction.type == TransactionType.transfer &&
                     transaction.toAccountName != null)
                   _panelRow(
                     context,
-                    label: 'To',
+                    label: 'transactionDetail.to'.tr(),
                     value: transaction.toAccountName!,
                   ),
                 _panelRow(
                   context,
-                  label: 'Type',
+                  label: 'transactionDetail.type'.tr(),
                   trailing: _typeBadge(context, transaction.type, amountColor),
                 ),
                 if (transaction.isRecurring)
                   _panelRow(
                     context,
-                    label: 'Recurring',
+                    label: 'transactionDetail.recurring'.tr(),
                     value: transaction.recurringInterval ?? 'Yes',
                     isLast: true,
                   ),
@@ -209,7 +209,7 @@ class TransactionDetailPage extends ConsumerWidget {
                     padding: const EdgeInsets.only(
                         left: 4, bottom: 6),
                     child: Text(
-                      'Notes',
+                      'transactionDetail.notes'.tr(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
@@ -248,7 +248,7 @@ class TransactionDetailPage extends ConsumerWidget {
                     child: Row(
                       children: [
                         Text(
-                          'Category',
+                          'transactionDetail.category'.tr(),
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
@@ -310,7 +310,7 @@ class TransactionDetailPage extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(CupertinoIcons.pencil),
-                    label: const Text('Edit'),
+                    label: Text('common.edit'.tr()),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.brandTeal,
                     ),
@@ -322,7 +322,7 @@ class TransactionDetailPage extends ConsumerWidget {
                     onPressed: () =>
                         _confirmDelete(context, ref, transaction),
                     icon: const Icon(CupertinoIcons.trash),
-                    label: const Text('Delete'),
+                    label: Text('common.delete'.tr()),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,
                     ),
@@ -400,9 +400,9 @@ class TransactionDetailPage extends ConsumerWidget {
   Widget _typeBadge(
       BuildContext context, TransactionType type, Color color) {
     final label = switch (type) {
-      TransactionType.income => 'Income',
-      TransactionType.expense => 'Expense',
-      TransactionType.transfer => 'Transfer',
+      TransactionType.income => 'transactionDetail.income'.tr(),
+      TransactionType.expense => 'transactionDetail.expense'.tr(),
+      TransactionType.transfer => 'transactionDetail.transfer'.tr(),
     };
     return Text(
       label,
@@ -447,18 +447,17 @@ class TransactionDetailPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content: const Text(
-            'Are you sure you want to delete this transaction? This cannot be undone.'),
+        title: Text('transactionDetail.deleteTitle'.tr()),
+        content: Text('transactionDetail.deleteMessage'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text('common.delete'.tr()),
           ),
         ],
       ),

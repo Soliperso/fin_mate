@@ -4,6 +4,7 @@ import '../../data/repositories/settings_repository_impl.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../../core/error/global_error_handler.dart';
 import '../../../../core/services/data_export_service.dart';
 
 /// Provider for settings repository
@@ -44,7 +45,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     try {
       final settings = await _repository.getSettings(_userId);
       state = AsyncValue.data(settings);
-    } catch (_) {
+    } catch (e, stack) {
+      GlobalErrorHandler.handleError(e, stack, context: 'settings.initialize');
       state = const AsyncValue.data(null);
     }
   }
@@ -55,7 +57,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     try {
       final settings = await _repository.updateThemeMode(_userId, themeMode);
       state = AsyncValue.data(settings);
-    } catch (_) {
+    } catch (e, stack) {
+      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateThemeMode');
       state = previous;
     }
   }
@@ -66,7 +69,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     try {
       final settings = await _repository.updateLanguage(_userId, language);
       state = AsyncValue.data(settings);
-    } catch (_) {
+    } catch (e, stack) {
+      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateLanguage');
       state = previous;
     }
   }
@@ -90,7 +94,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
       );
       state = AsyncValue.data(settings);
       return true;
-    } catch (_) {
+    } catch (e, stack) {
+      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateNotificationPreferences');
       state = previous;
       return false;
     }

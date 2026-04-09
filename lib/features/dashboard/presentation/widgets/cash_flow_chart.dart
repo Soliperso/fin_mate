@@ -1,8 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -46,7 +46,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Cash Flow Trend',
+                'cashFlow.title'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -82,13 +82,13 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
               _buildLegendItem(
                 context,
                 color: AppColors.success,
-                label: 'Income',
+                label: 'cashFlow.income'.tr(),
               ),
               const SizedBox(width: AppSizes.md),
               _buildLegendItem(
                 context,
                 color: AppColors.error,
-                label: 'Expenses',
+                label: 'cashFlow.expenses'.tr(),
               ),
             ],
           ),
@@ -269,7 +269,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
                 final format = ref.read(currencyFormat0Provider);
                 final isIncome = spot.barIndex == 0;
                 return LineTooltipItem(
-                  '${isIncome ? 'Income' : 'Expenses'}\n${format.format(spot.y)}',
+                  '${isIncome ? 'cashFlow.income'.tr() : 'cashFlow.expenses'.tr()}\n${format.format(spot.y)}',
                   TextStyle(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
@@ -296,7 +296,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
               final format = ref.watch(currencyFormat0Provider);
               final isIncome = rodIndex == 0;
               return BarTooltipItem(
-                '${isIncome ? 'Income' : 'Expenses'}\n${format.format(rod.toY)}',
+                '${isIncome ? 'cashFlow.income'.tr() : 'cashFlow.expenses'.tr()}\n${format.format(rod.toY)}',
                 TextStyle(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,

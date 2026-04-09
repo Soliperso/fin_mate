@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,7 +58,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'What if you paid extra?',
+                        'extraPayment.title'.tr(),
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -65,7 +66,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                       if (totalMinimum > 0) ...[
                         const SizedBox(height: 2),
                         Text(
-                          'Required minimum: ${currencyFormat.format(totalMinimum)}/mo',
+                          'extraPayment.requiredMinimum'.tr(namedArgs: {'amount': currencyFormat.format(totalMinimum)}),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -120,8 +121,8 @@ class ExtraPaymentCard extends ConsumerWidget {
             Center(
               child: Text(
                 extra == 0
-                    ? 'Move slider to simulate'
-                    : '+${currencyFormat.format(extra)}/month extra',
+                    ? 'extraPayment.moveSlider'.tr()
+                    : 'extraPayment.extraPerMonth'.tr(namedArgs: {'amount': currencyFormat.format(extra)}),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: extra == 0
                           ? AppColors.textSecondary
@@ -145,15 +146,14 @@ class ExtraPaymentCard extends ConsumerWidget {
                     _ImpactRow(
                       icon: CupertinoIcons.calendar,
                       text: monthsSaved > 0
-                          ? 'Pay off $monthsSaved months sooner'
-                          : 'Same payoff timeline',
+                          ? 'extraPayment.payOffSooner'.tr(namedArgs: {'months': '$monthsSaved'})
+                          : 'extraPayment.sameTimeline'.tr(),
                     ),
                     if (interestSaved > 0) ...[
                       const SizedBox(height: 4),
                       _ImpactRow(
                         icon: CupertinoIcons.money_dollar,
-                        text:
-                            'Save ${currencyFormat.format(interestSaved)} in interest',
+                        text: 'extraPayment.saveInInterest'.tr(namedArgs: {'amount': currencyFormat.format(interestSaved)}),
                       ),
                     ],
                   ],

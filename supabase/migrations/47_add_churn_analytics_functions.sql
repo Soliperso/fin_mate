@@ -4,7 +4,8 @@
 
 -- ============================================================================
 -- Function: get_churn_metrics
--- Returns KPI-level churn and subscription metrics for a date range
+-- Returns KPI-level churn and subscription metrics for a date range.
+-- SECURITY DEFINER so it bypasses RLS and reads all rows (admin-only via app guard).
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION get_churn_metrics(
@@ -17,7 +18,12 @@ RETURNS TABLE (
   metric_value      NUMERIC,
   metric_change     NUMERIC,  -- absolute change vs previous period
   metric_unit       TEXT      -- 'count', 'percent', 'currency'
-) AS $$
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   period_days    INTEGER;
   prev_start     DATE;
@@ -25,7 +31,8 @@ DECLARE
 BEGIN
   period_days := (p_end_date - p_start_date);
   prev_start   := p_start_date - period_days;
-  prev_end     := p_start_date - INTERVAL '1 day';
+  -- Use integer subtraction to keep DATE type (DATE - INTEGER = DATE)
+  prev_end     := p_start_date - 1;
 
   -- ── 1. Active Subscribers ────────────────────────────────────────────────
   RETURN QUERY
@@ -35,7 +42,6 @@ BEGIN
       AND subscription_status IN ('active', 'trialing')
   ),
   prev AS (
-    -- Approximate: premium users whose subscription started before prev_end
     SELECT COUNT(*) AS val FROM public.user_profiles
     WHERE subscription_tier = 'premium'
       AND subscription_status IN ('active', 'trialing')
@@ -179,14 +185,9 @@ BEGIN
     'percent'::TEXT
   FROM active_start, churned, prev_active, prev_churned;
 
-  -- ── 7. Revenue Churn Rate (same as customer churn since we lack $ amounts) ─
+  -- ── 7. Revenue Churn Rate ─────────────────────────────────────────────────
   RETURN QUERY
-  WITH active_start AS (
-    SELECT COUNT(*) AS cnt FROM public.user_profiles
-    WHERE subscription_tier = 'premium'
-      AND (subscription_start_date IS NULL OR subscription_start_date::DATE <= p_start_date)
-  ),
-  lost_revenue_units AS (
+  WITH lost_revenue_units AS (
     SELECT COALESCE(SUM(se.amount_cents), 0)::NUMERIC AS total
     FROM public.subscription_events se
     WHERE se.event_type IN ('canceled', 'expired')
@@ -226,24 +227,29 @@ BEGIN
   FROM lost_revenue_units, total_revenue_units, prev_lost, prev_total;
 
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$;
 
--- Grant execution to authenticated users (admin guard enforced in app)
 GRANT EXECUTE ON FUNCTION get_churn_metrics(DATE, DATE) TO authenticated;
 
 -- ============================================================================
 -- Function: get_subscription_cohorts
--- Returns cohort table: signup month × subscription conversion
+-- Returns cohort table: signup month × subscription conversion.
+-- SECURITY DEFINER so it bypasses RLS.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION get_subscription_cohorts()
 RETURNS TABLE (
-  cohort_month       TEXT,    -- e.g. 'Jan 2025'
-  cohort_month_date  DATE,    -- for sorting
+  cohort_month       TEXT,
+  cohort_month_date  DATE,
   total_signups      INTEGER,
   premium_count      INTEGER,
-  conversion_rate    NUMERIC  -- percent
-) AS $$
+  conversion_rate    NUMERIC
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   RETURN QUERY
   WITH cohorts AS (
@@ -267,13 +273,14 @@ BEGIN
   FROM cohorts c
   ORDER BY c.month_date DESC;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$;
 
 GRANT EXECUTE ON FUNCTION get_subscription_cohorts() TO authenticated;
 
 -- ============================================================================
 -- Function: get_subscription_timeline
--- Returns day-by-day subscription event counts for a date range
+-- Returns day-by-day subscription event counts for a date range.
+-- SECURITY DEFINER so it bypasses RLS.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION get_subscription_timeline(
@@ -286,7 +293,12 @@ RETURNS TABLE (
   cancellations  INTEGER,
   renewals       INTEGER,
   trials         INTEGER
-) AS $$
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   RETURN QUERY
   WITH date_series AS (
@@ -295,10 +307,10 @@ BEGIN
   events AS (
     SELECT
       created_at::DATE AS event_date,
-      COUNT(*) FILTER (WHERE event_type = 'subscribed')       AS new_subs,
-      COUNT(*) FILTER (WHERE event_type = 'canceled')         AS cancellations,
-      COUNT(*) FILTER (WHERE event_type = 'renewed')          AS renewals,
-      COUNT(*) FILTER (WHERE event_type = 'trial_started')    AS trials
+      COUNT(*) FILTER (WHERE event_type = 'subscribed')    AS new_subs,
+      COUNT(*) FILTER (WHERE event_type = 'canceled')      AS cancellations,
+      COUNT(*) FILTER (WHERE event_type = 'renewed')       AS renewals,
+      COUNT(*) FILTER (WHERE event_type = 'trial_started') AS trials
     FROM public.subscription_events
     WHERE created_at::DATE BETWEEN p_start_date AND p_end_date
     GROUP BY created_at::DATE
@@ -313,6 +325,6 @@ BEGIN
   LEFT JOIN events e ON e.event_date = ds.d
   ORDER BY ds.d;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$;
 
 GRANT EXECUTE ON FUNCTION get_subscription_timeline(DATE, DATE) TO authenticated;

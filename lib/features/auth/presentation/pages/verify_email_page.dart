@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -94,7 +95,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       if (mounted) {
         SuccessSnackbar.show(
           context,
-          message: 'Email verified! Welcome to Finmate.',
+          message: 'auth.verify.emailVerified'.tr(),
         );
         context.go('/dashboard');
       }
@@ -102,7 +103,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       if (mounted) {
         setState(() {
           _isVerifying = false;
-          _errorMessage = 'Invalid or expired code. Please try again.';
+          _errorMessage = 'auth.verify.invalidCode'.tr();
           // Clear boxes so user can re-enter
           for (final c in _controllers) {
             c.clear();
@@ -124,7 +125,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       if (mounted) {
         SuccessSnackbar.show(
           context,
-          message: 'A new code was sent to ${widget.email}',
+          message: 'auth.verify.codeSentTo'.tr(namedArgs: {'email': widget.email}),
           duration: const Duration(seconds: 4),
         );
         for (final c in _controllers) {
@@ -183,7 +184,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 Text(
-                  'Check Your Email',
+                  'auth.verify.title'.tr(),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -191,7 +192,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
-                  'We sent a 6-digit code to',
+                  'auth.verify.subtitle'.tr(),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -256,7 +257,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Verify Email'),
+                      : Text('auth.verify.verifyButton'.tr()),
                 ),
 
                 const SizedBox(height: AppSizes.lg),
@@ -265,7 +266,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Didn\'t receive a code? ',
+                      'auth.verify.didntReceive'.tr(),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
@@ -276,7 +277,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                               width: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Resend'),
+                          : Text('auth.verify.resend'.tr()),
                     ),
                   ],
                 ),
@@ -284,7 +285,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 TextButton(
                   onPressed: () => context.go('/login'),
                   child: Text(
-                    'Already confirmed? Log in',
+                    'auth.verify.alreadyConfirmed'.tr(),
                     style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 13,

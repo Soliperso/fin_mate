@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -107,9 +107,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
     if (success) {
       ref.invalidate(debtsProvider);
       ref.invalidate(debtSummaryProvider);
-      SuccessSnackbar.show(context, message: '${debt.name} removed');
+      SuccessSnackbar.show(context, message: 'debt.deleted'.tr(namedArgs: {'name': debt.name}));
     } else {
-      ErrorSnackbar.show(context, message: 'Failed to delete debt');
+      ErrorSnackbar.show(context, message: 'debt.failedToDelete'.tr());
     }
   }
 
@@ -129,9 +129,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text(
-          'Debt Payoff',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'debt.title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -139,9 +139,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
           labelColor: AppColors.brandTeal,
           unselectedLabelColor: AppColors.textSecondary,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-          tabs: const [
-            Tab(text: 'Overview'),
-            Tab(text: 'Plan'),
+          tabs: [
+            Tab(text: 'debt.overviewTab'.tr()),
+            Tab(text: 'debt.planTab'.tr()),
           ],
         ),
       ),
@@ -165,9 +165,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     ),
                   ),
                   icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'Add Debt',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  label: Text(
+                    'debt.addDebt'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -180,14 +180,14 @@ class _DebtPageState extends ConsumerState<DebtPage>
           children: [
             EmptyState(
               icon: CupertinoIcons.exclamationmark_circle,
-              title: 'Could Not Load Debts',
-              message: 'Pull down to refresh.',
+              title: 'debt.failedToLoad'.tr(),
+              message: 'debt.pullToRefresh'.tr(),
             ),
             Center(
               child: FilledButton.icon(
                 onPressed: _refresh,
                 icon: const Icon(CupertinoIcons.arrow_counterclockwise),
-                label: const Text('Retry'),
+                label: Text('debt.retry'.tr()),
               ),
             ),
           ],
@@ -201,8 +201,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
                 children: [
                   EmptyStateCard(
                     icon: CupertinoIcons.creditcard,
-                    title: 'No Debts Tracked',
-                    message: 'Add your debts to start your payoff journey.',
+                    title: 'debt.noDebts'.tr(),
+                    message: 'debt.noDebtsMessage'.tr(),
                     backgroundColor: AppColors.brandTeal,
                   ),
                   const SizedBox(height: AppSizes.lg),
@@ -223,9 +223,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         ),
                       ),
                       icon: const Icon(CupertinoIcons.add, size: 20),
-                      label: const Text(
-                        'Add Debt',
-                        style: TextStyle(
+                      label: Text(
+                        'debt.addDebt'.tr(),
+                        style: const TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                     ),
@@ -281,7 +281,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             Row(
                               children: [
                                 Text(
-                                  'Payoff Strategy',
+                                  'debt.strategy'.tr(),
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleSmall
@@ -293,7 +293,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                                   child: Row(
                                     children: [
                                       Text(
-                                        'Compare',
+                                        'debt.compare'.tr(),
                                         style: Theme.of(context)
                                             .textTheme
                                             .labelSmall
@@ -317,16 +317,16 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             SizedBox(
                               width: double.infinity,
                               child: SegmentedButton<DebtStrategy>(
-                                segments: const [
+                                segments: [
                                   ButtonSegment(
                                     value: DebtStrategy.avalanche,
-                                    label: Text('Avalanche'),
-                                    icon: Icon(CupertinoIcons.flame),
+                                    label: Text('debt.avalanche'.tr()),
+                                    icon: const Icon(CupertinoIcons.flame),
                                   ),
                                   ButtonSegment(
                                     value: DebtStrategy.snowball,
-                                    label: Text('Snowball'),
-                                    icon: Icon(CupertinoIcons.snow),
+                                    label: Text('debt.snowball'.tr()),
+                                    icon: const Icon(CupertinoIcons.snow),
                                   ),
                                 ],
                                 selected: {strategy},
@@ -350,8 +350,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             const SizedBox(height: AppSizes.xs),
                             Text(
                               strategy == DebtStrategy.avalanche
-                                  ? 'Highest interest rate first — saves the most money'
-                                  : 'Lowest balance first — builds momentum faster',
+                                  ? 'debt.avalancheDesc'.tr()
+                                  : 'debt.snowballDesc'.tr(),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -372,7 +372,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                                   _MetricItem(
                                     icon: CupertinoIcons.clock,
                                     iconColor: AppColors.brandTeal,
-                                    value: '${payoffResult.totalMonths} mo',
+                                    value: '${payoffResult.totalMonths} ${'debt.moAbbr'.tr()}',
                                   ),
                                   const SizedBox(width: AppSizes.sm),
                                   _MetricItem(
@@ -410,7 +410,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                                     ),
                                     const SizedBox(width: AppSizes.xs),
                                     Text(
-                                      'Focus on: ${payoffResult.schedule.first.focusDebtName}',
+                                      'debt.focusOn'.tr(namedArgs: {'name': payoffResult.schedule.first.focusDebtName}),
                                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                             color: AppColors.brandTeal,
                                             fontWeight: FontWeight.w600,
@@ -430,7 +430,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     Row(
                       children: [
                         Text(
-                          'Your Debts',
+                          'debt.yourDebts'.tr(),
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -438,7 +438,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         ),
                         const Spacer(),
                         Text(
-                          '${debts.length} account${debts.length == 1 ? '' : 's'}',
+                          debts.length == 1
+                              ? 'debt.accountCount'.tr(namedArgs: {'count': '1'})
+                              : 'debt.accountCountPlural'.tr(namedArgs: {'count': '${debts.length}'}),
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -461,8 +463,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
                               debt: debt,
                               isFocusDebt: isFocus,
                               focusReason: strategy == DebtStrategy.avalanche
-                                  ? 'Highest rate'
-                                  : 'Lowest balance',
+                                  ? 'debt.highestRate'.tr()
+                                  : 'debt.lowestBalance'.tr(),
                               onLogPayment: () => _showLogPayment(debt),
                               onEdit: () => _showEditDebt(debt),
                               onHistory: () => _showPaymentHistory(debt),
@@ -480,10 +482,10 @@ class _DebtPageState extends ConsumerState<DebtPage>
 
               // ── Tab 1: Plan ───────────────────────────────────────────
               payoffResult == null
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'Add debts to see your payoff plan.',
-                        style: TextStyle(color: AppColors.textSecondary),
+                        'debt.noPlan'.tr(),
+                        style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     )
                   : ListView(

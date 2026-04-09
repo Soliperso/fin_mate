@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/error/global_error_handler.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
@@ -182,7 +183,8 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
       );
       _invalidateDashboard();
       return true;
-    } catch (_) {
+    } catch (e, stack) {
+      GlobalErrorHandler.handleError(e, stack, context: 'recordDebtPayment');
       return false;
     }
   }

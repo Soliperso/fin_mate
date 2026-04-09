@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,14 +68,14 @@ class DebtCostSplitCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Cost of Your Debt',
+                      'debtCost.title'.tr(),
                       style: Theme.of(context)
                           .textTheme
                           .titleSmall
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      'Principal + interest over full payoff',
+                      'debtCost.subtitle'.tr(),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
@@ -138,9 +139,9 @@ class DebtCostSplitCard extends ConsumerWidget {
             // ── Legend ────────────────────────────────────────────────────
             Row(
               children: [
-                _LegendDot(color: AppColors.brandTeal, label: 'Principal'),
+                _LegendDot(color: AppColors.brandTeal, label: 'debtCost.principal'.tr()),
                 const SizedBox(width: AppSizes.md),
-                _LegendDot(color: AppColors.error, label: 'Interest'),
+                _LegendDot(color: AppColors.error, label: 'debtCost.interest'.tr()),
               ],
             ),
 
@@ -162,7 +163,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _AmountColumn(
-                    label: 'Principal',
+                    label: 'debtCost.principal'.tr(),
                     value: currency.format(principal),
                     color: AppColors.brandTeal,
                   ),
@@ -172,7 +173,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                     color: Theme.of(context).dividerColor,
                   ),
                   _AmountColumn(
-                    label: 'Interest',
+                    label: 'debtCost.interest'.tr(),
                     value: currency.format(interest),
                     color: AppColors.error,
                   ),
@@ -182,7 +183,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                     color: Theme.of(context).dividerColor,
                   ),
                   _AmountColumn(
-                    label: 'Total',
+                    label: 'debtCost.total'.tr(),
                     value: currency.format(total),
                     color: isDark
                         ? AppColors.labelDark
@@ -197,7 +198,7 @@ class DebtCostSplitCard extends ConsumerWidget {
             // ── Insight line ──────────────────────────────────────────────
             Center(
               child: Text(
-                "You'll pay $interestExtraPercent% extra in interest",
+                'debtCost.youllPay'.tr(namedArgs: {'pct': interestExtraPercent}),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,

@@ -39,8 +39,14 @@ final goalsSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 // Goal operations notifier
 class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
   final SavingsGoalRepository repository;
+  final Ref _ref;
 
-  GoalOperationsNotifier(this.repository) : super(const AsyncValue.data(null));
+  GoalOperationsNotifier(this.repository, this._ref) : super(const AsyncValue.data(null));
+
+  void _invalidate() {
+    _ref.invalidate(savingsGoalsProvider);
+    _ref.invalidate(goalsSummaryProvider);
+  }
 
   Future<SavingsGoal?> createGoal({
     required String name,
@@ -63,6 +69,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
         color: color,
       );
       state = const AsyncValue.data(null);
+      _invalidate();
       return goal;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -93,6 +100,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
         color: color,
       );
       state = const AsyncValue.data(null);
+      _invalidate();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -105,6 +113,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await repository.deleteGoal(goalId);
       state = const AsyncValue.data(null);
+      _invalidate();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -117,6 +126,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await repository.markGoalAsCompleted(goalId);
       state = const AsyncValue.data(null);
+      _invalidate();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -139,6 +149,9 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
         transactionId: transactionId,
       );
       state = const AsyncValue.data(null);
+      _invalidate();
+      _ref.invalidate(goalProvider(goalId));
+      _ref.invalidate(goalContributionsProvider(goalId));
       return contribution;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -151,6 +164,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await repository.deleteContribution(contributionId);
       state = const AsyncValue.data(null);
+      _invalidate();
       return true;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -160,5 +174,5 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 final goalOperationsProvider = StateNotifierProvider<GoalOperationsNotifier, AsyncValue<void>>((ref) {
-  return GoalOperationsNotifier(ref.watch(savingsGoalRepositoryProvider));
+  return GoalOperationsNotifier(ref.watch(savingsGoalRepositoryProvider), ref);
 });

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/payment_service.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_container.dart';
 
 final paymentMethodsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
@@ -29,15 +30,20 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: const Text('Payment Methods'),
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left),
-          onPressed: () => context.pop(),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
         actions: [
           if (!_isProcessing)
-            IconButton(
-              icon: const Icon(CupertinoIcons.add),
-              onPressed: () => _addPaymentMethod(context),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSizes.sm),
+              child: CircularIconButton(
+                icon: CupertinoIcons.add,
+                onTap: () => _addPaymentMethod(context),
+              ),
             ),
         ],
       ),

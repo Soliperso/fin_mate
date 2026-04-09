@@ -15,13 +15,13 @@ class OpenAiChatService {
   String? _systemPrompt;
 
   static const String _model = 'gpt-4o-mini';
-  static const String _apiUrl = 'https://api.openai.com/v1/chat/completions';
   static const int _maxHistoryTurns = 20; // Keep last 20 turns (40 messages)
 
   OpenAiChatService({SupabaseClient? supabaseClient})
       : _supabase = supabaseClient ?? supabase;
 
-  bool get isAvailable => EnvConfig.openAiApiKey.isNotEmpty;
+  // AI is available when the user is authenticated (key lives server-side)
+  bool get isAvailable => _supabase.auth.currentUser != null;
 
   /// Build the financial context system prompt from user's live data
   Future<String> _buildSystemPrompt(String userId) async {
@@ -133,11 +133,16 @@ class OpenAiChatService {
       ..._conversationHistory,
     ];
 
+    final session = _supabase.auth.currentSession;
+    if (session == null) throw Exception('User not authenticated');
+
+    final proxyUrl = '${EnvConfig.supabaseUrl}/functions/v1/openai-proxy';
     final response = await http.post(
-      Uri.parse(_apiUrl),
+      Uri.parse(proxyUrl),
       headers: {
-        'Authorization': 'Bearer ${EnvConfig.openAiApiKey}',
+        'Authorization': 'Bearer ${session.accessToken}',
         'Content-Type': 'application/json',
+        'apikey': EnvConfig.supabaseAnonKey,
       },
       body: json.encode({
         'model': _model,

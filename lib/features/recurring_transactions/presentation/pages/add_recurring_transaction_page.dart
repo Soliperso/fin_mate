@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
@@ -267,6 +268,12 @@ class _AddRecurringTransactionPageState
         centerTitle: false,
         title: Text(
           isEditing ? 'Edit Recurring Transaction' : 'Add Recurring Transaction',
+        ),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: SingleChildScrollView(

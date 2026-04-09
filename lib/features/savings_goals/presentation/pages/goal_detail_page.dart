@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -32,7 +32,13 @@ class GoalDetailPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Goal Details'),
+        title: Text('goalDetail.title'.tr()),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
+        ),
         actions: [
           CircularIconButton(
             icon: CupertinoIcons.pencil,
@@ -204,7 +210,7 @@ class GoalDetailPage extends ConsumerWidget {
                               isDark: isDark,
                               icon: CupertinoIcons.arrow_up_right,
                               iconColor: AppColors.brandTeal,
-                              label: 'Remaining',
+                              label: 'goalDetail.remaining'.tr(),
                               value: currencyFormat.format(remaining < 0 ? 0 : remaining),
                             ),
                           ),
@@ -218,9 +224,9 @@ class GoalDetailPage extends ConsumerWidget {
                               icon: CupertinoIcons.calendar,
                               iconColor: _getDaysRemainingColor(goal.deadline!),
                               label: isCompleted
-                                  ? 'Deadline'
+                                  ? 'goalDetail.deadline'.tr()
                                   : _getDaysRemaining(goal.deadline!),
-                              value: DateFormat('MMM dd, yyyy').format(goal.deadline!),
+                              value: DateFormat('MMM dd, yyyy', context.locale.languageCode).format(goal.deadline!),
                             ),
                           ),
                       ],
@@ -231,8 +237,8 @@ class GoalDetailPage extends ConsumerWidget {
                         isDark: isDark,
                         icon: CupertinoIcons.money_dollar,
                         iconColor: AppColors.warning,
-                        label: 'Monthly target to hit deadline',
-                        value: '${currencyFormat.format(goal.monthlySavingsNeeded!)}/mo',
+                        label: 'goalDetail.monthlyTarget'.tr(),
+                        value: '${currencyFormat.format(goal.monthlySavingsNeeded!)}/${'debt.moAbbr'.tr()}',
                       ),
                     ],
                   ],
@@ -263,7 +269,7 @@ class GoalDetailPage extends ConsumerWidget {
                           ),
                           const SizedBox(width: AppSizes.sm),
                           Text(
-                            'Goal Achieved!',
+                            'goalDetail.achieved'.tr(),
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   color: AppColors.success,
                                   fontWeight: FontWeight.bold,
@@ -278,7 +284,7 @@ class GoalDetailPage extends ConsumerWidget {
 
                   // ── Contributions Section ───────────────────────────────
                   Text(
-                    'Contributions',
+                    'goalDetail.contributions'.tr(),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSizes.md),
@@ -293,8 +299,8 @@ class GoalDetailPage extends ConsumerWidget {
                             children: [
                               EmptyStateCard(
                                 icon: CupertinoIcons.plus_circle,
-                                title: 'No Contributions Yet',
-                                message: 'Start building your savings by adding your first contribution.',
+                                title: 'goalDetail.noContributions'.tr(),
+                                message: 'goalDetail.noContributionsMessage'.tr(),
                                 backgroundColor: AppColors.brandTeal,
                               ),
                               const SizedBox(height: AppSizes.lg),
@@ -313,9 +319,9 @@ class GoalDetailPage extends ConsumerWidget {
                                     ),
                                   ),
                                   icon: const Icon(CupertinoIcons.add, size: 20),
-                                  label: const Text(
-                                    'Add Contribution',
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                  label: Text(
+                                    'goalDetail.addContribution'.tr(),
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                                   ),
                                 ),
                               ),
@@ -340,19 +346,19 @@ class GoalDetailPage extends ConsumerWidget {
                                   await showDialog(
                                     context: context,
                                     builder: (dialogContext) => AlertDialog(
-                                      title: const Text('Delete Contribution'),
-                                      content: const Text('Are you sure you want to delete this contribution?'),
+                                      title: Text('goalDetail.deleteContribution'.tr()),
+                                      content: Text('goalDetail.deleteMessage'.tr()),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(dialogContext),
-                                          child: const Text('Cancel'),
+                                          child: Text('common.cancel'.tr()),
                                         ),
                                         TextButton(
                                           onPressed: () {
                                             confirmed = true;
                                             Navigator.pop(dialogContext);
                                           },
-                                          child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                          child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
                                         ),
                                       ],
                                     ),
@@ -369,10 +375,10 @@ class GoalDetailPage extends ConsumerWidget {
                                     ref.invalidate(savingsGoalsProvider);
                                     ref.invalidate(goalsSummaryProvider);
                                     if (context.mounted) {
-                                      SuccessSnackbar.show(context, message: 'Contribution deleted');
+                                      SuccessSnackbar.show(context, message: 'goalDetail.contributionDeleted'.tr());
                                     }
                                   } else if (context.mounted) {
-                                    ErrorSnackbar.show(context, message: 'Failed to delete contribution');
+                                    ErrorSnackbar.show(context, message: 'goalDetail.failedToDelete'.tr());
                                   }
                                 },
                                 background: Container(
@@ -416,8 +422,8 @@ class GoalDetailPage extends ConsumerWidget {
                       ],
                     ),
                     error: (error, stack) => ErrorRetryWidget(
-                      title: 'Failed to load contributions',
-                      message: 'Unable to fetch contribution history.',
+                      title: 'goalDetail.failedToLoadContributions'.tr(),
+                      message: 'goalDetail.failedToLoadContributionsMessage'.tr(),
                       onRetry: () => ref.invalidate(goalContributionsProvider(goalId)),
                     ),
                   ),
@@ -427,8 +433,8 @@ class GoalDetailPage extends ConsumerWidget {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => ErrorRetryWidget(
-            title: 'Failed to load goal',
-            message: 'Unable to fetch goal details. Please try again.',
+            title: 'goalDetail.failedToLoadGoal'.tr(),
+            message: 'goalDetail.failedToLoadGoalMessage'.tr(),
             onRetry: () => ref.invalidate(goalProvider(goalId)),
           ),
         ),
@@ -452,9 +458,9 @@ class GoalDetailPage extends ConsumerWidget {
                     ),
                   ),
                   icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'Add Contribution',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  label: Text(
+                    'goalDetail.addContribution'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -466,10 +472,10 @@ class GoalDetailPage extends ConsumerWidget {
 
   String _getDaysRemaining(DateTime deadline) {
     final difference = deadline.difference(DateTime.now()).inDays;
-    if (difference < 0) return 'Overdue';
-    if (difference == 0) return 'Due today';
-    if (difference == 1) return '1 day left';
-    return '$difference days left';
+    if (difference < 0) return 'goalDetail.overdue'.tr();
+    if (difference == 0) return 'goalDetail.dueToday'.tr();
+    if (difference == 1) return 'goalDetail.oneDayLeft'.tr();
+    return 'goalDetail.daysLeft'.tr(namedArgs: {'days': '$difference'});
   }
 
   Color _getDaysRemainingColor(DateTime deadline) {
@@ -513,7 +519,7 @@ class GoalDetailPage extends ConsumerWidget {
           builder: (_) => GoalAchievementDialog(goalName: goalSnapshot.name),
         );
       } else {
-        SuccessSnackbar.show(context, message: 'Contribution added successfully!');
+        SuccessSnackbar.show(context, message: 'goalDetail.contributionAdded'.tr());
       }
     });
   }
@@ -536,14 +542,12 @@ class GoalDetailPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Goal'),
-        content: const Text(
-          'Are you sure you want to delete this goal? This action cannot be undone.',
-        ),
+        title: Text('goalDetail.deleteGoalTitle'.tr()),
+        content: Text('goalDetail.deleteGoalMessage'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -554,12 +558,12 @@ class GoalDetailPage extends ConsumerWidget {
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
                 context.pop();
-                SuccessSnackbar.show(context, message: 'Goal deleted successfully');
+                SuccessSnackbar.show(context, message: 'goalDetail.goalDeleted'.tr());
               } else if (context.mounted) {
-                ErrorSnackbar.show(context, message: 'Failed to delete goal');
+                ErrorSnackbar.show(context, message: 'goalDetail.failedToDeleteGoal'.tr());
               }
             },
-            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+            child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -574,12 +578,12 @@ class GoalDetailPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Contribution'),
-        content: const Text('Are you sure you want to delete this contribution?'),
+        title: Text('goalDetail.deleteContribution'.tr()),
+        content: Text('goalDetail.deleteMessage'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -592,12 +596,12 @@ class GoalDetailPage extends ConsumerWidget {
                 ref.invalidate(goalContributionsProvider(goalId));
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
-                SuccessSnackbar.show(context, message: 'Contribution deleted');
+                SuccessSnackbar.show(context, message: 'goalDetail.contributionDeleted'.tr());
               } else if (context.mounted) {
-                ErrorSnackbar.show(context, message: 'Failed to delete contribution');
+                ErrorSnackbar.show(context, message: 'goalDetail.failedToDelete'.tr());
               }
             },
-            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+            child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -710,7 +714,7 @@ class _ContributionRow extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  DateFormat('MMM dd, yyyy').format(contribution.contributedAt),
+                  DateFormat('MMM dd, yyyy', context.locale.languageCode).format(contribution.contributedAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),

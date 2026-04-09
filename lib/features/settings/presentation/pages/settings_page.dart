@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,7 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('settings.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -35,7 +36,7 @@ class SettingsPage extends ConsumerWidget {
                   size: 48, color: AppColors.error),
               const SizedBox(height: AppSizes.md),
               Text(
-                'Failed to load settings',
+                'settings.failedToLoad'.tr(),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSizes.md),
@@ -44,7 +45,7 @@ class SettingsPage extends ConsumerWidget {
                   // ignore: unused_result
                   ref.refresh(settingsOperationsProvider);
                 },
-                child: const Text('Retry'),
+                child: Text('common.retry'.tr()),
               ),
             ],
           ),
@@ -56,40 +57,40 @@ class SettingsPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Finances ──────────────────────────────────────────────
-              _sectionLabel(context, 'Finances'),
+              _sectionLabel(context, 'settings.finances'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildSettingsCard(context, isDark, children: [
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.repeat,
-                  title: 'Recurring Transactions',
-                  subtitle: 'Manage subscriptions, bills, and scheduled payments',
+                  title: 'settings.recurringTransactions'.tr(),
+                  subtitle: 'settings.recurringTransactionsSub'.tr(),
                   onTap: () => context.push('/recurring-transactions'),
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),
 
               // ── Display ───────────────────────────────────────────────
-              _sectionLabel(context, 'Display'),
+              _sectionLabel(context, 'settings.display'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildSettingsCard(context, isDark, children: [
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.moon,
-                  title: 'Theme',
-                  subtitle: 'Light or dark theme',
+                  title: 'settings.theme'.tr(),
+                  subtitle: 'settings.lightOrDark'.tr(),
                   onTap: () => context.push('/settings/display?section=theme'),
-                  trailingText: settings?.themeMode ?? 'System',
+                  trailingText: settings?.themeMode ?? 'settings.themeSystem'.tr(),
                 ),
                 _buildDivider(context, isDark),
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.money_dollar,
-                  title: 'Currency',
-                  subtitle: 'Default currency format',
+                  title: 'settings.currency'.tr(),
+                  subtitle: 'settings.currencyDefault'.tr(),
                   onTap: () => context.push('/settings/display?section=currency'),
                   trailingText: 'USD',
                 ),
@@ -98,8 +99,8 @@ class SettingsPage extends ConsumerWidget {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.calendar,
-                  title: 'Date Format',
-                  subtitle: 'How dates are displayed',
+                  title: 'settings.dateFormat'.tr(),
+                  subtitle: 'settings.dateFormatDisplay'.tr(),
                   onTap: () => context.push('/settings/display?section=dateformat'),
                   trailingText: 'MM/DD/YYYY',
                 ),
@@ -107,30 +108,30 @@ class SettingsPage extends ConsumerWidget {
               const SizedBox(height: AppSizes.lg),
 
               // ── Notifications ─────────────────────────────────────────
-              _sectionLabel(context, 'Notifications'),
+              _sectionLabel(context, 'settings.notifications'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildSettingsCard(context, isDark, children: [
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.bell,
-                  title: 'Notification Preferences',
-                  subtitle: 'Manage what you get notified about',
+                  title: 'settings.notificationPreferences'.tr(),
+                  subtitle: 'settings.notificationPreferencesSub'.tr(),
                   onTap: () => context.push('/settings/notifications'),
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),
 
               // ── Data & Privacy ────────────────────────────────────────
-              _sectionLabel(context, 'Data & Privacy'),
+              _sectionLabel(context, 'settings.dataPrivacy'.tr()),
               const SizedBox(height: AppSizes.sm),
               _buildSettingsCard(context, isDark, children: [
                 _buildSettingsTile(
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.arrow_down_to_line,
-                  title: 'Export Data',
-                  subtitle: 'Download your financial data',
+                  title: 'settings.exportData'.tr(),
+                  subtitle: 'settings.exportDataSub'.tr(),
                   onTap: () => context.push('/settings/data-privacy'),
                 ),
                 _buildDivider(context, isDark),
@@ -138,9 +139,9 @@ class SettingsPage extends ConsumerWidget {
                   context,
                   isDark: isDark,
                   icon: CupertinoIcons.hand_raised,
-                  title: 'Privacy & Security',
-                  subtitle: 'Account deletion and data privacy',
-                  onTap: () => context.push('/settings/data-privacy'),
+                  title: 'settings.privacySecurity'.tr(),
+                  subtitle: 'settings.privacySecuritySub'.tr(),
+                  onTap: () => context.push('/profile/security'),
                 ),
               ]),
               const SizedBox(height: AppSizes.xl),

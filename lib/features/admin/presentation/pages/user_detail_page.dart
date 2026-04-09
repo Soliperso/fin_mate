@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../domain/entities/admin_user_entity.dart';
 import '../providers/admin_providers.dart';
@@ -26,6 +28,12 @@ class UserDetailPage extends ConsumerWidget {
         title: userAsync.maybeWhen(
           data: (user) => Text(user.displayName),
           orElse: () => const Text('User Details'),
+        ),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () => context.pop(),
+          ),
         ),
       ),
       body: userAsync.when(

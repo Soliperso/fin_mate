@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -48,7 +48,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  'Strategy Comparison',
+                  'strategyComparison.title'.tr(),
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge
@@ -117,7 +117,7 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       ),
                       const SizedBox(width: AppSizes.xs),
                       Text(
-                        'Insights',
+                        'strategyComparison.insights'.tr(),
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge
@@ -136,12 +136,12 @@ class StrategyComparisonSheet extends ConsumerWidget {
                   _InsightRow(
                     icon: CupertinoIcons.money_dollar,
                     iconColor: AppColors.warning,
-                    label: 'Interest Savings',
+                    label: 'strategyComparison.interestSavings'.tr(),
                     value: interestDiff > 0
-                        ? 'Avalanche saves ${currencyFormat.format(interestDiff)}'
+                        ? 'strategyComparison.avalancheSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff)})
                         : interestDiff < 0
-                            ? 'Snowball saves ${currencyFormat.format(interestDiff.abs())}'
-                            : 'Same total interest',
+                            ? 'strategyComparison.snowballSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff.abs())})
+                            : 'strategyComparison.sameTotalInterest'.tr(),
                     valueBadgeColor: interestDiff.abs() > 0
                         ? AppColors.warning
                         : AppColors.textSecondary,
@@ -152,12 +152,12 @@ class StrategyComparisonSheet extends ConsumerWidget {
                   _InsightRow(
                     icon: CupertinoIcons.calendar,
                     iconColor: AppColors.info,
-                    label: 'Payoff Timeline',
+                    label: 'strategyComparison.payoffTimeline'.tr(),
                     value: monthDiff == 0
-                        ? 'Both finish the same month'
+                        ? 'strategyComparison.bothFinish'.tr()
                         : monthDiff > 0
-                            ? 'Avalanche finishes $monthDiff months sooner'
-                            : 'Snowball finishes ${monthDiff.abs()} months sooner',
+                            ? 'strategyComparison.avalancheFinishes'.tr(namedArgs: {'months': '$monthDiff'})
+                            : 'strategyComparison.snowballFinishes'.tr(namedArgs: {'months': '${monthDiff.abs()}'}),
                     valueBadgeColor: monthDiff.abs() > 0
                         ? AppColors.info
                         : AppColors.textSecondary,
@@ -168,10 +168,10 @@ class StrategyComparisonSheet extends ConsumerWidget {
                   _InsightRow(
                     icon: CupertinoIcons.star,
                     iconColor: AppColors.success,
-                    label: 'Best For You',
+                    label: 'strategyComparison.bestForYou'.tr(),
                     value: interestDiff >= 0
-                        ? 'Avalanche if cost matters most'
-                        : 'Snowball if motivation matters most',
+                        ? 'strategyComparison.avalancheBest'.tr()
+                        : 'strategyComparison.snowballBest'.tr(),
                     valueBadgeColor: AppColors.success,
                   ),
                 ],
@@ -201,7 +201,7 @@ class _StrategyCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAvalanche = strategy == DebtStrategy.avalanche;
     final currencyFormat = ref.watch(currencyFormat0Provider);
-    final dateFormat = DateFormat('MMM yyyy');
+    final dateFormat = DateFormat('MMM yyyy', context.locale.languageCode);
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -224,7 +224,7 @@ class _StrategyCard extends ConsumerWidget {
               ),
               const SizedBox(width: AppSizes.xs),
               Text(
-                isAvalanche ? 'Avalanche' : 'Snowball',
+                isAvalanche ? 'strategyComparison.avalanche'.tr() : 'strategyComparison.snowball'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isSelected
@@ -245,7 +245,7 @@ class _StrategyCard extends ConsumerWidget {
                         BorderRadius.circular(AppSizes.radiusFull),
                   ),
                   child: Text(
-                    'Active',
+                    'strategyComparison.active'.tr(),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.primaryTeal,
                           fontWeight: FontWeight.w700,
@@ -259,8 +259,8 @@ class _StrategyCard extends ConsumerWidget {
           // Description
           Text(
             isAvalanche
-                ? 'Pay highest-interest debt first. Minimises total interest paid.'
-                : 'Pay smallest balance first. Eliminates accounts quickly for motivation.',
+                ? 'strategyComparison.avalancheDesc'.tr()
+                : 'strategyComparison.snowballDesc'.tr(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -271,11 +271,11 @@ class _StrategyCard extends ConsumerWidget {
           Row(
             children: [
               _MetricTile(
-                label: 'Debt-Free',
+                label: 'strategyComparison.debtFree'.tr(),
                 value: dateFormat.format(result.debtFreeDate),
               ),
               _MetricTile(
-                label: 'Months',
+                label: 'strategyComparison.months'.tr(),
                 value: '${result.totalMonths}',
               ),
             ],
@@ -284,12 +284,12 @@ class _StrategyCard extends ConsumerWidget {
           Row(
             children: [
               _MetricTile(
-                label: 'Total Interest',
+                label: 'strategyComparison.totalInterest'.tr(),
                 value: currencyFormat.format(result.totalInterestPaid),
                 valueColor: AppColors.error,
               ),
               _MetricTile(
-                label: 'Total Paid',
+                label: 'strategyComparison.totalPaid'.tr(),
                 value: currencyFormat.format(result.totalPaid),
               ),
             ],
@@ -309,7 +309,7 @@ class _StrategyCard extends ConsumerWidget {
                       disabledForegroundColor:
                           AppColors.primaryTeal.withValues(alpha: 0.5),
                     ),
-                    child: const Text('Currently Active'),
+                    child: Text('strategyComparison.currentlyActive'.tr()),
                   )
                 : FilledButton(
                     onPressed: onSelect,
@@ -317,7 +317,7 @@ class _StrategyCard extends ConsumerWidget {
                       backgroundColor: AppColors.primaryTeal,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Use This Strategy'),
+                    child: Text('strategyComparison.useStrategy'.tr()),
                   ),
           ),
         ],

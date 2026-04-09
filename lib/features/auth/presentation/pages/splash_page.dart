@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -145,7 +146,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         const SizedBox(height: AppSizes.xl),
                         // App Name
                         Text(
-                          'Finmate',
+                          'app.name'.tr(),
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.bold,
@@ -155,7 +156,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         const SizedBox(height: AppSizes.sm),
                         // Tagline
                         Text(
-                          'Your Financial Companion',
+                          'app.tagline'.tr(),
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.85),
                                 letterSpacing: 0.5,

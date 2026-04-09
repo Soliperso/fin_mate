@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,9 +46,9 @@ class NetWorthCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Net Worth',
+                'netWorthCard.label'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
               ),
               // Trend badge
@@ -65,7 +66,7 @@ class NetWorthCard extends ConsumerWidget {
                           ? CupertinoIcons.arrow_up_right
                           : CupertinoIcons.arrow_down_right,
                       color: Colors.white,
-                      size: 11,
+                      size: AppSizes.iconXs - 5, // tight badge arrow
                     ),
                     const SizedBox(width: 3),
                     Text(
@@ -108,18 +109,18 @@ class NetWorthCard extends ConsumerWidget {
               children: [
                 _StatChip(
                   icon: CupertinoIcons.arrow_up_circle_fill,
-                  label: 'Income',
+                  label: 'netWorthCard.income'.tr(),
                   value: currencyFmt2.format(monthlyIncome),
                 ),
                 Container(
                   width: 1,
                   height: 24,
                   margin: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-                  color: Colors.white24,
+                  color: Colors.white.withValues(alpha: 0.35),
                 ),
                 _StatChip(
                   icon: CupertinoIcons.arrow_down_circle_fill,
-                  label: 'Expenses',
+                  label: 'netWorthCard.expenses'.tr(),
                   value: currencyFmt2.format(monthlyExpenses),
                 ),
               ],
@@ -147,24 +148,22 @@ class _StatChip extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, color: Colors.white70, size: 16),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 16),
           const SizedBox(width: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.white54,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.2,
                 ),
               ),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.3,

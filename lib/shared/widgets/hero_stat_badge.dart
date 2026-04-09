@@ -36,18 +36,17 @@ class HeroStatBadge extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 10,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 10, // intentionally small — badge label inside gradient card
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               value,
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: Colors.white,
-                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,

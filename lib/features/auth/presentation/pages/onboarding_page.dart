@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,25 +20,22 @@ class _OnboardingPageState extends State<OnboardingPage>
   late AnimationController _entranceController;
   late Animation<double> _entranceFade;
 
-  final List<OnboardingSlide> _slides = [
+  List<OnboardingSlide> get _slides => [
     OnboardingSlide(
-      title: 'Track Your Finances',
-      description:
-          'Get a complete overview of your income, expenses, and net worth in one place.',
+      title: 'onboarding.slide1.title'.tr(),
+      description: 'onboarding.slide1.description'.tr(),
       icon: CupertinoIcons.chart_pie_fill,
       color: AppColors.brandTeal,
     ),
     OnboardingSlide(
-      title: 'Pay Off Debt Faster',
-      description:
-          'Track your debts, choose a payoff strategy, and watch your progress as you achieve financial freedom.',
+      title: 'onboarding.slide2.title'.tr(),
+      description: 'onboarding.slide2.description'.tr(),
       icon: CupertinoIcons.creditcard_fill,
       color: AppColors.systemPurple,
     ),
     OnboardingSlide(
-      title: 'AI-Powered Insights',
-      description:
-          'Get personalized recommendations and spending insights powered by AI.',
+      title: 'onboarding.slide3.title'.tr(),
+      description: 'onboarding.slide3.description'.tr(),
       icon: CupertinoIcons.lightbulb_fill,
       color: AppColors.systemOrange,
     ),
@@ -152,7 +150,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                     child: TextButton(
                       onPressed: _isLastPage ? null : () => context.push('/login'),
                       child: Text(
-                        'Skip',
+                        'common.skip'.tr(),
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -274,7 +272,7 @@ class _OnboardingPageState extends State<OnboardingPage>
             curve: Curves.easeInOut,
           );
         },
-        child: const Text('Next'),
+        child: Text('common.next'.tr()),
       ),
     );
   }
@@ -287,16 +285,16 @@ class _OnboardingPageState extends State<OnboardingPage>
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () => context.push('/signup'),
-            child: const Text(
-              'Get Started',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              'common.getStarted'.tr(),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ),
         const SizedBox(height: AppSizes.md),
         TextButton(
           onPressed: () => context.push('/login'),
-          child: const Text('Already have an account? Log in'),
+          child: Text('onboarding.alreadyHaveAccount'.tr()),
         ),
       ],
     );

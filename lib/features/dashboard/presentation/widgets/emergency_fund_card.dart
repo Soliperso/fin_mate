@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -104,7 +104,7 @@ class EmergencyFundCard extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Emergency Fund',
+                            'emergency.title'.tr(),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -136,7 +136,7 @@ class EmergencyFundCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current',
+                          'emergency.currentAmount'.tr(),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -155,7 +155,7 @@ class EmergencyFundCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'Target (6 months)',
+                          'emergency.targetSixMonths'.tr(),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -250,7 +250,7 @@ class EmergencyFundCard extends ConsumerWidget {
                       context.pushNamed('emergency-fund');
                     },
                     icon: const Icon(CupertinoIcons.add_circled),
-                    label: const Text('Add to Emergency Fund'),
+                    label: Text('emergency.add'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: levelColor,
                       foregroundColor: Colors.white,
@@ -318,7 +318,7 @@ class EmergencyFundCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Emergency Fund Details',
+                        'emergency.detailsTitle'.tr(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -406,7 +406,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             // Your Fund Status Section
             Text(
-              'YOUR FUND STATUS',
+              'emergency.yourFundStatus'.tr(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -434,7 +434,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   _buildMetricRowWithIcon(
                     context,
                     CupertinoIcons.creditcard,
-                    'Current Emergency Fund',
+                    'emergency.currentFund'.tr(),
                     currencyFormat.format(status.currentAmount),
                     _getLevelColor(),
                   ),
@@ -444,7 +444,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   _buildMetricRowWithIcon(
                     context,
                     CupertinoIcons.flag,
-                    'Your Target',
+                    'emergency.yourTarget'.tr(),
                     currencyFormat.format(status.targetRecommended),
                     AppColors.textSecondary,
                   ),
@@ -452,7 +452,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
                   // Progress Bar
                   Text(
-                    'Progress',
+                    'emergency.progress'.tr(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -493,7 +493,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             // Breakdown Section
             Text(
-              'BREAKDOWN',
+              'emergency.breakdown'.tr(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -506,7 +506,7 @@ class EmergencyFundCard extends ConsumerWidget {
             _buildMetricRowWithIcon(
               context,
               CupertinoIcons.calendar,
-              'Months Covered',
+              'emergency.monthsCovered'.tr(namedArgs: {'months': ''}),
               '${status.monthsCovered.toStringAsFixed(1)} months',
               _getLevelColor(),
             ),
@@ -515,7 +515,7 @@ class EmergencyFundCard extends ConsumerWidget {
             _buildMetricRowWithIcon(
               context,
               CupertinoIcons.doc_text,
-              'Monthly Expenses (avg)',
+              'emergency.monthlyExpenses'.tr(),
               currencyFormat.format(status.averageMonthlyExpenses),
               AppColors.textSecondary,
             ),
@@ -524,7 +524,7 @@ class EmergencyFundCard extends ConsumerWidget {
             _buildMetricRowWithIcon(
               context,
               CupertinoIcons.checkmark_circle_fill,
-              'Minimum Goal (3 months)',
+              'emergency.minimumGoal'.tr(),
               currencyFormat.format(status.minimumRecommended),
               AppColors.textSecondary,
             ),
@@ -533,7 +533,7 @@ class EmergencyFundCard extends ConsumerWidget {
             _buildMetricRowWithIcon(
               context,
               CupertinoIcons.chart_pie_fill,
-              'Percentage of Net Worth',
+              'emergency.percentNetWorth'.tr(),
               '${status.percentageOfNetWorth.toStringAsFixed(1)}%',
               AppColors.textSecondary,
             ),
@@ -541,7 +541,7 @@ class EmergencyFundCard extends ConsumerWidget {
 
             // Recommendations
             Text(
-              'RECOMMENDATIONS',
+              'emergency.recommendations'.tr(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -583,7 +583,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
                 ),
-                child: const Text('Got it'),
+                child: Text('common.gotIt'.tr()),
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom),
@@ -601,7 +601,7 @@ class EmergencyFundCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Set Emergency Fund Target'),
+        title: Text('emergency.setTargetTitle'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,7 +615,7 @@ class EmergencyFundCard extends ConsumerWidget {
               controller: targetController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                labelText: 'Target Amount',
+                labelText: 'emergency.targetLabel'.tr(),
                 prefixText: '\$ ',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSizes.radiusSm),
@@ -625,7 +625,7 @@ class EmergencyFundCard extends ConsumerWidget {
             ),
             const SizedBox(height: AppSizes.md),
             Text(
-              'Recommended: 3-6 months of expenses',
+              'emergency.recommended'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -635,7 +635,7 @@ class EmergencyFundCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -654,7 +654,7 @@ class EmergencyFundCard extends ConsumerWidget {
                       Navigator.pop(context);
                       SuccessSnackbar.show(
                         context,
-                        message: 'Emergency fund target updated!',
+                        message: 'emergency.targetUpdated'.tr(),
                       );
                     }
                   }
@@ -662,7 +662,7 @@ class EmergencyFundCard extends ConsumerWidget {
                   if (context.mounted) {
                     ErrorSnackbar.show(
                       context,
-                      message: 'Failed to save target. Please try again.',
+                      message: 'emergency.failedToSave'.tr(),
                     );
                   }
                 }
@@ -670,12 +670,12 @@ class EmergencyFundCard extends ConsumerWidget {
                 if (context.mounted) {
                   ErrorSnackbar.show(
                     context,
-                    message: 'Please enter a valid amount.',
+                    message: 'emergency.invalidTargetAmount'.tr(),
                   );
                 }
               }
             },
-            child: const Text('Save'),
+            child: Text('common.save'.tr()),
           ),
         ],
       ),

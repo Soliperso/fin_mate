@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -96,7 +97,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.budget == null ? 'Create Budget' : 'Edit Budget',
+                      widget.budget == null ? 'createBudget.createTitle'.tr() : 'createBudget.editTitle'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -111,7 +112,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
 
                   // Category Selection
                   Text(
-                    'Category',
+                    'createBudget.category'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
@@ -120,8 +121,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       _loadedCategories = categories;
                       return DropdownButtonFormField<CategoryEntity>(
                         initialValue: _effectiveCategory,
-                        decoration: const InputDecoration(
-                          hintText: 'Select a category',
+                        decoration: InputDecoration(
+                          hintText: 'createBudget.selectCategory'.tr(),
                           border: OutlineInputBorder(),
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -139,27 +140,27 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                         },
                         validator: (value) {
                           if (value == null) {
-                            return 'Please select a category';
+                            return 'createBudget.categoryRequired'.tr();
                           }
                           return null;
                         },
                       );
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => const Text('Failed to load categories'),
+                    error: (error, _) => Text('createBudget.failedCategories'.tr()),
                   ),
                   const SizedBox(height: AppSizes.md),
 
                   // Amount
                   Text(
-                    'Budget Amount',
+                    'createBudget.amount'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   TextFormField(
                     controller: _amountController,
-                    decoration: const InputDecoration(
-                      hintText: '0.00',
+                    decoration: InputDecoration(
+                      hintText: 'createBudget.amountHint'.tr(),
                       prefixText: '\$ ',
                       border: OutlineInputBorder(),
                       isDense: true,
@@ -171,11 +172,11 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter an amount';
+                        return 'createBudget.amountRequired'.tr();
                       }
                       final amount = double.tryParse(value);
                       if (amount == null || amount <= 0) {
-                        return 'Please enter a valid amount';
+                        return 'createBudget.invalidAmount'.tr();
                       }
                       return null;
                     },
@@ -184,25 +185,25 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
 
                   // Period
                   Text(
-                    'Budget Period',
+                    'createBudget.period'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<BudgetPeriod>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: BudgetPeriod.weekly,
-                          label: Text('Weekly', style: TextStyle(fontSize: 13)),
+                          label: Text('createBudget.weekly'.tr(), style: const TextStyle(fontSize: 13)),
                         ),
                         ButtonSegment(
                           value: BudgetPeriod.monthly,
-                          label: Text('Monthly', style: TextStyle(fontSize: 13)),
+                          label: Text('createBudget.monthly'.tr(), style: const TextStyle(fontSize: 13)),
                         ),
                         ButtonSegment(
                           value: BudgetPeriod.yearly,
-                          label: Text('Yearly', style: TextStyle(fontSize: 13)),
+                          label: Text('createBudget.yearly'.tr(), style: const TextStyle(fontSize: 13)),
                         ),
                       ],
                       selected: {_selectedPeriod},
@@ -217,7 +218,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
 
                   // Start Date
                   Text(
-                    'Start Date',
+                    'createBudget.startDate'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSizes.sm),
@@ -255,7 +256,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                     children: [
                       Expanded(
                         child: Text(
-                          'End Date (Optional)',
+                          'createBudget.endDate'.tr(),
                           style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                         ),
                       ),
@@ -266,7 +267,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                               _endDate = null;
                             });
                           },
-                          child: const Text('Clear'),
+                          child: Text('createBudget.clear'.tr()),
                         ),
                     ],
                   ),
@@ -295,7 +296,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       child: Text(
                         _endDate != null
                             ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
-                            : 'Select end date',
+                            : 'createBudget.selectEndDate'.tr(),
                         style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
@@ -305,10 +306,10 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   // Carry-Over Toggle
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Carry Over Unspent / Overspent'),
+                    title: Text('createBudget.carryOver'.tr()),
                     subtitle: Text(
-                      'Rolls the surplus or deficit into the next period',
-                      style: TextStyle(
+                      'createBudget.carryOverSub'.tr(),
+                      style: const TextStyle(
                           color: AppColors.textSecondary, fontSize: 12),
                     ),
                     value: _carryOverEnabled,
@@ -328,7 +329,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                             shape: const StadiumBorder(),
                           ),
                           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          child: Text('common.cancel'.tr()),
                         ),
                       ),
                       const SizedBox(width: AppSizes.md),
@@ -348,7 +349,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                                         height: 20,
                                         child: CircularProgressIndicator(strokeWidth: 2),
                                       )
-                                    : const Text('Create'),
+                                    : Text('createBudget.create'.tr()),
                               )
                             : FilledButton(
                                 style: FilledButton.styleFrom(
@@ -362,7 +363,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                                         height: 20,
                                         child: CircularProgressIndicator(strokeWidth: 2),
                                       )
-                                    : const Text('Update'),
+                                    : Text('createBudget.update'.tr()),
                               ),
                       ),
                     ],
@@ -415,7 +416,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
         Navigator.of(context).pop(true);
         SuccessSnackbar.show(
           context,
-          message: widget.budget == null ? 'Budget created successfully' : 'Budget updated successfully',
+          message: widget.budget == null ? 'createBudget.created'.tr() : 'createBudget.updated'.tr(),
         );
       }
     } catch (e) {

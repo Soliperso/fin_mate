@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,8 +41,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    return DateFormat('MMM d, y').format(date);
   }
 
   Future<void> _submit() async {
@@ -103,7 +103,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Log Payment',
+                          'logPayment.title'.tr(),
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -127,17 +127,17 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                 // Amount
                 TextFormField(
                   controller: _amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Payment Amount (\$)',
+                  decoration: InputDecoration(
+                    labelText: 'logPayment.amountLabel'.tr(),
                     prefixText: '\$ ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Required';
+                    if (v == null || v.isEmpty) return 'common.required'.tr();
                     final amount = double.tryParse(v);
-                    if (amount == null) return 'Invalid number';
-                    if (amount <= 0) return 'Must be greater than 0';
+                    if (amount == null) return 'logPayment.invalidNumber'.tr();
+                    if (amount <= 0) return 'logPayment.mustBeGreaterThanZero'.tr();
                     return null;
                   },
                 ),
@@ -155,10 +155,10 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                     if (picked != null) setState(() => _selectedDate = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Payment Date',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(CupertinoIcons.calendar),
+                    decoration: InputDecoration(
+                      labelText: 'logPayment.paymentDate'.tr(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: const Icon(CupertinoIcons.calendar),
                     ),
                     child: Text(_formatDate(_selectedDate)),
                   ),
@@ -168,9 +168,9 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                 // Notes (optional)
                 TextFormField(
                   controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'logPayment.notes'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
                 ),
@@ -186,7 +186,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                           shape: const StadiumBorder(),
                         ),
                         onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text('common.cancel'.tr()),
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),
@@ -205,7 +205,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                               )
-                            : const Text('Log Payment'),
+                            : Text('logPayment.logButton'.tr()),
                       ),
                     ),
                   ],

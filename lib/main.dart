@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,8 +17,10 @@ import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
 // import 'core/services/payment_service.dart';
 import 'core/services/theme_provider.dart';
+import 'core/services/session_timeout_provider.dart';
 import 'core/providers/display_format_provider.dart';
 import 'core/error/global_error_handler.dart';
+import 'core/l10n/locale_bridge.dart';
 import 'shared/widgets/offline_indicator.dart';
 import 'features/transactions/data/datasources/reminder_remote_datasource.dart';
 import 'features/budgets/data/datasources/budget_remote_datasource.dart';
@@ -105,7 +109,13 @@ void main() async {
         );
       };
 
-      // Read saved theme + display format before first frame to avoid flash
+      // Initialize easy_localization
+      await EasyLocalization.ensureInitialized();
+
+      // Initialize date formatting for all supported locales (required for Arabic)
+      await initializeDateFormatting();
+
+      // Read saved theme + display format + locale before first frame to avoid flash
       final prefs = await SharedPreferences.getInstance();
       final savedTheme = prefs.getString('theme_mode') ?? 'dark';
       final initialThemeMode = savedTheme == 'light'
@@ -114,15 +124,29 @@ void main() async {
               ? ThemeMode.system
               : ThemeMode.dark;
       final initialDisplayFormat = await loadInitialDisplayFormat();
+      final savedLocaleCode = prefs.getString('saved_locale') ?? 'en';
 
       // Run app
-      runApp(ProviderScope(
-        overrides: [
-          initialThemeModeProvider.overrideWithValue(initialThemeMode),
-          initialDisplayFormatProvider.overrideWithValue(initialDisplayFormat),
-        ],
-        child: const FinmateApp(),
-      ));
+      runApp(
+        EasyLocalization(
+          supportedLocales: const [
+            Locale('en'),
+            Locale('fr'),
+            Locale('es'),
+            Locale('ar'),
+          ],
+          path: 'assets/translations',
+          fallbackLocale: const Locale('en'),
+          startLocale: Locale(savedLocaleCode),
+          child: ProviderScope(
+            overrides: [
+              initialThemeModeProvider.overrideWithValue(initialThemeMode),
+              initialDisplayFormatProvider.overrideWithValue(initialDisplayFormat),
+            ],
+            child: const FinmateApp(),
+          ),
+        ),
+      );
     },
     (error, stackTrace) {
       // Catch all uncaught async errors
@@ -153,6 +177,9 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
       await themeService.initialize();
       await ref.read(themeModeProvider.notifier).initialize();
 
+      // Start session timeout monitoring
+      ref.read(sessionTimeoutServiceProvider).startMonitoring();
+
       // Fire due reminders, apply budget carry-overs, and run auto backup on app open
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
@@ -170,13 +197,21 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
     final themeMode = ref.watch(themeModeProvider);
 
     return OfflineIndicator(
-      child: MaterialApp.router(
-        title: 'Finmate',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
-        themeMode: themeMode,
-        routerConfig: router,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => ref.read(sessionTimeoutServiceProvider).recordActivity(),
+        child: MaterialApp.router(
+          title: 'Finmate',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme(),
+          darkTheme: AppTheme.darkTheme(),
+          themeMode: themeMode,
+          routerConfig: router,
+          locale: context.locale,
+          supportedLocales: context.supportedLocales,
+          localizationsDelegates: context.localizationDelegates,
+          builder: (context, child) => LocaleBridge(child: child ?? const SizedBox()),
+        ),
       ),
     );
   }

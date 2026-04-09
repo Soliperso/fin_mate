@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,7 +131,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Edit Debt',
+                      'editDebt.title'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -144,20 +145,20 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Debt Name',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'editDebt.debtNameLabel'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.trim().isEmpty) ? 'common.required'.tr() : null,
                 ),
                 const SizedBox(height: AppSizes.md),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedDebtType,
-                  decoration: const InputDecoration(
-                    labelText: 'Debt Type',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'editDebt.debtType'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   items: _debtTypes
                       .map((t) =>
@@ -168,17 +169,17 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _balanceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Balance (\$)',
+                  decoration: InputDecoration(
+                    labelText: 'editDebt.balance'.tr(),
                     prefixText: '\$ ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Required';
-                    if (double.tryParse(v) == null) return 'Invalid number';
-                    if (double.parse(v) < 0) return 'Must be 0 or more';
+                    if (v == null || v.isEmpty) return 'common.required'.tr();
+                    if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0) return 'editDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -188,16 +189,16 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                     Expanded(
                       child: TextFormField(
                         controller: _interestRateController,
-                        decoration: const InputDecoration(
-                          labelText: 'Interest Rate (%)',
+                        decoration: InputDecoration(
+                          labelText: 'editDebt.interestRate'.tr(),
                           suffixText: '%',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType:
                             const TextInputType.numberWithOptions(decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (double.tryParse(v) == null) return 'Invalid';
+                          if (v == null || v.isEmpty) return 'common.required'.tr();
+                          if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
                           return null;
                         },
                       ),
@@ -206,17 +207,17 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                     Expanded(
                       child: TextFormField(
                         controller: _minimumPaymentController,
-                        decoration: const InputDecoration(
-                          labelText: 'Min. Payment (\$)',
+                        decoration: InputDecoration(
+                          labelText: 'editDebt.minPayment'.tr(),
                           prefixText: '\$ ',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType:
                             const TextInputType.numberWithOptions(decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (double.tryParse(v) == null) return 'Invalid';
-                          if (double.parse(v) <= 0) return 'Must be > 0';
+                          if (v == null || v.isEmpty) return 'common.required'.tr();
+                          if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
+                          if (double.parse(v) <= 0) return 'editDebt.mustBeGreaterThanZero'.tr();
                           return null;
                         },
                       ),
@@ -226,25 +227,25 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _dueDayController,
-                  decoration: const InputDecoration(
-                    labelText: 'Due Day (optional)',
-                    hintText: '1–31',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'editDebt.dueDay'.tr(),
+                    hintText: 'editDebt.dueDayHint'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final day = int.tryParse(v);
-                    if (day == null || day < 1 || day > 31) return 'Must be 1–31';
+                    if (day == null || day < 1 || day > 31) return 'editDebt.mustBe1to31'.tr();
                     return null;
                   },
                 ),
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
                   controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: 'editDebt.notes'.tr(),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
                 ),
@@ -259,7 +260,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                           shape: const StadiumBorder(),
                         ),
                         onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text('common.cancel'.tr()),
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),
@@ -281,7 +282,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Save Changes'),
+                            : Text('editDebt.save'.tr()),
                       ),
                     ),
                   ],

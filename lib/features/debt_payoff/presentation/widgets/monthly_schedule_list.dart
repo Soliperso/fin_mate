@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -118,7 +118,7 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currencyLarge = ref.watch(currencyFormat0Provider);
     final currencyDetail = ref.watch(currencyFormat2Provider);
-    final dateFormat = DateFormat('MMM yyyy');
+    final dateFormat = DateFormat('MMM yyyy', context.locale.languageCode);
 
     final visibleCount =
         _expanded ? widget.result.schedule.length : widget.monthsToShow;
@@ -156,7 +156,7 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
         Row(
           children: [
             Text(
-              'Payment Schedule',
+              'schedule.title'.tr(),
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -164,7 +164,7 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
             ),
             const Spacer(),
             Text(
-              '${widget.result.totalMonths} months total',
+              'schedule.totalMonths'.tr(namedArgs: {'months': '${widget.result.totalMonths}'}),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary),
             ),
@@ -208,8 +208,8 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
               ),
               label: Text(
                 _expanded
-                    ? 'Show less'
-                    : 'See full schedule (${widget.result.totalMonths} months)',
+                    ? 'schedule.showLess'.tr()
+                    : 'schedule.seeFullSchedule'.tr(namedArgs: {'months': '${widget.result.totalMonths}'}),
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
@@ -257,18 +257,18 @@ class _ColumnHeadersRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 52,
-            child: _headerLabel('Month'),
+            child: _headerLabel('schedule.month'.tr()),
           ),
           const SizedBox(width: AppSizes.sm),
           Expanded(
             flex: 2,
-            child: _headerLabel('Focus Debt'),
+            child: _headerLabel('schedule.focusDebt'.tr()),
           ),
           Expanded(
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerLabel('Balance'),
+              child: _headerLabel('schedule.balance'.tr()),
             ),
           ),
           const SizedBox(width: AppSizes.xs),
@@ -276,7 +276,7 @@ class _ColumnHeadersRow extends StatelessWidget {
             width: 52,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerLabel('Interest'),
+              child: _headerLabel('schedule.interest'.tr()),
             ),
           ),
           const SizedBox(width: AppSizes.xs),
@@ -284,7 +284,7 @@ class _ColumnHeadersRow extends StatelessWidget {
             width: 62,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerLabel('Payment'),
+              child: _headerLabel('schedule.payment'.tr()),
             ),
           ),
         ],
@@ -651,7 +651,7 @@ class _PaidOffMilestoneRow extends StatelessWidget {
           const SizedBox(width: AppSizes.sm),
           Expanded(
             child: Text(
-              '$debtName — Paid Off!',
+              'schedule.paidOff'.tr(namedArgs: {'name': debtName}),
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -700,7 +700,7 @@ class _SummaryFooter extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _SummaryItem(
-            label: 'Total Interest',
+            label: 'schedule.totalInterest'.tr(),
             value: currencyLarge.format(totalInterest),
             color: AppColors.systemOrange,
           ),
@@ -710,7 +710,7 @@ class _SummaryFooter extends StatelessWidget {
             color: Theme.of(context).dividerColor,
           ),
           _SummaryItem(
-            label: 'Total Paid',
+            label: 'schedule.totalPaid'.tr(),
             value: currencyLarge.format(totalPaid),
             color: isDark ? AppColors.labelDark : AppColors.label,
           ),

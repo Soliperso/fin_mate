@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -86,7 +87,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       await _runOcr();
     } catch (_) {
       setState(() {
-        _errorMessage = 'Could not access camera or gallery.';
+        _errorMessage = 'scanReceipt.cameraError'.tr();
         _state = _ScanState.idle;
       });
     }
@@ -133,7 +134,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Could not read this receipt. Try a clearer photo.';
+        _errorMessage = 'scanReceipt.readError'.tr();
         _state = _ScanState.idle;
       });
     }
@@ -218,7 +219,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     return SafeArea(
       child: Column(
         children: [
-          _topBar('Scan Receipt'),
+          _topBar('scanReceipt.titleBar'.tr()),
           const Spacer(),
           Container(
             width: 96,
@@ -233,9 +234,9 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                 size: 46, color: _scanGreen),
           ),
           const SizedBox(height: AppSizes.lg),
-          const Text(
-            'Scan a Receipt',
-            style: TextStyle(
+          Text(
+            'scanReceipt.title'.tr(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -244,7 +245,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
           ),
           const SizedBox(height: AppSizes.sm),
           Text(
-            'Take a photo or choose from your\ngallery to extract transaction data.',
+            'scanReceipt.description'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.55),
@@ -286,13 +287,13 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
               children: [
                 _primaryButton(
                   icon: CupertinoIcons.camera_fill,
-                  label: 'Take Photo',
+                  label: 'scanReceipt.takePhoto'.tr(),
                   onTap: () => _pickImage(ImageSource.camera),
                 ),
                 const SizedBox(height: AppSizes.md),
                 _secondaryButton(
                   icon: CupertinoIcons.photo,
-                  label: 'Choose from Gallery',
+                  label: 'scanReceipt.chooseGallery'.tr(),
                   onTap: () => _pickImage(ImageSource.gallery),
                 ),
               ],
@@ -310,7 +311,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     return SafeArea(
       child: Column(
         children: [
-          _topBar('Processing Receipt'),
+          _topBar('scanReceipt.titleProcessing'.tr()),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.md),
@@ -350,7 +351,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'OCR Scanning…',
+                      'scanReceipt.scanning'.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 13,
@@ -379,7 +380,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
-                  'Extracting merchant, amount, and date…',
+                  'scanReceipt.extracting'.tr(),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 12,
@@ -400,7 +401,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     return SafeArea(
       child: Column(
         children: [
-          _topBar('Review Receipt'),
+          _topBar('scanReceipt.titleReview'.tr()),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSizes.md),
@@ -440,8 +441,8 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                         const SizedBox(width: 6),
                         Text(
                           _aiParsed
-                              ? 'AI parsed — tap any field to edit'
-                              : 'Receipt scanned — tap any field to edit',
+                              ? 'scanReceipt.aiBadge'.tr()
+                              : 'scanReceipt.scannedBadge'.tr(),
                           style: const TextStyle(
                             color: AppColors.brandTeal,
                             fontSize: 13,
@@ -467,13 +468,13 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
               children: [
                 _primaryButton(
                   icon: CupertinoIcons.checkmark,
-                  label: 'Use This Data',
+                  label: 'scanReceipt.useData'.tr(),
                   onTap: _confirm,
                 ),
                 const SizedBox(height: AppSizes.md),
                 _secondaryButton(
                   icon: CupertinoIcons.arrow_counterclockwise,
-                  label: 'Scan Again',
+                  label: 'scanReceipt.scanAgain'.tr(),
                   onTap: _rescan,
                 ),
               ],
@@ -610,7 +611,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
 
     rows.add(_editableRow(
       icon: CupertinoIcons.bag,
-      label: 'Merchant',
+      label: 'scanReceipt.merchant'.tr(),
       controller: _merchantCtrl,
       isFirst: true,
     ));
@@ -619,7 +620,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       rows.add(_divider());
       rows.add(_editableRow(
         icon: CupertinoIcons.list_bullet,
-        label: 'Subtotal',
+        label: 'scanReceipt.subtotal'.tr(),
         controller: _subtotalCtrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         prefix: '\$',
@@ -630,7 +631,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       rows.add(_divider());
       rows.add(_editableRow(
         icon: CupertinoIcons.percent,
-        label: 'Tax',
+        label: 'scanReceipt.tax'.tr(),
         controller: _taxCtrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         prefix: '\$',
@@ -641,7 +642,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       rows.add(_divider());
       rows.add(_editableRow(
         icon: CupertinoIcons.heart,
-        label: 'Tip',
+        label: 'scanReceipt.tip'.tr(),
         controller: _tipCtrl,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         prefix: '\$',
@@ -651,7 +652,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     rows.add(_divider());
     rows.add(_editableRow(
       icon: CupertinoIcons.money_dollar_circle,
-      label: 'Total',
+      label: 'scanReceipt.total'.tr(),
       controller: _amountCtrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       prefix: '\$',
@@ -665,7 +666,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       onTap: _pickDate,
       child: _dataRow(
         icon: CupertinoIcons.calendar,
-        label: 'Date',
+        label: 'scanReceipt.date'.tr(),
         value: _formatDate(_reviewDate ?? DateTime.now()),
         isLast: true,
         trailing: const Icon(CupertinoIcons.pencil,
@@ -769,7 +770,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             padding: const EdgeInsets.fromLTRB(
                 AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm),
             child: Text(
-              'ITEMS',
+              'scanReceipt.itemsHeader'.tr(),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.4),
                 fontSize: 11,
@@ -783,7 +784,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
               padding: const EdgeInsets.fromLTRB(
                   AppSizes.md, 0, AppSizes.md, AppSizes.sm),
               child: Text(
-                'No items detected — see raw text below.',
+                'scanReceipt.noItems'.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.35),
                   fontSize: 13,
@@ -835,7 +836,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
               tilePadding: const EdgeInsets.symmetric(
                   horizontal: AppSizes.md, vertical: 0),
               title: Text(
-                'RAW OCR TEXT',
+                'scanReceipt.rawOcrHeader'.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 11,
@@ -850,7 +851,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                   padding: const EdgeInsets.fromLTRB(
                       AppSizes.md, 0, AppSizes.md, AppSizes.md),
                   child: SelectableText(
-                    rawText.isEmpty ? '(nothing extracted)' : rawText,
+                    rawText.isEmpty ? 'scanReceipt.nothingExtracted'.tr() : rawText,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.55),
                       fontSize: 12,

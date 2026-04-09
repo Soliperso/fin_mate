@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,13 +33,13 @@ class DtiWidget extends ConsumerWidget {
     String dtiLabel;
     if (dti < 36) {
       dtiColor = AppColors.success;
-      dtiLabel = 'Healthy';
+      dtiLabel = 'dti.healthy'.tr();
     } else if (dti < 50) {
       dtiColor = AppColors.warning;
-      dtiLabel = 'Moderate';
+      dtiLabel = 'dti.moderate'.tr();
     } else {
       dtiColor = AppColors.error;
-      dtiLabel = 'High';
+      dtiLabel = 'dti.high'.tr();
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -70,7 +71,7 @@ class DtiWidget extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Debt-to-Income Ratio',
+                    'dti.label'.tr(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.secondaryLabel,
                         ),

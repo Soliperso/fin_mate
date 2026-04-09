@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,9 +33,9 @@ class _NotificationSettingsPageState
 
     if (!mounted) return;
     if (success) {
-      SuccessSnackbar.show(context, message: 'Preferences saved');
+      SuccessSnackbar.show(context, message: 'notificationSettings.saved'.tr());
     } else {
-      ErrorSnackbar.show(context, message: 'Failed to save preferences');
+      ErrorSnackbar.show(context, message: 'notificationSettings.failed'.tr());
     }
   }
 
@@ -45,7 +46,7 @@ class _NotificationSettingsPageState
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Notification Settings'),
+        title: Text('notificationSettings.title'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
@@ -62,11 +63,11 @@ class _NotificationSettingsPageState
               const Icon(CupertinoIcons.exclamationmark_circle,
                   size: 48, color: AppColors.error),
               const SizedBox(height: AppSizes.md),
-              const Text('Failed to load settings'),
+              Text('settings.failedToLoad'.tr()),
               const SizedBox(height: AppSizes.md),
               FilledButton(
                 onPressed: () => ref.invalidate(settingsOperationsProvider),
-                child: const Text('Retry'),
+                child: Text('common.retry'.tr()),
               ),
             ],
           ),
@@ -74,7 +75,7 @@ class _NotificationSettingsPageState
         data: (settings) {
           final prefs = settings?.notificationPreferences;
           if (prefs == null) {
-            return const Center(child: Text('No settings found'));
+            return Center(child: Text('common.noData'.tr()));
           }
 
           // Initialise local slider values on first build
@@ -90,12 +91,12 @@ class _NotificationSettingsPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── General ───────────────────────────────────────────────
-                _sectionTitle(context, 'General'),
+                _sectionTitle(context, 'notificationSettings.title'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive notifications on this device',
+                  title: 'notificationSettings.pushNotifications'.tr(),
+                  subtitle: 'notificationSettings.pushSub'.tr(),
                   value: pushOn,
                   onChanged: (v) =>
                       _updatePreferences(prefs.copyWith(pushEnabled: v)),
@@ -103,8 +104,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Email Notifications',
-                  subtitle: 'Receive important updates via email',
+                  title: 'notificationSettings.emailNotifications'.tr(),
+                  subtitle: 'notificationSettings.emailSub'.tr(),
                   value: prefs.emailEnabled,
                   enabled: pushOn,
                   onChanged: (v) =>
@@ -113,8 +114,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Sound',
-                  subtitle: 'Play sound for notifications',
+                  title: 'notificationSettings.sound'.tr(),
+                  subtitle: 'notificationSettings.soundSub'.tr(),
                   value: prefs.soundEnabled,
                   enabled: pushOn,
                   onChanged: (v) =>
@@ -123,12 +124,14 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Budget Alerts ─────────────────────────────────────────
-                _sectionTitle(context, 'Budget Alerts'),
+                _sectionTitle(context, 'notificationSettings.budgetAlerts'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Budget Alerts',
-                  subtitle: 'Get notified when nearing a budget limit',
+                  title: 'notificationSettings.budgetAlerts'.tr(),
+                  subtitle: 'notificationSettings.budgetAlertsSub'.tr(
+                    namedArgs: {'threshold': prefs.budgetThreshold.toString()},
+                  ),
                   value: prefs.budgetAlerts,
                   enabled: pushOn,
                   onChanged: (v) =>
@@ -138,8 +141,10 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'Alert Threshold',
-                    subtitle: 'Alert when ${_budgetThreshold!.toInt()}% of budget is spent',
+                    title: 'notificationSettings.budgetAlerts'.tr(),
+                    subtitle: 'notificationSettings.budgetAlertsSub'.tr(
+                      namedArgs: {'threshold': _budgetThreshold!.toInt().toString()},
+                    ),
                     value: _budgetThreshold!,
                     min: 10,
                     max: 100,
@@ -154,12 +159,14 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Bill Reminders ────────────────────────────────────────
-                _sectionTitle(context, 'Bill Reminders'),
+                _sectionTitle(context, 'notificationSettings.billReminders'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Bill Reminders',
-                  subtitle: 'Get reminded about upcoming bills',
+                  title: 'notificationSettings.billReminders'.tr(),
+                  subtitle: 'notificationSettings.billRemindersSub'.tr(
+                    namedArgs: {'days': prefs.billReminderDays.toString()},
+                  ),
                   value: prefs.billReminders,
                   enabled: pushOn,
                   onChanged: (v) =>
@@ -169,8 +176,10 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'Days Before Due',
-                    subtitle: 'Remind me ${_billReminderDays!.toInt()} day(s) before bill is due',
+                    title: 'notificationSettings.billReminders'.tr(),
+                    subtitle: 'notificationSettings.billRemindersSub'.tr(
+                      namedArgs: {'days': _billReminderDays!.toInt().toString()},
+                    ),
                     value: _billReminderDays!,
                     min: 1,
                     max: 7,
@@ -185,12 +194,14 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Transaction Alerts ────────────────────────────────────
-                _sectionTitle(context, 'Transaction Alerts'),
+                _sectionTitle(context, 'notificationSettings.transactionAlerts'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
-                  title: 'Large Transaction Alerts',
-                  subtitle: 'Get notified for large expenses',
+                  title: 'notificationSettings.transactionAlerts'.tr(),
+                  subtitle: 'notificationSettings.transactionAlertsSub'.tr(
+                    namedArgs: {'amount': '\$${prefs.transactionThreshold}'},
+                  ),
                   value: prefs.transactionAlerts,
                   enabled: pushOn,
                   onChanged: (v) =>
@@ -200,8 +211,10 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'Amount Threshold',
-                    subtitle: 'Alert for transactions over \$${_transactionThreshold!.toInt()}',
+                    title: 'notificationSettings.transactionAlerts'.tr(),
+                    subtitle: 'notificationSettings.transactionAlertsSub'.tr(
+                      namedArgs: {'amount': '\$${_transactionThreshold!.toInt()}'},
+                    ),
                     value: _transactionThreshold!,
                     min: 100,
                     max: 10000,
@@ -216,12 +229,12 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Money Health & Goals ──────────────────────────────────
-                _sectionTitle(context, 'Money Health & Goals'),
+                _sectionTitle(context, 'notificationSettings.healthUpdates'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _dropdownTile(
                   context,
-                  title: 'Money Health Updates',
-                  subtitle: 'How often to receive money health insights',
+                  title: 'notificationSettings.healthUpdates'.tr(),
+                  subtitle: 'notificationSettings.healthUpdates'.tr(),
                   value: prefs.moneyHealthUpdates,
                   items: const ['weekly', 'monthly', 'off'],
                   labels: const ['Weekly', 'Monthly', 'Off'],
@@ -235,8 +248,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.sm),
                 _dropdownTile(
                   context,
-                  title: 'Goal Notifications',
-                  subtitle: 'When to be notified about savings goals',
+                  title: 'notificationSettings.goalNotifications'.tr(),
+                  subtitle: 'notificationSettings.goalNotifications'.tr(),
                   value: prefs.goalNotifications,
                   items: const ['milestones', 'all', 'off'],
                   labels: const ['Milestones Only', 'All Updates', 'Off'],
@@ -250,12 +263,12 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Data & Backup ─────────────────────────────────────────
-                _sectionTitle(context, 'Data & Backup'),
+                _sectionTitle(context, 'notificationSettings.autoBackup'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _dropdownTile(
                   context,
-                  title: 'Auto Backup',
-                  subtitle: 'Automatically back up your financial data',
+                  title: 'notificationSettings.autoBackup'.tr(),
+                  subtitle: 'notificationSettings.autoBackup'.tr(),
                   value: prefs.autoBackupSchedule,
                   items: const ['off', 'daily', 'weekly'],
                   labels: const ['Off', 'Daily', 'Weekly'],

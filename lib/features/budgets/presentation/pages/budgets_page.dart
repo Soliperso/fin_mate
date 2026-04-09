@@ -1,8 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -26,7 +26,7 @@ class BudgetsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Budgets'),
+        title: Text('budgets.title'.tr()),
       ),
       body: budgetsState.when(
         data: (budgets) => budgets.isEmpty
@@ -72,7 +72,7 @@ class BudgetsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSizes.md),
                 Text(
-                  'Failed to load budgets',
+                  'budgets.failedToLoad'.tr(),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: AppSizes.sm),
@@ -89,7 +89,7 @@ class BudgetsPage extends ConsumerWidget {
                     ref.read(budgetNotifierProvider.notifier).loadBudgets();
                   },
                   icon: const Icon(CupertinoIcons.arrow_counterclockwise),
-                  label: const Text('Retry'),
+                  label: Text('common.retry'.tr()),
                 ),
               ],
             ),
@@ -116,9 +116,9 @@ class BudgetsPage extends ConsumerWidget {
                     ),
                   ),
                   icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'New Budget',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  label: Text(
+                    'budgets.newBudget'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -135,8 +135,8 @@ class BudgetsPage extends ConsumerWidget {
         children: [
           EmptyStateCard(
             icon: CupertinoIcons.money_dollar,
-            title: 'No Budgets Yet',
-            message: 'Create budgets to track your spending by category',
+            title: 'budgets.noBudgets'.tr(),
+            message: 'budgets.noBudgetsMessage'.tr(),
             backgroundColor: AppColors.brandTeal,
           ),
           const SizedBox(height: AppSizes.lg),
@@ -155,9 +155,9 @@ class BudgetsPage extends ConsumerWidget {
                 ),
               ),
               icon: const Icon(CupertinoIcons.add, size: 20),
-              label: const Text(
-                'New Budget',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              label: Text(
+                'budgets.newBudget'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
           ),
@@ -316,7 +316,7 @@ class BudgetsPage extends ConsumerWidget {
                       Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          '${budget.spentPercentage.clamp(0, double.infinity).toStringAsFixed(0)}% used',
+                          '${budget.spentPercentage.clamp(0, double.infinity).toStringAsFixed(0)}${'budgets.percentUsed'.tr()}',
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: statusColor,
                                 fontWeight: FontWeight.w600,
@@ -350,7 +350,7 @@ class BudgetsPage extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Spent', style: Theme.of(context).textTheme.bodySmall),
+                              Text('budgets.spent'.tr(), style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
                                 '$currencySymbol${spent.toStringAsFixed(0)}',
@@ -365,7 +365,7 @@ class BudgetsPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                isOverBudget ? 'Over by' : 'Remaining',
+                                isOverBudget ? 'budgets.overBy'.tr() : 'budgets.remaining'.tr(),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const SizedBox(height: AppSizes.xs),
@@ -383,7 +383,7 @@ class BudgetsPage extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('Budget', style: Theme.of(context).textTheme.bodySmall),
+                              Text('budgets.budget'.tr(), style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
                                 '$currencySymbol${budget.effectiveAmount.toStringAsFixed(0)}',
@@ -501,7 +501,7 @@ class BudgetsPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Spent',
+                              'budgets.spent'.tr(),
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
@@ -519,7 +519,7 @@ class BudgetsPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              isOverBudget ? 'Over by' : 'Remaining',
+                              isOverBudget ? 'budgets.overBy'.tr() : 'budgets.remaining'.tr(),
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
@@ -548,7 +548,7 @@ class BudgetsPage extends ConsumerWidget {
                 context: context,
                 icon: CupertinoIcons.pencil,
                 iconColor: AppColors.brandTeal,
-                label: 'Edit Budget',
+                label: 'budgets.editBudget'.tr(),
                 onTap: () {
                   Navigator.pop(context);
                   _showCreateBudgetBottomSheet(context, budget: budget);
@@ -562,7 +562,7 @@ class BudgetsPage extends ConsumerWidget {
                 context: context,
                 icon: CupertinoIcons.list_bullet,
                 iconColor: AppColors.brandTeal,
-                label: 'View Transactions',
+                label: 'budgets.viewTransactions'.tr(),
                 onTap: () {
                   Navigator.pop(context);
                   context.push('/transactions');
@@ -576,23 +576,23 @@ class BudgetsPage extends ConsumerWidget {
                 context: context,
                 icon: CupertinoIcons.trash,
                 iconColor: AppColors.systemRed,
-                label: 'Delete Budget',
+                label: 'budgets.deleteBudget'.tr(),
                 labelColor: AppColors.systemRed,
                 onTap: () async {
                   Navigator.pop(context);
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (dialogContext) => AlertDialog(
-                      title: const Text('Delete Budget'),
-                      content: const Text('Are you sure you want to delete this budget?'),
+                      title: Text('budgets.deleteTitle'.tr()),
+                      content: Text('budgets.deleteMessage'.tr()),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(dialogContext, false),
-                          child: const Text('Cancel'),
+                          child: Text('common.cancel'.tr()),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(dialogContext, true),
-                          child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                          child: Text('budgets.delete'.tr(), style: const TextStyle(color: AppColors.error)),
                         ),
                       ],
                     ),
@@ -604,8 +604,8 @@ class BudgetsPage extends ConsumerWidget {
                       if (context.mounted) {
                         SuccessDialog.show(
                           context,
-                          title: 'Deleted',
-                          message: 'Budget deleted successfully',
+                          title: 'budgets.deleted'.tr(),
+                          message: 'budgets.deletedMessage'.tr(),
                           autoDismissDuration: const Duration(milliseconds: 800),
                         );
                       }

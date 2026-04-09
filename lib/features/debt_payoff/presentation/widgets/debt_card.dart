@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,14 +95,16 @@ class DebtCard extends ConsumerWidget {
       }
       daysUntil = nextDue.difference(today).inDays;
       if (daysUntil == 0) {
-        dueDateLabel = 'Due today';
+        dueDateLabel = 'debtCard.dueToday'.tr();
         dueDateColor = AppColors.error;
       } else if (daysUntil <= 5) {
-        dueDateLabel = 'Due in $daysUntil day${daysUntil == 1 ? '' : 's'}';
+        dueDateLabel = daysUntil == 1
+            ? 'debtCard.dueInDays'.tr(namedArgs: {'days': '$daysUntil'})
+            : 'debtCard.dueInDaysPlural'.tr(namedArgs: {'days': '$daysUntil'});
         dueDateColor = AppColors.warning;
       } else {
         final suffix = _daySuffix(clampedDay);
-        dueDateLabel = 'Due on the $clampedDay$suffix';
+        dueDateLabel = 'debtCard.dueOnThe'.tr(namedArgs: {'day': '$clampedDay$suffix'});
         dueDateColor = AppColors.textSecondary;
       }
     }
@@ -112,7 +115,7 @@ class DebtCard extends ConsumerWidget {
       final pct = (debt.monthlyInterest / debt.minimumPayment) * 100;
       if (pct >= 50) {
         interestTrapText =
-            '${pct.round()}% of your min payment goes to interest';
+            'debtCard.interestTrap'.tr(namedArgs: {'pct': '${pct.round()}'});
       }
     }
 
@@ -194,7 +197,7 @@ class DebtCard extends ConsumerWidget {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                'NEXT UP · $focusReason',
+                                'debtCard.nextUp'.tr(namedArgs: {'reason': focusReason}),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 9,
@@ -251,7 +254,7 @@ class DebtCard extends ConsumerWidget {
                       value: 'log_payment',
                       child: _MenuRow(
                         icon: CupertinoIcons.add_circled,
-                        label: 'Log Payment',
+                        label: 'debtCard.logPayment'.tr(),
                         color: AppColors.success,
                       ),
                     ),
@@ -259,7 +262,7 @@ class DebtCard extends ConsumerWidget {
                       value: 'edit',
                       child: _MenuRow(
                         icon: CupertinoIcons.pencil,
-                        label: 'Edit Debt',
+                        label: 'debtCard.editDebt'.tr(),
                         color: AppColors.systemBlue,
                       ),
                     ),
@@ -267,7 +270,7 @@ class DebtCard extends ConsumerWidget {
                       value: 'history',
                       child: _MenuRow(
                         icon: CupertinoIcons.clock,
-                        label: 'Payment History',
+                        label: 'debtCard.paymentHistory'.tr(),
                         color: AppColors.brandTeal,
                       ),
                     ),
@@ -276,7 +279,7 @@ class DebtCard extends ConsumerWidget {
                       value: 'delete',
                       child: _MenuRow(
                         icon: CupertinoIcons.trash,
-                        label: 'Delete Debt',
+                        label: 'debtCard.deleteDebt'.tr(),
                         isDestructive: true,
                       ),
                     ),
@@ -344,13 +347,12 @@ class DebtCard extends ConsumerWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text:
-                              'Min: ${currencyFormat.format(debt.minimumPayment)}/mo',
+                          text: 'debtCard.minPayment'.tr(namedArgs: {'amount': currencyFormat.format(debt.minimumPayment)}),
                         ),
                         if (monthsLeft != null) ...[
                           const TextSpan(text: '  ·  '),
                           TextSpan(
-                            text: '~$monthsLeft mo (min. only)',
+                            text: 'debtCard.monthsLeft'.tr(namedArgs: {'months': '$monthsLeft'}),
                             style: const TextStyle(
                               fontStyle: FontStyle.italic,
                             ),
@@ -383,9 +385,9 @@ class DebtCard extends ConsumerWidget {
                           BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
-                  child: const Text(
-                    'Log Payment',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  child: Text(
+                    'debtCard.logPayment'.tr(),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -459,11 +461,11 @@ class DebtCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         icon: const Icon(CupertinoIcons.trash_fill, color: AppColors.error, size: 28),
-        title: const Text('Delete Debt'),
+        title: Text('debtCard.deleteTitle'.tr()),
         titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
-        content: Text('Remove "${debt.name}" from your debt tracker? This cannot be undone.'),
+        content: Text('debtCard.deleteMessage'.tr(namedArgs: {'name': debt.name})),
         contentTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -472,7 +474,7 @@ class DebtCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
@@ -480,7 +482,7 @@ class DebtCard extends ConsumerWidget {
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text('debtCard.delete'.tr()),
           ),
         ],
       ),

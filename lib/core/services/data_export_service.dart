@@ -95,41 +95,58 @@ class DataExportService {
     }
   }
 
-  /// Generate transaction CSV with formatted headers
-  String generateTransactionsCsv(List<Map<String, dynamic>> transactions) {
+  /// Generate transaction CSV — human-readable, round-trippable for import.
+  ///
+  /// Headers: Date,Type,Amount,Account,Category,Description,Notes,Tags
+  ///
+  /// [dateFormat] must be one of: 'yyyy-MM-dd' (default), 'MM/dd/yyyy', 'dd/MM/yyyy'
+  String generateTransactionsCsv(
+    List<Map<String, dynamic>> transactions, {
+    String dateFormat = 'yyyy-MM-dd',
+  }) {
     if (transactions.isEmpty) {
       return 'No transactions to export';
     }
 
     final csvBuffer = StringBuffer();
+    csvBuffer.writeln('Date,Type,Amount,Account,Category,Description,Notes,Tags');
 
-    // Custom headers
-    csvBuffer.writeln('Date,Description,Amount,Category,Type,Account,Status');
+    final fmt = DateFormat(dateFormat);
 
-    // Add rows with formatted data
     for (final tx in transactions) {
+      // Date
       final rawDate = tx['date'] ?? tx['created_at'] ?? '';
-      String date = rawDate;
-      if (rawDate is String && rawDate.isNotEmpty) {
+      String date = rawDate is String && rawDate.isNotEmpty
+          ? rawDate.substring(0, 10) // ISO date portion
+          : '';
+      if (date.isNotEmpty) {
         try {
-          date = DateFormat('yyyy-MM-dd').format(DateTime.parse(rawDate));
+          date = fmt.format(DateTime.parse(date));
         } catch (_) {}
       }
-      final description = tx['description'] ?? '';
-      final amount = tx['amount'] ?? '';
-      final category = tx['category_id'] ?? tx['category'] ?? '';
-      final type = tx['type'] ?? '';
-      final account = tx['account_id'] ?? tx['account'] ?? '';
-      final status = tx['status'] ?? 'completed';
+
+      // Human-readable account / category names (joined fields preferred)
+      final account = tx['account_name'] ?? tx['account_id'] ?? '';
+      final category = tx['category_name'] ?? tx['category_id'] ?? '';
+
+      // Tags — pipe-separated
+      final rawTags = tx['tags'];
+      String tags = '';
+      if (rawTags is List) {
+        tags = rawTags.join('|');
+      } else if (rawTags is String && rawTags.isNotEmpty) {
+        tags = rawTags;
+      }
 
       final row = [
         _escapeCsvValue(date),
-        _escapeCsvValue(description),
-        _escapeCsvValue(amount.toString()),
-        _escapeCsvValue(category),
-        _escapeCsvValue(type),
-        _escapeCsvValue(account),
-        _escapeCsvValue(status),
+        _escapeCsvValue((tx['type'] ?? '').toString()),
+        _escapeCsvValue((tx['amount'] ?? '').toString()),
+        _escapeCsvValue(account.toString()),
+        _escapeCsvValue(category.toString()),
+        _escapeCsvValue((tx['description'] ?? '').toString()),
+        _escapeCsvValue((tx['notes'] ?? '').toString()),
+        _escapeCsvValue(tags),
       ];
 
       csvBuffer.writeln(row.join(','));
