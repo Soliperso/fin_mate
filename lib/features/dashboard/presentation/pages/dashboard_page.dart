@@ -298,10 +298,11 @@ class DashboardPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  EmptyState(
+                  EmptyStateCard(
                     icon: CupertinoIcons.exclamationmark_circle,
                     title: 'dashboard.failedToLoad'.tr(),
                     message: 'dashboard.failedMessage'.tr(),
+                    backgroundColor: AppColors.brandTeal,
                   ),
                   Center(
                     child: FilledButton.icon(
@@ -348,11 +349,10 @@ class _RecentTransactionsCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          EmptyStateCard(
+          EmptyState(
             icon: CupertinoIcons.doc_text,
             title: 'dashboard.noTransactions'.tr(),
             message: 'dashboard.noTransactionsMessage'.tr(),
-            backgroundColor: AppColors.brandTeal,
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
