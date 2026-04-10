@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/services/receipt_ocr_service.dart';
 import '../../domain/entities/receipt_data.dart';
 
@@ -187,10 +188,9 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
-        data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
             primary: AppColors.brandTeal,
-            surface: Color(0xFF1A1A1A),
           ),
         ),
         child: child!,
@@ -204,7 +204,6 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
       body: switch (_state) {
         _ScanState.idle => _buildIdleView(),
         _ScanState.scanning => _buildScanningView(),
@@ -216,6 +215,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
   // ── Idle ──────────────────────────────────────────────────────
 
   Widget _buildIdleView() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Column(
         children: [
@@ -225,7 +225,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
+              color: _scanGreen.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               border: Border.all(
                   color: _scanGreen.withValues(alpha: 0.3), width: 1.5),
@@ -236,8 +236,8 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
           const SizedBox(height: AppSizes.lg),
           Text(
             'scanReceipt.title'.tr(),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 24,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
@@ -248,7 +248,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             'scanReceipt.description'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.55),
+              color: colorScheme.onSurface.withValues(alpha: 0.55),
               fontSize: 15,
               height: 1.5,
             ),
@@ -353,7 +353,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                     Text(
                       'scanReceipt.scanning'.tr(),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -382,7 +382,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                 Text(
                   'scanReceipt.extracting'.tr(),
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 12,
                   ),
                 ),
@@ -493,17 +493,14 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
           AppSizes.sm, AppSizes.sm, AppSizes.md, 0),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(CupertinoIcons.xmark,
-                color: Colors.white, size: 24),
+          CircularIconButton(
+            icon: CupertinoIcons.xmark,
+            onTap: () => context.pop(),
           ),
-          const SizedBox(width: AppSizes.xs),
+          const SizedBox(width: AppSizes.sm),
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               letterSpacing: -0.3,
             ),
@@ -688,6 +685,9 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     bool bold = false,
     Color? valueColor,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final resolvedValueColor = valueColor ?? onSurface;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSizes.md,
@@ -701,16 +701,16 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2E),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppColors.labelDark, size: 17),
+            child: Icon(icon, color: onSurface.withValues(alpha: 0.7), size: 17),
           ),
           const SizedBox(width: AppSizes.md),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: onSurface.withValues(alpha: 0.5),
               fontSize: bold ? 14 : 13,
               fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
             ),
@@ -724,11 +724,9 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                   Text(
                     prefix,
                     style: TextStyle(
-                      color: (valueColor ?? Colors.white)
-                          .withValues(alpha: 0.7),
+                      color: resolvedValueColor.withValues(alpha: 0.7),
                       fontSize: bold ? 15 : 14,
-                      fontWeight:
-                          bold ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
                     ),
                   ),
                 Flexible(
@@ -737,10 +735,9 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                     keyboardType: keyboardType,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: valueColor ?? Colors.white,
+                      color: resolvedValueColor,
                       fontSize: bold ? 15 : 14,
-                      fontWeight:
-                          bold ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
                     ),
                     decoration: InputDecoration(
                       isDense: true,
@@ -748,7 +745,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                       border: InputBorder.none,
                       hintText: '—',
                       hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.2)),
+                          color: onSurface.withValues(alpha: 0.2)),
                     ),
                   ),
                 ),
@@ -761,6 +758,8 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
   }
 
   Widget _itemsCard(List<String> items, String rawText) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surfaceContainer = Theme.of(context).colorScheme.surfaceContainerHighest;
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +771,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             child: Text(
               'scanReceipt.itemsHeader'.tr(),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.4),
+                color: onSurface.withValues(alpha: 0.4),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
@@ -786,7 +785,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
               child: Text(
                 'scanReceipt.noItems'.tr(),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.35),
+                  color: onSurface.withValues(alpha: 0.35),
                   fontSize: 13,
                 ),
               ),
@@ -804,12 +803,12 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2C2C2E),
+                              color: surfaceContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               CupertinoIcons.doc_text,
-                              color: AppColors.labelDark,
+                              color: onSurface.withValues(alpha: 0.7),
                               size: 17,
                             ),
                           ),
@@ -818,7 +817,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                             child: Text(
                               e.value,
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.75),
+                                color: onSurface.withValues(alpha: 0.75),
                                 fontSize: 13,
                               ),
                             ),
@@ -828,24 +827,24 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                     ),
                   ],
                 )),
-          // ── Raw OCR text (always visible for debugging) ───────
+          // ── Raw OCR text ──────────────────────────────────────
           _divider(),
           Theme(
-            data: ThemeData(dividerColor: Colors.transparent),
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
               tilePadding: const EdgeInsets.symmetric(
                   horizontal: AppSizes.md, vertical: 0),
               title: Text(
                 'scanReceipt.rawOcrHeader'.tr(),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: onSurface.withValues(alpha: 0.4),
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
                 ),
               ),
-              iconColor: Colors.white.withValues(alpha: 0.3),
-              collapsedIconColor: Colors.white.withValues(alpha: 0.3),
+              iconColor: onSurface.withValues(alpha: 0.3),
+              collapsedIconColor: onSurface.withValues(alpha: 0.3),
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
@@ -853,7 +852,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
                   child: SelectableText(
                     rawText.isEmpty ? 'scanReceipt.nothingExtracted'.tr() : rawText,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: onSurface.withValues(alpha: 0.55),
                       fontSize: 12,
                       fontFamily: 'monospace',
                       height: 1.6,
@@ -868,16 +867,18 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     );
   }
 
-  Widget _card({required Widget child}) => Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        ),
-        child: child,
-      );
+  Widget _card({required Widget child}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.08)),
+      ),
+      child: child,
+    );
+  }
 
   Widget _dataRow({
     required IconData icon,
@@ -889,6 +890,8 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     bool bold = false,
     Widget? trailing,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final onSurface = colorScheme.onSurface;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSizes.md,
@@ -902,16 +905,16 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2E),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppColors.labelDark, size: 17),
+            child: Icon(icon, color: onSurface.withValues(alpha: 0.7), size: 17),
           ),
           const SizedBox(width: AppSizes.md),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: onSurface.withValues(alpha: 0.5),
               fontSize: bold ? 14 : 13,
               fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
             ),
@@ -921,7 +924,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
             child: Text(
               value,
               style: TextStyle(
-                color: valueColor ?? Colors.white,
+                color: valueColor ?? onSurface,
                 fontSize: bold ? 15 : 14,
                 fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
               ),
@@ -942,7 +945,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
   Widget _divider() => Divider(
         height: 1,
         thickness: 1,
-        color: Colors.white.withValues(alpha: 0.06),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
         indent: AppSizes.md + 18 + AppSizes.md,
       );
 
@@ -977,27 +980,29 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-  }) =>
-      SizedBox(
-        width: double.infinity,
-        height: AppSizes.buttonHeightLg,
-        child: OutlinedButton.icon(
-          onPressed: onTap,
-          icon: Icon(icon, size: 20),
-          label: Text(label),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+  }) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return SizedBox(
+      width: double.infinity,
+      height: AppSizes.buttonHeightLg,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 20),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: onSurface,
+          side: BorderSide(color: onSurface.withValues(alpha: 0.25)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
         ),
-      );
+      ),
+    );
+  }
 
   String _formatDate(DateTime d) {
     const m = [

@@ -15,7 +15,6 @@ import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/auth_callback_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../../features/dashboard/presentation/pages/emergency_fund_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
@@ -187,13 +186,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/dashboard',
             name: 'dashboard',
             pageBuilder: (context, state) => _FadeTransitionPage(child: const DashboardPage()),
-            routes: [
-              GoRoute(
-                path: 'emergency-fund',
-                name: 'emergency-fund',
-                builder: (context, state) => const EmergencyFundPage(),
-              ),
-            ],
+            // [Removed: Emergency Fund route - not in V1 plan]
+            routes: [],
           ),
           GoRoute(
             path: '/budgets',

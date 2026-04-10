@@ -303,28 +303,6 @@ class GoalDetailPage extends ConsumerWidget {
                                 message: 'goalDetail.noContributionsMessage'.tr(),
                                 backgroundColor: AppColors.brandTeal,
                               ),
-                              const SizedBox(height: AppSizes.lg),
-                              SizedBox(
-                                width: double.infinity,
-                                height: AppSizes.buttonHeightMd,
-                                child: ElevatedButton.icon(
-                                  onPressed: () => _showAddContributionSheet(context, ref),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.brandTeal,
-                                    foregroundColor: AppColors.white,
-                                    elevation: 4,
-                                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                                    ),
-                                  ),
-                                  icon: const Icon(CupertinoIcons.add, size: 20),
-                                  label: Text(
-                                    'goalDetail.addContribution'.tr(),
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         );

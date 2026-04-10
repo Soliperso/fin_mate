@@ -57,7 +57,7 @@ class DashboardPage extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
-              DateFormat('MMMM d, yyyy').format(DateTime.now()),
+              DateFormat('MMMM d, yyyy', context.locale.toString()).format(DateTime.now()),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.systemGray,
                   ),
@@ -347,6 +347,7 @@ class _RecentTransactionsCard extends StatelessWidget {
     if (transactions.isEmpty) {
       return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           EmptyStateCard(
             icon: CupertinoIcons.doc_text,
@@ -356,7 +357,6 @@ class _RecentTransactionsCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
-            width: double.infinity,
             height: AppSizes.buttonHeightMd,
             child: ElevatedButton.icon(
               onPressed: () => context.go('/transactions/add?type=expense'),
