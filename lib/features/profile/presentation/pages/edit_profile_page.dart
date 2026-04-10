@@ -155,7 +155,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 Text(email, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 2),
                 Text(
-                  'Cannot be changed',
+                  'profile.cannotBeChanged'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isDark
                             ? AppColors.secondaryLabelDark
@@ -398,7 +398,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: const Text('Edit Profile'),
+          title: Text('profile.editProfileTitle'.tr()),
           leading: Center(
             child: CircularIconButton(
               icon: CupertinoIcons.xmark,
@@ -417,7 +417,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text('common.save'.tr()),
             ),
           ],
         ),
@@ -479,7 +479,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 const SizedBox(height: AppSizes.sm),
                 Center(
                   child: Text(
-                    'Tap to change photo',
+                    'profile.tapToChangePhoto'.tr(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isDark
                               ? AppColors.secondaryLabelDark
@@ -490,19 +490,19 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Personal Information ──────────────────────────────────
-                _sectionLabel('Personal Information'),
+                _sectionLabel('profile.personalInformation'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _buildSectionCard(
                   children: [
                     TextFormField(
                       controller: _fullNameController,
                       decoration: _fieldDecoration(
-                        labelText: 'Full Name',
+                        labelText: 'profile.fullName'.tr(),
                         prefixIcon: _iconBadge(CupertinoIcons.person),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your full name';
+                          return 'profile.fullNameRequired'.tr();
                         }
                         return null;
                       },
@@ -511,7 +511,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     TextFormField(
                       controller: _phoneController,
                       decoration: _fieldDecoration(
-                        labelText: 'Phone Number (optional)',
+                        labelText: 'profile.phoneNumber'.tr(),
                         prefixIcon: _iconBadge(CupertinoIcons.phone),
                       ),
                       keyboardType: TextInputType.phone,
@@ -521,7 +521,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Account ───────────────────────────────────────────────
-                _sectionLabel('Account'),
+                _sectionLabel('profile.account'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _buildSectionCard(
                   children: [
@@ -531,14 +531,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Preferences ───────────────────────────────────────────
-                _sectionLabel('Preferences'),
+                _sectionLabel('profile.preferences'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _buildSectionCard(
                   children: [
                     DropdownButtonFormField<String>(
                       initialValue: _selectedCurrency,
                       decoration: _fieldDecoration(
-                        labelText: 'Preferred Currency',
+                        labelText: 'profile.preferredCurrency'.tr(),
                         prefixIcon: _iconBadge(CupertinoIcons.money_dollar),
                       ),
                       dropdownColor: isDark
