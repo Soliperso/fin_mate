@@ -83,7 +83,7 @@ class DashboardPage extends ConsumerWidget {
                   right: 0,
                   top: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.xs, vertical: 1),
                     decoration: BoxDecoration(
                       color: AppColors.systemRed,
                       borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -476,7 +476,7 @@ class _TransactionRow extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSizes.xs),
                   Text(
                     transaction.categoryName ?? 'dashboard.uncategorized'.tr(),
                     style: Theme.of(context).textTheme.bodySmall,
