@@ -460,7 +460,7 @@ class ProfilePage extends ConsumerWidget {
             child: LoadingSkeleton(
               width: 90,
               height: 90,
-              borderRadius: BorderRadius.circular(45),
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
             ),
           ),
           const SizedBox(height: AppSizes.md),

@@ -305,7 +305,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
               height: 32,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
               child: Icon(icon, color: iconColor, size: 17),
             ),
@@ -842,7 +842,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                                     ? AppColors.systemGray3
                                         .withValues(alpha: 0.2)
                                     : AppColors.systemGray5),
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
                           ),
                         ),
                       );
