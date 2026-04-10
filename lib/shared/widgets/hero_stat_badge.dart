@@ -36,9 +36,8 @@ class HeroStatBadge extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Colors.white.withValues(alpha: 0.9),
-                fontSize: 10, // intentionally small — badge label inside gradient card
                 fontWeight: FontWeight.w500,
               ),
             ),

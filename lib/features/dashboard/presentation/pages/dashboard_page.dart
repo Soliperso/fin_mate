@@ -91,9 +91,8 @@ class DashboardPage extends ConsumerWidget {
                     constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
                       unreadCount > 99 ? '99+' : '$unreadCount',
-                      style: const TextStyle(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Colors.white,
-                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                         height: 1.2,
                       ),
@@ -125,10 +124,9 @@ class DashboardPage extends ConsumerWidget {
                       backgroundColor: AppColors.brandTeal,
                       child: Text(
                         getInitials(),
-                        style: const TextStyle(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
                           letterSpacing: -0.08,
                         ),
                       ),
@@ -373,7 +371,9 @@ class _RecentTransactionsCard extends StatelessWidget {
               icon: const Icon(CupertinoIcons.add, size: 20),
               label: Text(
                 'dashboard.addTransaction'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

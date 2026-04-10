@@ -116,7 +116,7 @@ class DebtHeroCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: 11),
+                  const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: AppSizes.iconXs),
                   const SizedBox(width: 4),
                   Text(
                     'debtHero.extraPayment'.tr(namedArgs: {'amount': '\$${extraMonthly.toStringAsFixed(0)}'}),
@@ -150,9 +150,8 @@ class DebtHeroCard extends ConsumerWidget {
                 const SizedBox(width: AppSizes.sm),
                 Text(
                   '${(overallProgress * 100).toStringAsFixed(0)}${'debtHero.percentPaid'.tr()}',
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Colors.white,
-                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

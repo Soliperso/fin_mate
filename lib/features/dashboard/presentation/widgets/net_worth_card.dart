@@ -148,7 +148,7 @@ class _StatChip extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 16),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: AppSizes.iconSm),
           const SizedBox(width: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
