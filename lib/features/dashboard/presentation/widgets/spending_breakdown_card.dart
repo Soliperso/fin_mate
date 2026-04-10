@@ -81,7 +81,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                             duration: const Duration(milliseconds: 220),
                             child: Icon(
                               CupertinoIcons.chevron_down,
-                              size: 14,
+                              size: AppSizes.iconXs,
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface

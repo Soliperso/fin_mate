@@ -197,7 +197,7 @@ class NetWorthTrendChart extends ConsumerWidget {
           Icon(
             isGrowth ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
             color: isGrowth ? AppColors.success : AppColors.error,
-            size: 16,
+            size: AppSizes.iconXs,
           ),
           const SizedBox(width: 4),
           Text(

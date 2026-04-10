@@ -367,7 +367,7 @@ class _RecentTransactionsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
               ),
-              icon: const Icon(CupertinoIcons.add, size: 20),
+              icon: const Icon(CupertinoIcons.add, size: AppSizes.iconSm),
               label: Text(
                 'dashboard.addTransaction'.tr(),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(

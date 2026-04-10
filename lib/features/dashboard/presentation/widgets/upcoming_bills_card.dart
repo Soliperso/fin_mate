@@ -84,7 +84,7 @@ class UpcomingBillsCard extends ConsumerWidget {
                       ),
                       child: Icon(
                         CupertinoIcons.checkmark_circle_fill,
-                        size: 28,
+                        size: AppSizes.iconLg,
                         color: AppColors.systemGreen.withValues(alpha: 0.5),
                       ),
                     ),
@@ -187,7 +187,7 @@ class _BillRow extends StatelessWidget {
             child: Icon(
               CupertinoIcons.arrow_up,
               color: AppColors.systemRed,
-              size: 20,
+              size: AppSizes.iconSm,
             ),
           ),
           const SizedBox(width: AppSizes.sm + 4),

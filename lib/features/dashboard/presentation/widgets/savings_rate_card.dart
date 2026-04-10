@@ -107,7 +107,7 @@ class SavingsRateCard extends ConsumerWidget {
           ),
           const Icon(
             CupertinoIcons.chevron_right,
-            size: 16,
+            size: AppSizes.iconXs,
             color: AppColors.systemGray3,
           ),
         ],
@@ -145,7 +145,7 @@ class _TrendBadge extends StatelessWidget {
                 ? CupertinoIcons.arrow_up_right
                 : CupertinoIcons.arrow_down_right,
             color: color,
-            size: 12,
+            size: AppSizes.iconXs,
           ),
           const SizedBox(width: 2),
           Text(

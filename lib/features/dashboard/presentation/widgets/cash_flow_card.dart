@@ -155,7 +155,7 @@ class _FlowCell extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 16),
+            child: Icon(icon, color: color, size: AppSizes.iconXs),
           ),
           const SizedBox(height: AppSizes.xs),
           Text(

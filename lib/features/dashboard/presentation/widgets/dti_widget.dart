@@ -88,7 +88,7 @@ class DtiWidget extends ConsumerWidget {
               ),
             ),
             const Icon(CupertinoIcons.chevron_right,
-                size: 16, color: AppColors.systemGray3),
+                size: AppSizes.iconXs, color: AppColors.systemGray3),
           ],
         ),
       ),

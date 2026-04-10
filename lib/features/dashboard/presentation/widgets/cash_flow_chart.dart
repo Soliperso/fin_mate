@@ -130,7 +130,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: AppSizes.iconSm,
           color: isSelected ? AppColors.primaryTeal : AppColors.textSecondary,
         ),
       ),
