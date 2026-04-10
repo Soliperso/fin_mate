@@ -693,7 +693,12 @@
     "failedToRemovePhoto": "Error al eliminar foto",
     "failedToSignOut": "Error al cerrar sesión",
     "unsavedChanges": "Tienes cambios sin guardar",
-    "discardChangesMessage": "¿Estás seguro de que quieres descartar los cambios?"
+    "discardChangesMessage": "¿Estás seguro de que quieres descartar los cambios?",
+    "discard": "Descartar",
+    "chooseFromGallery": "Elegir de la galería",
+    "takeAPhoto": "Tomar una foto",
+    "removePhoto": "Eliminar foto",
+    "removePhotoConfirm": "¿Estás seguro de que quieres eliminar tu foto de perfil?"
   },
   "settings": {
     "title": "Configuración",

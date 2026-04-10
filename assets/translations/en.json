@@ -693,7 +693,12 @@
     "failedToRemovePhoto": "Failed to remove photo",
     "failedToSignOut": "Failed to sign out",
     "unsavedChanges": "You have unsaved changes",
-    "discardChangesMessage": "Are you sure you want to discard them?"
+    "discardChangesMessage": "Are you sure you want to discard them?",
+    "discard": "Discard",
+    "chooseFromGallery": "Choose from Gallery",
+    "takeAPhoto": "Take a Photo",
+    "removePhoto": "Remove Photo",
+    "removePhotoConfirm": "Are you sure you want to remove your profile photo?"
   },
   "settings": {
     "title": "Settings",

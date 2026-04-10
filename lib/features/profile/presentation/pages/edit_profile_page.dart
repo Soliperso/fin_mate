@@ -221,7 +221,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Discard'),
+            child: Text('profile.discard'.tr()),
           ),
         ],
       ),
@@ -243,7 +243,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           children: [
             ListTile(
               leading: const Icon(CupertinoIcons.photo),
-              title: const Text('Choose from Gallery'),
+              title: Text('profile.chooseFromGallery'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -251,7 +251,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             ),
             ListTile(
               leading: const Icon(CupertinoIcons.camera),
-              title: const Text('Take a Photo'),
+              title: Text('profile.takeAPhoto'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -267,9 +267,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               ListTile(
                 leading: const Icon(CupertinoIcons.trash,
                     color: AppColors.systemRed),
-                title: const Text(
-                  'Remove Photo',
-                  style: TextStyle(color: AppColors.systemRed),
+                title: Text(
+                  'profile.removePhoto'.tr(),
+                  style: const TextStyle(color: AppColors.systemRed),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -342,19 +342,18 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Photo'),
-        content:
-            const Text('Are you sure you want to remove your profile photo?'),
+        title: Text('profile.removePhoto'.tr()),
+        content: Text('profile.removePhotoConfirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Remove',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              'profile.removePhoto'.tr(),
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
         ],

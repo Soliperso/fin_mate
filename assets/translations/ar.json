@@ -693,7 +693,12 @@
     "failedToRemovePhoto": "فشل حذف الصورة",
     "failedToSignOut": "فشل تسجيل الخروج",
     "unsavedChanges": "لديك تغييرات غير محفوظة",
-    "discardChangesMessage": "هل أنت متأكد أنك تريد التخلي عن التغييرات؟"
+    "discardChangesMessage": "هل أنت متأكد أنك تريد التخلي عن التغييرات؟",
+    "discard": "تخلي",
+    "chooseFromGallery": "اختر من المعرض",
+    "takeAPhoto": "التقط صورة",
+    "removePhoto": "حذف الصورة",
+    "removePhotoConfirm": "هل أنت متأكد أنك تريد حذف صورة ملفك الشخصي؟"
   },
   "settings": {
     "title": "الإعدادات",

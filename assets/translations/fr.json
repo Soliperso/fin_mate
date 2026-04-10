@@ -693,7 +693,12 @@
     "failedToRemovePhoto": "Erreur lors de la suppression de la photo",
     "failedToSignOut": "Erreur lors de la déconnexion",
     "unsavedChanges": "Vous avez des modifications non enregistrées",
-    "discardChangesMessage": "Êtes-vous sûr de vouloir ignorer les modifications ?"
+    "discardChangesMessage": "Êtes-vous sûr de vouloir ignorer les modifications ?",
+    "discard": "Ignorer",
+    "chooseFromGallery": "Choisir dans la galerie",
+    "takeAPhoto": "Prendre une photo",
+    "removePhoto": "Supprimer la photo",
+    "removePhotoConfirm": "Êtes-vous sûr de vouloir supprimer votre photo de profil ?"
   },
   "settings": {
     "title": "Paramètres",
