@@ -109,8 +109,7 @@ class BudgetsPage extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brandTeal,
                     foregroundColor: Colors.white,
-                    elevation: 4,
-                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
@@ -118,7 +117,9 @@ class BudgetsPage extends ConsumerWidget {
                   icon: const Icon(CupertinoIcons.add, size: 20),
                   label: Text(
                     'budgets.newBudget'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

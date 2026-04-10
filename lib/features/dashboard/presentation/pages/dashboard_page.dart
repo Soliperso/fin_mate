@@ -362,8 +362,7 @@ class _RecentTransactionsCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryTeal,
                 foregroundColor: Colors.white,
-                elevation: 4,
-                shadowColor: AppColors.primaryTeal.withValues(alpha: 0.4),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
