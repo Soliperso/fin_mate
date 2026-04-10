@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -204,7 +205,7 @@ class LegalPage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         _showErrorDialog(
-            context, 'Failed to load Privacy Policy: ${e.toString()}');
+            context, 'legal.failedToLoadPrivacy'.tr());
       }
     }
   }
@@ -226,7 +227,7 @@ class LegalPage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         _showErrorDialog(
-            context, 'Failed to load Terms of Service: ${e.toString()}');
+            context, 'legal.failedToLoadTerms'.tr());
       }
     }
   }
@@ -248,7 +249,7 @@ class LegalPage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         _showErrorDialog(
-            context, 'Failed to load App Privacy Details: ${e.toString()}');
+            context, 'legal.failedToLoadDetails'.tr());
       }
     }
   }
@@ -257,7 +258,7 @@ class LegalPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
+        title: Text('legal.errorTitle'.tr()),
         content: Text(message),
         actions: [
           TextButton(

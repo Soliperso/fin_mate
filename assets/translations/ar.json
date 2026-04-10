@@ -687,7 +687,13 @@
     "systemSettings": "إعدادات النظام",
     "systemSettingsSub": "التكوين المتقدم للتطبيق",
     "logOut": "تسجيل الخروج",
-    "logOutConfirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
+    "logOutConfirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "failedToUpdateProfile": "فشل تحديث الملف الشخصي",
+    "failedToRemovePhoto": "فشل حذف الصورة",
+    "failedToSignOut": "فشل تسجيل الخروج",
+    "unsavedChanges": "لديك تغييرات غير محفوظة",
+    "discardChangesMessage": "هل أنت متأكد أنك تريد التخلي عن التغييرات؟"
   },
   "settings": {
     "title": "الإعدادات",
@@ -778,7 +784,17 @@
     "changePassword": "تغيير كلمة المرور",
     "dangerZone": "منطقة الخطر",
     "deleteAccount": "حذف الحساب",
-    "deleteAccountSub": "حذف حسابك وجميع بياناتك نهائياً"
+    "deleteAccountSub": "حذف حسابك وجميع بياناتك نهائياً",
+    "failedToUpdateBiometric": "فشل تحديث إعدادات البيومترية",
+    "emailMFAEnabled": "تم تفعيل المصادقة الثنائية عبر البريد الإلكتروني بنجاح",
+    "failedToEnableEmailMFA": "فشل تفعيل المصادقة الثنائية عبر البريد الإلكتروني",
+    "failedToEnableTOTP": "فشل تفعيل المصادقة الثنائية TOTP",
+    "enterSixDigitCode": "يرجى إدخال رمز من 6 أرقام",
+    "totpEnabled": "تم تفعيل المصادقة الثنائية TOTP بنجاح",
+    "invalidCode": "رمز غير صحيح",
+    "failedToDisableMFA": "فشل تعطيل المصادقة الثنائية",
+    "passwordChanged": "تم تغيير كلمة المرور بنجاح",
+    "failedToChangePassword": "فشل تغيير كلمة المرور"
   },
   "dataPrivacy": {
     "title": "البيانات والخصوصية",
@@ -794,6 +810,12 @@
     "dangerZone": "منطقة الخطر",
     "deleteAccount": "حذف الحساب",
     "deleteAccountSub": "حذف حسابك نهائياً"
+  },
+  "legal": {
+    "failedToLoadPrivacy": "فشل تحميل سياسة الخصوصية",
+    "failedToLoadTerms": "فشل تحميل شروط الخدمة",
+    "failedToLoadDetails": "فشل تحميل تفاصيل الخصوصية",
+    "errorTitle": "خطأ"
   },
   "errors": {
     "generic": "حدث خطأ ما. الرجاء المحاولة مجدداً.",

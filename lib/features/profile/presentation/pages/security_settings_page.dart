@@ -352,7 +352,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
           if (mounted) {
             showErrorDialog(
               context,
-              result.errorMessage ?? 'Biometric authentication failed',
+              result.errorMessage ?? 'auth.login.biometricFailed'.tr(),
             );
           }
           setState(() => _isLoadingBiometric = false);
@@ -410,7 +410,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       if (mounted) {
         showErrorDialog(
           context,
-          'Failed to update biometric setting: ${e.toString()}',
+          'security.failedToUpdateBiometric'.tr(),
         );
       }
     } finally {
@@ -486,7 +486,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         SuccessDialog.show(
           context,
           title: 'Enabled',
-          message: 'Email MFA enabled successfully',
+          message: 'security.emailMFAEnabled'.tr(),
           autoDismissDuration: const Duration(milliseconds: 800),
         );
       }
@@ -494,7 +494,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        showErrorDialog(context, 'Failed to enable email MFA: ${e.toString()}');
+        showErrorDialog(context, 'security.failedToEnableEmailMFA'.tr());
       }
     } finally {
       setState(() => _isLoadingMfa = false);
@@ -525,7 +525,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       }
     } catch (e) {
       if (mounted) {
-        showErrorDialog(context, 'Failed to enable TOTP MFA: ${e.toString()}');
+        showErrorDialog(context, 'security.failedToEnableTOTP'.tr());
       }
     } finally {
       setState(() => _isLoadingMfa = false);
@@ -595,7 +595,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             onPressed: () async {
               final code = codeController.text.trim();
               if (code.length != 6) {
-                showErrorDialog(context, 'Please enter a 6-digit code');
+                showErrorDialog(context, 'security.enterSixDigitCode'.tr());
                 return;
               }
 
@@ -611,13 +611,13 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 SuccessDialog.show(
                   context,
                   title: 'Enabled',
-                  message: 'TOTP MFA enabled successfully',
+                  message: 'security.totpEnabled'.tr(),
                   autoDismissDuration: const Duration(milliseconds: 800),
                 );
                 setState(() {});
               } catch (e) {
                 if (!context.mounted) return;
-                showErrorDialog(context, 'Invalid code: ${e.toString()}');
+                showErrorDialog(context, 'security.invalidCode'.tr());
               } finally {
                 codeController.dispose();
               }
@@ -672,7 +672,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        showErrorDialog(context, 'Failed to disable MFA: ${e.toString()}');
+        showErrorDialog(context, 'security.failedToDisableMFA'.tr());
       }
     } finally {
       setState(() => _isLoadingMfa = false);
@@ -926,7 +926,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                             SuccessDialog.show(
                               context,
                               title: 'Updated',
-                              message: 'Password changed successfully',
+                              message: 'security.passwordChanged'.tr(),
                               autoDismissDuration:
                                   const Duration(milliseconds: 800),
                             );
@@ -935,7 +935,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                             setState(() => isLoading = false);
                             showErrorDialog(
                               context,
-                              'Failed to change password: ${e.toString()}',
+                              'security.failedToChangePassword'.tr(),
                             );
                           }
                         },

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,13 +211,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       context: context,
       barrierDismissible: false,
       builder: (_) => CupertinoAlertDialog(
-        title: const Text('Discard Changes?'),
-        content: const Text(
-            'You have unsaved changes. Are you sure you want to discard them?'),
+        title: Text('profile.unsavedChanges'.tr()),
+        content: Text('profile.discardChangesMessage'.tr()),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -323,7 +323,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         if (mounted) {
           SuccessSnackbar.show(
             context,
-            message: 'Profile updated successfully',
+            message: 'profile.profileUpdated'.tr(),
           );
           context.pop();
         }
@@ -331,7 +331,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         if (mounted) {
           ErrorSnackbar.show(
             context,
-            message: 'Failed to update profile: $e',
+            message: 'profile.failedToUpdateProfile'.tr(),
           );
         }
       }
@@ -368,14 +368,14 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         if (mounted) {
           SuccessSnackbar.show(
             context,
-            message: 'Profile photo removed',
+            message: 'profile.profileUpdated'.tr(),
           );
         }
       } catch (e) {
         if (mounted) {
           ErrorSnackbar.show(
             context,
-            message: 'Failed to remove photo: $e',
+            message: 'profile.failedToRemovePhoto'.tr(),
           );
         }
       }

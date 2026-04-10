@@ -687,7 +687,13 @@
     "systemSettings": "Configuración del sistema",
     "systemSettingsSub": "Configuración avanzada de la app",
     "logOut": "Cerrar sesión",
-    "logOutConfirm": "¿Estás seguro de que quieres cerrar sesión?"
+    "logOutConfirm": "¿Estás seguro de que quieres cerrar sesión?",
+    "profileUpdated": "Perfil actualizado correctamente",
+    "failedToUpdateProfile": "Error al actualizar perfil",
+    "failedToRemovePhoto": "Error al eliminar foto",
+    "failedToSignOut": "Error al cerrar sesión",
+    "unsavedChanges": "Tienes cambios sin guardar",
+    "discardChangesMessage": "¿Estás seguro de que quieres descartar los cambios?"
   },
   "settings": {
     "title": "Configuración",
@@ -778,7 +784,17 @@
     "changePassword": "Cambiar contraseña",
     "dangerZone": "Zona peligrosa",
     "deleteAccount": "Eliminar cuenta",
-    "deleteAccountSub": "Eliminar permanentemente tu cuenta y todos los datos"
+    "deleteAccountSub": "Eliminar permanentemente tu cuenta y todos los datos",
+    "failedToUpdateBiometric": "Error al actualizar la configuración biométrica",
+    "emailMFAEnabled": "A2F por email habilitada correctamente",
+    "failedToEnableEmailMFA": "Error al habilitar A2F por email",
+    "failedToEnableTOTP": "Error al habilitar A2F TOTP",
+    "enterSixDigitCode": "Introduce un código de 6 dígitos",
+    "totpEnabled": "A2F TOTP habilitada correctamente",
+    "invalidCode": "Código inválido",
+    "failedToDisableMFA": "Error al deshabilitar A2F",
+    "passwordChanged": "Contraseña cambiada correctamente",
+    "failedToChangePassword": "Error al cambiar contraseña"
   },
   "dataPrivacy": {
     "title": "Datos y privacidad",
@@ -794,6 +810,12 @@
     "dangerZone": "Zona peligrosa",
     "deleteAccount": "Eliminar cuenta",
     "deleteAccountSub": "Eliminar permanentemente tu cuenta"
+  },
+  "legal": {
+    "failedToLoadPrivacy": "Error al cargar la Política de privacidad",
+    "failedToLoadTerms": "Error al cargar los Términos de servicio",
+    "failedToLoadDetails": "Error al cargar los Detalles de privacidad",
+    "errorTitle": "Error"
   },
   "errors": {
     "generic": "Algo salió mal. Por favor intenta de nuevo.",

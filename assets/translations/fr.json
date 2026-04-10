@@ -687,7 +687,13 @@
     "systemSettings": "Paramètres système",
     "systemSettingsSub": "Configuration avancée de l'application",
     "logOut": "Se déconnecter",
-    "logOutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
+    "logOutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "profileUpdated": "Profil mis à jour avec succès",
+    "failedToUpdateProfile": "Erreur lors de la mise à jour du profil",
+    "failedToRemovePhoto": "Erreur lors de la suppression de la photo",
+    "failedToSignOut": "Erreur lors de la déconnexion",
+    "unsavedChanges": "Vous avez des modifications non enregistrées",
+    "discardChangesMessage": "Êtes-vous sûr de vouloir ignorer les modifications ?"
   },
   "settings": {
     "title": "Paramètres",
@@ -778,7 +784,17 @@
     "changePassword": "Changer le mot de passe",
     "dangerZone": "Zone dangereuse",
     "deleteAccount": "Supprimer le compte",
-    "deleteAccountSub": "Supprimer définitivement votre compte et toutes les données"
+    "deleteAccountSub": "Supprimer définitivement votre compte et toutes les données",
+    "failedToUpdateBiometric": "Erreur lors de la mise à jour des paramètres biométriques",
+    "emailMFAEnabled": "A2F par email activée avec succès",
+    "failedToEnableEmailMFA": "Erreur lors de l'activation de l'A2F par email",
+    "failedToEnableTOTP": "Erreur lors de l'activation de l'A2F TOTP",
+    "enterSixDigitCode": "Veuillez entrer un code à 6 chiffres",
+    "totpEnabled": "A2F TOTP activée avec succès",
+    "invalidCode": "Code invalide",
+    "failedToDisableMFA": "Erreur lors de la désactivation de l'A2F",
+    "passwordChanged": "Mot de passe modifié avec succès",
+    "failedToChangePassword": "Erreur lors du changement du mot de passe"
   },
   "dataPrivacy": {
     "title": "Données et confidentialité",
@@ -794,6 +810,12 @@
     "dangerZone": "Zone dangereuse",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountSub": "Supprimer définitivement votre compte"
+  },
+  "legal": {
+    "failedToLoadPrivacy": "Erreur lors du chargement de la Politique de confidentialité",
+    "failedToLoadTerms": "Erreur lors du chargement des Conditions d'utilisation",
+    "failedToLoadDetails": "Erreur lors du chargement des Détails de confidentialité",
+    "errorTitle": "Erreur"
   },
   "errors": {
     "generic": "Une erreur s'est produite. Veuillez réessayer.",

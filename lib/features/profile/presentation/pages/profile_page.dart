@@ -618,7 +618,7 @@ class ProfilePage extends ConsumerWidget {
                 if (context.mounted) context.go('/login');
               } catch (e) {
                 if (context.mounted) {
-                  showErrorDialog(context, 'Failed to sign out: $e');
+                  showErrorDialog(context, 'profile.failedToSignOut'.tr());
                 }
               }
             },

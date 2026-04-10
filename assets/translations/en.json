@@ -687,7 +687,13 @@
     "systemSettings": "System Settings",
     "systemSettingsSub": "Advanced app configuration",
     "logOut": "Log Out",
-    "logOutConfirm": "Are you sure you want to log out?"
+    "logOutConfirm": "Are you sure you want to log out?",
+    "profileUpdated": "Profile updated successfully",
+    "failedToUpdateProfile": "Failed to update profile",
+    "failedToRemovePhoto": "Failed to remove photo",
+    "failedToSignOut": "Failed to sign out",
+    "unsavedChanges": "You have unsaved changes",
+    "discardChangesMessage": "Are you sure you want to discard them?"
   },
   "settings": {
     "title": "Settings",
@@ -778,7 +784,17 @@
     "changePassword": "Change Password",
     "dangerZone": "Danger Zone",
     "deleteAccount": "Delete Account",
-    "deleteAccountSub": "Permanently delete your account and all data"
+    "deleteAccountSub": "Permanently delete your account and all data",
+    "failedToUpdateBiometric": "Failed to update biometric setting",
+    "emailMFAEnabled": "Email MFA enabled successfully",
+    "failedToEnableEmailMFA": "Failed to enable email MFA",
+    "failedToEnableTOTP": "Failed to enable TOTP MFA",
+    "enterSixDigitCode": "Please enter a 6-digit code",
+    "totpEnabled": "TOTP MFA enabled successfully",
+    "invalidCode": "Invalid code",
+    "failedToDisableMFA": "Failed to disable MFA",
+    "passwordChanged": "Password changed successfully",
+    "failedToChangePassword": "Failed to change password"
   },
   "dataPrivacy": {
     "title": "Data & Privacy",
@@ -794,6 +810,12 @@
     "dangerZone": "Danger Zone",
     "deleteAccount": "Delete Account",
     "deleteAccountSub": "Permanently delete your account"
+  },
+  "legal": {
+    "failedToLoadPrivacy": "Failed to load Privacy Policy",
+    "failedToLoadTerms": "Failed to load Terms of Service",
+    "failedToLoadDetails": "Failed to load App Privacy Details",
+    "errorTitle": "Error"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
