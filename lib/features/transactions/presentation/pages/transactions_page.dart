@@ -288,7 +288,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                       title:
                                           'transactions.noTransactions'.tr(),
                                       message:
-                                          'Start by adding your first transaction to begin tracking your finances.',
+                                          'transactions.noTransactionsMessage'.tr(),
                                       backgroundColor: AppColors.brandTeal,
                                     ),
                                     const SizedBox(height: AppSizes.lg),

@@ -194,43 +194,54 @@ class _DebtPageState extends ConsumerState<DebtPage>
         ),
         data: (debts) {
           if (debts.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(AppSizes.md),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  EmptyStateCard(
-                    icon: CupertinoIcons.creditcard,
-                    title: 'debt.noDebts'.tr(),
-                    message: 'debt.noDebtsMessage'.tr(),
-                    backgroundColor: AppColors.brandTeal,
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppSizes.buttonHeightMd,
-                    child: ElevatedButton.icon(
-                      onPressed: _showAddDebt,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandTeal,
-                        foregroundColor: Colors.white,
-                        elevation: 4,
-                        shadowColor:
-                            AppColors.brandTeal.withValues(alpha: 0.4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radiusFull),
+            return LayoutBuilder(
+              builder: (context, constraints) =>
+                  SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.stretch,
+                      children: [
+                        EmptyStateCard(
+                          icon: CupertinoIcons.creditcard,
+                          title: 'debt.noDebts'.tr(),
+                          message: 'debt.noDebtsMessage'.tr(),
+                          backgroundColor: AppColors.brandTeal,
                         ),
-                      ),
-                      icon: const Icon(CupertinoIcons.add, size: 20),
-                      label: Text(
-                        'debt.addDebt'.tr(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16),
-                      ),
+                        const SizedBox(height: AppSizes.lg),
+                        SizedBox(
+                          height: AppSizes.buttonHeightMd,
+                          child: ElevatedButton.icon(
+                            onPressed: _showAddDebt,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.brandTeal,
+                              foregroundColor: Colors.white,
+                              elevation: 4,
+                              shadowColor:
+                                  AppColors.brandTeal.withValues(alpha: 0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusFull),
+                              ),
+                            ),
+                            icon: const Icon(CupertinoIcons.add, size: 20),
+                            label: Text(
+                              'debt.addDebt'.tr(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             );
           }

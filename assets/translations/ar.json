@@ -267,6 +267,7 @@
     "title": "المعاملات",
     "searchHint": "ابحث عن معاملات…",
     "noTransactions": "لا توجد معاملات بعد",
+    "noTransactionsMessage": "ابدأ بإضافة أول معاملة لك لتتمكن من تتبع أموالك.",
     "noTransactionsFound": "لم يتم العثور على معاملات",
     "deleted": "تم حذف المعاملة",
     "failedToDelete": "فشل حذف المعاملة",

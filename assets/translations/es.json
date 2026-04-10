@@ -267,6 +267,7 @@
     "title": "Transacciones",
     "searchHint": "Buscar transacciones…",
     "noTransactions": "Sin transacciones aún",
+    "noTransactionsMessage": "Comienza agregando tu primera transacción para comenzar a rastrear tus finanzas.",
     "noTransactionsFound": "No se encontraron transacciones",
     "deleted": "Transacción eliminada",
     "failedToDelete": "Error al eliminar la transacción",

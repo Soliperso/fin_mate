@@ -267,6 +267,7 @@
     "title": "Transactions",
     "searchHint": "Search transactions…",
     "noTransactions": "No Transactions Yet",
+    "noTransactionsMessage": "Start by adding your first transaction to begin tracking your finances.",
     "noTransactionsFound": "No Transactions Found",
     "deleted": "Transaction deleted",
     "failedToDelete": "Failed to delete transaction",
