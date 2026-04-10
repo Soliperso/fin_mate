@@ -45,11 +45,12 @@ class DebtHeroCard extends ConsumerWidget {
     double totalOriginal = 0;
     double totalPaid = 0;
     for (final d in debts) {
-      if (d.originalBalance != null && d.originalBalance! > 0) {
+      final originalBalance = d.originalBalance;
+      if (originalBalance != null && originalBalance > 0) {
         hasAnyOriginal = true;
-        totalOriginal += d.originalBalance!;
+        totalOriginal += originalBalance;
         totalPaid +=
-            (d.originalBalance! - d.balance).clamp(0.0, d.originalBalance!);
+            (originalBalance - d.balance).clamp(0.0, originalBalance);
       } else {
         totalOriginal += d.balance;
       }

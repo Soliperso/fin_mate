@@ -46,6 +46,9 @@ class DashboardPage extends ConsumerWidget {
       return '${names.first[0]}${names.last[0]}'.toUpperCase();
     }
 
+    final avatarUrl = profileState.profile?.avatarUrl;
+    final hasValidAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         titleSpacing: AppSizes.md,
@@ -112,12 +115,10 @@ class DashboardPage extends ConsumerWidget {
             padding: const EdgeInsets.only(right: AppSizes.sm),
             child: GestureDetector(
               onTap: () => context.go('/profile'),
-              child: profileState.profile?.avatarUrl != null &&
-                      profileState.profile!.avatarUrl!.isNotEmpty
+              child: hasValidAvatar
                   ? CircleAvatar(
                       radius: 17,
-                      backgroundImage:
-                          NetworkImage(profileState.profile!.avatarUrl!),
+                      backgroundImage: NetworkImage(avatarUrl),
                     )
                   : CircleAvatar(
                       radius: 17,

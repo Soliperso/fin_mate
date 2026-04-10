@@ -123,8 +123,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     padding: const EdgeInsets.all(AppSizes.lg),
                     children: [
                       for (final group in presentGroups) ...[
-                        _buildGroupHeader(context, group, grouped[group]!),
-                        ...grouped[group]!.map(
+                        _buildGroupHeader(context, group, grouped[group] ?? []),
+                        ...(grouped[group] ?? []).map(
                           (notification) => NotificationCard(
                             notification: notification,
                             onTap: () =>
@@ -183,8 +183,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           .read(notificationsProvider.notifier)
           .markAsRead(notification.id);
     }
-    if (notification.actionUrl != null && mounted) {
-      context.push(notification.actionUrl!);
+    final actionUrl = notification.actionUrl;
+    if (actionUrl != null && mounted) {
+      context.push(actionUrl);
     }
   }
 

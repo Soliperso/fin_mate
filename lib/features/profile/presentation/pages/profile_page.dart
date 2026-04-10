@@ -340,10 +340,11 @@ class ProfilePage extends ConsumerWidget {
   }
 
   Widget _buildProfilePicture(dynamic profile) {
-    if (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty) {
+    final avatarUrl = profile?.avatarUrl;
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
       return CircleAvatar(
         radius: 44,
-        backgroundImage: NetworkImage(profile.avatarUrl!),
+        backgroundImage: NetworkImage(avatarUrl),
       );
     }
     return CircleAvatar(
