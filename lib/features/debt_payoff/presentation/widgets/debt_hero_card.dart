@@ -69,7 +69,7 @@ class DebtHeroCard extends ConsumerWidget {
           Text(
             'debtHero.totalDebt'.tr(),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white,
                   letterSpacing: 0.5,
                 ),
           ),

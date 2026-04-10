@@ -48,7 +48,7 @@ class NetWorthCard extends ConsumerWidget {
               Text(
                 'netWorthCard.label'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white,
                     ),
               ),
               // Trend badge
@@ -156,7 +156,7 @@ class _StatChip extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: Colors.white.withValues(alpha: 0.95),
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.2,
                 ),
