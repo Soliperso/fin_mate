@@ -10,7 +10,6 @@ import '../../../../shared/widgets/section_header.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -349,10 +348,11 @@ class _RecentTransactionsCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          EmptyState(
+          EmptyStateCard(
             icon: CupertinoIcons.doc_text,
             title: 'dashboard.noTransactions'.tr(),
             message: 'dashboard.noTransactionsMessage'.tr(),
+            backgroundColor: AppColors.brandTeal,
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
