@@ -14,9 +14,9 @@ ALTER TABLE user_profiles
 -- Replace 'your-encryption-key' with the value from your Supabase Vault secret
 -- named 'totp_encryption_key', or set it via supabase secrets set TOTP_ENCRYPTION_KEY=...
 UPDATE user_profiles
-SET totp_secret_encrypted = pgp_sym_encrypt(
+SET totp_secret_encrypted = extensions.pgp_sym_encrypt(
       totp_secret,
-      current_setting('app.totp_encryption_key', true)
+      (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'totp_encryption_key' LIMIT 1)
     )
 WHERE totp_secret IS NOT NULL
   AND totp_secret_encrypted IS NULL;
@@ -26,7 +26,8 @@ WHERE totp_secret IS NOT NULL
 -- ALTER TABLE user_profiles DROP COLUMN totp_secret;
 -- ALTER TABLE user_profiles RENAME COLUMN totp_secret_encrypted TO totp_secret;
 
--- Create a secure RPC to verify a TOTP code without exposing the secret
+-- Create a secure RPC to retrieve a decrypted TOTP secret for the calling user.
+-- Key is read from Supabase Vault (vault.decrypted_secrets).
 CREATE OR REPLACE FUNCTION get_totp_secret_for_user(p_user_id UUID)
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -49,11 +50,15 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  v_key := current_setting('app.totp_encryption_key', true);
-  IF v_key IS NULL OR v_key = '' THEN
+  SELECT decrypted_secret INTO v_key
+  FROM vault.decrypted_secrets
+  WHERE name = 'totp_encryption_key'
+  LIMIT 1;
+
+  IF v_key IS NULL THEN
     RAISE EXCEPTION 'Encryption key not configured';
   END IF;
 
-  RETURN pgp_sym_decrypt(v_encrypted::bytea, v_key);
+  RETURN extensions.pgp_sym_decrypt(v_encrypted::bytea, v_key);
 END;
 $$;

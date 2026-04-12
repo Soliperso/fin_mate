@@ -299,11 +299,13 @@ class AuthRemoteDataSource {
       throw Exception('Invalid TOTP code');
     }
 
-    // Update user profile to indicate MFA is enabled with TOTP
+    // Encrypt and store the TOTP secret server-side via RPC (never plain-text in DB)
+    await _supabase.rpc('set_totp_secret_for_user', params: {'p_secret': secret});
+
+    // Update MFA flags (without touching the secret column)
     await _supabase.from('user_profiles').update({
       'mfa_enabled': true,
       'mfa_method': 'totp',
-      'totp_secret': secret,
     }).eq('id', user.id);
 
     // Save to local storage
@@ -317,11 +319,12 @@ class AuthRemoteDataSource {
     final user = _supabase.auth.currentUser;
     if (user == null) throw Exception('No authenticated user');
 
-    // Update user profile
+    // Update user profile and clear both secret columns
     await _supabase.from('user_profiles').update({
       'mfa_enabled': false,
       'mfa_method': null,
       'totp_secret': null,
+      'totp_secret_encrypted': null,
     }).eq('id', user.id);
 
     // Clear local storage
@@ -362,14 +365,12 @@ class AuthRemoteDataSource {
       // Verify TOTP code
       final secret = await _storage.getTotpSecret();
       if (secret == null) {
-        // Fetch from database
-        final profile = await _supabase
-            .from('user_profiles')
-            .select('totp_secret')
-            .eq('id', user.id)
-            .maybeSingle();
+        // Fetch decrypted secret via RPC (never exposed as plain-text column)
+        final dbSecret = await _supabase.rpc(
+          'get_totp_secret_for_user',
+          params: {'p_user_id': user.id},
+        ) as String?;
 
-        final dbSecret = profile?['totp_secret'];
         if (dbSecret == null) {
           throw Exception('TOTP secret not found');
         }
