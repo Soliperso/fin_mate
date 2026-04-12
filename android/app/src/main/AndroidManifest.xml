@@ -48,11 +48,10 @@
                     android:host="login-callback"/>
             </intent-filter>
         </activity>
-        <!-- Google Mobile Ads App ID
-             PRODUCTION: replace with your real AdMob App ID from AdMob dashboard -->
+        <!-- Google Mobile Ads App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3849377083349686~5584600488"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
