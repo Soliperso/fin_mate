@@ -43,12 +43,12 @@ class EnvConfig {
   static String get supabaseUrl =>
       _supabaseUrl.isNotEmpty
           ? _supabaseUrl
-          : dotenv.env['SUPABASE_URL'] ?? 'https://your-project.supabase.co';
+          : dotenv.env['SUPABASE_URL'] ?? '';
 
   static String get supabaseAnonKey =>
       _supabaseAnonKey.isNotEmpty
           ? _supabaseAnonKey
-          : dotenv.env['SUPABASE_ANON_KEY'] ?? 'your-anon-key-here';
+          : dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
   // Sentry
   static String get sentryDsn =>
@@ -77,43 +77,37 @@ class EnvConfig {
           : dotenv.env['OPENAI_API_KEY'] ?? '';
 
   // AdMob
-  // Test App IDs: ca-app-pub-3940256099942544~3347511713 (Android), ~1458002511 (iOS)
-  // PRODUCTION: set ADMOB_APP_ID_ANDROID / ADMOB_APP_ID_IOS via --dart-define
+  // PRODUCTION: set all ADMOB_* values via --dart-define or .env (local dev only).
+  // No test IDs are kept as fallbacks — missing IDs will simply show no ad.
   static String get admobAppIdAndroid =>
       _admobAppIdAndroid.isNotEmpty
           ? _admobAppIdAndroid
-          : dotenv.env['ADMOB_APP_ID_ANDROID'] ??
-              'ca-app-pub-3940256099942544~3347511713';
+          : dotenv.env['ADMOB_APP_ID_ANDROID'] ?? '';
 
   static String get admobAppIdIos =>
       _admobAppIdIos.isNotEmpty
           ? _admobAppIdIos
-          : dotenv.env['ADMOB_APP_ID_IOS'] ??
-              'ca-app-pub-3849377083349686~1772513830';
+          : dotenv.env['ADMOB_APP_ID_IOS'] ?? 'ca-app-pub-3849377083349686~1772513830';
 
   static String get admobBannerAndroid =>
       _admobBannerAndroid.isNotEmpty
           ? _admobBannerAndroid
-          : dotenv.env['ADMOB_BANNER_ANDROID'] ??
-              'ca-app-pub-3940256099942544/6300978111';
+          : dotenv.env['ADMOB_BANNER_ANDROID'] ?? '';
 
   static String get admobBannerIos =>
       _admobBannerIos.isNotEmpty
           ? _admobBannerIos
-          : dotenv.env['ADMOB_BANNER_IOS'] ??
-              'ca-app-pub-3940256099942544/2934735716'; // Google test ID — replace with real ID after 24h activation
+          : dotenv.env['ADMOB_BANNER_IOS'] ?? 'ca-app-pub-3849377083349686/5584600488';
 
   static String get admobInterstitialAndroid =>
       _admobInterstitialAndroid.isNotEmpty
           ? _admobInterstitialAndroid
-          : dotenv.env['ADMOB_INTERSTITIAL_ANDROID'] ??
-              'ca-app-pub-3940256099942544/1033173712';
+          : dotenv.env['ADMOB_INTERSTITIAL_ANDROID'] ?? '';
 
   static String get admobInterstitialIos =>
       _admobInterstitialIos.isNotEmpty
           ? _admobInterstitialIos
-          : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ??
-              'ca-app-pub-3940256099942544/4411468910';
+          : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ?? '';
 
   // Environment
   static String get environment =>
@@ -130,8 +124,7 @@ class EnvConfig {
 
   // Validation
   static bool get isConfigured =>
-      supabaseUrl != 'https://your-project.supabase.co' &&
-      supabaseAnonKey != 'your-anon-key-here';
+      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   EnvConfig._();
 }
