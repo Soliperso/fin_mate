@@ -11,7 +11,6 @@ class SecureStorageService {
 
   // Keys for stored values
   static const _keyEmail = 'saved_email';
-  static const _keyPassword = 'saved_password';
   static const _keyBiometricEnabled = 'biometric_enabled';
   static const _keyRefreshToken = 'biometric_refresh_token';
   static const _keyMfaEnabled = 'mfa_enabled';
@@ -41,21 +40,6 @@ class SecureStorageService {
   // ============================================================================
   // Biometric Settings
   // ============================================================================
-
-  /// Save password for biometric re-authentication (stored in platform keychain)
-  Future<void> savePassword(String password) async {
-    await _storage.write(key: _keyPassword, value: password);
-  }
-
-  /// Get saved password
-  Future<String?> getSavedPassword() async {
-    return await _storage.read(key: _keyPassword);
-  }
-
-  /// Clear saved password
-  Future<void> clearPassword() async {
-    await _storage.delete(key: _keyPassword);
-  }
 
   /// Enable/disable biometric authentication
   Future<void> setBiometricEnabled(bool enabled) async {

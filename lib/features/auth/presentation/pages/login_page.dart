@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/biometric_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -331,21 +332,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         final password = _passwordController.text;
         final storageService = ref.read(secureStorageServiceProvider);
 
-        // Save credentials before sign-in so they are always persisted
-        // even if navigation triggers before the await returns
         await storageService.saveEmail(email);
-        await storageService.savePassword(password);
 
         final biometricService = ref.read(biometricServiceProvider);
         final isAvailable = await biometricService.isBiometricAvailable();
-        if (isAvailable) {
-          await storageService.setBiometricEnabled(true);
-        }
 
         await ref.read(authNotifierProvider.notifier).signInWithEmail(
               email: email,
               password: password,
             );
+
+        // After successful sign-in, store refresh token for biometric re-auth
+        // (never store plaintext password)
+        if (isAvailable) {
+          final refreshToken = supabase.auth.currentSession?.refreshToken;
+          if (refreshToken != null) {
+            await storageService.saveRefreshToken(refreshToken);
+            await storageService.setBiometricEnabled(true);
+          }
+        }
         // Router will automatically redirect to dashboard via redirect logic
       } catch (e) {
         // Error is shown via the inline error box (authState.errorMessage)
@@ -380,22 +385,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      // Retrieve stored credentials and sign in
+      // Use stored refresh token to re-authenticate (never store plaintext password)
       final storageService = ref.read(secureStorageServiceProvider);
-      final email = await storageService.getSavedEmail();
-      final password = await storageService.getSavedPassword();
+      final refreshToken = await storageService.getRefreshToken();
 
-      if (email == null || email.isEmpty || password == null || password.isEmpty) {
+      if (refreshToken == null || refreshToken.isEmpty) {
         if (mounted) {
           showErrorDialog(context, 'auth.login.biometricNoCredentials'.tr());
         }
         return;
       }
 
-      await ref.read(authNotifierProvider.notifier).signInWithEmail(
-        email: email,
-        password: password,
-      );
+      final response = await supabase.auth.refreshSession(refreshToken);
+      if (response.session == null) {
+        if (mounted) {
+          showErrorDialog(context, 'auth.login.biometricFailed'.tr());
+        }
+        return;
+      }
+      // Store the new refresh token (rotation)
+      await storageService.saveRefreshToken(response.session!.refreshToken!);
     } catch (e) {
       if (mounted) {
         showErrorDialog(context, 'auth.login.biometricFailed'.tr());
