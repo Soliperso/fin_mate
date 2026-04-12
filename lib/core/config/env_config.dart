@@ -97,7 +97,7 @@ class EnvConfig {
   static String get admobBannerIos =>
       _admobBannerIos.isNotEmpty
           ? _admobBannerIos
-          : dotenv.env['ADMOB_BANNER_IOS'] ?? 'ca-app-pub-3849377083349686/5584600488';
+          : dotenv.env['ADMOB_BANNER_IOS'] ?? '';
 
   static String get admobInterstitialAndroid =>
       _admobInterstitialAndroid.isNotEmpty

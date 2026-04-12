@@ -6,10 +6,13 @@ plugins {
 }
 
 // Load keystore properties for release signing (populated by CI from GitHub secrets)
+import java.util.Properties
+import java.io.FileInputStream
+
 val keystorePropertiesFile = rootProject.file("key.properties")
-val keystoreProperties = java.util.Properties()
+val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
