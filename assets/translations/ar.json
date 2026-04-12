@@ -276,7 +276,12 @@
     "maxAmount": "الحد الأقصى للمبلغ",
     "filterAll": "الكل",
     "filterExpense": "النفقات",
-    "filterIncome": "الدخل"
+    "filterIncome": "الدخل",
+    "periodAll": "الكل",
+    "periodToday": "اليوم",
+    "periodWeek": "الأسبوع",
+    "periodMonth": "الشهر",
+    "periodYear": "السنة"
   },
   "addTransaction": {
     "editTitle": "تعديل المعاملة",
@@ -698,7 +703,17 @@
     "chooseFromGallery": "اختر من المعرض",
     "takeAPhoto": "التقط صورة",
     "removePhoto": "حذف الصورة",
-    "removePhotoConfirm": "هل أنت متأكد أنك تريد حذف صورة ملفك الشخصي؟"
+    "removePhotoConfirm": "هل أنت متأكد أنك تريد حذف صورة ملفك الشخصي؟",
+    "editProfileTitle": "تعديل الملف الشخصي",
+    "tapToChangePhoto": "اضغط لتغيير الصورة",
+    "personalInformation": "المعلومات الشخصية",
+    "fullName": "الاسم الكامل",
+    "fullNameRequired": "يرجى إدخال اسمك الكامل",
+    "phoneNumber": "رقم الهاتف (اختياري)",
+    "account": "الحساب",
+    "cannotBeChanged": "لا يمكن تغييره",
+    "preferences": "التفضيلات",
+    "preferredCurrency": "العملة المفضلة"
   },
   "settings": {
     "title": "الإعدادات",

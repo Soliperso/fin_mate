@@ -340,7 +340,7 @@ class _OtpBox extends StatelessWidget {
             counterText: '',
             filled: true,
             fillColor: isDark
-                ? const Color(0xFF2C2C2E)
+                ? AppColors.tertiarySystemBackgroundDark
                 : const Color(0xFFF2F2F7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

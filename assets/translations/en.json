@@ -276,7 +276,12 @@
     "maxAmount": "Max Amount",
     "filterAll": "All",
     "filterExpense": "Expenses",
-    "filterIncome": "Income"
+    "filterIncome": "Income",
+    "periodAll": "All",
+    "periodToday": "Today",
+    "periodWeek": "Week",
+    "periodMonth": "Month",
+    "periodYear": "Year"
   },
   "addTransaction": {
     "editTitle": "Edit Transaction",
@@ -698,7 +703,17 @@
     "chooseFromGallery": "Choose from Gallery",
     "takeAPhoto": "Take a Photo",
     "removePhoto": "Remove Photo",
-    "removePhotoConfirm": "Are you sure you want to remove your profile photo?"
+    "removePhotoConfirm": "Are you sure you want to remove your profile photo?",
+    "editProfileTitle": "Edit Profile",
+    "tapToChangePhoto": "Tap to change photo",
+    "personalInformation": "Personal Information",
+    "fullName": "Full Name",
+    "fullNameRequired": "Please enter your full name",
+    "phoneNumber": "Phone Number (optional)",
+    "account": "Account",
+    "cannotBeChanged": "Cannot be changed",
+    "preferences": "Preferences",
+    "preferredCurrency": "Preferred Currency"
   },
   "settings": {
     "title": "Settings",

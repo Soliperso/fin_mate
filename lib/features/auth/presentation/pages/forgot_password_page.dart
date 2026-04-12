@@ -35,7 +35,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = isDark ? const Color(0xFF2C2C2E) : AppColors.brandTeal.withValues(alpha: 0.12);
+    final iconBg = isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.brandTeal.withValues(alpha: 0.12);
     final iconColor = isDark ? Colors.white : AppColors.brandTeal;
 
     return GestureDetector(

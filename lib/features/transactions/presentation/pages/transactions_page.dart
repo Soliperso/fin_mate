@@ -608,7 +608,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ),
           ),
           child: Text(
-            period,
+            'transactions.period$period'.tr(),
             style: TextStyle(
               fontSize: 13,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
