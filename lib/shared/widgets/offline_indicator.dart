@@ -17,6 +17,7 @@ class OfflineIndicator extends StatefulWidget {
 class _OfflineIndicatorState extends State<OfflineIndicator>
     with SingleTickerProviderStateMixin {
   bool _isOffline = false;
+  bool _isRetrying = false;
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
 
@@ -62,7 +63,26 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
       });
       if (_isOffline) {
         _controller.forward();
+      } else {
+        _controller.reverse();
       }
+    }
+  }
+
+  Future<void> _retry() async {
+    if (_isRetrying) return;
+    setState(() => _isRetrying = true);
+
+    final result = await Connectivity().checkConnectivity();
+    final isOffline = result.contains(ConnectivityResult.none);
+
+    if (!mounted) return;
+    setState(() {
+      _isRetrying = false;
+      _isOffline = isOffline;
+    });
+    if (!isOffline) {
+      _controller.reverse();
     }
   }
 
@@ -120,17 +140,26 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: _checkConnectivity,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.sm,
-                    vertical: 4,
-                  ),
-                ),
-                child: const Text('Retry'),
-              ),
+              _isRetrying
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: _retry,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.sm,
+                          vertical: 4,
+                        ),
+                      ),
+                      child: const Text('Retry'),
+                    ),
             ],
           ),
         ),
