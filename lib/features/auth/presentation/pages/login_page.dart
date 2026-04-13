@@ -405,6 +405,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
       // Store the new refresh token (rotation)
       await storageService.saveRefreshToken(response.session!.refreshToken!);
+
+      // Update auth notifier so the router redirect fires
+      await ref.read(authNotifierProvider.notifier).refreshCurrentUser();
     } catch (e) {
       if (mounted) {
         showErrorDialog(context, 'auth.login.biometricFailed'.tr());
