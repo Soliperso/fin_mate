@@ -70,13 +70,21 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(milliseconds: 1800));
+    // Start auth check immediately — runs in parallel with the splash animation
+    final userFuture = ref
+        .read(currentUserProvider.future)
+        .then<Object?>((u) => u)
+        .catchError((_) => null);
+
+    // Minimum display time so the splash doesn't flash too briefly
+    await Future.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
 
+    // Await auth result — usually already resolved by now
     Object? user;
     try {
-      user = await ref.read(currentUserProvider.future);
+      user = await userFuture;
     } catch (_) {
       // Network error or Supabase unavailable — navigate to onboarding
     }
