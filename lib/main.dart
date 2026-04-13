@@ -33,24 +33,28 @@ void main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Load environment variables from .env file (local dev only).
-      // Production builds inject values via --dart-define flags instead.
-      try {
-        await dotenv.load(fileName: ".env");
-      } catch (_) {
-        // .env not present — production build using --dart-define
-      }
-
-      // Lock app to portrait mode
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
+      // Phase 1 — parallel: env + orientation lock (no deps between them)
+      await Future.wait([
+        dotenv.load(fileName: '.env').catchError((_) {}),
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]),
       ]);
 
-      // Initialize Sentry error tracking
-      await SentryService.initialize();
+      // Set up Flutter error handling early so init errors are caught
+      FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.presentError(details);
+        GlobalErrorHandler.handleError(
+          details.exception,
+          details.stack ?? StackTrace.current,
+          fatal: true,
+          context: 'Flutter Framework Error',
+        );
+      };
 
-      // Initialize Supabase with deep link handling
+      // Phase 2 — sequential: Sentry then Supabase (Sentry must be up before Supabase errors)
+      await SentryService.initialize();
       await Supabase.initialize(
         url: EnvConfig.supabaseUrl,
         anonKey: EnvConfig.supabaseAnonKey,
@@ -69,27 +73,31 @@ void main() async {
         }
       });
 
-      // Initialize Analytics
+      // Phase 3 — parallel: analytics (needs Supabase) + localization + prefs
+      // These are all independent of each other
       final analytics = AnalyticsService(Supabase.instance.client);
-      await analytics.initialize();
+      late SharedPreferences prefs;
+      await Future.wait([
+        analytics.initialize(),
+        EasyLocalization.ensureInitialized(),
+        initializeDateFormatting(),
+        SharedPreferences.getInstance().then((p) => prefs = p),
+      ]);
 
-      // Initialize Google Mobile Ads
-      await AdService.instance.initialize();
-
-      // Check device security (jailbreak/root detection)
-      final deviceSecurity = DeviceSecurityService();
-      final securityStatus = await deviceSecurity.getSecurityStatus();
-      if (!securityStatus.isSafe) {
-        // Log security warning
-        await GlobalErrorHandler.handleWarning(
-          'App running on compromised device',
-          context: 'Device Security',
-          extra: {
-            'isJailbroken': securityStatus.isJailbroken,
-            'isDeveloperMode': securityStatus.isDeveloperMode,
-          },
-        );
-      }
+      // Read saved theme + display format + locale from already-loaded prefs
+      final savedTheme = prefs.getString('theme_mode') ?? 'dark';
+      final initialThemeMode = savedTheme == 'light'
+          ? ThemeMode.light
+          : savedTheme == 'system'
+              ? ThemeMode.system
+              : ThemeMode.dark;
+      final initialDisplayFormat = DisplayFormatState(
+        currencyCode: prefs.getString('pref_currency') ?? 'USD',
+        dateFormat: prefs.getString('pref_date_format') ?? 'MM/DD/YYYY',
+        numberFormat: prefs.getString('pref_number_format') ?? '1,234.56',
+      );
+      setCachedDisplayFormat(initialDisplayFormat);
+      final savedLocaleCode = prefs.getString('saved_locale') ?? 'en';
 
       // [MVP: Payment Service - Commented out for initial launch]
       // All features are free during MVP testing phase
@@ -97,34 +105,6 @@ void main() async {
       // Uncomment below to enable payments:
       // final paymentService = PaymentService();
       // await paymentService.initialize();
-
-      // Set up Flutter error handling
-      FlutterError.onError = (FlutterErrorDetails details) {
-        FlutterError.presentError(details);
-        GlobalErrorHandler.handleError(
-          details.exception,
-          details.stack ?? StackTrace.current,
-          fatal: true,
-          context: 'Flutter Framework Error',
-        );
-      };
-
-      // Initialize easy_localization
-      await EasyLocalization.ensureInitialized();
-
-      // Initialize date formatting for all supported locales (required for Arabic)
-      await initializeDateFormatting();
-
-      // Read saved theme + display format + locale before first frame to avoid flash
-      final prefs = await SharedPreferences.getInstance();
-      final savedTheme = prefs.getString('theme_mode') ?? 'dark';
-      final initialThemeMode = savedTheme == 'light'
-          ? ThemeMode.light
-          : savedTheme == 'system'
-              ? ThemeMode.system
-              : ThemeMode.dark;
-      final initialDisplayFormat = await loadInitialDisplayFormat();
-      final savedLocaleCode = prefs.getString('saved_locale') ?? 'en';
 
       // Run app
       runApp(
@@ -179,6 +159,21 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
 
       // Start session timeout monitoring
       ref.read(sessionTimeoutServiceProvider).startMonitoring();
+
+      // Deferred: non-critical inits that don't affect the first frame
+      unawaited(AdService.instance.initialize().catchError((_) {}));
+      unawaited(DeviceSecurityService().getSecurityStatus().then((status) {
+        if (!status.isSafe) {
+          GlobalErrorHandler.handleWarning(
+            'App running on compromised device',
+            context: 'Device Security',
+            extra: {
+              'isJailbroken': status.isJailbroken,
+              'isDeveloperMode': status.isDeveloperMode,
+            },
+          );
+        }
+      }).catchError((_) {}));
 
       // Fire due reminders, apply budget carry-overs, and run auto backup on app open
       final user = Supabase.instance.client.auth.currentUser;

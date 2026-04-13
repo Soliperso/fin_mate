@@ -66,7 +66,7 @@ class DisplayFormatNotifier extends StateNotifier<DisplayFormatState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyCurrency, code);
     state = state.copyWith(currencyCode: code);
-    _setCachedDisplayFormat(state);
+    setCachedDisplayFormat(state);
   }
 
   Future<void> setDateFormat(String format) async {
@@ -74,7 +74,7 @@ class DisplayFormatNotifier extends StateNotifier<DisplayFormatState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDateFormat, format);
     state = state.copyWith(dateFormat: format);
-    _setCachedDisplayFormat(state);
+    setCachedDisplayFormat(state);
   }
 
   Future<void> setNumberFormat(String format) async {
@@ -82,7 +82,7 @@ class DisplayFormatNotifier extends StateNotifier<DisplayFormatState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyNumberFormat, format);
     state = state.copyWith(numberFormat: format);
-    _setCachedDisplayFormat(state);
+    setCachedDisplayFormat(state);
   }
 }
 
@@ -142,7 +142,7 @@ final userDateFormatProvider = Provider<DateFormat>((ref) {
 // ─── Singleton for service-layer access ──────────────────────────────────────
 DisplayFormatState? _cachedDisplayFormat;
 
-void _setCachedDisplayFormat(DisplayFormatState state) {
+void setCachedDisplayFormat(DisplayFormatState state) {
   _cachedDisplayFormat = state;
 }
 
@@ -153,7 +153,7 @@ DisplayFormatState getCachedDisplayFormat() {
 }
 
 /// Helper to load initial display format from SharedPreferences.
-/// Call this in main() before runApp, and always call _setCachedDisplayFormat with the result.
+/// Call this in main() before runApp, and always call setCachedDisplayFormat with the result.
 Future<DisplayFormatState> loadInitialDisplayFormat() async {
   final prefs = await SharedPreferences.getInstance();
   final state = DisplayFormatState(
@@ -161,6 +161,6 @@ Future<DisplayFormatState> loadInitialDisplayFormat() async {
     dateFormat: prefs.getString(_keyDateFormat) ?? 'MM/DD/YYYY',
     numberFormat: prefs.getString(_keyNumberFormat) ?? '1,234.56',
   );
-  _setCachedDisplayFormat(state);
+  setCachedDisplayFormat(state);
   return state;
 }
