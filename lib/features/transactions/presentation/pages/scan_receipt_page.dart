@@ -42,7 +42,7 @@ class _ScanReceiptPageState extends State<ScanReceiptPage>
   late AnimationController _scanLineController;
   late Animation<double> _scanLineAnimation;
 
-  static const _scanGreen = Color(0xFF00FF9F);
+  static const _scanGreen = AppColors.scanReceiptGreen;
 
   @override
   void initState() {
@@ -1026,7 +1026,7 @@ class _CornerPainter extends CustomPainter {
     required this.isLeft,
   });
 
-  static const _color = Color(0xFF00FF9F);
+  static const _color = AppColors.scanReceiptGreen;
 
   @override
   void paint(Canvas canvas, Size size) {

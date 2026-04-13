@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_config.dart';
 
@@ -8,6 +9,11 @@ class SessionTimeoutService {
       Duration(minutes: AppConfig.sessionTimeoutMinutes);
   Timer? _inactivityTimer;
   DateTime _lastActivityTime = DateTime.now();
+
+  /// Called after a timeout fires, whether or not the Supabase sign-out
+  /// network call succeeds.  Wire this in the provider to force-invalidate
+  /// local auth state so the router always redirects to /login.
+  void Function()? onSessionExpired;
 
   /// Start monitoring user activity
   void startMonitoring() {
@@ -46,8 +52,14 @@ class SessionTimeoutService {
     try {
       await Supabase.instance.client.auth.signOut();
     } catch (e) {
-      // Logout failed silently
+      // Sign-out network call failed — log so it is visible in debug builds,
+      // then fall through so onSessionExpired still fires and the router
+      // redirects the user to /login.
+      debugPrint('[SessionTimeout] signOut failed: $e');
     }
+    // Always notify so the auth notifier can invalidate local state, even
+    // when the network sign-out call fails.
+    onSessionExpired?.call();
   }
 
   /// Dispose resources

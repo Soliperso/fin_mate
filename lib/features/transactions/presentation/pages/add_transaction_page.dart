@@ -12,6 +12,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
@@ -395,8 +396,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               padding: const EdgeInsets.only(top: 10),
               child: Text(
                 '\$',
-                style: TextStyle(
-                  fontSize: 28,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   fontWeight: FontWeight.w600,
                   color: displayText.isEmpty
                       ? _typeColor.withValues(alpha: 0.25)
@@ -407,8 +407,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ),
             Text(
               displayText.isEmpty ? '0.00' : displayText,
-              style: TextStyle(
-                fontSize: 52,
+              style: Theme.of(context).textTheme.displaySmall!.copyWith(
                 fontWeight: FontWeight.w700,
                 color: displayText.isEmpty
                     ? _typeColor.withValues(alpha: 0.25)
@@ -470,8 +469,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 ),
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.w500,
                     color:
@@ -581,8 +579,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           child: Center(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 14,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isSelected ? selectedColor : AppColors.secondaryLabel,
                 letterSpacing: -0.2,
@@ -864,7 +861,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   );
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (e, _) => const SizedBox.shrink(),
+                error: (e, _) => ErrorRetryWidget(
+                  message: e.toString(),
+                  onRetry: () => ref.invalidate(accountsProvider),
+                ),
               );
             },
           ),
@@ -948,8 +948,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         ),
                         child: Text(
                           '${interval[0].toUpperCase()}${interval.substring(1)}',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -987,7 +986,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       Chip(
                         label: Text(
                           _attachmentFile!.name,
-                          style: const TextStyle(fontSize: 12),
+                          style: Theme.of(context).textTheme.labelSmall,
                           overflow: TextOverflow.ellipsis,
                         ),
                         deleteIcon:
@@ -1122,9 +1121,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         onPressed: () => Navigator.of(ctx).pop(),
                         child: Text(
                           'common.cancel'.tr(),
-                          style: const TextStyle(
+                          style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
                             color: AppColors.systemGray,
-                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -1134,8 +1132,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         children: [
                           Text(
                             'addTransaction.categoryLabel'.tr(),
-                            style: TextStyle(
-                              fontSize: 16,
+                            style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
                               fontWeight: FontWeight.w600,
                               color: labelColor,
                               letterSpacing: -0.3,
@@ -1144,8 +1141,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                           const SizedBox(height: 2),
                           Text(
                             '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: Theme.of(ctx).textTheme.labelSmall!.copyWith(
                               color: _typeColor,
                               fontWeight: FontWeight.w500,
                             ),
@@ -1164,10 +1160,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         },
                         child: Text(
                           'common.done'.tr(),
-                          style: TextStyle(
+                          style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
                             color: _typeColor,
                             fontWeight: FontWeight.w700,
-                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -1205,8 +1200,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             const SizedBox(width: 12),
                             Text(
                               cat.name,
-                              style: TextStyle(
-                                fontSize: 17,
+                              style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
                                 color: labelColor,
                                 letterSpacing: -0.2,
                               ),
@@ -1288,8 +1282,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       children: [
                         Text(
                           dayNames[day.weekday - 1],
-                          style: TextStyle(
-                            fontSize: 11,
+                          style: Theme.of(context).textTheme.labelSmall!.copyWith(
                             fontWeight: FontWeight.w500,
                             color: isSelected
                                 ? Colors.white.withValues(alpha: 0.85)
@@ -1299,8 +1292,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         const SizedBox(height: 4),
                         Text(
                           '${day.day}',
-                          style: TextStyle(
-                            fontSize: 15,
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.w700
                                 : FontWeight.w400,
@@ -1405,8 +1397,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       const SizedBox(height: 4),
                       Text(
                         'Get notified before this transaction\'s date',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 12),
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: AppColors.textSecondary),
                       ),
                     ],
                   ),

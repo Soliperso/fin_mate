@@ -99,6 +99,12 @@ class AppColors {
   static const borderMedium = systemGray4;
   static const borderDark = separatorDark;
 
+  // Scan / receipt overlay accent
+  static const scanReceiptGreen = Color(0xFF00FF9F);
+
+  // Dark green used in success gradients
+  static const successDark = Color(0xFF27A349);
+
   // Gradients for hero cards
   static const gradientStart = brandTeal;
   static const gradientEnd = brandTealLight;

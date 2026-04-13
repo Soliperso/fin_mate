@@ -106,10 +106,8 @@ class _TopSnackBarState extends State<_TopSnackBar>
                   Expanded(
                     child: Text(
                       widget.message,
-                      style: const TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -232,10 +230,8 @@ class _TopErrorSnackBarState extends State<_TopErrorSnackBar>
                   Expanded(
                     child: Text(
                       widget.message,
-                      style: const TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

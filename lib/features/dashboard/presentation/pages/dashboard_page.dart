@@ -71,11 +71,14 @@ class DashboardPage extends ConsumerWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              CircularIconButton(
-                icon: unreadCount > 0
-                    ? CupertinoIcons.bell_fill
-                    : CupertinoIcons.bell,
-                onTap: () => context.push('/notifications'),
+              Tooltip(
+                message: 'Notifications',
+                child: CircularIconButton(
+                  icon: unreadCount > 0
+                      ? CupertinoIcons.bell_fill
+                      : CupertinoIcons.bell,
+                  onTap: () => context.push('/notifications'),
+                ),
               ),
               if (unreadCount > 0)
                 Positioned(
@@ -103,33 +106,39 @@ class DashboardPage extends ConsumerWidget {
           ),
           const SizedBox(width: AppSizes.xs),
           // Global search
-          CircularIconButton(
-            icon: CupertinoIcons.search,
-            onTap: () => context.go('/transactions?search=true'),
+          Tooltip(
+            message: 'Search',
+            child: CircularIconButton(
+              icon: CupertinoIcons.search,
+              onTap: () => context.go('/transactions?search=true'),
+            ),
           ),
           const SizedBox(width: AppSizes.xs),
           // Avatar
-          Padding(
-            padding: const EdgeInsets.only(right: AppSizes.sm),
-            child: GestureDetector(
-              onTap: () => context.go('/profile'),
-              child: hasValidAvatar
-                  ? CircleAvatar(
-                      radius: 17,
-                      backgroundImage: NetworkImage(avatarUrl),
-                    )
-                  : CircleAvatar(
-                      radius: 17,
-                      backgroundColor: AppColors.brandTeal,
-                      child: Text(
-                        getInitials(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.08,
+          Tooltip(
+            message: 'Profile',
+            child: Padding(
+              padding: const EdgeInsets.only(right: AppSizes.sm),
+              child: GestureDetector(
+                onTap: () => context.go('/profile'),
+                child: hasValidAvatar
+                    ? CircleAvatar(
+                        radius: 17,
+                        backgroundImage: NetworkImage(avatarUrl),
+                      )
+                    : CircleAvatar(
+                        radius: 17,
+                        backgroundColor: AppColors.brandTeal,
+                        child: Text(
+                          getInitials(),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.08,
+                          ),
                         ),
                       ),
-                    ),
+              ),
             ),
           ),
         ],
@@ -360,8 +369,6 @@ class _RecentTransactionsCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () => context.go('/transactions/add?type=expense'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryTeal,
-                foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),

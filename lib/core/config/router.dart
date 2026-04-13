@@ -81,12 +81,16 @@ class GoRouterRefreshStream extends ChangeNotifier {
   }
 }
 
-// Router notifier that watches auth state changes
+// Router notifier that watches auth state changes and server admin verification
 class _RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   _RouterNotifier(this._ref) {
     _ref.listen(authNotifierProvider, (previous, next) {
+      notifyListeners();
+    });
+    // Re-evaluate admin redirects once the server RPC resolves.
+    _ref.listen(serverAdminVerifiedProvider, (previous, next) {
       notifyListeners();
     });
   }
@@ -124,10 +128,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAdminRoute) {
-        final isAdmin = ref.read(isAdminProvider);
-        if (!isAdmin) {
-          return '/dashboard'; // Redirect non-admins
-        }
+        // Layer 1 — fast local cache check (fails-closed on missing profile).
+        final isAdminLocal = ref.read(isAdminProvider);
+        if (!isAdminLocal) return '/dashboard';
+
+        // Layer 2 — server-side RPC verification (defence-in-depth).
+        // Uses cached AsyncValue so the redirect stays synchronous.
+        // The _RouterNotifier listens to serverAdminVerifiedProvider so the
+        // router re-evaluates this redirect once the RPC result arrives.
+        final serverResult = ref.read(serverAdminVerifiedProvider);
+        final isAdminServer = serverResult.when(
+          data: (verified) => verified,
+          // Still loading — optimistically allow (layer 1 passed); the router
+          // will re-run and correct this once the RPC resolves.
+          loading: () => true,
+          // RPC error — deny access to be safe.
+          error: (_, __) => false,
+        );
+        if (!isAdminServer) return '/dashboard';
       }
 
       return null; // No redirect

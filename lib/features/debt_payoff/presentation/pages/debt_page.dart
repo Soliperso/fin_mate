@@ -131,7 +131,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           'debt.title'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
           controller: _tabController,

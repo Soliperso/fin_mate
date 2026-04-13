@@ -38,16 +38,33 @@ class CsvImportService {
 
   static final _uuid = Uuid();
 
+  static const _maxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+  static const _maxDataRows = 5000;
+
   CsvImportResult parse(
     String csvContent,
     List<AccountEntity> accounts,
     List<CategoryEntity> categories,
     String userId,
   ) {
+    // Guard: reject files that are too large before attempting to parse.
+    if (csvContent.length > _maxFileSizeBytes) {
+      throw const FormatException(
+        'File is too large. Maximum allowed size is 5 MB.',
+      );
+    }
+
     final rows = const CsvToListConverter(eol: '\n').convert(csvContent);
 
     if (rows.isEmpty) {
       throw const FormatException('The file is empty.');
+    }
+
+    // Guard: reject imports with an unreasonable number of rows.
+    if (rows.length - 1 > _maxDataRows) {
+      throw FormatException(
+        'Too many rows (${rows.length - 1}). Maximum allowed is $_maxDataRows rows per import.',
+      );
     }
 
     // Validate headers (case-insensitive)
@@ -103,6 +120,13 @@ class CsvImportService {
         errors.add('Row $rowNum: invalid amount "${cells[2]}" — skipped.');
         continue;
       }
+      if (amount < 0) {
+        errors.add(
+          'Row $rowNum: negative amount "${cells[2]}" — use the Type column '
+          '(income/expense/transfer) to indicate direction.',
+        );
+        continue;
+      }
 
       // ── Account (required) ────────────────────────────────────────
       final account = _matchAccount(cells[3], accounts);
@@ -126,7 +150,7 @@ class CsvImportService {
         accountId: account.id,
         categoryId: category?.id,
         type: type,
-        amount: amount.abs(),
+        amount: amount,
         description: cells[5].isEmpty ? null : cells[5],
         notes: cells[6].isEmpty ? null : cells[6],
         date: date,

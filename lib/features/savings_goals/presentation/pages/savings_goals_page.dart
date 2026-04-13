@@ -69,7 +69,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                   icon: const Icon(CupertinoIcons.add, size: 20),
                   label: Text(
                     'savings.newGoal'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -112,7 +112,7 @@ class SavingsGoalsPage extends ConsumerWidget {
                         icon: const Icon(CupertinoIcons.add, size: 20),
                         label: Text(
                           'savings.newGoal'.tr(),
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

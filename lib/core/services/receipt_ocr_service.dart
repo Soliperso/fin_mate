@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/env_config.dart';
 
 /// Extracts structured data from receipt images using Google ML Kit OCR.
-/// If an OpenAI API key is available, AI parsing is attempted first.
+/// AI parsing is attempted first via the Supabase openai-proxy Edge Function;
+/// falls back to regex parsing when the user is unauthenticated or the proxy
+/// is unavailable.
 class ReceiptOcrService {
   final TextRecognizer _textRecognizer = TextRecognizer();
 
@@ -27,11 +30,11 @@ class ReceiptOcrService {
           .where((l) => l.isNotEmpty)
           .toList();
 
-      // Try AI parsing first
-      if (EnvConfig.openAiApiKey.isNotEmpty) {
-        final aiResult = await _parseWithAI(text);
-        if (aiResult != null) return aiResult;
-      }
+      // Try AI parsing via server-side proxy first.
+      // Falls back to regex parsing if the user is unauthenticated or the
+      // proxy returns an error.
+      final aiResult = await _parseWithAI(text);
+      if (aiResult != null) return aiResult;
 
       // Fall back to regex parsing
       final merchant = _extractMerchant(lines);
@@ -60,11 +63,20 @@ class ReceiptOcrService {
 
   Future<Map<String, dynamic>?> _parseWithAI(String rawText) async {
     try {
+      // Route through the Supabase Edge Function proxy so the OpenAI key
+      // never leaves the server.  Falls back to regex parsing if the user
+      // is not authenticated or the proxy is unavailable.
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session == null) return null;
+
+      final proxyUrl =
+          '${EnvConfig.supabaseUrl}/functions/v1/openai-proxy';
       final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
+        Uri.parse(proxyUrl),
         headers: {
-          'Authorization': 'Bearer ${EnvConfig.openAiApiKey}',
+          'Authorization': 'Bearer ${session.accessToken}',
           'Content-Type': 'application/json',
+          'apikey': EnvConfig.supabaseAnonKey,
         },
         body: json.encode({
           'model': 'gpt-4o-mini',

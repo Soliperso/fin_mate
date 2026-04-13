@@ -81,7 +81,7 @@ class GoalDetailPage extends ConsumerWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isCompleted
-                            ? [AppColors.success, const Color(0xFF27A349)]
+                            ? [AppColors.success, AppColors.successDark]
                             : [AppColors.brandTeal, AppColors.brandTealLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,

@@ -130,13 +130,12 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
                 size: 20,
               ),
               const SizedBox(width: AppSizes.sm),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'No internet connection',
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
                   ),
                 ),
               ),
