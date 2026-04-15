@@ -215,4 +215,19 @@ class DebtRemoteDatasource {
       throw Exception('Failed to fetch debt summary: $e');
     }
   }
+
+  Future<List<DebtPaymentModel>> getAllPayments() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+      final response = await _supabase
+          .from('debt_payments')
+          .select()
+          .eq('user_id', userId)
+          .order('payment_date', ascending: false);
+      return (response as List).map((json) => DebtPaymentModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch all payments: $e');
+    }
+  }
 }

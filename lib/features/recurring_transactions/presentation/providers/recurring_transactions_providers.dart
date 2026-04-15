@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../data/datasources/recurring_transactions_remote_datasource.dart';
 import '../../data/repositories/recurring_transactions_repository_impl.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
@@ -56,6 +57,69 @@ class RecurringTransactionsOperationsNotifier extends StateNotifier<AsyncValue<v
 
   RecurringTransactionsOperationsNotifier(this._repository, this._ref)
       : super(const AsyncValue.data(null));
+
+  /// Auto-generates transactions for all overdue active recurring entries.
+  /// Safe to call on every page load — advances next_occurrence so it's idempotent.
+  Future<void> processOverdue(String userId) async {
+    try {
+      final all = await _repository.getActiveRecurringTransactions();
+      final now = DateTime.now();
+      final overdue = all.where((t) => t.nextOccurrence.isBefore(now)).toList();
+      if (overdue.isEmpty) return;
+
+      for (final t in overdue) {
+        try {
+          await supabase.from('transactions').insert({
+            'user_id': userId,
+            'account_id': t.accountId,
+            if (t.categoryId != null) 'category_id': t.categoryId,
+            'type': t.type,
+            'amount': t.amount,
+            if (t.description != null) 'description': t.description,
+            'date': t.nextOccurrence.toIso8601String().split('T')[0],
+            'is_recurring': true,
+            if (t.toAccountId != null) 'to_account_id': t.toAccountId,
+          });
+
+          // Advance next_occurrence past now
+          var next = t.nextOccurrence;
+          while (!next.isAfter(now)) {
+            next = _advance(next, t.frequency);
+          }
+          await _repository.updateRecurringTransaction(
+            id: t.id,
+            nextOccurrence: next,
+          );
+        } catch (_) {
+          // Don't abort the loop for one failed entry
+        }
+      }
+
+      _ref.invalidate(recurringTransactionsProvider);
+      _ref.invalidate(activeRecurringTransactionsProvider);
+      _ref.invalidate(upcomingRecurringTransactionsProvider);
+    } catch (_) {
+      // Silent — auto-gen is best-effort
+    }
+  }
+
+  static DateTime _advance(DateTime from, RecurringFrequency frequency) {
+    switch (frequency) {
+      case RecurringFrequency.daily:
+        return from.add(const Duration(days: 1));
+      case RecurringFrequency.weekly:
+        return from.add(const Duration(days: 7));
+      case RecurringFrequency.monthly:
+        final newMonth = from.month + 1;
+        return DateTime(
+          from.year + (newMonth > 12 ? 1 : 0),
+          newMonth > 12 ? newMonth - 12 : newMonth,
+          from.day,
+        );
+      case RecurringFrequency.yearly:
+        return DateTime(from.year + 1, from.month, from.day);
+    }
+  }
 
   Future<void> createRecurringTransaction({
     required String accountId,

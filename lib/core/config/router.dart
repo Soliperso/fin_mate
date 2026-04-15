@@ -26,8 +26,6 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
 import '../../features/debt_payoff/presentation/pages/debt_page.dart';
-// [MVP: Documents - Commented out for initial launch]
-// import '../../features/documents/presentation/pages/documents_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 // [MVP: Pricing/Subscription - Commented out for initial launch]
 // import '../../features/profile/presentation/pages/pricing_page.dart';
@@ -204,7 +202,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/dashboard',
             name: 'dashboard',
             pageBuilder: (context, state) => _FadeTransitionPage(child: const DashboardPage()),
-            // [Removed: Emergency Fund route - not in V1 plan]
             routes: [],
           ),
           GoRoute(
@@ -294,12 +291,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // [MVP: Documents - Commented out for initial launch]
-          // GoRoute(
-          //   path: '/documents',
-          //   name: 'documents',
-          //   builder: (context, state) => const DocumentsPage(),
-          // ),
           // [MVP: Pricing - Commented out for initial launch]
           // GoRoute(
           //   path: '/pricing',

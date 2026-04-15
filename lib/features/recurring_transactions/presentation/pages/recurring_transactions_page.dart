@@ -28,6 +28,19 @@ class _RecurringTransactionsPageState
     extends ConsumerState<RecurringTransactionsPage> {
   String _filterType = 'all'; // all, active, inactive
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId != null) {
+        ref
+            .read(recurringTransactionsOperationsProvider.notifier)
+            .processOverdue(userId);
+      }
+    });
+  }
+
   void _showAddForm(RecurringTransactionEntity? transaction) {
     context.push('/recurring-transactions/add', extra: transaction);
   }

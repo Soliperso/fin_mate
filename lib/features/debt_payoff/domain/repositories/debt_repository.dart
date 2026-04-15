@@ -28,4 +28,5 @@ abstract class DebtRepository {
     String? notes,
   });
   Future<Map<String, dynamic>> getDebtSummary();
+  Future<List<DebtPaymentEntity>> getAllPayments();
 }

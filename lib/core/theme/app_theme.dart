@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
 
 /// Apple Wallet / Pay inspired theme for Finmate
 /// Built on iOS Human Interface Guidelines design tokens
 class AppTheme {
+  static final String _fontFamily = GoogleFonts.dmSans().fontFamily!;
+
   static ThemeData lightTheme() {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: _fontFamily,
       colorScheme: ColorScheme.light(
         primary: AppColors.brandTeal,
         secondary: AppColors.brandTeal,
@@ -41,7 +45,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.label,
           letterSpacing: -0.41,
-          fontFamily: '.SF Pro Text',
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -284,6 +287,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      fontFamily: _fontFamily,
       colorScheme: ColorScheme.dark(
         primary: AppColors.brandTealLight,
         secondary: AppColors.brandTealLight,
@@ -314,7 +318,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.labelDark,
           letterSpacing: -0.41,
-          fontFamily: '.SF Pro Text',
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,

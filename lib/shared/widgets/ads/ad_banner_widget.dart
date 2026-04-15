@@ -74,25 +74,20 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
 
       // User is freemium, load the ad
       final adService = ref.read(adServiceProvider);
-      final ad = await adService.loadBannerAd(
-        size: widget.adSize,
-        onAdFailedToLoad: (ad, error) {
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = false;
-              _isLoading = false;
-            });
-          }
-        },
-      );
+      final ad = await adService.loadBannerAd(size: widget.adSize);
 
-      if (ad != null && mounted) {
+      if (!mounted) {
+        ad?.dispose(); // widget was disposed while the ad was loading
+        return;
+      }
+
+      if (ad != null) {
         setState(() {
           _bannerAd = ad;
           _isAdLoaded = true;
           _isLoading = false;
         });
-      } else if (mounted) {
+      } else {
         setState(() {
           _isLoading = false;
         });

@@ -17,6 +17,7 @@ import '../providers/debt_providers.dart';
 import '../widgets/add_debt_bottom_sheet.dart';
 import '../widgets/debt_card.dart';
 import '../widgets/debt_hero_card.dart';
+import '../widgets/debt_milestone_card.dart';
 import '../widgets/edit_debt_bottom_sheet.dart';
 import '../widgets/extra_payment_card.dart';
 import '../widgets/log_payment_bottom_sheet.dart';
@@ -487,6 +488,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
                     ExtraPaymentCard(
                       totalMinimum: debts.fold(0.0, (s, d) => s + d.minimumPayment),
                     ),
+                    const SizedBox(height: AppSizes.md),
+                    const DebtMilestoneCard(),
                   ],
                 ),
               ),

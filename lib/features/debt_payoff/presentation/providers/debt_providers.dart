@@ -195,3 +195,118 @@ final debtNotifierProvider = StateNotifierProvider<DebtNotifier, AsyncValue<void
   final analytics = ref.watch(analyticsServiceProvider);
   return DebtNotifier(repository, analytics, ref);
 });
+
+// ── Gamification ─────────────────────────────────────────────────────────────
+
+/// All payments across all debts — used for streak calculation.
+final allDebtPaymentsProvider = FutureProvider<List<DebtPaymentEntity>>((ref) async {
+  final repository = ref.watch(debtRepositoryProvider);
+  return repository.getAllPayments();
+});
+
+/// Gamification data: streak + milestones computed from debts + payments.
+final debtGamificationProvider = Provider<DebtGamification?>((ref) {
+  final debts = ref.watch(debtsProvider).valueOrNull;
+  final payments = ref.watch(allDebtPaymentsProvider).valueOrNull;
+  if (debts == null || debts.isEmpty) return null;
+  return DebtGamification.compute(debts: debts, payments: payments ?? []);
+});
+
+// ── Gamification value types ─────────────────────────────────────────────────
+
+class DebtMilestone {
+  final String debtName;
+  final double progressPercent;
+  final bool isComplete;
+
+  const DebtMilestone({
+    required this.debtName,
+    required this.progressPercent,
+    required this.isComplete,
+  });
+
+  int get nextMilestone {
+    if (progressPercent >= 100) return 100;
+    if (progressPercent >= 75) return 100;
+    if (progressPercent >= 50) return 75;
+    if (progressPercent >= 25) return 50;
+    return 25;
+  }
+}
+
+class DebtGamification {
+  final int streakMonths;
+  final List<DebtMilestone> milestones;
+  final double totalPaidAllTime;
+
+  const DebtGamification({
+    required this.streakMonths,
+    required this.milestones,
+    required this.totalPaidAllTime,
+  });
+
+  String get badgeTitle {
+    if (streakMonths >= 12) return 'Debt Warrior';
+    if (streakMonths >= 6) return 'Dedicated';
+    if (streakMonths >= 3) return 'Consistent';
+    if (streakMonths >= 1) return 'Getting Started';
+    return 'Fresh Start';
+  }
+
+  String get badgeIcon {
+    if (streakMonths >= 12) return '🏆';
+    if (streakMonths >= 6) return '⚡';
+    if (streakMonths >= 3) return '🔥';
+    if (streakMonths >= 1) return '🚀';
+    return '🌱';
+  }
+
+  factory DebtGamification.compute({
+    required List<DebtEntity> debts,
+    required List<DebtPaymentEntity> payments,
+  }) {
+    int streakMonths = 0;
+    if (payments.isNotEmpty) {
+      final monthsWithPayments = payments
+          .map((p) => '${p.paymentDate.year}-${p.paymentDate.month}')
+          .toSet();
+      final now = DateTime.now();
+      var checkYear = now.year;
+      var checkMonth = now.month;
+      for (var i = 0; i < 60; i++) {
+        final key = '$checkYear-$checkMonth';
+        if (monthsWithPayments.contains(key)) {
+          streakMonths++;
+        } else if (i > 0) {
+          break;
+        }
+        checkMonth--;
+        if (checkMonth == 0) {
+          checkMonth = 12;
+          checkYear--;
+        }
+      }
+    }
+
+    final milestones = debts.map((debt) {
+      final original = debt.originalBalance;
+      double progress = 0.0;
+      if (original != null && original > 0) {
+        progress = ((original - debt.balance) / original * 100).clamp(0.0, 100.0);
+      }
+      return DebtMilestone(
+        debtName: debt.name,
+        progressPercent: progress,
+        isComplete: debt.balance <= 0,
+      );
+    }).toList();
+
+    final totalPaid = payments.fold<double>(0, (s, p) => s + p.amount);
+
+    return DebtGamification(
+      streakMonths: streakMonths,
+      milestones: milestones,
+      totalPaidAllTime: totalPaid,
+    );
+  }
+}

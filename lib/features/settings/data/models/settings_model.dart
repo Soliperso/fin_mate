@@ -15,6 +15,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
     super.moneyHealthUpdates = 'weekly',
     super.goalNotifications = 'milestones',
     super.autoBackupSchedule = 'off',
+    super.aiInsightsFrequency = 'weekly',
   });
 
   /// Create from JSON
@@ -32,6 +33,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       moneyHealthUpdates: json['money_health_updates'] as String? ?? 'weekly',
       goalNotifications: json['goal_notifications'] as String? ?? 'milestones',
       autoBackupSchedule: json['auto_backup_schedule'] as String? ?? 'off',
+      aiInsightsFrequency: json['ai_insights_frequency'] as String? ?? 'weekly',
     );
   }
 
@@ -50,6 +52,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       'money_health_updates': moneyHealthUpdates,
       'goal_notifications': goalNotifications,
       'auto_backup_schedule': autoBackupSchedule,
+      'ai_insights_frequency': aiInsightsFrequency,
     };
   }
 
@@ -68,6 +71,7 @@ class NotificationPreferencesModel extends NotificationPreferences {
       moneyHealthUpdates: moneyHealthUpdates,
       goalNotifications: goalNotifications,
       autoBackupSchedule: autoBackupSchedule,
+      aiInsightsFrequency: aiInsightsFrequency,
     );
   }
 }
@@ -141,6 +145,7 @@ class SettingsModel extends SettingsEntity {
               moneyHealthUpdates: prefs.moneyHealthUpdates,
               goalNotifications: prefs.goalNotifications,
               autoBackupSchedule: prefs.autoBackupSchedule,
+              aiInsightsFrequency: prefs.aiInsightsFrequency,
             ),
       updatedAt: entity.updatedAt,
     );

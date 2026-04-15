@@ -3,12 +3,14 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/config/supabase_client.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart' show Session; // [Biometric]
+// import '../../../../core/config/supabase_client.dart'; // [Biometric]
 import '../../../../core/services/secure_storage_provider.dart';
-import '../../../../core/services/biometric_provider.dart';
-import '../../../../shared/widgets/success_animation.dart';
+// import '../../../../core/services/biometric_provider.dart'; // [Biometric]
+// import '../../../../shared/widgets/success_animation.dart'; // [Biometric]
 import '../providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -26,6 +28,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  int _failedAttempts = 0;
+  DateTime? _lockoutUntil;
 
   @override
   void initState() {
@@ -138,78 +142,82 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: AppSizes.md),
                 ],
-                TextFormField(
-                  controller: _emailController,
-                  focusNode: _emailFocusNode,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                  decoration: InputDecoration(
-                    labelText: 'auth.login.emailLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'auth.login.emailRequired'.tr();
-                    }
-                    if (!value.contains('@')) {
-                      return 'auth.login.emailInvalid'.tr();
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSizes.md),
-                TextFormField(
-                  controller: _passwordController,
-                  focusNode: _passwordFocusNode,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _handleLogin(),
-                  decoration: InputDecoration(
-                    labelText: 'auth.login.passwordLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
-                      ),
-                    ),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                Semantics(
+                  label: 'Email address field',
+                  child: TextFormField(
+                    controller: _emailController,
+                    focusNode: _emailFocusNode,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                    decoration: InputDecoration(
+                      labelText: 'auth.login.emailLabel'.tr(),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
                         child: Container(
                           decoration: BoxDecoration(
                             color: iconBg,
                             borderRadius: const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: Icon(
-                            _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                            size: 17,
-                            color: iconColor,
+                          child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'auth.login.emailRequired'.tr();
+                      if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+                        return 'auth.login.emailInvalid'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSizes.md),
+                Semantics(
+                  label: 'Password field',
+                  child: TextFormField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleLogin(),
+                    decoration: InputDecoration(
+                      labelText: 'auth.login.passwordLabel'.tr(),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
+                        ),
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: GestureDetector(
+                          onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Icon(
+                              _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                              size: 17,
+                              color: iconColor,
+                            ),
                           ),
                         ),
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'auth.login.passwordRequired'.tr();
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'auth.login.passwordRequired'.tr();
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Row(
@@ -239,63 +247,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: AppSizes.lg),
-                Consumer(
-                  builder: (context, ref, child) {
-                    final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
-
-                    final showBiometric = isBiometricAvailable.maybeWhen(
-                      data: (v) => v,
-                      orElse: () => false,
-                    );
-
-                    return FutureBuilder<bool>(
-                      future: showBiometric
-                          ? ref.read(secureStorageServiceProvider).isBiometricEnabled()
-                          : Future.value(false),
-                      builder: (context, credSnapshot) {
-                        final hasCreds = credSnapshot.data ?? false;
-
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: authState.isLoading ? null : _handleLogin,
-                                child: authState.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : Text('auth.login.loginButton'.tr()),
-                              ),
-                            ),
-                            if (showBiometric && hasCreds) ...[
-                              const SizedBox(width: AppSizes.sm),
-                              FutureBuilder<String?>(
-                                future: ref.read(biometricServiceProvider).getPrimaryBiometricType(),
-                                builder: (context, typeSnapshot) {
-                                  final isFace = typeSnapshot.data == 'Face ID';
-                                  return SizedBox(
-                                    width: 52,
-                                    child: ElevatedButton(
-                                      onPressed: authState.isLoading ? null : _handleBiometricLogin,
-                                      style: ElevatedButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      child: Icon(
-                                        isFace ? Icons.face_unlock_outlined : Icons.fingerprint,
-                                        size: 26,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    );
-                  },
+                // [Biometric: commented out — login button with biometric icon]
+                // Consumer(
+                //   builder: (context, ref, child) {
+                //     final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
+                //     final showBiometric = isBiometricAvailable.maybeWhen(
+                //       data: (v) => v,
+                //       orElse: () => false,
+                //     );
+                //     if (!showBiometric) { return ElevatedButton(...); }
+                //     return FutureBuilder<String?>( // token check + biometric button
+                //       ...
+                //     );
+                //   },
+                // ),
+                Semantics(
+                  label: 'Log in button',
+                  button: true,
+                  child: ElevatedButton(
+                    onPressed: authState.isLoading ? null : _handleLogin,
+                    child: authState.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text('auth.login.loginButton'.tr()),
+                  ),
                 ),
                 const SizedBox(height: AppSizes.md),
                 Row(
@@ -326,6 +304,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
+    // Enforce client-side lockout
+    if (_lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!)) {
+      final remaining = _lockoutUntil!.difference(DateTime.now()).inMinutes + 1;
+      ref.read(authNotifierProvider.notifier).setError(
+            'auth.login.tooManyAttempts'.tr(args: [remaining.toString()]),
+          );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       try {
         final email = _emailController.text.trim();
@@ -334,86 +321,83 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         await storageService.saveEmail(email);
 
-        final biometricService = ref.read(biometricServiceProvider);
-        final isAvailable = await biometricService.isBiometricAvailable();
-
         await ref.read(authNotifierProvider.notifier).signInWithEmail(
               email: email,
               password: password,
             );
 
-        // After successful sign-in, store refresh token for biometric re-auth
-        // (never store plaintext password)
-        if (isAvailable) {
-          final refreshToken = supabase.auth.currentSession?.refreshToken;
-          if (refreshToken != null) {
-            await storageService.saveRefreshToken(refreshToken);
-            await storageService.setBiometricEnabled(true);
-          }
-        }
+        // Success — reset failure counter and clear password from memory
+        _failedAttempts = 0;
+        _lockoutUntil = null;
+        _passwordController.clear();
+
+        // [Biometric: commented out — refresh token storage for biometric re-auth]
+        // final biometricService = ref.read(biometricServiceProvider);
+        // final isAvailable = await biometricService.isBiometricAvailable();
+        // final refreshToken = supabase.auth.currentSession?.refreshToken;
+        // if (refreshToken != null) { await storageService.saveRefreshToken(refreshToken); }
+        // if (isAvailable) { await storageService.setBiometricEnabled(true); }
+
         // Router will automatically redirect to dashboard via redirect logic
       } catch (e) {
-        // Error is shown via the inline error box (authState.errorMessage)
+        // Clear password on failure too — never leave it in memory after an attempt
+        _passwordController.clear();
+
+        _failedAttempts++;
+        if (_failedAttempts >= AppConfig.maxLoginAttempts) {
+          setState(() {
+            _lockoutUntil = DateTime.now().add(const Duration(minutes: 15));
+          });
+        }
+        // Error message shown via the inline error box (authState.errorMessage)
       }
     }
   }
 
-  Future<void> _handleBiometricLogin() async {
-    try {
-      final biometricService = ref.read(biometricServiceProvider);
-
-      final isAvailable = await biometricService.isBiometricAvailable();
-      if (!isAvailable) {
-        if (mounted) {
-          showErrorDialog(context, 'auth.login.biometricNotAvailable'.tr());
-        }
-        return;
-      }
-
-      // Authenticate with biometrics
-      final result = await biometricService.authenticate(
-        localizedReason: 'auth.login.biometricReason'.tr(),
-      );
-
-      if (!result.success) {
-        if (mounted) {
-          showErrorDialog(
-            context,
-            result.errorMessage ?? 'auth.login.biometricFailed'.tr(),
-          );
-        }
-        return;
-      }
-
-      // Use stored refresh token to re-authenticate (never store plaintext password)
-      final storageService = ref.read(secureStorageServiceProvider);
-      final refreshToken = await storageService.getRefreshToken();
-
-      if (refreshToken == null || refreshToken.isEmpty) {
-        if (mounted) {
-          showErrorDialog(context, 'auth.login.biometricNoCredentials'.tr());
-        }
-        return;
-      }
-
-      final response = await supabase.auth.refreshSession(refreshToken);
-      if (response.session == null) {
-        if (mounted) {
-          showErrorDialog(context, 'auth.login.biometricFailed'.tr());
-        }
-        return;
-      }
-      // Store the new refresh token (rotation)
-      await storageService.saveRefreshToken(response.session!.refreshToken!);
-
-      // Update auth notifier so the router redirect fires
-      await ref.read(authNotifierProvider.notifier).refreshCurrentUser();
-    } catch (e) {
-      if (mounted) {
-        showErrorDialog(context, 'auth.login.biometricFailed'.tr());
-      }
-    }
-  }
+  // [Biometric: commented out]
+  // Future<void> _handleBiometricLogin() async {
+  //   try {
+  //     final biometricService = ref.read(biometricServiceProvider);
+  //     final isAvailable = await biometricService.isBiometricAvailable();
+  //     if (!isAvailable) {
+  //       if (mounted) showErrorDialog(context, 'auth.login.biometricNotAvailable'.tr());
+  //       return;
+  //     }
+  //     final result = await biometricService.authenticate(
+  //       localizedReason: 'auth.login.biometricReason'.tr(),
+  //     );
+  //     if (!result.success) {
+  //       if (mounted) {
+  //         showErrorDialog(context, result.errorMessage ?? 'auth.login.biometricFailed'.tr());
+  //       }
+  //       return;
+  //     }
+  //     final storageService = ref.read(secureStorageServiceProvider);
+  //     final refreshToken = await storageService.getRefreshToken();
+  //     if (refreshToken == null || refreshToken.isEmpty) {
+  //       if (mounted) showErrorDialog(context, 'auth.login.biometricNoCredentials'.tr());
+  //       return;
+  //     }
+  //     Session? session;
+  //     try {
+  //       final response = await supabase.auth.refreshSession(refreshToken);
+  //       session = response.session;
+  //     } catch (_) {}
+  //     if (session == null) {
+  //       await storageService.clearRefreshToken();
+  //       if (mounted) {
+  //         setState(() {});
+  //         showErrorDialog(context,
+  //           'Your session has expired. Log in once with your password — Face ID will work for all future logins.');
+  //       }
+  //       return;
+  //     }
+  //     await storageService.saveRefreshToken(session.refreshToken!);
+  //     await ref.read(authNotifierProvider.notifier).refreshCurrentUser();
+  //   } catch (e) {
+  //     if (mounted) showErrorDialog(context, 'auth.login.biometricFailed'.tr());
+  //   }
+  // }
 
   void _handleForgotPassword() {
     final email = _emailController.text.trim();

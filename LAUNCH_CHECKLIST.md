@@ -8,6 +8,33 @@
 
 ## 🔴 CRITICAL (Must Complete Today)
 
+### 0. Drop TOTP plain-text column ⚠️ **SECURITY — YOUR ACTION REQUIRED**
+
+**Time:** 5 minutes
+**Complexity:** Easy (copy-paste SQL)
+
+Migration `51_encrypt_totp_secrets.sql` added an encrypted column and copied secrets, but the `DROP COLUMN` was left commented out. Plain-text TOTP secrets may still exist in production.
+
+**Steps:**
+1. Open Supabase SQL editor for your project
+2. Run the verification query first:
+```sql
+SELECT COUNT(*)
+FROM user_profiles
+WHERE totp_secret IS NOT NULL;
+```
+3. If count > 0, encrypted migration hasn't finished — do NOT drop yet, re-run migration 51 fully.
+4. If count = 0, all secrets are encrypted. Safe to drop:
+```sql
+ALTER TABLE user_profiles DROP COLUMN IF EXISTS totp_secret;
+```
+
+**Why critical:** Plain-text TOTP secrets in the database is a security breach exposure.
+
+**Status:** ⚠️ PENDING — run verification query now
+
+---
+
 ### 1. Apply Database Migration 31 ⚠️ **YOUR ACTION REQUIRED**
 
 **Time:** 15 minutes
@@ -24,6 +51,9 @@
 **Status:** ⚠️ PENDING
 
 ---
+
+
+<!-- I'VE GOTTEN TO THIS POINT AND I NEED COMPLETE THE ITEMS BELOW -->
 
 ### 2. Configure Sentry DSN (Optional but Highly Recommended)
 

@@ -22,9 +22,11 @@ class ExtraPaymentCard extends ConsumerWidget {
 
     int? monthsSaved;
     double? interestSaved;
+    bool baseHitCap = false;
     if (extra > 0 && baseResult != null && simResult != null) {
       monthsSaved = baseResult.totalMonths - simResult.totalMonths;
       interestSaved = baseResult.totalInterestPaid - simResult.totalInterestPaid;
+      baseHitCap = baseResult.hitMaxMonths;
     }
 
     return Card(
@@ -133,32 +135,80 @@ class ExtraPaymentCard extends ConsumerWidget {
             ),
 
             // Impact summary
-            if (monthsSaved != null && interestSaved != null && extra > 0) ...[
+            if (monthsSaved != null && interestSaved != null && extra > 0 && simResult != null) ...[
               const SizedBox(height: AppSizes.md),
-              Container(
-                padding: const EdgeInsets.all(AppSizes.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                ),
-                child: Column(
-                  children: [
-                    _ImpactRow(
-                      icon: CupertinoIcons.calendar,
-                      text: monthsSaved > 0
-                          ? 'extraPayment.payOffSooner'.tr(namedArgs: {'months': '$monthsSaved'})
-                          : 'extraPayment.sameTimeline'.tr(),
+              if (baseHitCap) ...[
+                // Baseline never pays off — show the danger warning + simulated upside
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    border: Border.all(
+                      color: AppColors.warning.withValues(alpha: 0.3),
+                      width: 0.5,
                     ),
-                    if (interestSaved > 0) ...[
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ImpactRow(
+                        icon: CupertinoIcons.exclamationmark_triangle,
+                        iconColor: AppColors.warning,
+                        textColor: AppColors.warning,
+                        text: 'At minimum payments, this debt takes 50+ years to clear.',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  ),
+                  child: Column(
+                    children: [
+                      _ImpactRow(
+                        icon: CupertinoIcons.calendar,
+                        text: 'With this extra payment: paid off in ${simResult.totalMonths} months',
+                      ),
                       const SizedBox(height: 4),
                       _ImpactRow(
                         icon: CupertinoIcons.money_dollar,
-                        text: 'extraPayment.saveInInterest'.tr(namedArgs: {'amount': currencyFormat.format(interestSaved)}),
+                        text: 'Total interest: ${currencyFormat.format(simResult.totalInterestPaid)}',
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              ] else ...[
+                // Normal case — both baseline and simulated have a finite payoff
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  ),
+                  child: Column(
+                    children: [
+                      _ImpactRow(
+                        icon: CupertinoIcons.calendar,
+                        text: monthsSaved > 0
+                            ? 'extraPayment.payOffSooner'.tr(namedArgs: {'months': '$monthsSaved'})
+                            : 'extraPayment.sameTimeline'.tr(),
+                      ),
+                      if (interestSaved > 0) ...[
+                        const SizedBox(height: 4),
+                        _ImpactRow(
+                          icon: CupertinoIcons.money_dollar,
+                          text: 'extraPayment.saveInInterest'.tr(namedArgs: {'amount': currencyFormat.format(interestSaved)}),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ],
           ],
         ),
@@ -170,20 +220,28 @@ class ExtraPaymentCard extends ConsumerWidget {
 class _ImpactRow extends StatelessWidget {
   final IconData icon;
   final String text;
+  final Color? iconColor;
+  final Color? textColor;
 
-  const _ImpactRow({required this.icon, required this.text});
+  const _ImpactRow({
+    required this.icon,
+    required this.text,
+    this.iconColor,
+    this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = iconColor ?? AppColors.success;
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppColors.success),
+        Icon(icon, size: 14, color: effectiveColor),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
             text,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.success,
+                  color: textColor ?? AppColors.success,
                   fontWeight: FontWeight.w600,
                 ),
           ),

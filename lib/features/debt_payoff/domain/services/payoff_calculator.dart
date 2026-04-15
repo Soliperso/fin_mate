@@ -9,12 +9,16 @@ class PayoffResult {
   final double totalInterestPaid;
   final double totalPaid;
   final List<MonthlySnapshot> schedule;
+  /// True when the simulation hit the 50-year safety cap without fully paying
+  /// off the debt. This usually means minimum payments are ≤ monthly interest.
+  final bool hitMaxMonths;
 
   const PayoffResult({
     required this.debtFreeDate,
     required this.totalInterestPaid,
     required this.totalPaid,
     required this.schedule,
+    this.hitMaxMonths = false,
   });
 
   int get totalMonths => schedule.length;
@@ -170,11 +174,16 @@ class PayoffCalculator {
         ? schedule.last.date
         : DateTime.now().add(const Duration(days: 1));
 
+    // Check if the loop was stopped by the safety cap rather than full payoff.
+    final remainingBalance = balances.values.fold<double>(0, (s, b) => s + b);
+    final hitCap = schedule.length >= _maxMonths && remainingBalance > 0.01;
+
     return PayoffResult(
       debtFreeDate: debtFreeDate,
       totalInterestPaid: totalInterest,
       totalPaid: totalPaid,
       schedule: schedule,
+      hitMaxMonths: hitCap,
     );
   }
 }

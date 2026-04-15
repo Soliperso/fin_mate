@@ -10,6 +10,7 @@ import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../providers/insights_providers.dart';
+import '../widgets/community_benchmark_card.dart';
 
 class InsightsPage extends ConsumerWidget {
   const InsightsPage({super.key});
@@ -114,6 +115,11 @@ class InsightsPage extends ConsumerWidget {
                   onRetry: () => ref.invalidate(defaultCategoryBreakdownProvider),
                 ),
               ),
+
+              const SizedBox(height: AppSizes.xl),
+
+              // Community Benchmarks
+              const CommunityBenchmarkCard(),
 
               const SizedBox(height: AppSizes.xl),
 

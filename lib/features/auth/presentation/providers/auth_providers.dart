@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent; // [Biometric]
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+// import '../../../../core/config/supabase_client.dart'; // [Biometric]
 import '../../../../core/services/sentry_service.dart';
+// import '../../../../core/services/secure_storage_provider.dart'; // [Biometric]
 import '../../../../core/providers/analytics_provider.dart';
 
 // ============================================================================
@@ -74,6 +78,8 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   final Ref _ref;
+  StreamSubscription<UserEntity?>? _authSubscription;
+  // StreamSubscription? _tokenSyncSubscription; // [Biometric]
 
   AuthNotifier(this._repository, this._ref) : super(AuthState()) {
     _init();
@@ -92,6 +98,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = AuthState(isLoading: false, errorMessage: e.toString());
     }
+
+    // Subscribe to Supabase auth events so external session changes
+    // (biometric refreshSession, deep-link sign-in, token rotation) automatically
+    // update the notifier — no explicit refreshCurrentUser() call needed.
+    _authSubscription = _repository.authStateChanges.listen((user) {
+      state = AuthState(user: user, isLoading: false);
+      if (user != null) {
+        _setUserContext(user);
+      } else {
+        _clearUserContext();
+      }
+    });
+
+    // [Biometric: commented out — token sync subscription for refresh token rotation]
+    // final storage = _ref.read(secureStorageServiceProvider);
+    // _tokenSyncSubscription = supabase.auth.onAuthStateChange.listen((event) {
+    //   final token = event.session?.refreshToken;
+    //   if (token != null &&
+    //       (event.event == AuthChangeEvent.signedIn ||
+    //           event.event == AuthChangeEvent.tokenRefreshed ||
+    //           event.event == AuthChangeEvent.initialSession)) {
+    //     storage.saveRefreshToken(token);
+    //   }
+    // });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    // _tokenSyncSubscription?.cancel(); // [Biometric]
+    super.dispose();
   }
 
   Future<void> _setUserContext(UserEntity user) async {
@@ -167,6 +204,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  void setError(String message) {
+    state = state.copyWith(errorMessage: message);
   }
 
   Future<void> signOut() async {

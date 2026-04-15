@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/services/biometric_provider.dart';
+// import '../../../../core/services/biometric_provider.dart'; // [Biometric]
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/services/mfa_provider.dart';
 import '../../../../core/services/mfa_service.dart';
@@ -23,13 +23,13 @@ class SecuritySettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
-  bool _isLoadingBiometric = false;
+  // bool _isLoadingBiometric = false; // [Biometric]
   bool _isLoadingMfa = false;
 
   @override
   Widget build(BuildContext context) {
     final storage = ref.watch(secureStorageServiceProvider);
-    final isBiometricAvailableAsync = ref.watch(isBiometricAvailableProvider);
+    // final isBiometricAvailableAsync = ref.watch(isBiometricAvailableProvider); // [Biometric]
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -53,50 +53,12 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             _sectionLabel(context, 'security.authMethods'.tr()),
             const SizedBox(height: AppSizes.sm),
             _buildCard(context, isDark, children: [
-              // Biometric tile (only if hardware is available)
-              isBiometricAvailableAsync.when(
-                data: (isAvailable) {
-                  if (!isAvailable) return const SizedBox.shrink();
-                  return FutureBuilder<bool>(
-                    future: storage.isBiometricEnabled(),
-                    builder: (context, snapshot) {
-                      final isEnabled = snapshot.data ?? false;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildSwitchTile(
-                            context,
-                            isDark: isDark,
-                            icon: Icons.fingerprint,
-                            iconBg: AppColors.brandTeal.withValues(alpha: 0.14),
-                            iconColor: AppColors.brandTeal,
-                            title: 'security.biometricLogin'.tr(),
-                            subtitle: FutureBuilder<String?>(
-                              future: ref
-                                  .read(biometricServiceProvider)
-                                  .getPrimaryBiometricType(),
-                              builder: (context, typeSnapshot) {
-                                final type = typeSnapshot.data ?? 'Biometric';
-                                return Text(
-                                  'security.biometricSub'.tr(namedArgs: {'type': type}),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                );
-                              },
-                            ),
-                            value: isEnabled,
-                            onChanged: _isLoadingBiometric
-                                ? null
-                                : _handleBiometricToggle,
-                          ),
-                          _buildDivider(context, isDark),
-                        ],
-                      );
-                    },
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (e, _) => const SizedBox.shrink(),
-              ),
+              // [Biometric: commented out — biometric login toggle tile]
+              // isBiometricAvailableAsync.when(
+              //   data: (isAvailable) { ... },
+              //   loading: () => const SizedBox.shrink(),
+              //   error: (e, _) => const SizedBox.shrink(),
+              // ),
 
               // MFA tile
               FutureBuilder<bool>(
@@ -335,88 +297,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     );
   }
 
-  Future<void> _handleBiometricToggle(bool enable) async {
-    setState(() => _isLoadingBiometric = true);
-
-    try {
-      final storage = ref.read(secureStorageServiceProvider);
-
-      if (enable) {
-        // Test biometric authentication first
-        final biometricService = ref.read(biometricServiceProvider);
-        final result = await biometricService.authenticate(
-          localizedReason: 'Verify your identity to enable biometric login',
-        );
-
-        if (!result.success) {
-          if (mounted) {
-            showErrorDialog(
-              context,
-              result.errorMessage ?? 'auth.login.biometricFailed'.tr(),
-            );
-          }
-          setState(() => _isLoadingBiometric = false);
-          return;
-        }
-
-        // Check if email is saved (required for biometric login)
-        var email = await storage.getSavedEmail();
-
-        if (email == null) {
-          // Fall back to the currently authenticated user's email
-          final authState = ref.read(authNotifierProvider);
-          email = authState.user?.email;
-
-          if (email == null) {
-            if (mounted) {
-              showErrorDialog(
-                context,
-                'Unable to retrieve your email. Please sign out and sign in again.',
-              );
-            }
-            setState(() => _isLoadingBiometric = false);
-            return;
-          }
-
-          // Save so the login screen can use it for biometric sign-in
-          await storage.saveEmail(email);
-        }
-
-        await storage.setBiometricEnabled(true);
-
-        if (mounted) {
-          SuccessDialog.show(
-            context,
-            title: 'Enabled',
-            message: 'Biometric login enabled',
-            autoDismissDuration: const Duration(milliseconds: 800),
-          );
-        }
-      } else {
-        await storage.setBiometricEnabled(false);
-
-        if (mounted) {
-          SuccessDialog.show(
-            context,
-            title: 'Disabled',
-            message: 'Biometric login disabled',
-            autoDismissDuration: const Duration(milliseconds: 800),
-          );
-        }
-      }
-
-      setState(() {});
-    } catch (e) {
-      if (mounted) {
-        showErrorDialog(
-          context,
-          'security.failedToUpdateBiometric'.tr(),
-        );
-      }
-    } finally {
-      setState(() => _isLoadingBiometric = false);
-    }
-  }
+  // [Biometric: commented out]
+  // Future<void> _handleBiometricToggle(bool enable) async { ... }
 
   void _showMfaSetupOptions() {
     GlassBottomSheet.show(

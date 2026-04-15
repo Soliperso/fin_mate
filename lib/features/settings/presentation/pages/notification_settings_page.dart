@@ -260,6 +260,21 @@ class _NotificationSettingsPageState
                     }
                   },
                 ),
+                const SizedBox(height: AppSizes.sm),
+                _dropdownTile(
+                  context,
+                  title: 'AI Insights Frequency',
+                  subtitle: 'How often to refresh spending insights',
+                  value: prefs.aiInsightsFrequency,
+                  items: const ['daily', 'weekly', 'monthly'],
+                  labels: const ['Daily', 'Weekly', 'Monthly'],
+                  enabled: pushOn,
+                  onChanged: (v) {
+                    if (v != null) {
+                      _updatePreferences(prefs.copyWith(aiInsightsFrequency: v));
+                    }
+                  },
+                ),
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Data & Backup ─────────────────────────────────────────

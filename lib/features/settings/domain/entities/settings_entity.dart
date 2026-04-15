@@ -14,6 +14,7 @@ class NotificationPreferences extends Equatable {
   final String moneyHealthUpdates; // 'weekly', 'monthly', 'off'
   final String goalNotifications; // 'milestones', 'all', 'off'
   final String autoBackupSchedule; // 'off', 'daily', 'weekly'
+  final String aiInsightsFrequency; // 'daily', 'weekly', 'monthly'
 
   const NotificationPreferences({
     this.pushEnabled = true,
@@ -28,6 +29,7 @@ class NotificationPreferences extends Equatable {
     this.moneyHealthUpdates = 'weekly',
     this.goalNotifications = 'milestones',
     this.autoBackupSchedule = 'off',
+    this.aiInsightsFrequency = 'weekly',
   });
 
   @override
@@ -44,6 +46,7 @@ class NotificationPreferences extends Equatable {
         moneyHealthUpdates,
         goalNotifications,
         autoBackupSchedule,
+        aiInsightsFrequency,
       ];
 
   NotificationPreferences copyWith({
@@ -59,6 +62,7 @@ class NotificationPreferences extends Equatable {
     String? moneyHealthUpdates,
     String? goalNotifications,
     String? autoBackupSchedule,
+    String? aiInsightsFrequency,
   }) {
     return NotificationPreferences(
       pushEnabled: pushEnabled ?? this.pushEnabled,
@@ -73,6 +77,7 @@ class NotificationPreferences extends Equatable {
       moneyHealthUpdates: moneyHealthUpdates ?? this.moneyHealthUpdates,
       goalNotifications: goalNotifications ?? this.goalNotifications,
       autoBackupSchedule: autoBackupSchedule ?? this.autoBackupSchedule,
+      aiInsightsFrequency: aiInsightsFrequency ?? this.aiInsightsFrequency,
     );
   }
 }

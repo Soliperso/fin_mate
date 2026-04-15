@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/error/global_error_handler.dart';
 import '../../../transactions/data/models/transaction_model.dart';
 import '../../domain/entities/dashboard_stats.dart';
 import '../../domain/repositories/dashboard_repository.dart';
@@ -61,8 +62,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         recentTransactions: recentTransactions.map((model) => model.toEntity()).toList(),
         upcomingBills: upcomingBills,
       );
-    } catch (e) {
-      // Return empty stats on error
+    } catch (e, st) {
+      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getDashboardStats');
       return DashboardStats.empty;
     }
   }
@@ -239,41 +240,37 @@ class DashboardRepositoryImpl implements DashboardRepository {
   Future<List<MonthlyFlowData>> getMonthlyFlowData({int months = 6}) async {
     try {
       final now = DateTime.now();
-      final List<MonthlyFlowData> flowData = [];
 
-      // Get data for each of the last N months
+      // Build date ranges synchronously, then fire all RPC calls in parallel.
+      final ranges = <({DateTime start, DateTime end})>[];
       for (int i = months - 1; i >= 0; i--) {
-        // Properly calculate month by subtracting from current month and year
-        // Handle year wraparound correctly
         int month = now.month - i;
         int year = now.year;
-
-        // Handle negative months by wrapping to previous year
         while (month <= 0) {
           month += 12;
           year -= 1;
         }
-
-        final startDate = DateTime(year, month, 1);
-        final endDate = month == 12
-            ? DateTime(year + 1, 1, 0)
-            : DateTime(year, month + 1, 0);
-
-        // Get income for this month
-        final income = await _getMonthlyIncome(startDate, endDate);
-
-        // Get expenses for this month
-        final expenses = await _getMonthlyExpenses(startDate, endDate);
-
-        flowData.add(MonthlyFlowData(
-          month: startDate,
-          income: income,
-          expenses: expenses,
-        ));
+        final start = DateTime(year, month, 1);
+        final end = month == 12 ? DateTime(year + 1, 1, 0) : DateTime(year, month + 1, 0);
+        ranges.add((start: start, end: end));
       }
 
-      return flowData;
-    } catch (e) {
+      // Fire all income + expense futures simultaneously (12 RPCs → 1 round-trip batch)
+      final results = await Future.wait([
+        for (final r in ranges) _getMonthlyIncome(r.start, r.end),
+        for (final r in ranges) _getMonthlyExpenses(r.start, r.end),
+      ]);
+
+      return [
+        for (int i = 0; i < ranges.length; i++)
+          MonthlyFlowData(
+            month: ranges[i].start,
+            income: results[i],
+            expenses: results[i + ranges.length],
+          ),
+      ];
+    } catch (e, st) {
+      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getMonthlyFlowData');
       return [];
     }
   }
@@ -300,8 +297,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
           netWorth: ((row['net_worth'] as num?)?.toDouble() ?? 0),
         );
       }).toList();
-    } catch (e) {
-      // Return empty list on error
+    } catch (e, st) {
+      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getNetWorthSnapshots');
       return [];
     }
   }

@@ -396,7 +396,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               padding: const EdgeInsets.only(top: 10),
               child: Text(
                 '\$',
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                style: TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.w600,
                   color: displayText.isEmpty
                       ? _typeColor.withValues(alpha: 0.25)
@@ -407,7 +408,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ),
             Text(
               displayText.isEmpty ? '0.00' : displayText,
-              style: Theme.of(context).textTheme.displaySmall!.copyWith(
+              style: TextStyle(
+                fontSize: 52,
                 fontWeight: FontWeight.w700,
                 color: displayText.isEmpty
                     ? _typeColor.withValues(alpha: 0.25)

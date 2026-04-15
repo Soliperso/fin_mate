@@ -109,10 +109,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'auth.forgotPassword.emailRequired'.tr();
-                      }
-                      if (!value.contains('@')) {
+                      if (value == null || value.isEmpty) return 'auth.forgotPassword.emailRequired'.tr();
+                      if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
                         return 'auth.forgotPassword.emailInvalid'.tr();
                       }
                       return null;

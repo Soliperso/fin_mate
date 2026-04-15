@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/env_config.dart';
@@ -51,35 +52,37 @@ class AdService {
     throw UnsupportedError('Unsupported platform');
   }
 
-  /// Create and load a banner ad
-  /// Returns null if loading fails
-  Future<BannerAd?> loadBannerAd({
-    AdSize size = AdSize.banner,
-    Function(Ad, LoadAdError)? onAdFailedToLoad,
-  }) async {
-    if (!_isInitialized) {
-      return null;
-    }
+  /// Create and load a banner ad.
+  /// Returns the loaded [BannerAd] on success, or null if the ad fails to load.
+  /// The future only resolves after the native callback confirms success or failure,
+  /// preventing the "Ad with id X is not available" plugin warning caused by
+  /// disposing the ad before the failure callback fires.
+  Future<BannerAd?> loadBannerAd({AdSize size = AdSize.banner}) async {
+    if (!_isInitialized) return null;
+
+    final completer = Completer<BannerAd?>();
+
+    late BannerAd banner;
+    banner = BannerAd(
+      adUnitId: bannerAdUnitId,
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          if (!completer.isCompleted) completer.complete(ad as BannerAd);
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          if (!completer.isCompleted) completer.complete(null);
+        },
+      ),
+    );
 
     try {
-      final banner = BannerAd(
-        adUnitId: bannerAdUnitId,
-        size: size,
-        request: const AdRequest(),
-        listener: BannerAdListener(
-          onAdLoaded: (ad) {},
-          onAdFailedToLoad: (ad, error) {
-            ad.dispose();
-            onAdFailedToLoad?.call(ad, error);
-          },
-          onAdOpened: (ad) {},
-          onAdClosed: (ad) {},
-        ),
-      );
-
       await banner.load();
-      return banner;
+      return await completer.future;
     } catch (e) {
+      if (!completer.isCompleted) completer.complete(null);
       return null;
     }
   }

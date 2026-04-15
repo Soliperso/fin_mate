@@ -104,30 +104,33 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   ),
                   const SizedBox(height: AppSizes.md),
                 ],
-                TextFormField(
-                  controller: _nameController,
-                  focusNode: _nameFocusNode,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
-                  decoration: InputDecoration(
-                    labelText: 'auth.signup.fullNameLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
+                Semantics(
+                  label: 'Full name field',
+                  child: TextFormField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
+                    decoration: InputDecoration(
+                      labelText: 'auth.signup.fullNameLabel'.tr(),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(CupertinoIcons.person, size: 17, color: iconColor),
                         ),
-                        child: Icon(CupertinoIcons.person, size: 17, color: iconColor),
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'auth.signup.nameRequired'.tr();
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'auth.signup.nameRequired'.tr();
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: AppSizes.md),
                 TextFormField(
@@ -150,10 +153,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'auth.signup.emailRequired'.tr();
-                    }
-                    if (!value.contains('@')) {
+                    if (value == null || value.isEmpty) return 'auth.signup.emailRequired'.tr();
+                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
                       return 'auth.signup.emailInvalid'.tr();
                     }
                     return null;
@@ -305,15 +306,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: AppSizes.lg),
-                ElevatedButton(
-                  onPressed: (authState.isLoading || !_acceptedTerms) ? null : _handleSignup,
-                  child: authState.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text('auth.signup.createButton'.tr()),
+                Semantics(
+                  label: 'Create account button',
+                  button: true,
+                  child: ElevatedButton(
+                    onPressed: (authState.isLoading || !_acceptedTerms) ? null : _handleSignup,
+                    child: authState.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text('auth.signup.createButton'.tr()),
+                  ),
                 ),
                 const SizedBox(height: AppSizes.md),
                 Row(
