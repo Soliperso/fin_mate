@@ -150,4 +150,9 @@ class AdminRepositoryImpl implements AdminRepository {
       endDate: endDate,
     );
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSystemAuditLog() async {
+    return await remoteDataSource.getSystemAuditLog();
+  }
 }

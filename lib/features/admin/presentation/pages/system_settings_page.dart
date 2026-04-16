@@ -2,9 +2,12 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
+import '../providers/admin_providers.dart';
 
 class SystemSettingsPage extends ConsumerWidget {
   const SystemSettingsPage({super.key});
@@ -140,7 +143,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.systemBlue,
                 title: 'Activity Logs',
                 subtitle: 'View system and admin activity logs',
-                onTap: () => _showComingSoon(context, 'Activity Logs'),
+                onTap: () => _showActivityLogs(context, ref),
               ),
             ]),
             const SizedBox(height: AppSizes.xl),
@@ -269,6 +272,225 @@ class SystemSettingsPage extends ConsumerWidget {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showActivityLogs(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (context, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.secondarySystemBackgroundDark
+                  : AppColors.systemBackground,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppSizes.radiusCard),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: AppSizes.md),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.tertiaryLabelDark
+                          : AppColors.systemGray4,
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    ),
+                  ),
+                ),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.pagePadding,
+                    vertical: AppSizes.md,
+                  ),
+                  child: Text(
+                    'Activity Logs',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: ref.watch(systemAuditLogProvider).when(
+                    data: (logs) {
+                      if (logs.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                CupertinoIcons.doc_text,
+                                size: 48,
+                                color: isDark
+                                    ? AppColors.secondaryLabelDark
+                                    : AppColors.secondaryLabel,
+                              ),
+                              const SizedBox(height: AppSizes.md),
+                              Text(
+                                'No activity recorded yet',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: isDark
+                                          ? AppColors.secondaryLabelDark
+                                          : AppColors.secondaryLabel,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(AppSizes.pagePadding),
+                        itemCount: logs.length,
+                        separatorBuilder: (_, __) => Divider(
+                          height: 1,
+                          color: isDark
+                              ? AppColors.separatorDark
+                              : AppColors.separator,
+                        ),
+                        itemBuilder: (context, index) {
+                          final entry = logs[index];
+                          final action = entry['action'] ?? 'Unknown Action';
+                          final createdAt = entry['created_at'] ?? 'N/A';
+                          final userId = entry['user_id'] ?? 'N/A';
+
+                          // Format timestamp
+                          String formattedTime = 'N/A';
+                          try {
+                            if (createdAt != 'N/A') {
+                              final dateTime = DateTime.parse(createdAt);
+                              formattedTime =
+                                  DateFormat('MMM d, yyyy · h:mm a')
+                                      .format(dateTime);
+                            }
+                          } catch (_) {
+                            formattedTime = createdAt;
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  action,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? AppColors.labelDark
+                                            : AppColors.label,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formattedTime,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: isDark
+                                            ? AppColors.secondaryLabelDark
+                                            : AppColors.secondaryLabel,
+                                        fontSize: 11,
+                                      ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'User: $userId',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: isDark
+                                            ? AppColors.tertiaryLabelDark
+                                            : AppColors.systemGray3,
+                                        fontSize: 10,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(AppSizes.pagePadding),
+                      itemCount: 5,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LoadingSkeleton(
+                            width: 150,
+                            height: 12,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          const SizedBox(height: 6),
+                          LoadingSkeleton(
+                            width: 200,
+                            height: 10,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          const SizedBox(height: 4),
+                          LoadingSkeleton(
+                            width: 100,
+                            height: 9,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ],
+                      ),
+                    ),
+                    error: (error, _) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.exclamationmark_circle,
+                            size: 48,
+                            color: AppColors.systemRed,
+                          ),
+                          const SizedBox(height: AppSizes.md),
+                          Text(
+                            'Error loading logs',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: AppColors.systemRed),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

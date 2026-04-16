@@ -87,4 +87,7 @@ abstract class AdminRepository {
     required DateTime startDate,
     required DateTime endDate,
   });
+
+  /// Get system-wide audit log
+  Future<List<Map<String, dynamic>>> getSystemAuditLog();
 }

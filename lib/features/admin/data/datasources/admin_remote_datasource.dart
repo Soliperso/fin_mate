@@ -322,4 +322,20 @@ class AdminRemoteDataSource {
       throw Exception('Failed to fetch subscription timeline: $e');
     }
   }
+
+  /// Get system-wide audit log
+  Future<List<Map<String, dynamic>>> getSystemAuditLog() async {
+    try {
+      final response = await _supabase
+          .from('audit_log')
+          .select('*')
+          .order('created_at', ascending: false)
+          .limit(100);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      // graceful fallback if table doesn't exist
+      return [];
+    }
+  }
 }

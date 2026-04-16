@@ -176,6 +176,7 @@ class _SystemAnalyticsPageEnhancedState
         ref.invalidate(userGrowthTrendsProvider);
         ref.invalidate(financialTrendsProvider);
         ref.invalidate(categoryBreakdownProvider);
+        ref.invalidate(engagementMetricsProvider);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -459,14 +460,29 @@ class _SystemAnalyticsPageEnhancedState
                       message: 'User growth trends will appear once data is available',
                       backgroundColor: AppColors.brandTeal,
                     )
-                  : _chartCard(
-                      child: AnalyticsLineChart(
-                        dates: trends.map((t) => t.periodStart).toList(),
-                        values:
-                            trends.map((t) => t.newUsers.toDouble()).toList(),
-                        title: 'New Users',
-                        lineColor: AppColors.brandTeal,
-                      ),
+                  : Column(
+                      children: [
+                        _chartCard(
+                          child: AnalyticsLineChart(
+                            dates: trends.map((t) => t.periodStart).toList(),
+                            values:
+                                trends.map((t) => t.newUsers.toDouble()).toList(),
+                            title: 'New Users',
+                            lineColor: AppColors.brandTeal,
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.md),
+                        _chartCard(
+                          child: AnalyticsLineChart(
+                            dates: trends.map((t) => t.periodStart).toList(),
+                            values: trends
+                                .map((t) => t.cumulativeUsers.toDouble())
+                                .toList(),
+                            title: 'Total Users (Cumulative)',
+                            lineColor: AppColors.systemOrange,
+                          ),
+                        ),
+                      ],
                     ),
               loading: () => _chartCardLoading(),
               error: (e, _) => EmptyStateCard(
@@ -520,6 +536,17 @@ class _SystemAnalyticsPageEnhancedState
                             lineColor: AppColors.tealBlue,
                           ),
                         ),
+                        const SizedBox(height: AppSizes.md),
+                        _chartCard(
+                          child: AnalyticsLineChart(
+                            dates: trends.map((t) => t.periodStart).toList(),
+                            values:
+                                trends.map((t) => t.netCashflow).toList(),
+                            title: 'Net Cash Flow · Income − Expenses',
+                            lineColor: AppColors.brandTeal,
+                            valuePrefix: '\$',
+                          ),
+                        ),
                       ],
                     ),
               loading: () => _chartCardLoading(),
@@ -540,7 +567,8 @@ class _SystemAnalyticsPageEnhancedState
   // ── Engagement Tab ─────────────────────────────────────────────────────────
 
   Widget _buildEngagementTab() {
-    final engagementAsync = ref.watch(engagementMetricsProvider(30));
+    final periodDays = _dateRange.endDate.difference(_dateRange.startDate).inDays;
+    final engagementAsync = ref.watch(engagementMetricsProvider(periodDays));
     final categoryBreakdownAsync =
         ref.watch(categoryBreakdownProvider(_dateRange));
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -670,12 +698,14 @@ class _SystemAnalyticsPageEnhancedState
                       message: 'Category data will appear once transactions are created',
                       backgroundColor: AppColors.tealBlue,
                     )
-                  : _chartCard(
-                      child: AnalyticsPieChart(
-                        labels: categories.take(5).map((c) => c.categoryName).toList(),
-                        values: categories.take(5).map((c) => c.totalAmount).toList(),
-                        title: 'Top 5 Categories',
-                      ),
+                  : Column(
+                      children: [
+                        _buildCategoryBreakdownChart(categories, isDark),
+                        const SizedBox(height: AppSizes.lg),
+                        _sectionLabel('Category Details'),
+                        const SizedBox(height: AppSizes.sm),
+                        _buildCategoryDetailsList(categories, isDark),
+                      ],
                     ),
               loading: () => _chartCardLoading(),
               error: (e, _) => EmptyStateCard(
@@ -1314,13 +1344,35 @@ class _SystemAnalyticsPageEnhancedState
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: Text(
-                                      p.percentile,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.w500),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          p.percentile,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                  fontWeight:
+                                                      FontWeight.w500),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          '${p.userCount} users',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                color: isDark
+                                                    ? AppColors
+                                                        .secondaryLabelDark
+                                                    : AppColors
+                                                        .secondaryLabel,
+                                                fontSize: 10,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   Text(
@@ -1351,6 +1403,124 @@ class _SystemAnalyticsPageEnhancedState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCategoryBreakdownChart(
+      List<dynamic> categories, bool isDark) {
+    // Take top 5 categories and calculate Others if needed
+    final top5 = categories.take(5).toList();
+    final hasOthers = categories.length > 5;
+
+    final chartLabels =
+        top5.map((c) => c.categoryName as String).toList();
+    final chartValues =
+        top5.map((c) => c.totalAmount as double).toList();
+
+    if (hasOthers) {
+      final othersTotal = categories
+          .skip(5)
+          .fold<double>(0, (sum, c) => sum + (c.totalAmount as double));
+      chartLabels.add('Others');
+      chartValues.add(othersTotal);
+    }
+
+    return _chartCard(
+      child: AnalyticsPieChart(
+        labels: chartLabels,
+        values: chartValues,
+        title:
+            'Top ${hasOthers ? '5+' : '5'} Categories',
+      ),
+    );
+  }
+
+  Widget _buildCategoryDetailsList(
+      List<dynamic> categories, bool isDark) {
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return Column(
+      children: categories.map((category) {
+        final name = category.categoryName as String;
+        final amount = category.totalAmount as double;
+        final percentage = category.percentageOfTotal as double;
+        final formattedAmount =
+            NumberFormat.currency(symbol: '\$').format(amount);
+        final formattedPercentage =
+            percentage.toStringAsFixed(1);
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: AppSizes.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppColors.labelDark
+                                : AppColors.label,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      formattedAmount,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                            color: isDark
+                                ? AppColors.secondaryLabelDark
+                                : AppColors.secondaryLabel,
+                            fontSize: 11,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.brandTeal.withValues(alpha: 0.15),
+                  borderRadius:
+                      BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Text(
+                  '$formattedPercentage%',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.brandTeal,
+                        fontSize: 10,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

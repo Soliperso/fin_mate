@@ -306,3 +306,10 @@ final updateUserRoleProvider = FutureProvider.autoDispose
   final repository = ref.watch(adminRepositoryProvider);
   return await repository.updateUserRole(args.userId, args.role);
 });
+
+/// Get system-wide audit log provider
+final systemAuditLogProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.getSystemAuditLog();
+});
