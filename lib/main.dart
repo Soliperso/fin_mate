@@ -26,6 +26,7 @@ import 'features/transactions/data/datasources/reminder_remote_datasource.dart';
 import 'features/budgets/data/datasources/budget_remote_datasource.dart';
 import 'core/services/auto_backup_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
+import 'core/services/notification_provider.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -175,13 +176,17 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
         }
       }).catchError((_) {}));
 
-      // Fire due reminders, apply budget carry-overs, and run auto backup on app open
+      // Fire due reminders, apply budget carry-overs, check alerts, and run auto backup on app open
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
         unawaited(ReminderRemoteDatasource().processReminders().catchError((_) {}));
         unawaited(BudgetRemoteDataSource().applyCarryOvers().catchError((_) {}));
         unawaited(AutoBackupService().runIfDue().catchError((_) {}));
         unawaited(RecurringTransactionProcessor().processOverdue().catchError((_) {}));
+        // Create notifications for bill reminders and budget alerts
+        final notifier = ref.read(notificationsProvider.notifier);
+        unawaited(notifier.createBillReminders().catchError((_) {}));
+        unawaited(notifier.checkBudgetAlerts().catchError((_) {}));
       }
     });
   }

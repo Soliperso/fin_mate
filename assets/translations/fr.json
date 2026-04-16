@@ -524,7 +524,12 @@
     "noPaymentsMessage": "Enregistrez votre premier paiement pour suivre vos progrès.",
     "paymentsLogged": "{count} paiement enregistré",
     "paymentsLoggedPlural": "{count} paiements enregistrés",
-    "totalPaid": "{amount} au total"
+    "totalPaid": "{amount} au total",
+    "undoPayment": "Annuler le paiement",
+    "undoConfirmation": "Supprimer ce paiement de {amount}? Le solde de la dette sera restauré.",
+    "undoButton": "Annuler",
+    "undoSuccess": "Paiement supprimé avec succès",
+    "undoFailed": "Échec de la suppression du paiement"
   },
   "payoffChart": {
     "title": "Répartition du remboursement des dettes",

@@ -230,4 +230,41 @@ class DebtRemoteDatasource {
       throw Exception('Failed to fetch all payments: $e');
     }
   }
+
+  Future<void> deletePayment({
+    required String paymentId,
+    required String debtId,
+    required double amount,
+  }) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Delete the payment record
+      await _supabase
+          .from('debt_payments')
+          .delete()
+          .eq('id', paymentId)
+          .eq('user_id', userId);
+
+      // Fetch current balance and restore it
+      final debtResponse = await _supabase
+          .from('debts')
+          .select('balance')
+          .eq('id', debtId)
+          .eq('user_id', userId)
+          .single();
+
+      final currentBalance = (debtResponse['balance'] as num).toDouble();
+      final restoredBalance = currentBalance + amount;
+
+      await _supabase
+          .from('debts')
+          .update({'balance': restoredBalance})
+          .eq('id', debtId)
+          .eq('user_id', userId);
+    } catch (e) {
+      throw Exception('Failed to delete payment: $e');
+    }
+  }
 }

@@ -65,6 +65,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
         moneyHealthUpdates: preferences.moneyHealthUpdates,
         goalNotifications: preferences.goalNotifications,
         autoBackupSchedule: preferences.autoBackupSchedule,
+        aiInsightsFrequency: preferences.aiInsightsFrequency,
       );
 
       final settings = await _remoteDataSource.updateNotificationPreferences(

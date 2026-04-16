@@ -265,3 +265,44 @@ final subscriptionTimelineProvider =
     );
   },
 );
+
+// ============================================================================
+// Admin Actions Providers
+// ============================================================================
+
+/// Reset user password provider
+final resetUserPasswordProvider =
+    FutureProvider.autoDispose.family<void, String>((ref, email) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.resetUserPassword(email);
+});
+
+/// Disable user account provider
+final disableUserAccountProvider =
+    FutureProvider.autoDispose.family<void, String>((ref, userId) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.disableUserAccount(userId);
+});
+
+/// Enable user account provider
+final enableUserAccountProvider =
+    FutureProvider.autoDispose.family<void, String>((ref, userId) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.enableUserAccount(userId);
+});
+
+/// Get user audit log provider
+final userAuditLogProvider =
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
+  (ref, userId) async {
+    final repository = ref.watch(adminRepositoryProvider);
+    return await repository.getUserAuditLog(userId);
+  },
+);
+
+/// Update user role provider
+final updateUserRoleProvider = FutureProvider.autoDispose
+    .family<void, ({String userId, String role})>((ref, args) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.updateUserRole(args.userId, args.role);
+});

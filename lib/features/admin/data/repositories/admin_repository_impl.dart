@@ -46,6 +46,26 @@ class AdminRepositoryImpl implements AdminRepository {
     return await remoteDataSource.updateUserRole(userId, role);
   }
 
+  @override
+  Future<void> resetUserPassword(String email) async {
+    return await remoteDataSource.resetUserPassword(email);
+  }
+
+  @override
+  Future<void> disableUserAccount(String userId) async {
+    return await remoteDataSource.disableUserAccount(userId);
+  }
+
+  @override
+  Future<void> enableUserAccount(String userId) async {
+    return await remoteDataSource.enableUserAccount(userId);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserAuditLog(String userId) async {
+    return await remoteDataSource.getUserAuditLog(userId);
+  }
+
   // Advanced Analytics Methods
 
   @override

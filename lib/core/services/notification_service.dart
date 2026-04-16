@@ -285,6 +285,27 @@ class NotificationService {
     }
   }
 
+  /// Check if a transaction amount exceeds the user's alert threshold and
+  /// create a transaction_alert notification if so.
+  Future<bool> checkTransactionAlert({
+    required String userId,
+    required double amount,
+    required String? description,
+    required String transactionId,
+  }) async {
+    try {
+      final result = await _supabase.rpc('check_transaction_alert', params: {
+        'p_user_id': userId,
+        'p_amount': amount,
+        'p_description': description,
+        'p_transaction_id': transactionId,
+      });
+      return result as bool? ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Subscribe to real-time notifications
   RealtimeChannel subscribeToNotifications({
     required void Function(AppNotification) onNotification,

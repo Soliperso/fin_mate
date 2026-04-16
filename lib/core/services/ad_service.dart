@@ -36,19 +36,41 @@ class AdService {
   /// Safe to leave empty — only affects dev/test builds.
   static const List<String> _testDeviceIds = [];
 
+  // Google's official test ad unit IDs — safe to use in development.
+  // Replace via ADMOB_BANNER_* / ADMOB_INTERSTITIAL_* in .env or --dart-define
+  // before submitting to the App Store / Play Store.
+  static const _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
+  static const _testBannerIos = 'ca-app-pub-3940256099942544/2934735716';
+  static const _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';
+  static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
+
   /// Get the appropriate banner ad unit ID for the current platform.
-  /// Override via ADMOB_BANNER_ANDROID / ADMOB_BANNER_IOS in .env or --dart-define.
+  /// Uses the value from .env / --dart-define when set; falls back to Google's
+  /// test IDs so ads are always visible during development.
   String get bannerAdUnitId {
-    if (Platform.isAndroid) return EnvConfig.admobBannerAndroid;
-    if (Platform.isIOS) return EnvConfig.admobBannerIos;
+    if (Platform.isAndroid) {
+      final id = EnvConfig.admobBannerAndroid;
+      return id.isNotEmpty ? id : _testBannerAndroid;
+    }
+    if (Platform.isIOS) {
+      final id = EnvConfig.admobBannerIos;
+      return id.isNotEmpty ? id : _testBannerIos;
+    }
     throw UnsupportedError('Unsupported platform');
   }
 
   /// Get the appropriate interstitial ad unit ID for the current platform.
-  /// Override via ADMOB_INTERSTITIAL_ANDROID / ADMOB_INTERSTITIAL_IOS in .env or --dart-define.
+  /// Uses the value from .env / --dart-define when set; falls back to Google's
+  /// test IDs so ads are always visible during development.
   String get interstitialAdUnitId {
-    if (Platform.isAndroid) return EnvConfig.admobInterstitialAndroid;
-    if (Platform.isIOS) return EnvConfig.admobInterstitialIos;
+    if (Platform.isAndroid) {
+      final id = EnvConfig.admobInterstitialAndroid;
+      return id.isNotEmpty ? id : _testInterstitialAndroid;
+    }
+    if (Platform.isIOS) {
+      final id = EnvConfig.admobInterstitialIos;
+      return id.isNotEmpty ? id : _testInterstitialIos;
+    }
     throw UnsupportedError('Unsupported platform');
   }
 

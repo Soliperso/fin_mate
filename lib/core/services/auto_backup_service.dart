@@ -79,7 +79,7 @@ class AutoBackupService {
       if (userId == null) return;
 
       final row = await client
-          .from('user_settings')
+          .from('user_profiles')
           .select('notification_preferences')
           .eq('id', userId)
           .maybeSingle();

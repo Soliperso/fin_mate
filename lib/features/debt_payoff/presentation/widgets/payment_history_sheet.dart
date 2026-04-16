@@ -9,6 +9,7 @@ import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../domain/entities/debt_entity.dart';
+import '../../domain/entities/debt_payment_entity.dart';
 import '../providers/debt_providers.dart';
 
 class PaymentHistorySheet extends ConsumerWidget {
@@ -237,6 +238,11 @@ class PaymentHistorySheet extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
+                                const SizedBox(width: AppSizes.sm),
+                                _UndoPaymentButton(
+                                  payment: p,
+                                  debt: debt,
+                                ),
                               ],
                             ),
                           ),
@@ -251,6 +257,97 @@ class PaymentHistorySheet extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _UndoPaymentButton extends ConsumerWidget {
+  final DebtPaymentEntity payment;
+  final DebtEntity debt;
+
+  const _UndoPaymentButton({
+    required this.payment,
+    required this.debt,
+  });
+
+  Future<void> _showConfirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('paymentHistory.undoPayment'.tr()),
+        content: Text(
+          'paymentHistory.undoConfirmation'.tr(
+            namedArgs: {
+              'amount': NumberFormat.currency(symbol: '\$').format(payment.amount)
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text('paymentHistory.undoButton'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final success = await ref.read(debtNotifierProvider.notifier).deletePayment(
+          paymentId: payment.id,
+          debtId: payment.debtId,
+          amount: payment.amount,
+        );
+
+    if (!context.mounted) return;
+
+    if (success) {
+      // Invalidate payments provider to refresh the list
+      ref.invalidate(debtPaymentsProvider(debt.id));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('paymentHistory.undoSuccess'.tr()),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('paymentHistory.undoFailed'.tr()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () => _showConfirmDelete(context, ref),
+      child: Container(
+        padding: const EdgeInsets.all(AppSizes.xs),
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          CupertinoIcons.trash,
+          color: AppColors.error,
+          size: 16,
+        ),
       ),
     );
   }

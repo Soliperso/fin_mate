@@ -26,11 +26,26 @@ import '../widgets/upcoming_bills_card.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh the badge count every time the dashboard is mounted so the
+    // count stays accurate after reading notifications or switching tabs.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationsProvider.notifier).updateUnreadCount();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
     final dashboardState = ref.watch(dashboardNotifierProvider);
@@ -379,6 +394,7 @@ class _RecentTransactionsCard extends StatelessWidget {
                 'dashboard.addTransaction'.tr(),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),

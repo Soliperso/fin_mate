@@ -71,6 +71,18 @@ class DebtRepositoryImpl implements DebtRepository {
       );
 
   @override
+  Future<void> deletePayment({
+    required String paymentId,
+    required String debtId,
+    required double amount,
+  }) =>
+      _datasource.deletePayment(
+        paymentId: paymentId,
+        debtId: debtId,
+        amount: amount,
+      );
+
+  @override
   Future<Map<String, dynamic>> getDebtSummary() => _datasource.getDebtSummary();
 
   @override

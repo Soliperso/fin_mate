@@ -190,6 +190,31 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
       return false;
     }
   }
+
+  Future<bool> deletePayment({
+    required String paymentId,
+    required String debtId,
+    required double amount,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.deletePayment(
+        paymentId: paymentId,
+        debtId: debtId,
+        amount: amount,
+      );
+      _analytics.logEvent(
+        eventName: 'debt_payment_deleted',
+        properties: {'debt_id': debtId, 'amount': amount},
+      );
+      state = const AsyncValue.data(null);
+      _invalidateDashboard();
+      return true;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false;
+    }
+  }
 }
 
 final debtNotifierProvider = StateNotifierProvider<DebtNotifier, AsyncValue<void>>((ref) {

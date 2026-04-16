@@ -524,7 +524,12 @@
     "noPaymentsMessage": "Log your first payment to track your progress.",
     "paymentsLogged": "{count} payment logged",
     "paymentsLoggedPlural": "{count} payments logged",
-    "totalPaid": "{amount} total"
+    "totalPaid": "{amount} total",
+    "undoPayment": "Undo Payment",
+    "undoConfirmation": "Remove this {amount} payment? The debt balance will be restored.",
+    "undoButton": "Undo",
+    "undoSuccess": "Payment removed successfully",
+    "undoFailed": "Failed to remove payment"
   },
   "payoffChart": {
     "title": "Debt Payoff Breakdown",

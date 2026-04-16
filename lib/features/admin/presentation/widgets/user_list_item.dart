@@ -29,12 +29,15 @@ class UserListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           onTap: () => context.push('/admin/users/${user.id}'),
           child: Padding(
-            padding: const EdgeInsets.all(AppSizes.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.md,
+              vertical: AppSizes.sm,
+            ),
             child: Row(
               children: [
                 // Avatar
                 CircleAvatar(
-                  radius: 32,
+                  radius: 24,
                   backgroundColor: AppColors.brandTeal.withValues(alpha: 0.15),
                   backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
                       ? NetworkImage(user.avatarUrl!)
@@ -45,7 +48,7 @@ class UserListItem extends StatelessWidget {
                           style: const TextStyle(
                             color: AppColors.brandTeal,
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: 16,
                           ),
                         )
                       : null,
@@ -62,7 +65,7 @@ class UserListItem extends StatelessWidget {
                           Expanded(
                             child: Text(
                               user.displayName,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                               maxLines: 1,
@@ -73,8 +76,8 @@ class UserListItem extends StatelessWidget {
                           if (user.isAdmin)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.sm,
-                                vertical: 4,
+                                horizontal: 6,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.brandTeal.withValues(alpha: 0.15),
@@ -85,10 +88,10 @@ class UserListItem extends StatelessWidget {
                                 children: [
                                   const Icon(
                                     CupertinoIcons.shield,
-                                    size: 14,
+                                    size: 12,
                                     color: AppColors.brandTeal,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 3),
                                   Text(
                                     'Admin',
                                     style: Theme.of(context)
@@ -97,6 +100,7 @@ class UserListItem extends StatelessWidget {
                                         ?.copyWith(
                                           color: AppColors.brandTeal,
                                           fontWeight: FontWeight.w600,
+                                          fontSize: 10,
                                         ),
                                   ),
                                 ],
@@ -104,19 +108,19 @@ class UserListItem extends StatelessWidget {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 3),
                       Text(
                         user.email,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
                             ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: AppSizes.sm),
+                      const SizedBox(height: 5),
                       Wrap(
-                        spacing: AppSizes.xs,
-                        runSpacing: AppSizes.xs,
+                        spacing: 4,
+                        runSpacing: 2,
                         children: [
                           _buildStatChip(
                             icon: CupertinoIcons.doc_text,
@@ -161,8 +165,8 @@ class UserListItem extends StatelessWidget {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.sm,
-        vertical: 4,
+        horizontal: 6,
+        vertical: 2,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
@@ -171,12 +175,12 @@ class UserListItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 2),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               color: color,
               fontWeight: FontWeight.w600,
             ),

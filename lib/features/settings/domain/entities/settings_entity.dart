@@ -23,7 +23,7 @@ class NotificationPreferences extends Equatable {
     this.budgetAlerts = true,
     this.budgetThreshold = 80,
     this.billReminders = true,
-    this.billReminderDays = 1,
+    this.billReminderDays = 3,
     this.transactionAlerts = false,
     this.transactionThreshold = 1000,
     this.moneyHealthUpdates = 'weekly',

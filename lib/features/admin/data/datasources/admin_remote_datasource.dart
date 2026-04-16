@@ -91,6 +91,56 @@ class AdminRemoteDataSource {
     }
   }
 
+  /// Send password reset email to user
+  Future<void> resetUserPassword(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      throw Exception('Failed to send password reset email: $e');
+    }
+  }
+
+  /// Disable/deactivate user account
+  Future<void> disableUserAccount(String userId) async {
+    try {
+      await _supabase
+          .from('user_profiles')
+          .update({'is_active': false})
+          .eq('id', userId);
+    } catch (e) {
+      throw Exception('Failed to disable user account: $e');
+    }
+  }
+
+  /// Enable/reactivate user account
+  Future<void> enableUserAccount(String userId) async {
+    try {
+      await _supabase
+          .from('user_profiles')
+          .update({'is_active': true})
+          .eq('id', userId);
+    } catch (e) {
+      throw Exception('Failed to enable user account: $e');
+    }
+  }
+
+  /// Get audit log entries for a user
+  Future<List<Map<String, dynamic>>> getUserAuditLog(String userId) async {
+    try {
+      final response = await _supabase
+          .from('audit_log')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(50);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      // If audit_log table doesn't exist, return empty list gracefully
+      return [];
+    }
+  }
+
   // Advanced Analytics Methods
 
   /// Get user growth trends

@@ -119,6 +119,7 @@ class BudgetsPage extends ConsumerWidget {
                     'budgets.newBudget'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -164,7 +165,7 @@ class BudgetsPage extends ConsumerWidget {
                       icon: const Icon(CupertinoIcons.add, size: 20),
                       label: Text(
                         'budgets.newBudget'.tr(),
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
                       ),
                     ),
                   ),

@@ -98,7 +98,7 @@ class AppTheme {
           foregroundColor: AppColors.brandTeal,
           textStyle: const TextStyle(
             fontSize: 17,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             letterSpacing: -0.41,
           ),
         ),
@@ -370,7 +370,22 @@ class AppTheme {
           foregroundColor: AppColors.brandTealLight,
           textStyle: const TextStyle(
             fontSize: 17,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.41,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.brandTealLight,
+          side: const BorderSide(color: AppColors.brandTealLight, width: 1.5),
+          minimumSize: const Size(0, AppSizes.buttonHeightMd),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
             letterSpacing: -0.41,
           ),
         ),

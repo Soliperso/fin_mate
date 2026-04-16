@@ -524,7 +524,12 @@
     "noPaymentsMessage": "Registra tu primer pago para rastrear tu progreso.",
     "paymentsLogged": "{count} pago registrado",
     "paymentsLoggedPlural": "{count} pagos registrados",
-    "totalPaid": "{amount} en total"
+    "totalPaid": "{amount} en total",
+    "undoPayment": "Deshacer pago",
+    "undoConfirmation": "¿Eliminar este pago de {amount}? El saldo de la deuda será restaurado.",
+    "undoButton": "Deshacer",
+    "undoSuccess": "Pago removido exitosamente",
+    "undoFailed": "Fallo al remover el pago"
   },
   "payoffChart": {
     "title": "Desglose del pago de deudas",

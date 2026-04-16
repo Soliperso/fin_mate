@@ -187,6 +187,29 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     }
   }
 
+  /// Check if a new transaction triggers an alert and refresh state if so.
+  Future<void> checkTransactionAlert({
+    required String userId,
+    required double amount,
+    required String? description,
+    required String transactionId,
+  }) async {
+    try {
+      final created = await _service.checkTransactionAlert(
+        userId: userId,
+        amount: amount,
+        description: description,
+        transactionId: transactionId,
+      );
+      if (created) {
+        await loadNotifications();
+        await updateUnreadCount();
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
   /// Subscribe to real-time notification updates
   void _subscribeToRealtimeUpdates() {
     _realtimeChannel = _service.subscribeToNotifications(

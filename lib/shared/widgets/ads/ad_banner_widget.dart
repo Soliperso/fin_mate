@@ -63,7 +63,6 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
       final shouldShowAds = await ref.read(shouldShowAdsProvider.future);
 
       if (!shouldShowAds) {
-        // User is premium, don't load ads
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -77,7 +76,7 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
       final ad = await adService.loadBannerAd(size: widget.adSize);
 
       if (!mounted) {
-        ad?.dispose(); // widget was disposed while the ad was loading
+        ad?.dispose();
         return;
       }
 

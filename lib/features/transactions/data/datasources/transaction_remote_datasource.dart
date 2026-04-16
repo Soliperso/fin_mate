@@ -67,7 +67,22 @@ class TransactionRemoteDataSource {
         .select()
         .single();
 
-    return TransactionModel.fromJson(response);
+    final created = TransactionModel.fromJson(response);
+
+    // Fire transaction alert check (non-fatal) for expense transactions only
+    if (created.type == 'expense') {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId != null) {
+        _supabase.rpc('check_transaction_alert', params: {
+          'p_user_id': userId,
+          'p_amount': created.amount,
+          'p_description': created.description,
+          'p_transaction_id': created.id,
+        }).catchError((_) {});
+      }
+    }
+
+    return created;
   }
 
   /// Update transaction

@@ -524,7 +524,12 @@
     "noPaymentsMessage": "سجّل دفعتك الأولى لتتبع تقدمك.",
     "paymentsLogged": "{count} دفعة مسجّلة",
     "paymentsLoggedPlural": "{count} دفعات مسجّلة",
-    "totalPaid": "إجمالي {amount}"
+    "totalPaid": "إجمالي {amount}",
+    "undoPayment": "التراجع عن الدفع",
+    "undoConfirmation": "هل تريد إزالة هذه الدفعة بقيمة {amount}؟ سيتم استرجاع رصيد الدين.",
+    "undoButton": "التراجع",
+    "undoSuccess": "تمت إزالة الدفعة بنجاح",
+    "undoFailed": "فشل في إزالة الدفعة"
   },
   "payoffChart": {
     "title": "توزيع سداد الديون",

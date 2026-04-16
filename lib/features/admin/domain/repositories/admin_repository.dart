@@ -28,6 +28,18 @@ abstract class AdminRepository {
   /// Update user role (admin only)
   Future<void> updateUserRole(String userId, String role);
 
+  /// Send password reset email to user
+  Future<void> resetUserPassword(String email);
+
+  /// Disable/deactivate user account
+  Future<void> disableUserAccount(String userId);
+
+  /// Enable/reactivate user account
+  Future<void> enableUserAccount(String userId);
+
+  /// Get audit log entries for a user
+  Future<List<Map<String, dynamic>>> getUserAuditLog(String userId);
+
   // Advanced Analytics Methods
 
   /// Get user growth trends over time

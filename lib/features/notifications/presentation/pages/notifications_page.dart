@@ -89,7 +89,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 'notifPage.markAllRead'.tr(),
                 style: const TextStyle(
                   color: AppColors.brandTeal,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
