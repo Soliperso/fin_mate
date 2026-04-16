@@ -29,6 +29,13 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 // ============================================================================
+// User Session Key — increments on every sign-in / sign-out so all data
+// providers that watch it automatically re-run for the new user.
+// ============================================================================
+
+final userSessionProvider = StateProvider<int>((ref) => 0);
+
+// ============================================================================
 // Auth State Provider
 // ============================================================================
 
@@ -160,6 +167,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       state = AuthState(user: user, isLoading: false);
 
+      // Bump session key so all data providers re-run for the new user
+      _ref.read(userSessionProvider.notifier).state++;
+
       // Set user context in Sentry and track sign in
       await _setUserContext(user);
 
@@ -187,10 +197,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
         fullName: fullName,
       );
-      // Don't set user - they need to verify email first
-      state = AuthState(user: null, isLoading: false);
+      // If email confirmation is disabled, the datasource returns a fully
+      // authenticated user. If confirmation is required, getCurrentUser()
+      // returns null (unconfirmed users are treated as unauthenticated).
+      final currentUser = await _repository.getCurrentUser();
+      state = AuthState(user: currentUser, isLoading: false);
 
-      // Track sign up event (user not yet verified)
+      if (currentUser != null) {
+        _ref.read(userSessionProvider.notifier).state++;
+        await _setUserContext(currentUser);
+      }
+
+      // Track sign up event
       final analytics = _ref.read(analyticsServiceProvider);
       await analytics.trackSignUp(method: 'email');
     } catch (e) {
@@ -219,6 +237,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
+
+      // Bump session key so all cached data providers are cleared
+      _ref.read(userSessionProvider.notifier).state++;
 
       // Clear user context from Sentry
       await _clearUserContext();
@@ -332,20 +353,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return 'Invalid email or password';
     } else if (errorStr.contains('email not confirmed')) {
       return 'Please confirm your email address';
-    } else if (errorStr.contains('user already registered')) {
-      return 'An account with this email already exists';
+    } else if (errorStr.contains('user already registered') ||
+        errorStr.contains('an account with this email already exists')) {
+      return 'An account with this email already exists. Please sign in.';
+    } else if (errorStr.contains('too many signup attempts') ||
+        errorStr.contains('email rate limit')) {
+      return 'Too many attempts. Please wait a few minutes and try again.';
     } else if (errorStr.contains('password')) {
       return 'Password does not meet requirements';
     } else if (errorStr.contains('network') || errorStr.contains('socket')) {
       return 'Network error. Please check your connection';
-    } else if (errorStr.contains('database error')) {
-      return 'A server error occurred. Please contact support';
+    } else if (errorStr.contains('database error') ||
+        errorStr.contains('server error')) {
+      return 'A server error occurred. Please try again.';
+    } else if (errorStr.contains('sign up failed:')) {
+      // Surface the specific message the datasource already formatted
+      const prefix = 'sign up failed:';
+      final idx = errorStr.indexOf(prefix);
+      if (idx != -1) {
+        final specific = error.toString().substring(idx + prefix.length).trim();
+        if (specific.isNotEmpty && specific.length < 200) return specific;
+      }
+      return 'Failed to create account. Please try again.';
     }
-    // Never expose raw error details in production
-    assert(() {
-      // In debug mode only: rethrow raw error for developer visibility
-      return true;
-    }());
     return 'Something went wrong. Please try again.';
   }
 }

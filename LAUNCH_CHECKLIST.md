@@ -1,511 +1,517 @@
 # Finmate Launch Checklist
 
-**App Version:** 1.0.0+1
-**Target:** Beta Launch
-**Timeline:** 3-5 days from now
+**App Version:** 1.0.0+1  
+**Target:** Beta → Public App Store Launch  
+**Last updated:** 2026-04-15
 
 ---
 
-## 🔴 CRITICAL (Must Complete Today)
+## ✅ COMPLETED
 
-### 0. Drop TOTP plain-text column ⚠️ **SECURITY — YOUR ACTION REQUIRED**
+| Item | Detail |
+|---|---|
+| `flutter analyze` — zero issues | All code changes clean |
+| Security: email validation | RFC regex via `Validators.email()` |
+| Security: password cleared post-login | In success + catch |
+| Security: login rate limiting | 5 failures → 15-min lockout |
+| Security: login error feedback fix | `onChanged` vs `addListener` bug fixed |
+| Security: Sentry in dashboard catch blocks | Silent errors now reported |
+| Android build hardening | ProGuard + minification + shrinkResources |
+| Font system | DM Sans via GoogleFonts, single source of truth |
+| Dashboard performance | `getMonthlyFlowData` parallelised (~6× faster) |
+| Emergency fund removal | All traces deleted |
+| Debt payoff gamification | Streak, badges, milestone progress bars |
+| Recurring transactions auto-gen | `processOverdue()` inserts real transactions, idempotent |
+| Accessibility — Semantics labels | Login + Signup key fields/buttons wrapped |
+| Customizable insights frequency | `aiInsightsFrequency` in settings entity, model, and UI |
+| Community benchmarks | `CommunityBenchmarkCard` with stacked bars + color-coded status |
+| "What if you paid extra?" bug fix | `hitMaxMonths` flag → two-panel display |
+| TOTP column dropped | Verification count = 0, column dropped |
+| Migration 31 applied | Subscription tier column live in `user_profiles` |
+| Sentry DSN configured | DSN confirmed in `.env` |
+| Payment flow | Deferred to V1.1 — no premium features in V1.0 |
+| Signup errors fixed | Proper messages for duplicate account, rate limit, etc. |
+| Cross-user data isolation | `userSessionProvider` pattern — all 10 repository providers updated |
+| Admin route links fixed | Router re-evaluates after profile loads; optimistic allow while loading |
 
-**Time:** 5 minutes
-**Complexity:** Easy (copy-paste SQL)
+---
 
-Migration `51_encrypt_totp_secrets.sql` added an encrypted column and copied secrets, but the `DROP COLUMN` was left commented out. Plain-text TOTP secrets may still exist in production.
+## ✅ READY TO SUBMIT WHEN:
 
-**Steps:**
-1. Open Supabase SQL editor for your project
-2. Run the verification query first:
-```sql
-SELECT COUNT(*)
-FROM user_profiles
-WHERE totp_secret IS NOT NULL;
+- [x] `flutter analyze` — zero issues
+- [x] All V1.0 features implemented
+- [x] Critical bugs fixed
+- [x] TOTP column dropped
+- [x] Migration 31 applied
+- [x] Sentry DSN configured
+- [ ] Apple Developer account active ⏳ **→ Step 1**
+- [ ] App ID + provisioning profile created ⏳ **→ Steps 2–4**
+- [ ] Xcode signing configured ⏳ **→ Step 5**
+- [ ] App icon — 1024×1024 no alpha ⏳ **→ Step 6**
+- [ ] Screenshots — 6.9" and 5.5" minimum ⏳ **→ Step 7**
+- [ ] App record created in App Store Connect ⏳ **→ Step 8**
+- [ ] Privacy Policy URL live ⏳ **→ Step 9**
+- [ ] App Store listing complete ⏳ **→ Step 10**
+- [ ] IPA built + uploaded to TestFlight ⏳ **→ Step 11**
+- [ ] Physical iOS device testing passed ⏳ **→ Step 12**
+- [ ] TestFlight external beta approved (optional) ⏳ **→ Step 13**
+- [ ] Zero critical bugs from beta testing ⏳
+- [ ] App Store submission submitted ⏳ **→ Step 14**
+
+---
+
+## SEQUENCE OVERVIEW
+
 ```
-3. If count > 0, encrypted migration hasn't finished — do NOT drop yet, re-run migration 51 fully.
-4. If count = 0, all secrets are encrypted. Safe to drop:
-```sql
-ALTER TABLE user_profiles DROP COLUMN IF EXISTS totp_secret;
+Step 1  → Apple Developer account ($99)
+Step 2  → Register App ID in developer portal
+Step 3  → Create Distribution Certificate
+Step 4  → Create Provisioning Profile
+Step 5  → Configure Xcode signing
+Step 6  → Generate app icon (1024×1024, no alpha)
+Step 7  → Take screenshots in Simulator
+Step 8  → Create app record in App Store Connect
+Step 9  → Write + publish Privacy Policy
+Step 10 → Complete App Store listing (description, keywords, screenshots, privacy)
+Step 11 → Build IPA + upload to TestFlight
+Step 12 → Install on physical device + test all flows
+Step 13 → External beta (optional, 1–2 weeks)
+Step 14 → Submit for App Review
 ```
 
-**Why critical:** Plain-text TOTP secrets in the database is a security breach exposure.
-
-**Status:** ⚠️ PENDING — run verification query now
+Steps 1–5 must be done in order. Steps 6–10 can be done in parallel once Step 1 is active. Steps 11–14 are sequential.
 
 ---
 
-### 1. Apply Database Migration 31 ⚠️ **YOUR ACTION REQUIRED**
+## STEP 1 — Apple Developer Account
 
-**Time:** 15 minutes
-**Complexity:** Easy (copy-paste SQL)
+**Blocker: everything below depends on this.**
 
-**Steps:**
-1. Open: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/sql/new
-2. Copy SQL from: `supabase/migrations/31_add_subscription_tier_and_enable_documents.sql`
-3. Paste and click "Run"
-4. Verify with test queries (provided in CRITICAL_BLOCKERS_STATUS.md)
+1. Go to [developer.apple.com/enroll](https://developer.apple.com/enroll)
+2. Sign in with your Apple ID → choose **Individual** ($99/year)
+3. Pay the fee — approval is usually instant for individuals
+4. Confirm you can log into [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
 
-**Why critical:** Without this, premium subscriptions won't work properly.
-
-**Status:** ⚠️ PENDING
+- [ ] Account active and accessible
 
 ---
 
+## STEP 2 — Register Your App ID
 
-<!-- I'VE GOTTEN TO THIS POINT AND I NEED COMPLETE THE ITEMS BELOW -->
+1. [developer.apple.com](https://developer.apple.com) → **Certificates, Identifiers & Profiles** → **Identifiers** → **+**
+2. Select **App IDs** → **App** → Continue
+3. Open your project: check `ios/Runner.xcodeproj` for `PRODUCT_BUNDLE_IDENTIFIER` (e.g. `com.yourname.finmate`)
+4. Paste that exact value as the Bundle ID
+5. Enable capabilities: **Push Notifications** (nothing else required for V1.0)
+6. Register
 
-### 2. Configure Sentry DSN (Optional but Highly Recommended)
-
-**Time:** 5 minutes
-**Complexity:** Easy
-
-**Steps:**
-1. Sign up: https://sentry.io/signup/
-2. Create Flutter project
-3. Copy DSN (format: `https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXXX`)
-4. Update `.env` file: `SENTRY_DSN=your-dsn-here`
-
-**Why important:** Production error tracking and crash monitoring.
-
-**Status:** ℹ️ OPTIONAL (but strongly recommended for launch)
+- [ ] App ID registered with correct Bundle ID
 
 ---
 
-## 🟢 COMPLETED ✅
+## STEP 3 — Distribution Certificate
 
-- ✅ **Stripe Secret Key Configuration** - All 9 edge functions deployed and active
-- ✅ **Code Quality** - `flutter analyze` shows zero issues
-- ✅ **Security Audit** - No hardcoded secrets, .env properly gitignored
-- ✅ **Environment Configuration** - .env and .env.example in sync
+1. **Certificates** → **+** → **Apple Distribution**
+2. On your Mac: open **Keychain Access** → menu **Keychain Access → Certificate Assistant → Request a Certificate from a Certificate Authority**
+3. Enter your email, select **Saved to disk**, save the `.certSigningRequest` file
+4. Upload that file on developer.apple.com → Download the resulting `.cer` file
+5. Double-click the `.cer` to install it in Keychain
+
+- [ ] Distribution certificate installed in Keychain
 
 ---
 
-## 🟡 HIGH PRIORITY (This Week - Before Beta Launch)
+## STEP 4 — Provisioning Profile
 
-### 3. End-to-End Payment Testing (After Migration 31)
+1. **Profiles** → **+** → **App Store Connect**
+2. Select your App ID → select your Distribution Certificate
+3. Name it: `Finmate AppStore Distribution`
+4. Download → double-click to install
+5. Confirm it appears in Xcode → **Settings** → **Accounts** → your team
 
-**Time:** 30-60 minutes
-**Complexity:** Medium
+- [ ] Provisioning profile installed
 
-**Test Flow:**
+---
+
+## STEP 5 — Configure Xcode Signing
+
+1. Open `ios/Runner.xcworkspace` in Xcode (not `.xcodeproj`)
+2. Select **Runner** target → **Signing & Capabilities**
+3. Set **Team** to your Apple Developer account
+4. Set **Signing** to **Manual** → select `Finmate AppStore Distribution`
+5. Verify Bundle Identifier matches what you registered
+6. Build (`Cmd+B`) — confirm no signing errors
+
+- [ ] Xcode builds with no signing errors
+
+---
+
+## STEP 6 — App Icon
+
+Requirements: **1024×1024 px PNG, no alpha channel, no rounded corners** (iOS applies corners automatically).
+
+**To check for alpha:** Open the PNG in Preview → Tools → Adjust Color — if there's an Alpha slider, re-export with alpha unchecked.
+
+Once you have the image:
+
+1. Place it at `assets/icon/app_icon.png`
+2. Add to `pubspec.yaml` under the `flutter` section:
+   ```yaml
+   flutter_launcher_icons:
+     android: true
+     ios: true
+     image_path: "assets/icon/app_icon.png"
+   ```
+3. Run:
+   ```bash
+   dart run flutter_launcher_icons
+   ```
+4. Confirm `ios/Runner/Assets.xcassets/AppIcon.appiconset/` has all sizes generated
+
+- [ ] App icon generated, all sizes present, no alpha
+
+---
+
+## STEP 7 — Screenshots
+
+Apple requires screenshots for every device size you support. **Minimum required:**
+
+| Device | Resolution |
+|---|---|
+| 6.9" — iPhone 16 Pro Max | 1320×2868 px |
+| 5.5" — iPhone 8 Plus | 1242×2208 px |
+
+**How to take them (Simulator, not physical device):**
+
+1. In Xcode → open Simulator → File → Open Simulator → select the device size
+2. Run: `flutter run`
+3. Navigate to each screen → **Cmd+S** in Simulator → screenshot saves to Desktop
+4. Repeat for the other device size
+
+**Screens to capture (5–8 per device size):**
+
+- [ ] Dashboard — net worth card + cash flow chart
+- [ ] Transactions list — populated with data
+- [ ] Add Transaction screen
+- [ ] Budgets — with progress bars
+- [ ] Debt Payoff — milestone card + extra payment slider
+- [ ] AI Insights — community benchmarks card
+- [ ] Dark mode version of Dashboard
+- [ ] Login screen (optional)
+
+**Optional but recommended:** Add text overlays in Canva or Figma (e.g. "Track every dollar", "Crush your debt faster") — improves App Store conversion significantly.
+
+- [ ] Screenshots taken for 6.9" device
+- [ ] Screenshots taken for 5.5" device
+
+---
+
+## STEP 8 — Create App Record in App Store Connect
+
+1. [appstoreconnect.apple.com](https://appstoreconnect.apple.com) → **My Apps** → **+** → **New App**
+2. Fill in:
+   - **Platform:** iOS
+   - **Name:** Finmate (max 30 chars — this is the public App Store name)
+   - **Primary Language:** English
+   - **Bundle ID:** select the one you registered
+   - **SKU:** `finmate-ios-v1` (internal only, never shown publicly)
+3. **App Information** → Category: **Finance** (Primary), **Productivity** (Secondary)
+4. **Age Rating:** complete the questionnaire → should land at **4+**
+5. **Pricing:** Free
+
+- [ ] App record created in App Store Connect
+
+---
+
+## STEP 9 — Privacy Policy
+
+Apple rejects apps without a publicly accessible Privacy Policy URL.
+
+**Quickest option — Notion:**
+
+1. Create a new Notion page and paste:
+   ```
+   Privacy Policy for Finmate
+   Last updated: [date]
+
+   We collect: email address (for account login), financial transaction data
+   (entered manually by you), crash reports (via Sentry).
+
+   We do not sell your data. We do not share your data with third parties
+   except Sentry (crash reporting).
+
+   Your data is stored securely via Supabase (cloud database).
+
+   To request data deletion, email: [your@email.com]
+   ```
+2. Click **Share** → **Publish to web** → copy the public URL
+
+**Alternative:** [termsfeed.com](https://www.termsfeed.com/privacy-policy-generator/) — free generator, 2 minutes.
+
+- [ ] Privacy Policy published and URL accessible
+
+---
+
+## STEP 10 — Complete the App Store Listing
+
+In App Store Connect → your app → **App Store** tab:
+
+### Description
+```
+Take control of your finances with Finmate — the personal finance app that helps you track spending, crush debt, and hit your savings goals.
+
+TRACK EVERYTHING
+• Log income, expenses, and transfers across multiple accounts
+• Categorize transactions and search your full history
+
+BUDGET SMARTER
+• Set monthly budgets by category
+• Get alerted before you overspend
+• See exactly where your money goes
+
+DEBT PAYOFF
+• Avalanche or Snowball strategy — you choose
+• See exactly how much interest you save with extra payments
+• Track your streak and milestones as you pay down debt
+
+INSIGHTS
+• Spending breakdown by category
+• Community benchmarks — see how you compare
+
+YOUR DATA, YOUR PRIVACY
+• All data stored securely in the cloud
+• Biometric login (Face ID / Touch ID)
+• Two-factor authentication (TOTP + email OTP)
+• No bank account linking required — full manual control
+```
+
+### Keywords (100 chars max, no spaces after commas)
+```
+budget,finance,money,expense,debt,savings,tracker,spending,income,cashflow,payoff
+```
+
+### Subtitle (max 30 chars)
+```
+Personal Finance & Budgeting
+```
+
+### Remaining fields
+- **Support URL:** your privacy policy URL (or a simple landing page)
+- **Privacy Policy URL:** from Step 9
+- **Screenshots:** upload from Step 7 — match each screenshot set to the correct device size slot
+
+### App Privacy Declaration
+App Store Connect → your app → **App Privacy** → **Get Started**
+
+| Data type | Collected | Used for tracking |
+|---|---|---|
+| Email address | Yes — account login | No |
+| Financial info (transaction amounts) | Yes — user-entered | No |
+| Crash data | Yes — Sentry | No |
+| Everything else | No | No |
+
+- [ ] Description pasted
+- [ ] Keywords filled in
+- [ ] Support URL + Privacy Policy URL entered
+- [ ] Screenshots uploaded for all required device sizes
+- [ ] App Privacy declaration completed
+- [ ] Age rating completed (4+)
+- [ ] Pricing set to Free
+
+---
+
+## STEP 11 — Build IPA + Upload to TestFlight
+
+### Build
 ```bash
 flutter clean
 flutter pub get
-flutter run
+flutter build ipa --release
 ```
 
-**Steps:**
-1. Create new test user account
-2. Navigate: Profile → Upgrade to Premium
-3. Click "Start Free Trial" or "Subscribe Monthly"
-4. Should redirect to Stripe checkout page
-5. Use test card: `4242 4242 4242 4242`
-   - Expiry: Any future date (e.g., 12/25)
-   - CVC: Any 3 digits (e.g., 123)
-   - ZIP: Any 5 digits (e.g., 12345)
-6. Complete checkout
-7. Return to app
-8. Verify subscription status shows "Premium"
-9. Check Supabase: `user_profiles` table should show `subscription_tier = 'premium'`
+Output: `build/ios/ipa/finmate.ipa`
 
-**Expected Result:** ✅ Subscription activates, user is premium
+**Increment build number before each upload** (`pubspec.yaml`):
+```yaml
+version: 1.0.0+1   # increment the +N each upload, e.g. +2, +3
+```
 
-**If it fails:**
-- Check Supabase Edge Function logs
-- Verify Stripe webhook is receiving events
-- Check `STRIPE_SECRET_KEY` is set correctly
+### Upload (pick one method)
 
-**Status:** ⏳ PENDING (blocked by Migration 31)
+**Option A — Transporter (easiest):**
+1. Download [Transporter](https://apps.apple.com/app/transporter/id1450874784) (free, Mac App Store)
+2. Drag and drop the `.ipa` file
+3. Click Deliver
 
----
+**Option B — Xcode Organizer:**
+1. Open `ios/Runner.xcworkspace`
+2. Select **Any iOS Device** as the target (not a simulator)
+3. **Product → Archive**
+4. **Organizer → Distribute App → App Store Connect → Upload**
 
-### 4. Receipt Scanning Feature Testing (Premium Only)
+Wait 5–15 minutes for Apple to process. Build appears under the **TestFlight** tab.
 
-**Time:** 15 minutes
-**Complexity:** Easy
-
-**Prerequisites:**
-- Migration 31 applied ✅
-- User has premium subscription ✅
-
-**Steps:**
-1. Login as premium user
-2. Go to: Transactions → Add Transaction
-3. Look for "Scan Receipt" button
-4. Tap → Choose camera or photo library
-5. Take/select a receipt photo
-6. Review extracted data:
-   - Amount
-   - Merchant name
-   - Date
-   - Line items
-7. Confirm → Should auto-fill transaction form
-
-**Expected Result:** ✅ Receipt data extracted and transaction created
-
-**Status:** ⏳ PENDING (blocked by Migration 31)
+- [ ] IPA built successfully
+- [ ] Build uploaded and visible in TestFlight
 
 ---
 
-### 5. Physical Device Testing (iOS Priority)
+## STEP 12 — Physical Device Testing
 
-**Time:** 2-3 hours
-**Complexity:** Medium
+Install via TestFlight on a physical iPhone (iOS 15+).
 
-**Device Requirements:**
-- iPhone with iOS 15+ (for Face ID/Touch ID testing)
-- Physical device (not simulator)
+### Internal TestFlight Setup
+1. App Store Connect → **TestFlight** → **Internal Testing** → **+**
+2. Add yourself by Apple ID (must be in your developer team)
+3. Select the build → Save
+4. You get an email → install via the TestFlight app
 
-**Test Checklist:**
+### Full Test Checklist
 
-**Authentication & Security:**
-- [ ] Sign up new user → Email verification works
-- [ ] Login with email/password
-- [ ] Enable Face ID/Touch ID
-- [ ] Logout → Login with biometric auth
-- [ ] Enable MFA (TOTP) → Scan QR code with authenticator app
-- [ ] Logout → Login with MFA code
-- [ ] Test "Forgot Password" flow
+**Auth flows:**
+- [ ] Sign up with new email → confirmation email received → OTP verified → lands on dashboard
+- [ ] Login with correct credentials
+- [ ] Login with wrong password → error shown, field not cleared
+- [ ] 5 wrong passwords → rate limit message → 15-min lockout enforced
+- [ ] Forgot Password → email received → can reset
+- [ ] Face ID / Touch ID login
+- [ ] MFA with TOTP (if configured)
+- [ ] Sign out → data cleared → login as different user → sees only their own data
 
-**Core Features:**
-- [ ] Create income transaction → Appears in dashboard
-- [ ] Create expense transaction → Budget updates
-- [ ] Create transfer between accounts
-- [ ] Filter transactions by date, category, amount
-- [ ] Search transactions
-- [ ] Create monthly budget → Track spending
-- [ ] Get over-budget alert when exceeding limit
+**Transactions:**
+- [ ] Add income transaction
+- [ ] Add expense transaction with category
+- [ ] Add transfer between accounts
+- [ ] Edit existing transaction
+- [ ] Delete transaction
+- [ ] Search + filter transactions
+- [ ] Pull-to-refresh updates the list
 
-**Premium Features:**
-- [ ] Upgrade to premium subscription
-- [ ] Scan receipt with camera
-- [ ] Upload document to Documents page
-- [ ] Export all transactions to CSV
+**Budgets:**
+- [ ] Create budget for a category
+- [ ] Add expense in that category → budget progress updates
+- [ ] Over-budget alert appears when spending exceeds budget
 
-**UI/UX:**
-- [ ] Toggle dark mode → Check all screens look correct
-- [ ] Test on different screen sizes
-- [ ] Check keyboard behavior (doesn't overlap inputs)
-- [ ] Verify all buttons are tappable
-- [ ] Test scrolling on long lists (transactions, budgets)
-
-**Offline Behavior:**
-- [ ] Turn on Airplane mode
-- [ ] Try to add transaction → Should show offline indicator
-- [ ] Turn off Airplane mode → Data syncs
-
-**Performance:**
-- [ ] Create 100+ transactions → List scrolls smoothly
-- [ ] Charts render without lag
-- [ ] App startup time < 3 seconds
-
-**Status:** ⏳ PENDING
-
----
-
-### 6. Android Testing (After iOS)
-
-**Time:** 2-3 hours
-**Complexity:** Medium
-
-**Prerequisites:**
-- Fix Java environment: `export JAVA_HOME=/path/to/jdk`
-- Android device or emulator
-
-**Test Same Checklist as iOS Above**
-
-**Android-Specific Tests:**
-- [ ] Fingerprint authentication (instead of Face ID)
-- [ ] Back button behavior (doesn't crash app)
-- [ ] Material design components render correctly
-- [ ] Permissions (camera, storage) requested properly
-
-**Status:** ⏳ PENDING (Java environment needs fix first)
-
----
-
-## 🟢 NICE TO HAVE (Can Do Post-Launch)
-
-### 7. Improve Test Coverage
-
-**Current:** 20% (~8 test files)
-**Target:** 60%+
-**Time:** 2-3 days
-
-**Priority Tests to Add:**
-- Integration tests for auth flow
-- Transaction CRUD tests
-- Budget calculation tests
-- Payment flow integration test
-
-**Status:** 📅 DEFERRED TO V1.1
-
----
-
-### 8. Performance Optimization
-
-**Time:** 1 day
-**Focus Areas:**
-- Large data sets (1000+ transactions)
-- Chart rendering optimization
-- Memory leak detection
-- App startup time improvement
-
-**Status:** 📅 DEFERRED TO V1.1
-
----
-
-### 9. Accessibility Audit
-
-**Time:** 4 hours
-**Check:**
-- VoiceOver/TalkBack compatibility
-- Color contrast ratios (WCAG AA)
-- Dynamic text sizing
-- Keyboard navigation
-
-**Status:** 📅 DEFERRED TO V1.1
-
----
-
-### 10. Set Up CI/CD Pipeline
-
-**Time:** 1 day
-**Setup:**
-- GitHub Actions or GitLab CI
-- Automated builds for iOS/Android
-- Automated tests on PRs
-- Automated deployment to TestFlight/Play Console
-
-**Status:** 📅 DEFERRED TO V1.1
-
----
-
-## 📊 FEATURE SCOPE FOR V1.0 BETA
-
-### ✅ INCLUDED (Core Features)
-
-**Authentication:**
-- ✅ Email/password signup & login
-- ✅ Email verification
-- ✅ Biometric authentication (Face ID/Touch ID/Fingerprint)
-- ✅ MFA (TOTP & Email OTP)
-- ✅ Password reset
-
-**Personal Finance:**
-- ✅ Transactions (income, expense, transfer)
-- ✅ Multiple accounts (checking, savings, cash, credit cards)
-- ✅ Categories & categorization
-- ✅ Transaction search & filtering
-- ✅ Budgets by category
-- ✅ Budget tracking & alerts
-
-**Dashboard & Analytics:**
-- ✅ Net worth tracking
-- ✅ Cash flow visualization
-- ✅ Money health score
-- ✅ Recent transactions feed
-- ✅ Category spending breakdown
-
-**Premium Subscription:**
-- ✅ Freemium tier (unlimited transactions & budgets)
-- ✅ Premium tier ($4.99/mo or $49.99/yr)
-- ✅ Stripe checkout integration
-- ✅ Subscription management
-- ✅ Receipt scanning (Premium only)
-- ✅ Document storage (Premium only)
-- ✅ Unlimited transaction history (Premium only)
-
-**Profile & Settings:**
-- ✅ Profile editing with avatar upload
-- ✅ Security settings (MFA, biometric)
-- ✅ Theme switching (light/dark/system)
-- ✅ Notification preferences
-- ✅ Data export (CSV, JSON, PDF)
-- ✅ Privacy controls
-
----
-
-### ❌ DEFERRED TO V1.1 (Optional Features)
-
-**AI Insights:**
-- ❌ Conversational AI assistant (needs Gemini API key)
-- ❌ Spending pattern analysis
-- ❌ Cash flow forecasting
-- ❌ Personalized recommendations
-- **Status:** 60% complete, needs backend API integration
-- **Decision:** DEFER - Can launch without it
-
-**Bill Splitting:**
-- ❌ Group expense tracking
-- ❌ Split bills (equal, custom, percentage)
-- ❌ Settlement tracking
-- **Status:** 70% complete, just needs routes uncommented
-- **Decision:** DEFER - Niche audience, add after beta feedback
-
-**Savings Goals:**
-- ❌ Goal creation & tracking
-- ❌ Progress visualization
-- ❌ AI goal recommendations
-- **Status:** 75% complete, just needs routes uncommented
-- **Decision:** DEFER - Can add quickly if beta users request it
+**Debt Payoff:**
+- [ ] Add a debt
+- [ ] View Avalanche / Snowball strategy switch
+- [ ] Extra payment slider → recalculates correctly
+- [ ] Log a payment → milestone card updates
+- [ ] Streak counter increments
 
 **Recurring Transactions:**
-- ❌ Auto-generation of recurring transactions
-- ❌ Reminder system
-- **Status:** 65% complete, auto-generation not implemented
-- **Decision:** DEFER - Complex feature, needs more testing
+- [ ] Navigate to Recurring Transactions page → overdue ones auto-generate
+- [ ] No duplicates on second visit
+
+**Settings & Profile:**
+- [ ] Edit profile — name, currency saves
+- [ ] Change password in Security Settings
+- [ ] Dark mode toggle applies immediately across all screens
+- [ ] Language preference saves
+- [ ] AI Insights frequency dropdown saves
+
+**Admin (if applicable):**
+- [ ] Admin section visible in Profile for admin accounts
+- [ ] User Management, System Analytics, System Settings links navigate correctly
+
+**General:**
+- [ ] Dark mode renders correctly on all main screens
+- [ ] Keyboard does not overlap input fields on any screen
+- [ ] Pull-to-refresh works on Dashboard, Transactions, Budgets
+- [ ] Airplane mode → offline indicator shown → back online → data syncs
+- [ ] App does not crash after 10+ minutes of use
+
+- [ ] All test flows passed on physical device
 
 ---
 
-### ❌ NOT IN SCOPE (Phase 2+)
+## STEP 13 — External Beta (Optional)
 
-**Bank Integration:**
-- ❌ Plaid/TrueLayer connection
-- ❌ Automatic transaction import
-- **Timeline:** Phase 2 (3-6 months)
+Recommended if you want feedback before public launch. Adds 1–2 weeks but catches real-world issues.
 
-**Multi-Currency:**
-- ❌ Currency conversion
-- ❌ FX rate tracking
-- **Timeline:** Phase 2 (3-6 months)
+1. TestFlight → **External Groups** → **+** → create group "Beta Testers"
+2. Add the build → **Submit for Beta App Review**
+3. First review takes 1–2 days; subsequent builds same day
+4. Share the public TestFlight link with testers
+5. Collect and address critical feedback before Step 14
 
-**Advanced Features:**
-- ❌ Shared/joint wallets
-- ❌ Subscription manager (detect recurring charges)
-- ❌ API & plugin system
-- ❌ Community features
-- **Timeline:** Phase 3 (6-12 months)
+- [ ] Beta review approved
+- [ ] At least 5–10 testers installed and tested
+- [ ] Zero critical bugs reported
 
 ---
 
-## 🎯 BETA LAUNCH PLAN
+## STEP 14 — Submit for App Review
 
-### **Week 1: Critical Fixes & Core Testing**
+Once testing passes:
 
-**Monday (Today):**
-- [ ] Apply Migration 31 (15 min)
-- [ ] Configure Sentry DSN (5 min)
-- [ ] Test payment flow (30 min)
-- [ ] Test receipt scanning (15 min)
+1. App Store Connect → your app → **iOS App** → **Build** → **+** → select the TestFlight build that passed testing
+2. Fill in **Review Notes:**
+   ```
+   Test account credentials:
+   Email: testuser@finmate.app
+   Password: TestPass123!
 
-**Tuesday-Wednesday:**
-- [ ] Physical device testing - iOS (2-3 hours)
-- [ ] Fix any critical bugs found
-- [ ] Create TestFlight build
+   Note: This app does not connect to bank accounts.
+   All financial data is entered manually by the user.
+   No real financial transactions are processed in this version.
+   ```
+3. Click **Add for Review** → **Submit to App Review**
+4. Export compliance: **Yes, standard encryption** (HTTPS only)
+5. Advertising identifier: **No**
+6. Status changes to "Waiting for Review"
 
-**Thursday:**
-- [ ] Invite 20-50 beta testers (friends, family, colleagues)
-- [ ] Send beta testing guide
-- [ ] Monitor Sentry for crash reports
+### Review Timeline
+- First submission: **1–3 days**
+- Updates: usually **24 hours**, often same day
+- Expedited review: available at developer.apple.com/contact/app-store for critical fixes
 
-**Friday:**
-- [ ] Collect beta feedback
-- [ ] Triage bugs (critical vs nice-to-have)
-- [ ] Plan V1.1 features based on user requests
+### Common Rejection Reasons for Finance Apps
+| Rejection reason | Fix |
+|---|---|
+| Missing privacy policy | Add URL, resubmit |
+| Placeholder content or broken flows | Fix and resubmit |
+| Misleading screenshots | Update screenshots |
+| Missing functionality description | Clarify in Review Notes |
 
----
-
-### **Week 2: Iterate & Expand**
-
-**Monday-Tuesday:**
-- [ ] Fix critical bugs from beta
-- [ ] Improve based on feedback
-- [ ] Test on Android (if Java environment fixed)
-
-**Wednesday:**
-- [ ] Expand to 100-200 beta users
-- [ ] A/B test onboarding flow (if time permits)
-
-**Thursday-Friday:**
-- [ ] Monitor analytics & crash reports
-- [ ] Decide on V1.1 feature priority
-- [ ] Prepare for public launch (if beta stable)
+- [ ] Build attached to submission
+- [ ] Review Notes filled in
+- [ ] Submitted for App Review
+- [ ] Approved and live on App Store
 
 ---
 
-### **Week 3-4: Public Launch Prep**
+## PHASE 8 — Post-Launch
 
-**Tasks:**
-- [ ] App Store submission (iOS)
-- [ ] Play Store submission (Android - if ready)
-- [ ] Marketing materials (screenshots, description)
-- [ ] Launch announcement (social media, email list)
-- [ ] Support system setup (email, in-app chat)
+### Monitor Crash Reports
+- Sentry dashboard: check within first 24 hours
+- Focus on: auth flow, transaction creation, database errors
 
----
+### Monitor App Store Reviews
+- App Store Connect → **Ratings and Reviews**
+- Respond to every review in the first week — Apple factors response rate into ranking
 
-## 📈 SUCCESS METRICS
-
-### **Beta Launch (Week 1-2):**
-- **Target:** 50 beta users
-- **Key Metrics:**
-  - Signup completion rate
-  - Daily active users (DAU)
-  - Transactions created per user
-  - Budgets created per user
-  - Premium upgrade rate
-  - Crash-free rate (target: 99%+)
-
-### **Public Launch (Week 3+):**
-- **Target:** 500-1000 users (Month 1)
-- **Key Metrics:**
-  - 7-day retention rate (target: 40%+)
-  - 30-day retention rate (target: 20%+)
-  - Premium conversion rate (target: 3-5%)
-  - NPS score (target: 50+)
+### Watch Key Metrics (First 7 Days)
+- Crash-free rate: target 99%+
+- Avg session length
+- Transactions created per user
+- Day-1 and Day-7 retention
 
 ---
 
-## 🚨 LAUNCH BLOCKERS
+## DEFERRED TO V1.1
 
-### **CANNOT LAUNCH WITHOUT:**
-
-1. ⚠️ **Migration 31 applied** - Subscription system won't work
-2. ⚠️ **Payment flow tested** - Can't charge users if broken
-3. ⚠️ **Physical device testing** - Simulator doesn't catch all bugs
-
-### **CAN LAUNCH WITHOUT (But Not Recommended):**
-
-1. ℹ️ Sentry DSN - Won't have error tracking (risky)
-2. ℹ️ Android build - Can do iOS-only beta first
-3. ℹ️ AI Insights - Core app works without it
-4. ℹ️ Bill Splitting - Can add in V1.1
-
----
-
-## ✅ READY TO LAUNCH WHEN:
-
-- [x] Flutter analyze shows zero issues ✅
-- [ ] Migration 31 applied ⚠️ **DO THIS TODAY**
-- [ ] Sentry DSN configured ℹ️ **Strongly recommended**
-- [ ] Payment flow tested end-to-end ⏳
-- [ ] Tested on physical iOS device ⏳
-- [ ] Zero critical bugs ⏳
-- [ ] TestFlight build created ⏳
-
----
-
-## 📞 NEED HELP?
-
-**Resources:**
-- Supabase Dashboard: https://supabase.com/dashboard/project/YOUR_PROJECT_ID
-- Stripe Dashboard: https://dashboard.stripe.com/test/dashboard
-- Sentry Dashboard: https://sentry.io (after signup)
-
-**Common Issues:**
-- Edge function errors → Check Supabase function logs
-- Payment issues → Check Stripe webhook events
-- Database issues → Check Supabase table editor & RLS policies
-
----
-
-**Current Status:** 🟡 **2 of 4 critical tasks complete**
-**Next Action:** 🎯 **Apply Migration 31** (your manual action required)
-**Timeline:** 🚀 **3-5 days to beta launch** (after Migration 31)
-
----
-
-*Last updated: November 28, 2025*
-*Review after: Migration 31 applied + payment testing complete*
+| Feature | Status |
+|---|---|
+| Premium subscription + payment flow | Deferred — no premium features in V1.0 |
+| AI Insights frequency enforcement | UI saves, enforcement logic pending |
+| Adaptive onboarding (persona-driven) | Not started |
+| TOTP MFA backup codes | Not in MVP scope |
+| CSV import for transactions | Not started |
+| Data export (CSV/PDF) | Not started |
+| Expanded Semantics coverage | Auth screens done, rest pending |
+| Test coverage (target 60%) | Currently ~20% |
+| CI/CD pipeline | Not started |
+| Bank integration (Plaid/TrueLayer) | Phase 2 |
+| Multi-currency | Phase 2 |
+| Android public release | After iOS beta is stable |

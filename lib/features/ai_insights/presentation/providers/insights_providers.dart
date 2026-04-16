@@ -6,9 +6,11 @@ import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/merchant_insight.dart';
 import '../../domain/entities/proactive_alert.dart';
 import 'chat_provider.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Service provider
 final insightsServiceProvider = Provider<InsightsService>((ref) {
+  ref.watch(userSessionProvider);
   return InsightsService();
 });
 

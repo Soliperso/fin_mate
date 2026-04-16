@@ -4,9 +4,11 @@ import '../../data/repositories/savings_goal_repository_impl.dart';
 import '../../domain/entities/savings_goal_entity.dart';
 import '../../domain/entities/goal_contribution_entity.dart';
 import '../../domain/repositories/savings_goal_repository.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Repository provider
 final savingsGoalRepositoryProvider = Provider<SavingsGoalRepository>((ref) {
+  ref.watch(userSessionProvider);
   return SavingsGoalRepositoryImpl(
     remoteDatasource: SavingsGoalRemoteDatasource(),
   );

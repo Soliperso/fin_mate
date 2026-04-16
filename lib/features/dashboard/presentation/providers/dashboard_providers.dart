@@ -4,9 +4,11 @@ import '../../domain/entities/dashboard_stats.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../widgets/cash_flow_chart.dart';
 import '../widgets/net_worth_trend_chart.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 /// Provider for dashboard repository
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
+  ref.watch(userSessionProvider);
   return DashboardRepositoryImpl();
 });
 

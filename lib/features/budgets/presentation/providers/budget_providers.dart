@@ -5,9 +5,11 @@ import '../../../../core/services/analytics_service.dart';
 import '../../data/repositories/budget_repository_impl.dart';
 import '../../domain/entities/budget_entity.dart';
 import '../../domain/repositories/budget_repository.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 /// Provider for budget repository
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
+  ref.watch(userSessionProvider);
   return BudgetRepositoryImpl();
 });
 

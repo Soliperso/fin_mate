@@ -81,20 +81,20 @@ class AuthRemoteDataSource {
         throw Exception('Sign up failed: No user returned');
       }
 
-      // Check if email confirmation is required
-      // If session is null, it means email confirmation is required
       if (response.session == null) {
-        // Email confirmation is enabled - user needs to verify email
-        // Sign out to ensure user must verify email before login
+        // Email confirmation is enabled — sign out, user must verify first.
         await _supabase.auth.signOut();
+        return UserModel.fromSupabase(response.user!, null);
       } else {
-        // Email confirmation is disabled - user is automatically logged in
-        // Still sign them out so they go through proper login flow
-        await _supabase.auth.signOut();
+        // Email confirmation is disabled — user is already signed in.
+        // Fetch their profile so the notifier can set the full user state.
+        final profile = await _supabase
+            .from('user_profiles')
+            .select()
+            .eq('id', response.user!.id)
+            .maybeSingle();
+        return UserModel.fromSupabase(response.user!, profile);
       }
-
-      // Return user (will not be used since we sign out)
-      return UserModel.fromSupabase(response.user!, null);
     } on AuthException catch (e) {
       // Handle specific Supabase auth errors
       if (e.message.contains('User already registered')) {
@@ -323,7 +323,6 @@ class AuthRemoteDataSource {
     await _supabase.from('user_profiles').update({
       'mfa_enabled': false,
       'mfa_method': null,
-      'totp_secret': null,
       'totp_secret_encrypted': null,
     }).eq('id', user.id);
 

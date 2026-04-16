@@ -6,6 +6,7 @@ import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/repositories/transaction_repository.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Data Source Provider
 final transactionDataSourceProvider = Provider<TransactionRemoteDataSource>((ref) {
@@ -14,6 +15,7 @@ final transactionDataSourceProvider = Provider<TransactionRemoteDataSource>((ref
 
 // Repository Provider
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
+  ref.watch(userSessionProvider);
   return TransactionRepositoryImpl(ref.read(transactionDataSourceProvider));
 });
 

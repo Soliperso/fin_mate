@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -352,61 +353,60 @@ class PricingPage extends ConsumerWidget {
   }
 
   Future<void> _handleUpgrade(BuildContext context, WidgetRef ref) async {
+    final user = ref.read(authNotifierProvider).user;
+    if (user == null) {
+      _showError(context, 'Please log in to upgrade');
+      return;
+    }
+
+    // Show loading while creating the Stripe Checkout session
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
+
     try {
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
-      final user = ref.read(authNotifierProvider).user;
-      if (user == null) {
-        if (context.mounted) Navigator.pop(context);
-        _showError(context, 'Please log in to upgrade');
-        return;
-      }
-
-      // Create subscription with Payment Sheet (in-app)
       final paymentService = PaymentService();
-      final success = await paymentService.createSubscriptionWithPaymentSheet(
+      final checkoutUrl = await paymentService.createCheckoutSession(
         priceId: PaymentConfig.monthlyPriceId,
+        userId: user.id,
       );
 
       if (context.mounted) Navigator.pop(context);
 
-      if (success) {
-        // Subscription created successfully
+      if (checkoutUrl == null) {
         if (context.mounted) {
-          // Refresh subscription status
-          ref.invalidate(subscriptionStatusProvider);
-          // Also refresh profile provider to get updated subscription data
-          ref.invalidate(currentUserProfileProvider);
-
-          // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Welcome to Finmate Premium!'),
-              backgroundColor: AppColors.success,
-              duration: Duration(seconds: 3),
-            ),
-          );
-
-          // Navigate to dashboard instead of popping back
-          // This ensures clean state and avoids stuck loading indicators
-          context.go('/');
+          _showError(context, 'Could not create checkout session. Please try again.');
         }
-      } else {
+        return;
+      }
+
+      // Open Stripe Checkout in the browser
+      final uri = Uri.parse(checkoutUrl);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         if (context.mounted) {
-          _showError(context, 'Failed to complete subscription. Please try again.');
+          _showError(context, 'Could not open payment page. Please try again.');
         }
+        return;
+      }
+
+      // Inform the user to return after completing payment
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Complete payment in your browser, then pull down to refresh.'),
+            duration: Duration(seconds: 6),
+          ),
+        );
+        // Invalidate so the page refreshes subscription status when user returns
+        ref.invalidate(subscriptionStatusProvider);
+        ref.invalidate(currentUserProfileProvider);
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
-        _showError(context, 'An error occurred: ${e.toString()}');
+        Navigator.of(context, rootNavigator: true).pop();
+        _showError(context, 'An error occurred. Please try again.');
       }
     }
   }

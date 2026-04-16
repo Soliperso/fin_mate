@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/balance_forecast_service.dart';
 import '../../domain/entities/balance_forecast.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Service provider
 final balanceForecastServiceProvider = Provider<BalanceForecastService>((ref) {
+  ref.watch(userSessionProvider);
   return BalanceForecastService();
 });
 

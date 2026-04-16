@@ -4,10 +4,12 @@ import '../../data/datasources/recurring_transactions_remote_datasource.dart';
 import '../../data/repositories/recurring_transactions_repository_impl.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
 import '../../domain/repositories/recurring_transactions_repository.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Repository provider
 final recurringTransactionsRepositoryProvider =
     Provider<RecurringTransactionsRepository>((ref) {
+  ref.watch(userSessionProvider);
   return RecurringTransactionsRepositoryImpl(
     RecurringTransactionsRemoteDatasource(),
   );

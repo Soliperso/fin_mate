@@ -9,8 +9,10 @@ import '../../domain/entities/debt_entity.dart';
 import '../../domain/entities/debt_payment_entity.dart';
 import '../../domain/repositories/debt_repository.dart';
 import '../../domain/services/payoff_calculator.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 final debtRepositoryProvider = Provider<DebtRepository>((ref) {
+  ref.watch(userSessionProvider);
   return DebtRepositoryImpl(DebtRemoteDatasource());
 });
 

@@ -7,7 +7,7 @@ import '../constants/app_sizes.dart';
 /// Apple Wallet / Pay inspired theme for Finmate
 /// Built on iOS Human Interface Guidelines design tokens
 class AppTheme {
-  static final String _fontFamily = GoogleFonts.dmSans().fontFamily!;
+  static final String _fontFamily = GoogleFonts.inter().fontFamily!;
 
   static ThemeData lightTheme() {
     return ThemeData(

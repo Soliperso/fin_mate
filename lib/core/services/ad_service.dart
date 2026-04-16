@@ -58,6 +58,8 @@ class AdService {
   /// preventing the "Ad with id X is not available" plugin warning caused by
   /// disposing the ad before the failure callback fires.
   Future<BannerAd?> loadBannerAd({AdSize size = AdSize.banner}) async {
+    // Self-heal: initialize if the deferred startup init hasn't completed yet.
+    if (!_isInitialized) await initialize();
     if (!_isInitialized) return null;
 
     final completer = Completer<BannerAd?>();

@@ -1069,6 +1069,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final bgColor = isDark

@@ -18,6 +18,7 @@ final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((ref) 
 // ============================================================================
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
+  ref.watch(userSessionProvider);
   return ProfileRepositoryImpl(
     remoteDataSource: ref.read(profileRemoteDataSourceProvider),
   );

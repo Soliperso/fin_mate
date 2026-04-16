@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../guards/admin_guard.dart';
+import '../../features/profile/presentation/providers/profile_providers.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
@@ -91,6 +92,12 @@ class _RouterNotifier extends ChangeNotifier {
     _ref.listen(serverAdminVerifiedProvider, (previous, next) {
       notifyListeners();
     });
+    // Re-evaluate admin redirects once the local profile loads.
+    // Without this, profileProvider resolves after the redirect already ran
+    // (returning false while loading) and the router never corrects itself.
+    _ref.listen(isAdminProvider, (previous, next) {
+      notifyListeners();
+    });
   }
 }
 
@@ -126,9 +133,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAdminRoute) {
-        // Layer 1 — fast local cache check (fails-closed on missing profile).
-        final isAdminLocal = ref.read(isAdminProvider);
-        if (!isAdminLocal) return '/dashboard';
+        // Layer 1 — local profile check.
+        // Read the raw async value so we can differentiate loading from
+        // "loaded and not admin". While loading, allow optimistically — the
+        // _RouterNotifier listens to isAdminProvider so the router will
+        // re-evaluate and kick out non-admins once the profile resolves.
+        final profileAsync = ref.read(profileProvider);
+        if (!profileAsync.isLoading) {
+          final isAdminLocal = profileAsync.valueOrNull?.isAdmin ?? false;
+          if (!isAdminLocal) return '/dashboard';
+        }
 
         // Layer 2 — server-side RPC verification (defence-in-depth).
         // Uses cached AsyncValue so the redirect stays synchronous.

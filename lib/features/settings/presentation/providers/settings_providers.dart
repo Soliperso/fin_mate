@@ -9,6 +9,7 @@ import '../../../../core/services/data_export_service.dart';
 
 /// Provider for settings repository
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  ref.watch(userSessionProvider);
   final datasource = SettingsRemoteDataSource();
   final exportService = DataExportService();
   return SettingsRepositoryImpl(

@@ -212,14 +212,6 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'profile.languageSub'.tr(),
                             onTap: () => context.push('/settings/display'),
                           ),
-                          _buildDivider(context, isDark),
-                          _buildSettingsTile(
-                            context: context,
-                            icon: CupertinoIcons.money_dollar,
-                            title: 'profile.currency'.tr(),
-                            subtitle: profile?.currency ?? 'USD',
-                            onTap: () => context.push('/profile/edit'),
-                          ),
                         ]),
                         const SizedBox(height: AppSizes.lg),
 

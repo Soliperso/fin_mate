@@ -36,9 +36,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.initState();
     _loadSavedCredentials();
 
-    // Clear errors when user types
-    _emailController.addListener(_clearError);
-    _passwordController.addListener(_clearError);
+    // Clear errors when user types (addListener fires on programmatic clear() too,
+    // which would wipe the error set by a failed login before the UI renders it —
+    // onChanged fires only on actual user input, so the error survives the
+    // programmatic password clear that happens after a failed attempt).
   }
 
   void _clearError() {
@@ -149,6 +150,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
+                    onChanged: (_) => _clearError(),
                     onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     decoration: InputDecoration(
                       labelText: 'auth.login.emailLabel'.tr(),
@@ -180,6 +182,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     focusNode: _passwordFocusNode,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
+                    onChanged: (_) => _clearError(),
                     onFieldSubmitted: (_) => _handleLogin(),
                     decoration: InputDecoration(
                       labelText: 'auth.login.passwordLabel'.tr(),
