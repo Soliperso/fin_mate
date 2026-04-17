@@ -32,6 +32,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
         _getUpcomingBills(limit: 3),
       ]);
 
+      // Create a net worth snapshot after fetching baseline (to avoid comparing against just-created snapshot)
+      await createNetWorthSnapshot();
+
       final currentNetWorth = results[0] as double;
       final previousNetWorth = results[1] as double?;
       final monthlyIncome = results[2] as double;
@@ -89,21 +92,48 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   /// Get net worth snapshot from the start of the current month (for % comparison).
-  /// Returns null if no snapshot exists yet (can't compute a meaningful change).
+  /// Returns the first snapshot on or after the start of the month.
+  /// If none exists, returns the most recent snapshot from the previous month.
+  /// Returns null if no snapshots exist yet (can't compute a meaningful change).
   Future<double?> _getPreviousMonthNetWorth() async {
     try {
       final now = DateTime.now();
       final startOfMonth = DateTime(now.year, now.month, 1);
 
+      // First, try to get a snapshot on or after the start of the month
       final response = await _supabase.rpc('get_net_worth_snapshots', params: {
         'p_user_id': _supabase.auth.currentUser?.id,
         'p_start_date': startOfMonth.toIso8601String().split('T')[0],
-        'p_end_date': startOfMonth.toIso8601String().split('T')[0],
+        'p_end_date': now.toIso8601String().split('T')[0],
       });
 
       if (response is List && response.isNotEmpty) {
+        // Return the first (earliest) snapshot from this month
         return (response.first['net_worth'] as num?)?.toDouble();
       }
+
+      // Fallback: get the most recent snapshot from the previous month
+      int prevMonth = now.month - 1;
+      int prevYear = now.year;
+      if (prevMonth <= 0) {
+        prevMonth = 12;
+        prevYear = now.year - 1;
+      }
+
+      final previousMonthStart = DateTime(prevYear, prevMonth, 1);
+      final previousMonthEnd = DateTime(prevYear, prevMonth + 1, 0);
+
+      final fallbackResponse = await _supabase.rpc('get_net_worth_snapshots', params: {
+        'p_user_id': _supabase.auth.currentUser?.id,
+        'p_start_date': previousMonthStart.toIso8601String().split('T')[0],
+        'p_end_date': previousMonthEnd.toIso8601String().split('T')[0],
+      });
+
+      if (fallbackResponse is List && fallbackResponse.isNotEmpty) {
+        // Return the last (most recent) snapshot from the previous month
+        return (fallbackResponse.last['net_worth'] as num?)?.toDouble();
+      }
+
       return null;
     } catch (e) {
       return null;

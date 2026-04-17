@@ -27,7 +27,7 @@ class HeroStatBadge extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: highlight
-              ? AppColors.systemRed.withValues(alpha: 0.25)
+              ? const Color(0xFFB52D23)
               : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),

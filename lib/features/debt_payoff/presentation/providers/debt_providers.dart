@@ -245,11 +245,15 @@ class DebtMilestone {
   final String debtName;
   final double progressPercent;
   final bool isComplete;
+  final double? originalBalance;
+  final double currentBalance;
 
   const DebtMilestone({
     required this.debtName,
     required this.progressPercent,
     required this.isComplete,
+    this.originalBalance,
+    required this.currentBalance,
   });
 
   int get nextMilestone {
@@ -259,17 +263,27 @@ class DebtMilestone {
     if (progressPercent >= 25) return 50;
     return 25;
   }
+
+  double? get amountToNextMilestone {
+    if (isComplete || originalBalance == null || originalBalance! <= 0) return null;
+    if (progressPercent <= 0) return null;
+    final targetBalance = originalBalance! * (1.0 - nextMilestone / 100.0);
+    final delta = currentBalance - targetBalance;
+    return delta > 0 ? delta : null;
+  }
 }
 
 class DebtGamification {
   final int streakMonths;
   final List<DebtMilestone> milestones;
   final double totalPaidAllTime;
+  final double? overallProgressPercent;
 
   const DebtGamification({
     required this.streakMonths,
     required this.milestones,
     required this.totalPaidAllTime,
+    this.overallProgressPercent,
   });
 
   String get badgeTitle {
@@ -281,11 +295,36 @@ class DebtGamification {
   }
 
   String get badgeIcon {
-    if (streakMonths >= 12) return '🏆';
-    if (streakMonths >= 6) return '⚡';
-    if (streakMonths >= 3) return '🔥';
-    if (streakMonths >= 1) return '🚀';
-    return '🌱';
+    // Returns icon code to be rendered as icon, not emoji
+    if (streakMonths >= 12) return 'trophy';
+    if (streakMonths >= 6) return 'bolt';
+    if (streakMonths >= 3) return 'flame';
+    if (streakMonths >= 1) return 'rocket';
+    return 'leaf';
+  }
+
+  int? get monthsToNextBadge {
+    if (streakMonths >= 12) return null;
+    if (streakMonths >= 6) return 12 - streakMonths;
+    if (streakMonths >= 3) return 6 - streakMonths;
+    if (streakMonths >= 1) return 3 - streakMonths;
+    return 1;
+  }
+
+  String get nextBadgeIcon {
+    if (streakMonths >= 12) return '';
+    if (streakMonths >= 6) return 'trophy';
+    if (streakMonths >= 3) return 'bolt';
+    if (streakMonths >= 1) return 'flame';
+    return 'rocket';
+  }
+
+  String get nextBadgeTitle {
+    if (streakMonths >= 12) return '';
+    if (streakMonths >= 6) return 'Debt Warrior';
+    if (streakMonths >= 3) return 'Dedicated';
+    if (streakMonths >= 1) return 'Consistent';
+    return 'Getting Started';
   }
 
   factory DebtGamification.compute({
@@ -325,15 +364,40 @@ class DebtGamification {
         debtName: debt.name,
         progressPercent: progress,
         isComplete: debt.balance <= 0,
+        originalBalance: debt.originalBalance,
+        currentBalance: debt.balance,
       );
     }).toList();
 
+    // Sort milestones: incomplete by progress descending, completed at bottom
+    milestones.sort((a, b) {
+      if (a.isComplete != b.isComplete) return a.isComplete ? 1 : -1;
+      return b.progressPercent.compareTo(a.progressPercent);
+    });
+
     final totalPaid = payments.fold<double>(0, (s, p) => s + p.amount);
+
+    // Calculate overall portfolio progress
+    final debtsWithOriginal = debts
+        .where((d) => d.originalBalance != null && d.originalBalance! > 0)
+        .toList();
+
+    double? overallProgressPercent;
+    if (debtsWithOriginal.isNotEmpty) {
+      final totalOriginal =
+          debtsWithOriginal.fold<double>(0, (s, d) => s + d.originalBalance!);
+      final totalPaidDown = debtsWithOriginal.fold<double>(0, (s, d) {
+        final paid = (d.originalBalance! - d.balance).clamp(0.0, d.originalBalance!);
+        return s + paid;
+      });
+      overallProgressPercent = (totalPaidDown / totalOriginal * 100).clamp(0.0, 100.0);
+    }
 
     return DebtGamification(
       streakMonths: streakMonths,
       milestones: milestones,
       totalPaidAllTime: totalPaid,
+      overallProgressPercent: overallProgressPercent,
     );
   }
 }

@@ -19,7 +19,6 @@ import '../providers/dashboard_providers.dart';
 import '../widgets/net_worth_card.dart';
 import '../widgets/cash_flow_card.dart';
 import '../widgets/cash_flow_chart.dart';
-import '../widgets/net_worth_trend_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
 import '../widgets/upcoming_bills_card.dart';
@@ -164,7 +163,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
             ref.invalidate(monthlyFlowDataProvider);
-            ref.invalidate(netWorthSnapshotsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -241,34 +239,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   },
                 ),
 
-                Consumer(
-                  builder: (context, ref, _) {
-                    final snapshotsAsync = ref.watch(netWorthSnapshotsProvider);
-                    return snapshotsAsync.when(
-                      data: (snapshots) {
-                        if (snapshots.isEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
-                            child: Center(
-                              child: Text(
-                                'dashboard.noWorthData'.tr(),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ),
-                          );
-                        }
-                        return Column(
-                          children: [
-                            NetWorthTrendChart(snapshots: snapshots),
-                            const SizedBox(height: AppSizes.md),
-                          ],
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (e, _) => const SizedBox.shrink(),
-                    );
-                  },
-                ),
 
                 // ── Spending breakdown ────────────────────────────────────
                 const SpendingBreakdownCard(),
@@ -312,7 +282,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
             ref.invalidate(monthlyFlowDataProvider);
-            ref.invalidate(netWorthSnapshotsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
