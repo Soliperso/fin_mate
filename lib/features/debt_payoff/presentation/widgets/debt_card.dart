@@ -2,10 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
+import 'debt_progress_ring.dart';
 
 class DebtCard extends ConsumerWidget {
   final DebtEntity debt;
@@ -74,10 +76,6 @@ class DebtCard extends ConsumerWidget {
       progressValue =
           (debt.originalBalance! - debt.balance) / debt.originalBalance!;
     }
-    final paidPercent = progressValue != null
-        ? '${(progressValue * 100).toStringAsFixed(0)}% paid'
-        : null;
-
     // ── Due date ──────────────────────────────────────────────────────────
     String? dueDateLabel;
     Color? dueDateColor;
@@ -131,14 +129,17 @@ class DebtCard extends ConsumerWidget {
                   : AppColors.separator.withValues(alpha: 0.4),
         ),
       ),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/debt/${debt.id}'),
+        child: Padding(
         padding: const EdgeInsets.all(AppSizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Header row ────────────────────────────────────────────────
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Icon
                 Container(
@@ -212,26 +213,34 @@ class DebtCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                // Balance + APR
+                // Progress ring + balance
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    DebtProgressRing(
+                      progressPercent: progressValue != null ? progressValue * 100 : null,
+                      size: 54,
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       currencyFormat.format(debt.balance),
                       style: Theme.of(context)
                           .textTheme
-                          .titleSmall
+                          .labelSmall
                           ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.error),
                     ),
-                    Text(
-                      '${debt.interestRate.toStringAsFixed(1)}% APR',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(color: AppColors.textSecondary),
-                    ),
+                    if (debt.originalBalance != null && debt.originalBalance! > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '${debt.debtType == 'credit_card' ? 'Limit' : 'Original'}: ${currencyFormat.format(debt.originalBalance!)}',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 10,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(width: AppSizes.xs),
@@ -299,43 +308,6 @@ class DebtCard extends ConsumerWidget {
                 ),
               ],
             ),
-
-            // ── Progress bar ──────────────────────────────────────────────
-            if (progressValue != null) ...[
-              const SizedBox(height: AppSizes.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: progressValue),
-                      duration: const Duration(milliseconds: 700),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, value, _) => ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusFull),
-                        child: LinearProgressIndicator(
-                          value: value,
-                          minHeight: 6,
-                          backgroundColor:
-                              AppColors.error.withValues(alpha: 0.12),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.success,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.sm),
-                  Text(
-                    paidPercent!,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.success,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ),
-            ],
 
             const SizedBox(height: AppSizes.sm),
 
@@ -449,6 +421,7 @@ class DebtCard extends ConsumerWidget {
             ],
           ],
         ),
+      ),
       ),
     );
   }

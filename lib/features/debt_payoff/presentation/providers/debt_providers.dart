@@ -21,6 +21,13 @@ final debtsProvider = FutureProvider<List<DebtEntity>>((ref) async {
   return repository.getDebts();
 });
 
+final debtByIdProvider = Provider.family<DebtEntity?, String>((ref, id) {
+  return ref.watch(debtsProvider).valueOrNull
+      ?.where((d) => d.id == id)
+      .cast<DebtEntity?>()
+      .firstOrNull;
+});
+
 final debtPaymentsProvider = FutureProvider.family<List<DebtPaymentEntity>, String>((ref, debtId) async {
   final repository = ref.watch(debtRepositoryProvider);
   return repository.getPayments(debtId);
@@ -96,6 +103,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
     required double balance,
     required double interestRate,
     required double minimumPayment,
+    double? originalBalance,
     int? dueDay,
     String? notes,
   }) async {
@@ -107,6 +115,7 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
         balance: balance,
         interestRate: interestRate,
         minimumPayment: minimumPayment,
+        originalBalance: originalBalance,
         dueDay: dueDay,
         notes: notes,
       );

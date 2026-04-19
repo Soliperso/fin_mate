@@ -18,6 +18,7 @@ class DebtRepositoryImpl implements DebtRepository {
     required double balance,
     required double interestRate,
     required double minimumPayment,
+    double? originalBalance,
     int? dueDay,
     String? notes,
   }) =>
@@ -27,6 +28,7 @@ class DebtRepositoryImpl implements DebtRepository {
         balance: balance,
         interestRate: interestRate,
         minimumPayment: minimumPayment,
+        originalBalance: originalBalance,
         dueDay: dueDay,
         notes: notes,
       );

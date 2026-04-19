@@ -460,6 +460,9 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "Doit être entre 1 et 31",
     "notes": "Notes (facultatif)",
+    "creditLimit": "Limite de crédit (facultatif)",
+    "originalBalance": "Solde initial (facultatif)",
+    "originalBalanceHelper": "Facultatif — pour suivre la progression",
     "cancel": "Annuler",
     "addButton": "Ajouter la dette"
   },
@@ -481,6 +484,8 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "Doit être entre 1 et 31",
     "notes": "Notes (facultatif)",
+    "creditLimit": "Limite de crédit",
+    "originalBalance": "Solde initial",
     "cancel": "Annuler",
     "save": "Enregistrer les modifications"
   },

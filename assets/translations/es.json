@@ -460,6 +460,9 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "Debe ser entre 1 y 31",
     "notes": "Notas (opcional)",
+    "creditLimit": "Límite de crédito (opcional)",
+    "originalBalance": "Saldo original (opcional)",
+    "originalBalanceHelper": "Opcional — para seguir el progreso",
     "cancel": "Cancelar",
     "addButton": "Agregar deuda"
   },
@@ -481,6 +484,8 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "Debe ser entre 1 y 31",
     "notes": "Notas (opcional)",
+    "creditLimit": "Límite de crédito",
+    "originalBalance": "Saldo original",
     "cancel": "Cancelar",
     "save": "Guardar cambios"
   },

@@ -23,6 +23,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _balanceController;
+  late final TextEditingController _originalBalanceController;
   late final TextEditingController _interestRateController;
   late final TextEditingController _minimumPaymentController;
   late final TextEditingController _dueDayController;
@@ -46,6 +47,8 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
     _nameController = TextEditingController(text: widget.debt.name);
     _balanceController =
         TextEditingController(text: widget.debt.balance.toStringAsFixed(2));
+    _originalBalanceController = TextEditingController(
+        text: widget.debt.originalBalance?.toStringAsFixed(2) ?? '');
     _interestRateController = TextEditingController(
         text: widget.debt.interestRate.toStringAsFixed(2));
     _minimumPaymentController = TextEditingController(
@@ -60,6 +63,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
   void dispose() {
     _nameController.dispose();
     _balanceController.dispose();
+    _originalBalanceController.dispose();
     _interestRateController.dispose();
     _minimumPaymentController.dispose();
     _dueDayController.dispose();
@@ -71,10 +75,13 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
 
+    final rawOriginal = _originalBalanceController.text.trim();
     final fields = <String, dynamic>{
       'name': _nameController.text.trim(),
       'debt_type': _selectedDebtType,
       'balance': double.parse(_balanceController.text),
+      if (rawOriginal.isNotEmpty && double.tryParse(rawOriginal) != null)
+        'original_balance': double.parse(rawOriginal),
       'interest_rate': double.parse(_interestRateController.text),
       'minimum_payment': double.parse(_minimumPaymentController.text),
       'due_day': _dueDayController.text.isEmpty
@@ -178,6 +185,28 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                       const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'common.required'.tr();
+                    if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0) return 'editDebt.mustBeZeroOrMore'.tr();
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // Credit Limit / Original Balance
+                TextFormField(
+                  controller: _originalBalanceController,
+                  decoration: InputDecoration(
+                    labelText: _selectedDebtType == 'credit_card'
+                        ? 'editDebt.creditLimit'.tr()
+                        : 'editDebt.originalBalance'.tr(),
+                    prefixText: '\$ ',
+                    border: const OutlineInputBorder(),
+                    helperText: 'addDebt.originalBalanceHelper'.tr(),
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
                     if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
                     if (double.parse(v) < 0) return 'editDebt.mustBeZeroOrMore'.tr();
                     return null;

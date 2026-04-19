@@ -460,6 +460,9 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "يجب أن يكون بين 1 و31",
     "notes": "ملاحظات (اختياري)",
+    "creditLimit": "حد الائتمان (اختياري)",
+    "originalBalance": "الرصيد الأصلي (اختياري)",
+    "originalBalanceHelper": "اختياري — لتتبع تقدم السداد",
     "cancel": "إلغاء",
     "addButton": "إضافة الدين"
   },
@@ -481,6 +484,8 @@
     "dueDayHint": "1–31",
     "mustBe1to31": "يجب أن يكون بين 1 و31",
     "notes": "ملاحظات (اختياري)",
+    "creditLimit": "حد الائتمان",
+    "originalBalance": "الرصيد الأصلي",
     "cancel": "إلغاء",
     "save": "حفظ التغييرات"
   },

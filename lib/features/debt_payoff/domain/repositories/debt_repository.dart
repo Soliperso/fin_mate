@@ -9,6 +9,7 @@ abstract class DebtRepository {
     required double balance,
     required double interestRate,
     required double minimumPayment,
+    double? originalBalance,
     int? dueDay,
     String? notes,
   });

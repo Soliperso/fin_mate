@@ -33,6 +33,7 @@ class DebtRemoteDatasource {
     required double balance,
     required double interestRate,
     required double minimumPayment,
+    double? originalBalance,
     int? dueDay,
     String? notes,
   }) async {
@@ -47,7 +48,7 @@ class DebtRemoteDatasource {
             'name': name,
             'debt_type': debtType,
             'balance': balance,
-            'original_balance': balance,
+            'original_balance': originalBalance ?? balance,
             'interest_rate': interestRate,
             'minimum_payment': minimumPayment,
             'due_day': dueDay,

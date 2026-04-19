@@ -19,6 +19,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _balanceController = TextEditingController();
+  final _originalBalanceController = TextEditingController();
   final _interestRateController = TextEditingController();
   final _minimumPaymentController = TextEditingController();
   final _dueDayController = TextEditingController();
@@ -40,6 +41,7 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
   void dispose() {
     _nameController.dispose();
     _balanceController.dispose();
+    _originalBalanceController.dispose();
     _interestRateController.dispose();
     _minimumPaymentController.dispose();
     _dueDayController.dispose();
@@ -52,12 +54,14 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
 
     setState(() => _isSubmitting = true);
 
+    final rawOriginal = _originalBalanceController.text.trim();
     final debt = await ref.read(debtNotifierProvider.notifier).createDebt(
           name: _nameController.text.trim(),
           debtType: _selectedDebtType,
           balance: double.parse(_balanceController.text),
           interestRate: double.parse(_interestRateController.text),
           minimumPayment: double.parse(_minimumPaymentController.text),
+          originalBalance: rawOriginal.isNotEmpty ? double.tryParse(rawOriginal) : null,
           dueDay: _dueDayController.text.isNotEmpty
               ? int.tryParse(_dueDayController.text)
               : null,
@@ -159,6 +163,27 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'common.required'.tr();
+                    if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0) return 'addDebt.mustBeZeroOrMore'.tr();
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // Credit Limit / Original Balance (optional)
+                TextFormField(
+                  controller: _originalBalanceController,
+                  decoration: InputDecoration(
+                    labelText: _selectedDebtType == 'credit_card'
+                        ? 'addDebt.creditLimit'.tr()
+                        : 'addDebt.originalBalance'.tr(),
+                    prefixText: '\$ ',
+                    border: const OutlineInputBorder(),
+                    helperText: 'addDebt.originalBalanceHelper'.tr(),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
                     if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
                     if (double.parse(v) < 0) return 'addDebt.mustBeZeroOrMore'.tr();
                     return null;
