@@ -400,7 +400,10 @@
     "noPlan": "Agrega deudas para ver tu plan de pago.",
     "moAbbr": "mes",
     "deleted": "{name} eliminado",
-    "failedToDelete": "Error al eliminar la deuda"
+    "failedToDelete": "Error al eliminar la deuda",
+    "capHitDate": "50+ años",
+    "capHitInterest": "Crece indefinidamente",
+    "capHitWarning": "El pago mínimo es menor que el interés mensual. El saldo crece cada mes — aumenta tus pagos para salir de esta trampa."
   },
   "debtHero": {
     "totalDebt": "Deuda total",
@@ -408,7 +411,10 @@
     "totalInterest": "Interés total",
     "accounts": "Cuentas",
     "extraPayment": "Incluye +{amount}/mes de pago extra",
-    "percentPaid": "% pagado"
+    "percentPaid": "% pagado",
+    "neverPaysOff": "Nunca",
+    "neverPaysOffInterest": "Crece indefinidamente",
+    "neverPaysOffWarning": "El pago mínimo es menor que el interés mensual — el saldo crece cada mes. Agrega pagos adicionales para salir de esta trampa."
   },
   "debtCard": {
     "dueToday": "Vence hoy",

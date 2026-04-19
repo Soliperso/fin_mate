@@ -25,6 +25,7 @@ import '../widgets/monthly_schedule_list.dart';
 import '../widgets/payment_history_sheet.dart';
 import '../widgets/payoff_timeline_chart.dart';
 import '../widgets/debt_cost_split_card.dart';
+import '../widgets/payment_calendar_tab.dart';
 import '../widgets/strategy_comparison_sheet.dart';
 
 export '../../domain/services/payoff_calculator.dart' show DebtStrategy;
@@ -43,7 +44,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -143,6 +144,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
           tabs: [
             Tab(text: 'debt.overviewTab'.tr()),
             Tab(text: 'debt.planTab'.tr()),
+            Tab(text: 'debt.trackTab'.tr()),
           ],
         ),
       ),
@@ -372,29 +374,64 @@ class _DebtPageState extends ConsumerState<DebtPage>
                             if (payoffResult != null && payoffResult.schedule.isNotEmpty) ...[
                               const SizedBox(height: AppSizes.sm),
 
-                              // 3-metric summary row
-                              Row(
-                                children: [
-                                  _MetricItem(
-                                    icon: CupertinoIcons.calendar,
-                                    iconColor: AppColors.brandTeal,
-                                    value: dateFormat.format(payoffResult.debtFreeDate),
+                              if (payoffResult.hitMaxMonths) ...[
+                                // Cap-hit: min payment < monthly interest — show actionable warning
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(AppSizes.sm),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                                    border: Border.all(
+                                      color: AppColors.error.withValues(alpha: 0.25),
+                                      width: 0.5,
+                                    ),
                                   ),
-                                  const SizedBox(width: AppSizes.sm),
-                                  _MetricItem(
-                                    icon: CupertinoIcons.clock,
-                                    iconColor: AppColors.brandTeal,
-                                    value: '${payoffResult.totalMonths} ${'debt.moAbbr'.tr()}',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        CupertinoIcons.exclamationmark_triangle_fill,
+                                        size: 14,
+                                        color: AppColors.error,
+                                      ),
+                                      const SizedBox(width: AppSizes.xs),
+                                      Expanded(
+                                        child: Text(
+                                          'debt.capHitWarning'.tr(),
+                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                color: AppColors.error,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: AppSizes.sm),
-                                  _MetricItem(
-                                    icon: CupertinoIcons.money_dollar,
-                                    iconColor: AppColors.error,
-                                    value: currencyFormat.format(payoffResult.totalInterestPaid),
-                                    valueColor: AppColors.error,
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ] else ...[
+                                // 3-metric summary row (normal case)
+                                Row(
+                                  children: [
+                                    _MetricItem(
+                                      icon: CupertinoIcons.calendar,
+                                      iconColor: AppColors.brandTeal,
+                                      value: dateFormat.format(payoffResult.debtFreeDate),
+                                    ),
+                                    const SizedBox(width: AppSizes.sm),
+                                    _MetricItem(
+                                      icon: CupertinoIcons.clock,
+                                      iconColor: AppColors.brandTeal,
+                                      value: '${payoffResult.totalMonths} ${'debt.moAbbr'.tr()}',
+                                    ),
+                                    const SizedBox(width: AppSizes.sm),
+                                    _MetricItem(
+                                      icon: CupertinoIcons.money_dollar,
+                                      iconColor: AppColors.error,
+                                      value: currencyFormat.format(payoffResult.totalInterestPaid),
+                                      valueColor: AppColors.error,
+                                    ),
+                                  ],
+                                ),
+                              ],
 
                               const SizedBox(height: AppSizes.sm),
 
@@ -526,6 +563,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
                         const ExtraPaymentCard(),
                       ],
                     ),
+
+              // ── Tab 2: Track ──────────────────────────────────────────
+              const PaymentCalendarTab(),
             ],
           );
         },

@@ -32,12 +32,17 @@ class DebtHeroCard extends ConsumerWidget {
     final currencyFormat2 = ref.watch(currencyFormat2Provider);
     final monthFormat = DateFormat('MMM yyyy', context.locale.languageCode);
 
-    final debtFreeLabel = payoffResult != null
-        ? monthFormat.format(payoffResult!.debtFreeDate)
-        : '—';
-    final totalInterestLabel = payoffResult != null
-        ? currencyFormat0.format(payoffResult!.totalInterestPaid)
-        : '—';
+    final capHit = payoffResult?.hitMaxMonths == true;
+    final debtFreeLabel = payoffResult == null
+        ? '—'
+        : capHit
+            ? 'debtHero.neverPaysOff'.tr()
+            : monthFormat.format(payoffResult!.debtFreeDate);
+    final totalInterestLabel = payoffResult == null
+        ? '—'
+        : capHit
+            ? 'debtHero.neverPaysOffInterest'.tr()
+            : currencyFormat0.format(payoffResult!.totalInterestPaid);
 
     // Overall progress — only shown when at least one debt has originalBalance
     double? overallProgress;
@@ -97,6 +102,44 @@ class DebtHeroCard extends ConsumerWidget {
               HeroStatBadge(label: 'debtHero.accounts'.tr(), value: '$debtCount'),
             ],
           ),
+
+          // Cap-hit warning: min payment < monthly interest
+          if (capHit) ...[
+            const SizedBox(height: AppSizes.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.sm,
+                vertical: AppSizes.xs + 1,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.30),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    size: 13,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: AppSizes.xs),
+                  Expanded(
+                    child: Text(
+                      'debtHero.neverPaysOffWarning'.tr(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Extra payment active indicator
           if (extraMonthly > 0) ...[

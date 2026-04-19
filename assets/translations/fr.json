@@ -400,7 +400,10 @@
     "noPlan": "Ajoutez des dettes pour voir votre plan de remboursement.",
     "moAbbr": "mois",
     "deleted": "{name} supprimé",
-    "failedToDelete": "Échec de la suppression de la dette"
+    "failedToDelete": "Échec de la suppression de la dette",
+    "capHitDate": "50+ ans",
+    "capHitInterest": "Croît indéfiniment",
+    "capHitWarning": "La mensualité minimale est inférieure aux intérêts mensuels. Le solde augmente chaque mois — augmentez vos paiements pour vous en sortir."
   },
   "debtHero": {
     "totalDebt": "Dette totale",
@@ -408,7 +411,10 @@
     "totalInterest": "Intérêts totaux",
     "accounts": "Comptes",
     "extraPayment": "Inclut +{amount}/mois de paiement supplémentaire",
-    "percentPaid": "% remboursé"
+    "percentPaid": "% remboursé",
+    "neverPaysOff": "Jamais",
+    "neverPaysOffInterest": "Croît indéfiniment",
+    "neverPaysOffWarning": "La mensualité minimale est inférieure aux intérêts mensuels — le solde augmente chaque mois. Augmentez vos paiements pour vous en sortir."
   },
   "debtCard": {
     "dueToday": "Dû aujourd'hui",

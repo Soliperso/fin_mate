@@ -400,7 +400,10 @@
     "noPlan": "Add debts to see your payoff plan.",
     "moAbbr": "mo",
     "deleted": "{name} removed",
-    "failedToDelete": "Failed to delete debt"
+    "failedToDelete": "Failed to delete debt",
+    "capHitDate": "50+ yrs",
+    "capHitInterest": "Grows forever",
+    "capHitWarning": "Minimum payment is less than monthly interest. Balance grows every month — increase your payment to break free."
   },
   "debtHero": {
     "totalDebt": "Total Debt",
@@ -408,7 +411,10 @@
     "totalInterest": "Total Interest",
     "accounts": "Accounts",
     "extraPayment": "Includes +{amount}/mo extra payment",
-    "percentPaid": "% paid off"
+    "percentPaid": "% paid off",
+    "neverPaysOff": "Never",
+    "neverPaysOffInterest": "Grows forever",
+    "neverPaysOffWarning": "Min payment is less than monthly interest — balance grows every month. Add extra payments to escape."
   },
   "debtCard": {
     "dueToday": "Due today",

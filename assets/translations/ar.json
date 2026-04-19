@@ -400,7 +400,10 @@
     "noPlan": "أضف ديوناً لرؤية خطة السداد.",
     "moAbbr": "شهر",
     "deleted": "تمت إزالة {name}",
-    "failedToDelete": "فشل حذف الدين"
+    "failedToDelete": "فشل حذف الدين",
+    "capHitDate": "50+ سنة",
+    "capHitInterest": "يتزايد باستمرار",
+    "capHitWarning": "الدفعة الأدنى أقل من الفوائد الشهرية. الرصيد يزداد كل شهر — زِد دفعاتك للخروج من هذا الفخ."
   },
   "debtHero": {
     "totalDebt": "إجمالي الديون",
@@ -408,7 +411,10 @@
     "totalInterest": "إجمالي الفوائد",
     "accounts": "الحسابات",
     "extraPayment": "يشمل +{amount}/شهر دفعة إضافية",
-    "percentPaid": "% مسدَّد"
+    "percentPaid": "% مسدَّد",
+    "neverPaysOff": "لا يُسدَّد أبدًا",
+    "neverPaysOffInterest": "يتزايد باستمرار",
+    "neverPaysOffWarning": "الدفعة الأدنى أقل من الفوائد الشهرية — الرصيد يزداد كل شهر. أضف دفعات إضافية للخروج من هذا الفخ."
   },
   "debtCard": {
     "dueToday": "مستحق اليوم",
