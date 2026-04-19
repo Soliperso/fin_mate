@@ -43,22 +43,37 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final recentTransactions = results[5] as List<TransactionModel>;
       final upcomingBills = results[6] as List<UpcomingBill>;
 
-      // Calculate net worth change percentage
+      // Calculate net worth change percentage.
+      //
+      // Rules:
+      //  • No previous snapshot → 0 %, neutral (first-ever load).
+      //  • Previous ≈ $0 → can't compute a meaningful %, show 0 %.
+      //  • Current = $0 → user has no data; always show 0 % neutral so a
+      //    stale snapshot from a prior session never produces a scary –100 %.
+      //  • Normal case → standard period-over-period % change.
       double changePercentage = 0;
-      if (previousNetWorth != null) {
+      bool isPositive;
+
+      if (previousNetWorth == null || currentNetWorth == 0) {
+        // No baseline or no current data — neutral badge.
+        isPositive = currentNetWorth >= 0;
+      } else {
         final base = previousNetWorth.abs();
-        if (base != 0) {
+        if (base < 0.01) {
+          // Previous was ~$0: division would be meaningless.
+          changePercentage = 0;
+          isPositive = currentNetWorth >= 0;
+        } else {
           changePercentage =
               ((currentNetWorth - previousNetWorth) / base) * 100;
+          isPositive = currentNetWorth >= previousNetWorth;
         }
       }
 
       return DashboardStats(
         netWorth: currentNetWorth,
         netWorthChangePercentage: changePercentage.abs(),
-        isNetWorthPositive: previousNetWorth != null
-            ? currentNetWorth >= previousNetWorth
-            : currentNetWorth >= 0,
+        isNetWorthPositive: isPositive,
         monthlyIncome: monthlyIncome,
         monthlyExpenses: monthlyExpenses,
         moneyHealthScore: healthScore,

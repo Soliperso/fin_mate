@@ -30,6 +30,7 @@ class NetWorthCard extends ConsumerWidget {
     final currencyFmt2 = ref.watch(currencyFormat2Provider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final sign = isPositive ? '+' : '–';
+    final hasChange = changePercentage.abs() >= 0.05;
 
     final gradientColors = netWorth >= 0
         ? [AppColors.brandTeal, AppColors.brandTealDark]
@@ -70,7 +71,9 @@ class NetWorthCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      '$sign${changePercentage.abs().toStringAsFixed(1)}%',
+                      hasChange
+                          ? '$sign${changePercentage.abs().toStringAsFixed(1)}%'
+                          : '—',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
