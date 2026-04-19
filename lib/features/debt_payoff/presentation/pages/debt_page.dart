@@ -397,7 +397,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
                                       const SizedBox(width: AppSizes.xs),
                                       Expanded(
                                         child: Text(
-                                          'debt.capHitWarning'.tr(),
+                                          'debtHero.neverPaysOffWarning'.tr(),
                                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                 color: AppColors.error,
                                                 fontWeight: FontWeight.w600,

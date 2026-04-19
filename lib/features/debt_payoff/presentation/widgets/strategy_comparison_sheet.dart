@@ -27,6 +27,8 @@ class StrategyComparisonSheet extends ConsumerWidget {
         snowballResult.totalInterestPaid - avalancheResult.totalInterestPaid;
     final monthDiff = snowballResult.totalMonths - avalancheResult.totalMonths;
     final currencyFormat = ref.watch(currencyFormat0Provider);
+    final bothHitCap =
+        avalancheResult.hitMaxMonths && snowballResult.hitMaxMonths;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -93,7 +95,9 @@ class StrategyComparisonSheet extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSizes.md),
               decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.06),
+                color: bothHitCap
+                    ? AppColors.error.withValues(alpha: 0.06)
+                    : AppColors.success.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(AppSizes.radiusCard),
               ),
               child: Column(
@@ -105,24 +109,26 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(AppSizes.xs),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withValues(alpha: 0.15),
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radiusSm),
+                          color: bothHitCap
+                              ? AppColors.error.withValues(alpha: 0.15)
+                              : AppColors.success.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                         ),
-                        child: const Icon(
-                          CupertinoIcons.lightbulb,
+                        child: Icon(
+                          bothHitCap
+                              ? CupertinoIcons.exclamationmark_triangle
+                              : CupertinoIcons.lightbulb,
                           size: 14,
-                          color: AppColors.success,
+                          color: bothHitCap ? AppColors.error : AppColors.success,
                         ),
                       ),
                       const SizedBox(width: AppSizes.xs),
                       Text(
                         'strategyComparison.insights'.tr(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(
-                              color: AppColors.success,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: bothHitCap
+                                  ? AppColors.error
+                                  : AppColors.success,
                               fontWeight: FontWeight.w700,
                             ),
                       ),
@@ -132,48 +138,67 @@ class StrategyComparisonSheet extends ConsumerWidget {
                   const Divider(height: 1),
                   const SizedBox(height: AppSizes.sm),
 
-                  // Interest savings row
-                  _InsightRow(
-                    icon: CupertinoIcons.money_dollar,
-                    iconColor: AppColors.warning,
-                    label: 'strategyComparison.interestSavings'.tr(),
-                    value: interestDiff > 0
-                        ? 'strategyComparison.avalancheSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff)})
-                        : interestDiff < 0
-                            ? 'strategyComparison.snowballSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff.abs())})
-                            : 'strategyComparison.sameTotalInterest'.tr(),
-                    valueBadgeColor: interestDiff.abs() > 0
-                        ? AppColors.warning
-                        : AppColors.textSecondary,
-                  ),
-                  const SizedBox(height: AppSizes.sm),
+                  if (bothHitCap) ...[
+                    // Neither strategy can pay off at current minimums
+                    _InsightRow(
+                      icon: CupertinoIcons.exclamationmark_circle,
+                      iconColor: AppColors.error,
+                      label: 'strategyComparison.payoffTimeline'.tr(),
+                      value: 'Neither strategy pays off at current minimums. Increase payments.',
+                      valueBadgeColor: AppColors.error,
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    _InsightRow(
+                      icon: CupertinoIcons.star,
+                      iconColor: AppColors.warning,
+                      label: 'strategyComparison.bestForYou'.tr(),
+                      value: 'strategyComparison.avalancheBest'.tr(),
+                      valueBadgeColor: AppColors.warning,
+                    ),
+                  ] else ...[
+                    // Interest savings row
+                    _InsightRow(
+                      icon: CupertinoIcons.money_dollar,
+                      iconColor: AppColors.warning,
+                      label: 'strategyComparison.interestSavings'.tr(),
+                      value: interestDiff > 0
+                          ? 'strategyComparison.avalancheSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff)})
+                          : interestDiff < 0
+                              ? 'strategyComparison.snowballSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff.abs())})
+                              : 'strategyComparison.sameTotalInterest'.tr(),
+                      valueBadgeColor: interestDiff.abs() > 0
+                          ? AppColors.warning
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: AppSizes.sm),
 
-                  // Timeline row
-                  _InsightRow(
-                    icon: CupertinoIcons.calendar,
-                    iconColor: AppColors.info,
-                    label: 'strategyComparison.payoffTimeline'.tr(),
-                    value: monthDiff == 0
-                        ? 'strategyComparison.bothFinish'.tr()
-                        : monthDiff > 0
-                            ? 'strategyComparison.avalancheFinishes'.tr(namedArgs: {'months': '$monthDiff'})
-                            : 'strategyComparison.snowballFinishes'.tr(namedArgs: {'months': '${monthDiff.abs()}'}),
-                    valueBadgeColor: monthDiff.abs() > 0
-                        ? AppColors.info
-                        : AppColors.textSecondary,
-                  ),
-                  const SizedBox(height: AppSizes.sm),
+                    // Timeline row
+                    _InsightRow(
+                      icon: CupertinoIcons.calendar,
+                      iconColor: AppColors.info,
+                      label: 'strategyComparison.payoffTimeline'.tr(),
+                      value: monthDiff == 0
+                          ? 'strategyComparison.bothFinish'.tr()
+                          : monthDiff > 0
+                              ? 'strategyComparison.avalancheFinishes'.tr(namedArgs: {'months': '$monthDiff'})
+                              : 'strategyComparison.snowballFinishes'.tr(namedArgs: {'months': '${monthDiff.abs()}'}),
+                      valueBadgeColor: monthDiff.abs() > 0
+                          ? AppColors.info
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: AppSizes.sm),
 
-                  // Recommendation row
-                  _InsightRow(
-                    icon: CupertinoIcons.star,
-                    iconColor: AppColors.success,
-                    label: 'strategyComparison.bestForYou'.tr(),
-                    value: interestDiff >= 0
-                        ? 'strategyComparison.avalancheBest'.tr()
-                        : 'strategyComparison.snowballBest'.tr(),
-                    valueBadgeColor: AppColors.success,
-                  ),
+                    // Recommendation row
+                    _InsightRow(
+                      icon: CupertinoIcons.star,
+                      iconColor: AppColors.success,
+                      label: 'strategyComparison.bestForYou'.tr(),
+                      value: interestDiff >= 0
+                          ? 'strategyComparison.avalancheBest'.tr()
+                          : 'strategyComparison.snowballBest'.tr(),
+                      valueBadgeColor: AppColors.success,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -267,16 +292,22 @@ class _StrategyCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSizes.md),
 
-          // 2×2 metric grid
+          // 2×2 metric grid — show cap-hit labels when debt never pays off
           Row(
             children: [
               _MetricTile(
                 label: 'strategyComparison.debtFree'.tr(),
-                value: dateFormat.format(result.debtFreeDate),
+                value: result.hitMaxMonths
+                    ? 'debtHero.neverPaysOff'.tr()
+                    : dateFormat.format(result.debtFreeDate),
+                valueColor: result.hitMaxMonths ? AppColors.error : null,
               ),
               _MetricTile(
                 label: 'strategyComparison.months'.tr(),
-                value: '${result.totalMonths}',
+                value: result.hitMaxMonths
+                    ? 'debt.capHitDate'.tr()
+                    : '${result.totalMonths}',
+                valueColor: result.hitMaxMonths ? AppColors.error : null,
               ),
             ],
           ),
@@ -285,15 +316,53 @@ class _StrategyCard extends ConsumerWidget {
             children: [
               _MetricTile(
                 label: 'strategyComparison.totalInterest'.tr(),
-                value: currencyFormat.format(result.totalInterestPaid),
+                value: result.hitMaxMonths
+                    ? 'debtHero.neverPaysOffInterest'.tr()
+                    : currencyFormat.format(result.totalInterestPaid),
                 valueColor: AppColors.error,
               ),
               _MetricTile(
                 label: 'strategyComparison.totalPaid'.tr(),
-                value: currencyFormat.format(result.totalPaid),
+                value: result.hitMaxMonths
+                    ? '—'
+                    : currencyFormat.format(result.totalPaid),
               ),
             ],
           ),
+          if (result.hitMaxMonths) ...[
+            const SizedBox(height: AppSizes.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSizes.sm),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.25),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    size: 13,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(width: AppSizes.xs),
+                  Expanded(
+                    child: Text(
+                      'debtHero.neverPaysOffWarning'.tr(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: AppSizes.md),
 
           // Action button
