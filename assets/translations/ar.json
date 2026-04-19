@@ -378,6 +378,7 @@
     "title": "سداد الديون",
     "overviewTab": "نظرة عامة",
     "planTab": "الخطة",
+    "trackTab": "التتبع",
     "addDebt": "إضافة دين",
     "failedToLoad": "تعذّر تحميل الديون",
     "pullToRefresh": "اسحب للأسفل للتحديث.",
@@ -496,7 +497,10 @@
     "extraPerMonth": "+{amount}/شهر إضافي",
     "payOffSooner": "سدّد قبل {months} أشهر",
     "sameTimeline": "نفس جدول السداد",
-    "saveInInterest": "وفّر {amount} في الفوائد"
+    "saveInInterest": "وفّر {amount} في الفوائد",
+    "capWarning": "بالدفعات الأدنى، يستغرق سداد هذا الدين أكثر من 50 عامًا.",
+    "withExtraPayoff": "بهذه الدفعة الإضافية: يُسدَّد خلال {months} شهرًا",
+    "withExtraInterest": "إجمالي الفوائد: {amount}"
   },
   "monthlyFunding": {
     "title": "الأموال الشهرية المطلوبة",
@@ -815,6 +819,38 @@
     "failedToLoadTerms": "فشل تحميل شروط الخدمة",
     "failedToLoadDetails": "فشل تحميل تفاصيل الخصوصية",
     "errorTitle": "خطأ"
+  },
+  "track": {
+    "pastDue": "متأخر",
+    "upcoming": "القادم",
+    "noDueDates": "لا توجد تواريخ استحقاق. عدّل ديناً لإضافة تاريخ.",
+    "paymentLogged": "تم تسجيل الدفعة",
+    "missedThisMonth": "لم يُدفع هذا الشهر",
+    "dueToday": "مستحق اليوم",
+    "dueTomorrow": "مستحق غداً",
+    "dueInDays": "مستحق خلال {days} أيام"
+  },
+  "debtDetail": {
+    "progress": "التقدم",
+    "transactions": "المعاملات",
+    "details": "التفاصيل",
+    "paid": "مدفوع",
+    "remaining": "المتبقي",
+    "apr": "معدل الفائدة",
+    "minPayment": "الحد الأدنى",
+    "monthsLeft": "الوقت المتبقي",
+    "months": "أشهر",
+    "milestoneHint": "إنجاز {pct}% — يبقى {amount}",
+    "noOriginalBalance": "أضف الرصيد الأصلي لتتبع التقدم.",
+    "type": "النوع",
+    "balance": "الرصيد الحالي",
+    "originalBalance": "الرصيد الأصلي",
+    "interestRate": "معدل الفائدة",
+    "minimumPayment": "الحد الأدنى للدفع",
+    "dueDay": "يوم الاستحقاق",
+    "dueDayValue": "اليوم {day} من الشهر",
+    "notes": "ملاحظات",
+    "addedOn": "أُضيف في"
   },
   "errors": {
     "generic": "حدث خطأ ما. الرجاء المحاولة مجدداً.",

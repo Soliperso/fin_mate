@@ -378,6 +378,7 @@
     "title": "Debt Payoff",
     "overviewTab": "Overview",
     "planTab": "Plan",
+    "trackTab": "Track",
     "addDebt": "Add Debt",
     "failedToLoad": "Could Not Load Debts",
     "pullToRefresh": "Pull down to refresh.",
@@ -496,7 +497,10 @@
     "extraPerMonth": "+{amount}/month extra",
     "payOffSooner": "Pay off {months} months sooner",
     "sameTimeline": "Same payoff timeline",
-    "saveInInterest": "Save {amount} in interest"
+    "saveInInterest": "Save {amount} in interest",
+    "capWarning": "At minimum payments, this debt takes 50+ years to clear.",
+    "withExtraPayoff": "With this extra payment: paid off in {months} months",
+    "withExtraInterest": "Total interest: {amount}"
   },
   "monthlyFunding": {
     "title": "Monthly Funds Required",
@@ -815,6 +819,38 @@
     "failedToLoadTerms": "Failed to load Terms of Service",
     "failedToLoadDetails": "Failed to load App Privacy Details",
     "errorTitle": "Error"
+  },
+  "track": {
+    "pastDue": "Past Due",
+    "upcoming": "Upcoming",
+    "noDueDates": "No due dates set. Edit a debt to add one.",
+    "paymentLogged": "Payment logged",
+    "missedThisMonth": "Missed this month",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueInDays": "Due in {days} days"
+  },
+  "debtDetail": {
+    "progress": "Progress",
+    "transactions": "Transactions",
+    "details": "Details",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "apr": "APR",
+    "minPayment": "Min. Payment",
+    "monthsLeft": "Time Left",
+    "months": "months",
+    "milestoneHint": "{pct}% milestone — {amount} away",
+    "noOriginalBalance": "Set an original balance to track progress.",
+    "type": "Type",
+    "balance": "Current Balance",
+    "originalBalance": "Original Balance",
+    "interestRate": "Interest Rate",
+    "minimumPayment": "Min. Payment",
+    "dueDay": "Due Day",
+    "dueDayValue": "Day {day} of month",
+    "notes": "Notes",
+    "addedOn": "Added On"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

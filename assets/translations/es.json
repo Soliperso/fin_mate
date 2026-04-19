@@ -378,6 +378,7 @@
     "title": "Pago de deudas",
     "overviewTab": "Resumen",
     "planTab": "Plan",
+    "trackTab": "Seguimiento",
     "addDebt": "Agregar deuda",
     "failedToLoad": "No se pudieron cargar las deudas",
     "pullToRefresh": "Desliza hacia abajo para actualizar.",
@@ -496,7 +497,10 @@
     "extraPerMonth": "+{amount}/mes extra",
     "payOffSooner": "Paga {months} meses antes",
     "sameTimeline": "Mismo cronograma de pago",
-    "saveInInterest": "Ahorra {amount} en intereses"
+    "saveInInterest": "Ahorra {amount} en intereses",
+    "capWarning": "Con pagos mínimos, esta deuda tarda más de 50 años en liquidarse.",
+    "withExtraPayoff": "Con este pago extra: liquidado en {months} meses",
+    "withExtraInterest": "Interés total: {amount}"
   },
   "monthlyFunding": {
     "title": "Fondos mensuales requeridos",
@@ -815,6 +819,38 @@
     "failedToLoadTerms": "Error al cargar los Términos de servicio",
     "failedToLoadDetails": "Error al cargar los Detalles de privacidad",
     "errorTitle": "Error"
+  },
+  "track": {
+    "pastDue": "Vencidas",
+    "upcoming": "Próximas",
+    "noDueDates": "Sin fechas de vencimiento. Edita una deuda para agregar una.",
+    "paymentLogged": "Pago registrado",
+    "missedThisMonth": "Sin pago este mes",
+    "dueToday": "Vence hoy",
+    "dueTomorrow": "Vence mañana",
+    "dueInDays": "Vence en {days} días"
+  },
+  "debtDetail": {
+    "progress": "Progreso",
+    "transactions": "Transacciones",
+    "details": "Detalles",
+    "paid": "Pagado",
+    "remaining": "Restante",
+    "apr": "TAE",
+    "minPayment": "Pago mín.",
+    "monthsLeft": "Tiempo restante",
+    "months": "meses",
+    "milestoneHint": "Hito {pct}% — faltan {amount}",
+    "noOriginalBalance": "Establece un saldo original para rastrear el progreso.",
+    "type": "Tipo",
+    "balance": "Saldo actual",
+    "originalBalance": "Saldo original",
+    "interestRate": "Tasa de interés",
+    "minimumPayment": "Pago mínimo",
+    "dueDay": "Día de vencimiento",
+    "dueDayValue": "Día {day} del mes",
+    "notes": "Notas",
+    "addedOn": "Agregado el"
   },
   "errors": {
     "generic": "Algo salió mal. Por favor intenta de nuevo.",

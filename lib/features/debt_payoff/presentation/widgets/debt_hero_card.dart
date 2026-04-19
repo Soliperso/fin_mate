@@ -51,9 +51,10 @@ class DebtHeroCard extends ConsumerWidget {
         totalOriginal += originalBalance;
         totalPaid +=
             (originalBalance - d.balance).clamp(0.0, originalBalance);
-      } else {
-        totalOriginal += d.balance;
       }
+      // Debts without originalBalance are excluded from the progress
+      // calculation — adding their current balance to the denominator (but
+      // nothing to the numerator) would make the progress look lower than it is.
     }
     if (hasAnyOriginal && totalOriginal > 0) {
       overallProgress = (totalPaid / totalOriginal).clamp(0.0, 1.0);
@@ -119,7 +120,7 @@ class DebtHeroCard extends ConsumerWidget {
                   const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: AppSizes.iconXs),
                   const SizedBox(width: 4),
                   Text(
-                    'debtHero.extraPayment'.tr(namedArgs: {'amount': '\$${extraMonthly.toStringAsFixed(0)}'}),
+                    'debtHero.extraPayment'.tr(namedArgs: {'amount': currencyFormat0.format(extraMonthly)}),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,

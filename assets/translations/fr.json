@@ -378,6 +378,7 @@
     "title": "Remboursement de dettes",
     "overviewTab": "Vue d'ensemble",
     "planTab": "Plan",
+    "trackTab": "Suivi",
     "addDebt": "Ajouter une dette",
     "failedToLoad": "Impossible de charger les dettes",
     "pullToRefresh": "Tirez vers le bas pour actualiser.",
@@ -496,7 +497,10 @@
     "extraPerMonth": "+{amount}/mois supplémentaire",
     "payOffSooner": "Remboursez {months} mois plus tôt",
     "sameTimeline": "Même calendrier de remboursement",
-    "saveInInterest": "Économisez {amount} en intérêts"
+    "saveInInterest": "Économisez {amount} en intérêts",
+    "capWarning": "Avec les paiements minimaux, cette dette prend plus de 50 ans à solder.",
+    "withExtraPayoff": "Avec ce paiement supplémentaire : soldé en {months} mois",
+    "withExtraInterest": "Intérêts totaux : {amount}"
   },
   "monthlyFunding": {
     "title": "Fonds mensuels requis",
@@ -815,6 +819,38 @@
     "failedToLoadTerms": "Erreur lors du chargement des Conditions d'utilisation",
     "failedToLoadDetails": "Erreur lors du chargement des Détails de confidentialité",
     "errorTitle": "Erreur"
+  },
+  "track": {
+    "pastDue": "En retard",
+    "upcoming": "À venir",
+    "noDueDates": "Aucune date d'échéance. Modifiez une dette pour en ajouter une.",
+    "paymentLogged": "Paiement enregistré",
+    "missedThisMonth": "Manqué ce mois-ci",
+    "dueToday": "Échéance aujourd'hui",
+    "dueTomorrow": "Échéance demain",
+    "dueInDays": "Échéance dans {days} jours"
+  },
+  "debtDetail": {
+    "progress": "Progression",
+    "transactions": "Transactions",
+    "details": "Détails",
+    "paid": "Payé",
+    "remaining": "Restant",
+    "apr": "TAEG",
+    "minPayment": "Paiement min.",
+    "monthsLeft": "Temps restant",
+    "months": "mois",
+    "milestoneHint": "Jalon {pct}% — {amount} restants",
+    "noOriginalBalance": "Définissez un solde initial pour suivre la progression.",
+    "type": "Type",
+    "balance": "Solde actuel",
+    "originalBalance": "Solde initial",
+    "interestRate": "Taux d'intérêt",
+    "minimumPayment": "Paiement minimum",
+    "dueDay": "Jour d'échéance",
+    "dueDayValue": "Jour {day} du mois",
+    "notes": "Notes",
+    "addedOn": "Ajouté le"
   },
   "errors": {
     "generic": "Une erreur s'est produite. Veuillez réessayer.",

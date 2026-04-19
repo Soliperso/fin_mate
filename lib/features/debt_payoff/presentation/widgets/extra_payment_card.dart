@@ -156,7 +156,7 @@ class ExtraPaymentCard extends ConsumerWidget {
                         icon: CupertinoIcons.exclamationmark_triangle,
                         iconColor: AppColors.warning,
                         textColor: AppColors.warning,
-                        text: 'At minimum payments, this debt takes 50+ years to clear.',
+                        text: 'extraPayment.capWarning'.tr(),
                       ),
                     ],
                   ),
@@ -172,12 +172,12 @@ class ExtraPaymentCard extends ConsumerWidget {
                     children: [
                       _ImpactRow(
                         icon: CupertinoIcons.calendar,
-                        text: 'With this extra payment: paid off in ${simResult.totalMonths} months',
+                        text: 'extraPayment.withExtraPayoff'.tr(namedArgs: {'months': '${simResult.totalMonths}'}),
                       ),
                       const SizedBox(height: 4),
                       _ImpactRow(
                         icon: CupertinoIcons.money_dollar,
-                        text: 'Total interest: ${currencyFormat.format(simResult.totalInterestPaid)}',
+                        text: 'extraPayment.withExtraInterest'.tr(namedArgs: {'amount': currencyFormat.format(simResult.totalInterestPaid)}),
                       ),
                     ],
                   ),
