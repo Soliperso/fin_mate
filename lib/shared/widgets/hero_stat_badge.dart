@@ -48,6 +48,7 @@ class HeroStatBadge extends StatelessWidget {
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
