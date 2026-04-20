@@ -8,6 +8,47 @@ import 'category_breakdown_chart.dart';
 import 'follow_up_suggestions.dart';
 import 'message_action_button.dart';
 
+/// Blinking cursor shown while the assistant is streaming a response.
+class _StreamingCursor extends StatefulWidget {
+  const _StreamingCursor();
+
+  @override
+  State<_StreamingCursor> createState() => _StreamingCursorState();
+}
+
+class _StreamingCursorState extends State<_StreamingCursor>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 560),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Text(
+        '▋',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.primaryTeal,
+            ),
+      ),
+    );
+  }
+}
+
 class EnhancedChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
   final Function(String)? onFollowUpTap;
@@ -74,20 +115,41 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Main text content
-                      Text(
-                        message.content,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: _getTextColor(isUser, context),
+                      // Main text content with optional blinking cursor
+                      if (message.status == MessageStatus.streaming && message.content.isEmpty)
+                        const _StreamingCursor()
+                      else if (message.status == MessageStatus.streaming)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                message.content,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: _getTextColor(isUser, context),
+                                    ),
+                              ),
                             ),
-                      ),
+                            const SizedBox(width: 2),
+                            const _StreamingCursor(),
+                          ],
+                        )
+                      else
+                        Text(
+                          message.content,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: _getTextColor(isUser, context),
+                              ),
+                        ),
 
-                      // Rich content based on message type
-                      if (message.type == MessageType.textWithChart && message.metadata != null)
-                        _buildChartContent(message.metadata!),
+                      // Rich content — only after streaming completes
+                      if (message.status != MessageStatus.streaming) ...[
+                        if (message.type == MessageType.textWithChart && message.metadata != null)
+                          _buildChartContent(message.metadata!),
 
-                      if (message.type == MessageType.textWithActions && message.metadata != null)
-                        _buildActionsContent(message.metadata!),
+                        if (message.type == MessageType.textWithActions && message.metadata != null)
+                          _buildActionsContent(message.metadata!),
+                      ],
                     ],
                   ),
                 ),
@@ -126,8 +188,11 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                   ),
                 ),
 
-                // Follow-up suggestions (only for assistant messages)
-                if (!isUser && message.followUpSuggestions != null && message.followUpSuggestions!.isNotEmpty)
+                // Follow-up suggestions — shown only after streaming completes
+                if (!isUser &&
+                    message.status == MessageStatus.sent &&
+                    message.followUpSuggestions != null &&
+                    message.followUpSuggestions!.isNotEmpty)
                   FollowUpSuggestions(
                     suggestions: message.followUpSuggestions!,
                     onSuggestionTap: onFollowUpTap ?? (_) {},

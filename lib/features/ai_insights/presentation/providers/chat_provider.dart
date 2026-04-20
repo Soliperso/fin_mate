@@ -1,5 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../data/services/query_processor_service.dart';
 import '../../data/services/openai_chat_service.dart';
@@ -19,9 +21,16 @@ const FlutterSecureStorage _storage = FlutterSecureStorage();
 // Chat state notifier
 class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final QueryProcessorService _queryProcessor;
+  StreamSubscription<String>? _activeStream;
 
   ChatNotifier(this._queryProcessor) : super(const AsyncValue.loading()) {
     _loadChatHistory();
+  }
+
+  @override
+  void dispose() {
+    _activeStream?.cancel();
+    super.dispose();
   }
 
   /// Load chat history from storage
@@ -35,7 +44,6 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
             .toList();
         state = AsyncValue.data(messages);
       } else {
-        // Initialize with welcome message with follow-up suggestions
         final welcomeMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           sender: MessageSender.assistant,
@@ -56,26 +64,29 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     }
   }
 
-  /// Save chat history to storage
+  /// Save chat history to storage (max 50 messages, streaming messages excluded)
   Future<void> _saveChatHistory(List<ChatMessage> messages) async {
     try {
-      // Keep only last 50 messages to avoid storage issues
-      final messagesToSave = messages.length > 50 ? messages.sublist(messages.length - 50) : messages;
-      final jsonList = messagesToSave.map((m) => m.toJson()).toList();
-      final jsonStr = json.encode(jsonList);
-      await _storage.write(key: _chatHistoryKey, value: jsonStr);
-    } catch (e) {
-      // Ignore storage errors
+      final toSave = messages
+          .where((m) => m.status != MessageStatus.streaming)
+          .toList();
+      final capped = toSave.length > 50 ? toSave.sublist(toSave.length - 50) : toSave;
+      await _storage.write(key: _chatHistoryKey, value: json.encode(capped.map((m) => m.toJson()).toList()));
+    } catch (_) {
+      // Ignore storage errors — UI already updated
     }
   }
 
-  /// Send a message and get response
+  /// Send a message, streaming the AI response token by token.
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
+    // Cancel any in-flight stream before starting a new one
+    await _activeStream?.cancel();
+    _activeStream = null;
+
     final currentMessages = state.value ?? [];
 
-    // Add user message with sending status
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       sender: MessageSender.user,
@@ -84,46 +95,80 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
       status: MessageStatus.sent,
     );
 
-    final updatedMessages = [...currentMessages, userMessage];
-    state = AsyncValue.data(updatedMessages);
-    await _saveChatHistory(updatedMessages);
+    final withUser = [...currentMessages, userMessage];
+    state = AsyncValue.data(withUser);
+    // Save user message without awaiting — don't block streaming start
+    _saveChatHistory(withUser);
 
-    // Process query and get rich response
-    try {
-      final response = await _queryProcessor.processQueryRich(text);
+    // Placeholder that will grow as tokens arrive
+    final assistantId = '${DateTime.now().millisecondsSinceEpoch + 1}';
+    final placeholder = ChatMessage(
+      id: assistantId,
+      sender: MessageSender.assistant,
+      content: '',
+      timestamp: DateTime.now(),
+      status: MessageStatus.streaming,
+    );
+    state = AsyncValue.data([...withUser, placeholder]);
 
-      final assistantMessage = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: MessageSender.assistant,
-        content: response.content,
-        timestamp: DateTime.now(),
-        type: response.type,
+    final buffer = StringBuffer();
+
+    _activeStream = _queryProcessor.streamMessage(text).listen(
+      (chunk) {
+        if (!mounted) return;
+        buffer.write(chunk);
+        final current = state.valueOrNull;
+        if (current == null) return;
+        final idx = current.indexWhere((m) => m.id == assistantId);
+        if (idx == -1) return;
+        final updated = List<ChatMessage>.from(current);
+        updated[idx] = updated[idx].copyWith(content: buffer.toString());
+        state = AsyncValue.data(updated);
+      },
+      onError: (Object e) {
+        debugPrint('[ChatNotifier] Stream error: $e');
+        _resolveStream(assistantId, buffer.toString(), isError: true);
+      },
+      onDone: () {
+        _resolveStream(assistantId, buffer.toString(), isError: false);
+      },
+      cancelOnError: true,
+    );
+  }
+
+  void _resolveStream(String assistantId, String fullContent, {required bool isError}) {
+    if (!mounted) return;
+    final current = state.valueOrNull;
+    if (current == null) return;
+    final idx = current.indexWhere((m) => m.id == assistantId);
+    if (idx == -1) return;
+
+    final ChatMessage resolved;
+    if (isError || fullContent.isEmpty) {
+      resolved = current[idx].copyWith(
+        content: fullContent.isEmpty
+            ? 'Sorry, I couldn\'t generate a response. Please try again.'
+            : fullContent,
+        type: isError ? MessageType.error : MessageType.text,
+        status: isError ? MessageStatus.error : MessageStatus.sent,
+      );
+    } else {
+      resolved = current[idx].copyWith(
+        content: fullContent,
         status: MessageStatus.sent,
-        metadata: response.data,
-        followUpSuggestions: response.followUpSuggestions,
       );
-
-      final finalMessages = [...updatedMessages, assistantMessage];
-      state = AsyncValue.data(finalMessages);
-      await _saveChatHistory(finalMessages);
-    } catch (e) {
-      final errorMessage = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: MessageSender.assistant,
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
-        timestamp: DateTime.now(),
-        type: MessageType.error,
-        status: MessageStatus.error,
-      );
-
-      final finalMessages = [...updatedMessages, errorMessage];
-      state = AsyncValue.data(finalMessages);
-      await _saveChatHistory(finalMessages);
     }
+
+    final updated = List<ChatMessage>.from(current);
+    updated[idx] = resolved;
+    state = AsyncValue.data(updated);
+    _saveChatHistory(updated);
   }
 
   /// Clear chat history and reset OpenAI session
   Future<void> clearHistory() async {
+    await _activeStream?.cancel();
+    _activeStream = null;
     _queryProcessor.clearOpenAiSession();
     final welcomeMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -136,7 +181,6 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         'What bills are due soon?',
       ],
     );
-
     state = AsyncValue.data([welcomeMessage]);
     await _saveChatHistory([welcomeMessage]);
   }

@@ -24,6 +24,10 @@ class QueryProcessorService {
   /// Clear OpenAI session (called when user clears chat history)
   void clearOpenAiSession() => _openAiService.clearSession();
 
+  /// Streams the AI response token by token (delegates to OpenAI SSE).
+  Stream<String> streamMessage(String userMessage) =>
+      _openAiService.sendMessageStreaming(userMessage);
+
   /// Helper to get the current currency format
   NumberFormat _getCurrencyFormat({int decimalDigits = 2}) {
     final fmt = getCachedDisplayFormat();

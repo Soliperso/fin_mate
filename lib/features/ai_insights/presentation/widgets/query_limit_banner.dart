@@ -19,77 +19,20 @@ class QueryLimitBanner extends ConsumerWidget {
 
     return isPremiumAsync.when(
       data: (isPremium) {
-        if (isPremium) {
-          // Premium users see unlimited banner
-          return _PremiumBanner();
-        }
+        if (isPremium) return const SizedBox.shrink();
 
-        // Freemium users see query limit
         return queryUsageAsync.when(
-          data: (usage) => _FreemiumBanner(usage: usage),
-          loading: () => const _LoadingBanner(),
-          error: (error, stack) => const SizedBox.shrink(),
+          data: (usage) {
+            // Hidden below 7 queries — not worth the visual noise
+            if (usage.queriesUsed < 7) return const SizedBox.shrink();
+            return _FreemiumBanner(usage: usage);
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
         );
       },
-      loading: () => const _LoadingBanner(),
-      error: (error, stack) => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _PremiumBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.lg,
-        vertical: AppSizes.md,
-      ),
-      enableGlass: false,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              CupertinoIcons.star_fill,
-              color: AppColors.warning,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: AppSizes.md),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Premium Active',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Unlimited AI queries',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            CupertinoIcons.checkmark_circle_fill,
-            color: AppColors.success,
-            size: 20,
-          ),
-        ],
-      ),
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
@@ -224,34 +167,4 @@ class _FreemiumBanner extends ConsumerWidget {
   }
 }
 
-class _LoadingBanner extends StatelessWidget {
-  const _LoadingBanner();
 
-  @override
-  Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.lg,
-        vertical: AppSizes.md,
-      ),
-      enableGlass: false,
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          SizedBox(width: AppSizes.md),
-          Text(
-            'Loading query limit...',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

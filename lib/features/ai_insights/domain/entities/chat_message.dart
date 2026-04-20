@@ -15,6 +15,7 @@ enum MessageType {
 
 enum MessageStatus {
   sending,
+  streaming,
   sent,
   error,
 }

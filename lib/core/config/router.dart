@@ -22,11 +22,12 @@ import '../../features/transactions/presentation/pages/add_transaction_page.dart
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
 import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
 // [MVP: AI Insights - Commented out]
-// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
 import '../../features/debt_payoff/presentation/pages/debt_page.dart';
+import '../../features/debt_payoff/presentation/pages/debt_detail_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 // [MVP: Pricing/Subscription - Commented out for initial launch]
 // import '../../features/profile/presentation/pages/pricing_page.dart';
@@ -278,13 +279,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/debt',
             name: 'debt',
             pageBuilder: (context, state) => _FadeTransitionPage(child: const DebtPage()),
+            routes: [
+              GoRoute(
+                path: ':debtId',
+                name: 'debt-detail',
+                builder: (context, state) => DebtDetailPage(
+                  debtId: state.pathParameters['debtId']!,
+                ),
+              ),
+            ],
           ),
           // [MVP: AI Insights - Commented out]
-          // GoRoute(
-          //   path: '/insights',
-          //   name: 'insights',
-          //   builder: (context, state) => const AiInsightsPage(),
-          // ),
+          GoRoute(
+            path: '/insights',
+            name: 'insights',
+            builder: (context, state) => const AiInsightsPage(),
+          ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',
@@ -517,11 +527,11 @@ class _MainShellState extends State<MainShell>
                   onTap: () => context.go('/debt'),
                 ),
                 _TabItem(
-                  icon: CupertinoIcons.person,
-                  activeIcon: CupertinoIcons.person_fill,
-                  label: 'nav.profile'.tr(),
+                  icon: CupertinoIcons.sparkles,
+                  activeIcon: CupertinoIcons.sparkles,
+                  label: 'AI',
                   isSelected: selectedIndex == 4,
-                  onTap: () => context.go('/profile'),
+                  onTap: () => context.go('/insights'),
                 ),
               ],
             ),
@@ -537,7 +547,7 @@ class _MainShellState extends State<MainShell>
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
     if (location.startsWith('/debt')) return 3;
-    if (location.startsWith('/profile')) return 4;
+    if (location.startsWith('/insights')) return 4;
     return 0;
   }
 }

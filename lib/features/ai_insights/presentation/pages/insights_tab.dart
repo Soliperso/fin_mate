@@ -10,10 +10,10 @@ import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/section_header.dart';
 import '../providers/insights_providers.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
-import '../../domain/entities/merchant_insight.dart';
 import '../../domain/entities/proactive_alert.dart';
 
 class InsightsTab extends ConsumerStatefulWidget {
@@ -24,30 +24,25 @@ class InsightsTab extends ConsumerStatefulWidget {
 }
 
 class _InsightsTabState extends ConsumerState<InsightsTab> {
-  final Set<String> _reviewedMerchants = {};
-
   @override
   Widget build(BuildContext context) {
-    final insightsAsync = ref.watch(spendingInsightsProvider);
     final categoryBreakdownAsync = ref.watch(defaultCategoryBreakdownProvider);
-    final forecastAsync = ref.watch(defaultForecastProvider);
     final recurringExpensesAsync = ref.watch(recurringExpensesProvider);
     final spendingAnomaliesAsync = ref.watch(spendingAnomaliesProvider);
-    final merchantInsightsAsync = ref.watch(merchantInsightsProvider);
-    final weekendVsWeekdayAsync = ref.watch(weekendVsWeekdayProvider);
     final alertsAsync = ref.watch(typedProactiveAlertsProvider);
     final dismissedIds = ref.watch(dismissedAlertIdsProvider);
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(typedProactiveAlertsProvider);
-        ref.invalidate(spendingInsightsProvider);
         ref.invalidate(defaultCategoryBreakdownProvider);
-        ref.invalidate(defaultForecastProvider);
         ref.invalidate(recurringExpensesProvider);
         ref.invalidate(spendingAnomaliesProvider);
-        ref.invalidate(merchantInsightsProvider);
-        ref.invalidate(weekendVsWeekdayProvider);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -55,189 +50,91 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Proactive Alerts (top, only when active alerts exist)
+            // ── 1. Proactive Alerts ──────────────────────────────────────
             alertsAsync.whenOrNull(
               data: (alerts) {
-                final active = alerts.where((a) => !dismissedIds.contains(a.id)).toList();
+                final active =
+                    alerts.where((a) => !dismissedIds.contains(a.id)).toList();
                 if (active.isEmpty) return null;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Alerts', style: Theme.of(context).textTheme.titleLarge),
+                    const SectionHeader(title: 'Alerts'),
                     const SizedBox(height: AppSizes.sm),
-                    ...active.map((alert) => _buildDismissibleAlertCard(alert)),
-                    const SizedBox(height: AppSizes.xl),
+                    ...active.map((a) => _buildAlertCard(a)),
+                    const SizedBox(height: AppSizes.lg),
                   ],
                 );
               },
             ) ?? const SizedBox.shrink(),
 
-            // Personalized Insights
-            Text('Personalized Insights', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
-            insightsAsync.when(
-              data: (insights) {
-                if (insights.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.lightbulb,
-                    title: 'No Insights Yet',
-                    message: 'Start adding transactions to unlock personalized financial insights and smart recommendations.',
-                    backgroundColor: AppColors.primaryTeal,
-                  );
-                }
-                return Column(children: insights.map(_buildInsightCard).toList());
-              },
-              loading: () => const Column(children: [
-                SkeletonCard(height: 100),
-                SkeletonCard(height: 100),
-                SkeletonCard(height: 100),
-              ]),
-              error: (error, stack) => ErrorRetryWidget(
-                title: 'Failed to load insights',
-                message: 'Unable to analyze your spending patterns',
-                onRetry: () => ref.invalidate(spendingInsightsProvider),
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.xl),
-
-            // Category Breakdown
-            Text('Spending by Category', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
+            // ── 2. Spending by Category ──────────────────────────────────
+            const SectionHeader(title: 'Spending by Category'),
+            const SizedBox(height: AppSizes.sm),
             categoryBreakdownAsync.when(
-              data: (categories) {
-                if (categories.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.chart_pie_fill,
-                    title: 'No Spending Data',
-                    message: 'Add some expenses to see your category breakdown and track where your money goes.',
-                    backgroundColor: AppColors.primaryTeal,
-                  );
-                }
-                return _buildCategoryBreakdown(ref, categories);
-              },
-              loading: () => const SkeletonCard(height: 300),
-              error: (error, stack) => ErrorRetryWidget(
+              data: (categories) => categories.isEmpty
+                  ? EmptyStateCard(
+                      icon: CupertinoIcons.chart_pie_fill,
+                      title: 'No Spending Data',
+                      message: 'Add some expenses to see your category breakdown.',
+                      backgroundColor: AppColors.primaryTeal,
+                    )
+                  : _buildCategoryCard(categories, cardColor),
+              loading: () => const SkeletonCard(height: 160),
+              error: (_, __) => ErrorRetryWidget(
                 title: 'Failed to load categories',
                 message: 'Unable to load spending breakdown',
                 onRetry: () => ref.invalidate(defaultCategoryBreakdownProvider),
               ),
             ),
 
-            const SizedBox(height: AppSizes.xl),
+            const SizedBox(height: AppSizes.lg),
 
-            // Cashflow Forecast
-            Text('Cashflow Forecast (Next 3 Months)', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
-            forecastAsync.when(
-              data: (forecast) {
-                if (forecast.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.arrow_up_right,
-                    title: 'No Forecast Yet',
-                    message: 'Build up your transaction history to generate accurate cashflow forecasts for the next 3 months.',
-                    backgroundColor: AppColors.primaryTeal,
-                  );
-                }
-                return _buildForecastSection(ref, forecast);
-              },
-              loading: () => const SkeletonCard(height: 250),
-              error: (error, stack) => ErrorRetryWidget(
-                title: 'Failed to generate forecast',
-                message: 'Unable to predict future cashflow',
-                onRetry: () => ref.invalidate(defaultForecastProvider),
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.xl),
-
-            // Recurring Expenses
-            Text('Subscriptions & Recurring Bills', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
-            recurringExpensesAsync.when(
-              data: (patterns) {
-                if (patterns.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.bell,
-                    title: 'No Subscriptions Yet',
-                    message: 'Add recurring transactions to identify your subscriptions and track price changes.',
-                    backgroundColor: AppColors.primaryTeal,
-                  );
-                }
-                return _buildRecurringExpensesSection(ref, patterns);
-              },
-              loading: () => const SkeletonCard(height: 200),
-              error: (error, stack) => ErrorRetryWidget(
-                title: 'Failed to analyze patterns',
-                message: 'Unable to detect recurring expenses',
-                onRetry: () => ref.invalidate(recurringExpensesProvider),
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.xl),
-
-            // Spending Anomalies
-            Text('Unusual Spending', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
+            // ── 3. Unusual Spending ──────────────────────────────────────
+            const SectionHeader(title: 'Unusual Spending'),
+            const SizedBox(height: AppSizes.sm),
             spendingAnomaliesAsync.when(
-              data: (anomalies) {
-                if (anomalies.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.arrow_right,
-                    title: 'Spending on Track',
-                    message: 'Great news! No unusual spending detected. Your spending patterns are consistent.',
-                    backgroundColor: AppColors.success,
-                  );
-                }
-                return _buildSpendingAnomaliesSection(anomalies.take(5).toList());
-              },
-              loading: () => const SkeletonCard(height: 200),
-              error: (error, stack) => ErrorRetryWidget(
+              data: (anomalies) => anomalies.isEmpty
+                  ? EmptyStateCard(
+                      icon: CupertinoIcons.checkmark_shield,
+                      title: 'Spending on Track',
+                      message: 'No unusual spending detected. Your patterns look consistent.',
+                      backgroundColor: AppColors.success,
+                    )
+                  : Column(
+                      children: anomalies
+                          .take(3)
+                          .map((a) => _buildAnomalyCard(a, cardColor))
+                          .toList(),
+                    ),
+              loading: () => const SkeletonCard(height: 180),
+              error: (_, __) => ErrorRetryWidget(
                 title: 'Failed to detect anomalies',
                 message: 'Unable to analyze spending patterns',
                 onRetry: () => ref.invalidate(spendingAnomaliesProvider),
               ),
             ),
 
-            const SizedBox(height: AppSizes.xl),
+            const SizedBox(height: AppSizes.lg),
 
-            // Top Merchants
-            Text('Top Merchants', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
-            merchantInsightsAsync.when(
-              data: (merchants) {
-                if (merchants.isEmpty) {
-                  return _buildEmptyStateCard(
-                    icon: CupertinoIcons.building_2_fill,
-                    title: 'No Merchant Data',
-                    message: 'Start adding transactions to see your favorite merchants and spending patterns.',
-                    backgroundColor: AppColors.warning,
-                  );
-                }
-                return _buildTopMerchantsSection(ref, merchants.where((m) => m.isTopMerchant).toList());
+            // ── 4. Recurring Price Changes ───────────────────────────────
+            recurringExpensesAsync.when(
+              data: (patterns) {
+                final priceChanges =
+                    patterns.where((p) => p.isPriceIncreased).toList();
+                if (priceChanges.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(title: 'Price Changes'),
+                    const SizedBox(height: AppSizes.sm),
+                    ...priceChanges.map((p) => _buildPriceChangeCard(p, cardColor)),
+                    const SizedBox(height: AppSizes.lg),
+                  ],
+                );
               },
-              loading: () => const SkeletonCard(height: 250),
-              error: (error, stack) => ErrorRetryWidget(
-                title: 'Failed to analyze merchants',
-                message: 'Unable to load merchant data',
-                onRetry: () => ref.invalidate(merchantInsightsProvider),
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.xl),
-
-            // Behavioral Patterns
-            Text('Behavioral Patterns', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSizes.md),
-            weekendVsWeekdayAsync.when(
-              data: _buildBehavioralInsightsSection,
-              loading: () => const SkeletonCard(height: 150),
-              error: (error, stack) => const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSizes.md),
-                  child: Text('Unable to analyze behavioral patterns'),
-                ),
-              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
             ),
           ],
         ),
@@ -245,61 +142,192 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
     );
   }
 
-  // ─── Alert card ───────────────────────────────────────────────────────────
+  // ── Alert card ─────────────────────────────────────────────────────────────
 
-  Widget _buildDismissibleAlertCard(ProactiveAlert alert) {
-    Color severityColor;
+  Widget _buildAlertCard(ProactiveAlert alert) {
+    final Color severity;
     switch (alert.severity) {
       case AlertSeverity.critical:
-        severityColor = AppColors.error;
+        severity = AppColors.error;
         break;
       case AlertSeverity.high:
-        severityColor = AppColors.warning;
+        severity = AppColors.warning;
         break;
       default:
-        severityColor = AppColors.primaryTeal;
+        severity = AppColors.primaryTeal;
     }
 
     return Dismissible(
       key: Key(alert.id),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) {
-        ref.read(dismissedAlertIdsProvider.notifier).update((s) => {...s, alert.id});
-      },
+      onDismissed: (_) =>
+          ref.read(dismissedAlertIdsProvider.notifier).update((s) => {...s, alert.id}),
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSizes.md),
         margin: const EdgeInsets.only(bottom: AppSizes.sm),
         decoration: BoxDecoration(
           color: AppColors.error.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         ),
-        child: Icon(CupertinoIcons.xmark, color: AppColors.error),
+        child: const Icon(CupertinoIcons.xmark, color: AppColors.error),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSizes.sm),
+        padding: const EdgeInsets.all(AppSizes.md),
         decoration: BoxDecoration(
-          color: severityColor.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          border: Border(left: BorderSide(color: severityColor, width: 4)),
+          color: severity.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          border: Border(left: BorderSide(color: severity, width: 4)),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.md),
-          child: Row(
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    alert.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSizes.xs),
+                  Text(
+                    alert.message,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(CupertinoIcons.chevron_left,
+                color: AppColors.textSecondary, size: AppSizes.iconXs),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Category card ──────────────────────────────────────────────────────────
+
+  Widget _buildCategoryCard(
+      List<Map<String, dynamic>> categories, Color cardColor) {
+    final currencyFormat = ref.watch(currencyFormat2Provider);
+    final total =
+        categories.fold(0.0, (sum, c) => sum + (c['total_amount'] as double));
+
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Column(
+        children: categories.take(5).map((category) {
+          final amount = category['total_amount'] as double;
+          final pct = total > 0 ? amount / total : 0.0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            category['category_name'] as String,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            '${(pct * 100).toStringAsFixed(0)}% · ${currencyFormat.format(amount)}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        value: pct,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.systemGray4.withValues(alpha: 0.15)
+                            : AppColors.systemGray4.withValues(alpha: 0.35),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryTeal.withValues(alpha: 0.65)),
+                        minHeight: 4,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ── Anomaly card ───────────────────────────────────────────────────────────
+
+  Widget _buildAnomalyCard(SpendingAnomaly anomaly, Color cardColor) {
+    final Color severity;
+    switch (anomaly.severity) {
+      case AnomalySeverity.critical:
+        severity = AppColors.error;
+        break;
+      case AnomalySeverity.high:
+        severity = AppColors.warning;
+        break;
+      case AnomalySeverity.medium:
+        severity = AppColors.warning.withValues(alpha: 0.7);
+        break;
+      default:
+        severity = AppColors.primaryTeal;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSizes.sm),
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.all(AppSizes.sm),
+                decoration: BoxDecoration(
+                  color: severity.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Icon(CupertinoIcons.exclamationmark_triangle,
+                    color: severity, size: AppSizes.iconSm),
+              ),
+              const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      alert.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      anomaly.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: AppSizes.xs),
                     Text(
-                      alert.message,
+                      anomaly.description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -307,318 +335,117 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   ],
                 ),
               ),
-              Icon(CupertinoIcons.chevron_left, color: AppColors.textSecondary, size: 16),
             ],
           ),
-        ),
+          const SizedBox(height: AppSizes.sm),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(CupertinoIcons.list_bullet, size: 16),
+                  label: const Text('View Transactions'),
+                  onPressed: () => context.go('/transactions'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryTeal,
+                    side: BorderSide(color: AppColors.primaryTeal),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.sm),
+              Expanded(
+                child: FilledButton.icon(
+                  icon: const Icon(CupertinoIcons.bell, size: 16),
+                  label: const Text('Set Budget Alert'),
+                  onPressed: () => context.go('/budgets'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  // ─── Insight card ─────────────────────────────────────────────────────────
+  // ── Price change card ──────────────────────────────────────────────────────
 
-  Widget _buildInsightCard(Map<String, dynamic> insight) {
-    final type = insight['color'] as String? ?? 'info';
-    Color color;
-    switch (type) {
-      case 'warning':
-        color = AppColors.warning;
-        break;
-      case 'error':
-        color = AppColors.error;
-        break;
-      case 'success':
-        color = AppColors.success;
-        break;
-      default:
-        color = AppColors.primaryTeal;
-    }
-
-    IconData icon;
-    switch (insight['icon'] as String?) {
-      case 'trending_up':
-        icon = CupertinoIcons.arrow_up_right;
-        break;
-      case 'check_circle':
-        icon = CupertinoIcons.checkmark_circle_fill;
-        break;
-      case 'warning':
-        icon = CupertinoIcons.exclamationmark_triangle;
-        break;
-      case 'savings':
-        icon = CupertinoIcons.money_dollar;
-        break;
-      case 'info':
-        icon = CupertinoIcons.info_circle;
-        break;
-      default:
-        icon = CupertinoIcons.lightbulb;
-    }
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSizes.md),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSizes.sm),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-              ),
-              child: Icon(icon, color: color.withValues(alpha: 0.65), size: 20),
-            ),
-            const SizedBox(width: AppSizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    insight['title'] as String,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: AppSizes.xs),
-                  Text(
-                    insight['message'] as String,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.4,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ─── Category breakdown ───────────────────────────────────────────────────
-
-  Widget _buildCategoryBreakdown(WidgetRef ref, List<Map<String, dynamic>> categories) {
-    final currencyFormat = ref.watch(currencyFormat2Provider);
-    final total = categories.fold(0.0, (sum, cat) => sum + (cat['total_amount'] as double));
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          children: categories.take(5).map((category) {
-            final amount = category['total_amount'] as double;
-            final percentage = total > 0 ? (amount / total * 100) : 0.0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSizes.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(category['category_name'] as String,
-                          style: Theme.of(context).textTheme.bodyMedium),
-                      Text(currencyFormat.format(amount),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: AppSizes.xs),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: percentage / 100,
-                          backgroundColor: AppColors.lightGray,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryTeal),
-                          minHeight: 6,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.sm),
-                      Text(
-                        '${percentage.toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  // ─── Forecast section ─────────────────────────────────────────────────────
-
-  Widget _buildForecastSection(WidgetRef ref, List<Map<String, dynamic>> forecast) {
-    final currencyFormat = ref.watch(currencyFormat0Provider);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          children: forecast.map((month) {
-            final income = month['income'] as double;
-            final expense = month['expense'] as double;
-            final net = month['net'] as double;
-            final isPositive = net >= 0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSizes.md),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(_formatMonthYear(month['month'] as String),
-                        style: Theme.of(context).textTheme.bodyMedium),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('In: ${currencyFormat.format(income)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.success)),
-                        Text('Out: ${currencyFormat.format(expense)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.error)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: (isPositive ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                    ),
-                    child: Text(
-                      '${isPositive ? '+' : ''}${currencyFormat.format(net)}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: isPositive ? AppColors.success : AppColors.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  String _formatMonthYear(String monthStr) {
-    final parts = monthStr.split('-');
-    if (parts.length != 2) return monthStr;
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final month = int.tryParse(parts[1]) ?? 1;
-    return '${monthNames[month - 1]} ${parts[0]}';
-  }
-
-  // ─── Recurring expenses ───────────────────────────────────────────────────
-
-  Widget _buildRecurringExpensesSection(WidgetRef ref, List<RecurringExpensePattern> patterns) {
+  Widget _buildPriceChangeCard(
+      RecurringExpensePattern pattern, Color cardColor) {
     final currencyFormat = ref.watch(currencyFormat2Provider);
 
-    return Column(
-      children: patterns.map((pattern) {
-        final subtitle = '${pattern.interval.displayName} • ${currencyFormat.format(pattern.averageAmount)}';
-        final priceChangeInfo = pattern.isPriceIncreased
-            ? ' (increased ${pattern.priceChangePercentage?.toStringAsFixed(1)}%)'
-            : '';
-        final isReviewed = _reviewedMerchants.contains(pattern.merchantName);
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: AppSizes.md),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.md),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSizes.sm),
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSizes.sm),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            ),
+            child: const Icon(CupertinoIcons.arrow_up_right,
+                color: AppColors.warning, size: AppSizes.iconSm),
+          ),
+          const SizedBox(width: AppSizes.md),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppSizes.sm),
-                      decoration: BoxDecoration(
-                        color: pattern.isPriceIncreased
-                            ? AppColors.warning.withValues(alpha: 0.1)
-                            : AppColors.success.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                      ),
-                      child: Icon(
-                        pattern.isPriceIncreased ? CupertinoIcons.arrow_up_right : CupertinoIcons.bell,
-                        color: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pattern.merchantName,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                          Text(
-                            subtitle + priceChangeInfo,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.sm),
                 Text(
-                  'Next charge expected: ${pattern.nextExpectedDate != null ? DateFormat('MMM d, yyyy').format(pattern.nextExpectedDate!) : 'Unknown'}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  pattern.merchantName,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
-                if (!isReviewed) ...[
-                  const SizedBox(height: AppSizes.sm),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: Icon(
-                        pattern.isPriceIncreased ? CupertinoIcons.pencil : CupertinoIcons.checkmark_circle_fill,
-                        size: 16,
+                const SizedBox(height: AppSizes.xs),
+                Text(
+                  '${pattern.interval.displayName} · ${currencyFormat.format(pattern.averageAmount)}'
+                  '  (+${pattern.priceChangePercentage?.toStringAsFixed(1) ?? '?'}%)',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                      label: Text(pattern.isPriceIncreased ? 'Update Amount' : 'Mark Reviewed'),
-                      onPressed: () => pattern.isPriceIncreased
-                          ? _showUpdateAmountDialog(pattern)
-                          : _markRecurringReviewed(pattern.merchantName),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
-                        side: BorderSide(
-                          color: pattern.isPriceIncreased ? AppColors.warning : AppColors.success,
+                ),
+                if (pattern.nextExpectedDate != null) ...[
+                  const SizedBox(height: AppSizes.xs),
+                  Text(
+                    'Next: ${DateFormat('MMM d, yyyy').format(pattern.nextExpectedDate!)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
                         ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
                   ),
                 ],
               ],
             ),
           ),
-        );
-      }).toList(),
+          OutlinedButton(
+            onPressed: () => _showUpdateAmountDialog(pattern),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.warning,
+              side: const BorderSide(color: AppColors.warning),
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.sm, vertical: AppSizes.xs),
+            ),
+            child: const Text('Update'),
+          ),
+        ],
+      ),
     );
   }
 
-  void _markRecurringReviewed(String merchantName) {
-    setState(() => _reviewedMerchants.add(merchantName));
-  }
-
   void _showUpdateAmountDialog(RecurringExpensePattern pattern) {
-    final controller = TextEditingController(text: pattern.averageAmount.toStringAsFixed(2));
+    final controller =
+        TextEditingController(text: pattern.averageAmount.toStringAsFixed(2));
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -626,11 +453,14 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'New amount', prefixText: '\$'),
+          decoration:
+              const InputDecoration(labelText: 'New amount', prefixText: '\$'),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
               final newAmount = double.tryParse(controller.text);
@@ -646,294 +476,18 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                     ref.invalidate(recurringExpensesProvider);
                   }
                 } catch (e) {
-                  debugPrint('[InsightsTab] Failed to update recurring transaction amount: $e');
+                  debugPrint(
+                      '[InsightsTab] Failed to update recurring transaction: $e');
                 }
               }
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            style: FilledButton.styleFrom(backgroundColor: AppColors.brandTeal),
+            style:
+                FilledButton.styleFrom(backgroundColor: AppColors.brandTeal),
             child: const Text('Update'),
           ),
         ],
       ),
-    );
-  }
-
-  // ─── Spending anomalies ───────────────────────────────────────────────────
-
-  Widget _buildSpendingAnomaliesSection(List<SpendingAnomaly> anomalies) {
-    return Column(
-      children: anomalies.map((anomaly) {
-        Color severityColor;
-        switch (anomaly.severity) {
-          case AnomalySeverity.critical:
-            severityColor = AppColors.error;
-            break;
-          case AnomalySeverity.high:
-            severityColor = AppColors.warning;
-            break;
-          case AnomalySeverity.medium:
-            severityColor = AppColors.warning.withValues(alpha: 0.7);
-            break;
-          case AnomalySeverity.low:
-            severityColor = AppColors.primaryTeal;
-            break;
-        }
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: AppSizes.md),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(AppSizes.sm),
-                      decoration: BoxDecoration(
-                        color: severityColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                      ),
-                      child: Icon(CupertinoIcons.exclamationmark_triangle, color: severityColor, size: 24),
-                    ),
-                    const SizedBox(width: AppSizes.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            anomaly.title,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                          const SizedBox(height: AppSizes.xs),
-                          Text(
-                            anomaly.description,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(CupertinoIcons.list_bullet, size: 16),
-                        label: const Text('View Transactions'),
-                        onPressed: () => context.go('/transactions'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryTeal,
-                          side: BorderSide(color: AppColors.primaryTeal),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSizes.sm),
-                    Expanded(
-                      child: FilledButton.icon(
-                        icon: const Icon(CupertinoIcons.bell, size: 16),
-                        label: const Text('Set Budget Alert'),
-                        onPressed: () => context.go('/budgets'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.brandTeal,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ─── Top merchants ────────────────────────────────────────────────────────
-
-  Widget _buildTopMerchantsSection(WidgetRef ref, List<MerchantInsight> merchants) {
-    final currencyFormat = ref.watch(currencyFormat2Provider);
-
-    return Column(
-      children: merchants.take(5).map((merchant) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: AppSizes.md),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            merchant.merchantName,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(merchant.category,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      currencyFormat.format(merchant.totalSpent),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('${merchant.visitCount} visits',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
-                    Text('${merchant.percentageOfCategorySpending.toStringAsFixed(1)}% of category',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ─── Behavioral patterns ──────────────────────────────────────────────────
-
-  Widget _buildBehavioralInsightsSection(Map<String, dynamic> data) {
-    final insight = data['insight'] as String;
-
-    return Card(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryTeal.withValues(alpha: 0.06),
-              AppColors.primaryTeal.withValues(alpha: 0.02),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg, vertical: AppSizes.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Weekend vs Weekday',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: AppSizes.sm),
-              Text(
-                insight,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, height: 1.5),
-              ),
-              const SizedBox(height: AppSizes.xl),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: _buildSpendingComparisonCard(
-                      label: 'Weekday Avg',
-                      amount: data['weekday_average'] as num,
-                      color: AppColors.primaryTeal,
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.lg),
-                  Expanded(
-                    child: _buildSpendingComparisonCard(
-                      label: 'Weekend Avg',
-                      amount: data['weekend_average'] as num,
-                      color: AppColors.warning,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.lg),
-              Container(
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primaryTeal.withValues(alpha: 0.3), AppColors.primaryTeal.withValues(alpha: 0)],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpendingComparisonCard({
-    required String label,
-    required num amount,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.md),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  )),
-          const SizedBox(height: AppSizes.sm),
-          Text(
-            '\$${amount.toStringAsFixed(2)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: color.withValues(alpha: 0.75)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  Widget _buildEmptyStateCard({
-    required IconData icon,
-    required String title,
-    required String message,
-    required Color backgroundColor,
-  }) {
-    return EmptyStateCard(
-      icon: icon,
-      title: title,
-      message: message,
-      backgroundColor: backgroundColor,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -166,6 +167,89 @@ class OpenAiChatService {
       content: content.trim(),
       type: MessageType.text,
     );
+  }
+
+  /// Streams the AI response token by token via OpenAI SSE.
+  /// Yields each content delta as it arrives. Conversation history is updated
+  /// atomically when the stream completes or errors.
+  Stream<String> sendMessageStreaming(String userMessage) async* {
+    if (!isAvailable) throw Exception('Not authenticated');
+
+    if (_conversationHistory.length >= _maxHistoryTurns * 2) {
+      _conversationHistory.removeRange(0, 2);
+    }
+    _conversationHistory.add({'role': 'user', 'content': userMessage});
+
+    final session = _supabase.auth.currentSession;
+    if (session == null) {
+      _conversationHistory.removeLast();
+      throw Exception('User not authenticated');
+    }
+
+    final messages = <Map<String, String>>[
+      {'role': 'system', 'content': _systemPrompt ?? ''},
+      ..._conversationHistory,
+    ];
+
+    final proxyUrl = '${EnvConfig.supabaseUrl}/functions/v1/openai-proxy';
+    final request = http.Request('POST', Uri.parse(proxyUrl));
+    request.headers.addAll({
+      'Authorization': 'Bearer ${session.accessToken}',
+      'Content-Type': 'application/json',
+      'apikey': EnvConfig.supabaseAnonKey,
+    });
+    request.body = json.encode({
+      'model': _model,
+      'messages': messages,
+      'max_tokens': 400,
+      'temperature': 0.7,
+      'stream': true,
+    });
+
+    final client = http.Client();
+    final fullContent = StringBuffer();
+
+    try {
+      final streamedResponse = await client.send(request);
+
+      if (streamedResponse.statusCode != 200) {
+        _conversationHistory.removeLast();
+        throw Exception('Streaming request failed: ${streamedResponse.statusCode}');
+      }
+
+      await for (final line in streamedResponse.stream
+          .transform(const Utf8Decoder(allowMalformed: true))
+          .transform(const LineSplitter())) {
+        final trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        final data = trimmed.substring(6);
+        if (data == '[DONE]') break;
+
+        try {
+          final decoded = json.decode(data) as Map<String, dynamic>;
+          final choices = decoded['choices'] as List?;
+          if (choices == null || choices.isEmpty) continue;
+          final delta = choices.first['delta']?['content'] as String?;
+          if (delta != null && delta.isNotEmpty) {
+            fullContent.write(delta);
+            yield delta;
+          }
+        } catch (_) {
+          // Skip malformed SSE chunks
+        }
+      }
+
+      if (fullContent.isNotEmpty) {
+        _conversationHistory.add({'role': 'assistant', 'content': fullContent.toString()});
+      } else {
+        _conversationHistory.removeLast();
+      }
+    } catch (e) {
+      if (fullContent.isEmpty) _conversationHistory.removeLast();
+      rethrow;
+    } finally {
+      client.close();
+    }
   }
 
   /// Clear session (called when user clears chat history)

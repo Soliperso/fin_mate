@@ -146,7 +146,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                             ],
                           ),
                           child: Image.asset(
-                            'assets/images/updated_dollar_symbol.png',
+                            'assets/images/money_icon.png',
                             width: 180,
                             height: 180,
                           ),
@@ -155,7 +155,10 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         // App Name
                         Text(
                           'app.name'.tr(),
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium
+                              ?.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.5,
@@ -165,7 +168,10 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         // Tagline
                         Text(
                           'app.tagline'.tr(),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.85),
                                 letterSpacing: 0.5,
                               ),

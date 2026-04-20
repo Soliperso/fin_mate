@@ -5,17 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/ai_query_limit_provider.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/balance_forecast_provider.dart';
 import '../providers/insights_providers.dart';
 import '../../domain/entities/balance_forecast.dart';
+import '../../domain/entities/chat_message.dart';
 import '../widgets/enhanced_chat_message_bubble.dart';
-import '../widgets/typing_indicator.dart';
 import '../widgets/chat_input_field.dart';
 import '../widgets/suggested_prompts.dart';
-import '../widgets/balance_forecast_card.dart';
 import '../widgets/balance_timeline_chart.dart';
 import '../widgets/query_limit_banner.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
+import '../../../../shared/widgets/hero_stat_badge.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
@@ -32,7 +34,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _chatScrollController = ScrollController();
-  bool _isProcessing = false;
+  // True only during the brief query-limit check before streaming starts
+  bool _isSendingCheck = false;
 
   @override
   void initState() {
@@ -50,46 +53,42 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
   void _scrollToBottom() {
     if (_chatScrollController.hasClients) {
       Future.delayed(const Duration(milliseconds: 100), () {
-        _chatScrollController.animateTo(
-          _chatScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        if (_chatScrollController.hasClients) {
+          _chatScrollController.animateTo(
+            _chatScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       });
     }
   }
 
   Future<void> _handleSendMessage(String text) async {
-    // Check if user can make a query
+    if (_isSendingCheck) return;
+    setState(() => _isSendingCheck = true);
+
     final canMakeQuery = await ref.read(canMakeQueryProvider.future);
 
+    if (!mounted) return;
+    setState(() => _isSendingCheck = false);
+
     if (!canMakeQuery) {
-      // Show limit reached dialog
-      if (!mounted) return;
       _showQueryLimitDialog();
       return;
     }
 
-    setState(() => _isProcessing = true);
-    _scrollToBottom();
-
-    // Increment query count for freemium users
+    // Increment query count — continue even if this fails
     try {
       await ref.read(aiQueryOperationsProvider).incrementQueryCount();
     } catch (e) {
-      // Continue even if count increment fails
       debugPrint('Failed to increment query count: $e');
     }
 
-    // Ensure typing indicator shows for at least 800ms for better UX
-    final minDisplayTime = Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
 
-    await Future.wait([
-      ref.read(chatProvider.notifier).sendMessage(text),
-      minDisplayTime,
-    ]);
-
-    setState(() => _isProcessing = false);
+    // Streaming starts immediately inside the notifier; no need to await
+    ref.read(chatProvider.notifier).sendMessage(text);
     _scrollToBottom();
     ref.invalidate(dynamicPromptsProvider);
   }
@@ -188,81 +187,74 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
   Widget _buildChatTab() {
     final chatMessagesAsync = ref.watch(chatProvider);
-    final List<String> suggestedPrompts = ref.watch(dynamicPromptsProvider).whenOrNull(data: (p) => p)
-        ?? ref.watch(suggestedPromptsProvider);
+    final List<String> suggestedPrompts =
+        ref.watch(dynamicPromptsProvider).whenOrNull(data: (p) => p) ??
+            ref.watch(suggestedPromptsProvider);
 
-    return Column(
-      children: [
-        // Query limit banner
-        const Padding(
-          padding: EdgeInsets.all(AppSizes.md),
-          child: QueryLimitBanner(),
-        ),
-        Expanded(
-          child: chatMessagesAsync.when(
-            data: (messages) {
-              if (messages.isEmpty) {
-                return EmptyStateCard(
-                  icon: CupertinoIcons.chat_bubble,
-                  title: 'Start a Conversation',
-                  message: 'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
-                  backgroundColor: AppColors.brandTeal,
-                );
-              }
+    return chatMessagesAsync.when(
+      data: (messages) {
+        final isStreaming =
+            _isSendingCheck || messages.any((m) => m.status == MessageStatus.streaming);
 
-              return ListView.builder(
-                controller: _chatScrollController,
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
-                itemCount: messages.length + (_isProcessing ? 2 : 1),
-                itemBuilder: (context, index) {
-                  // Show typing indicator while processing
-                  if (_isProcessing && index == messages.length) {
-                    return const TypingIndicator();
-                  }
+        // Auto-scroll when a streaming message grows
+        if (isStreaming) _scrollToBottom();
 
-                  // Suggested prompts at bottom
-                  if (index == messages.length || (_isProcessing && index == messages.length + 1)) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: AppSizes.md,
-                        bottom: AppSizes.sm,
+        return Column(
+          children: [
+            // Query limit banner — only visible ≥7/10 queries, chat tab only
+            const QueryLimitBanner(),
+            Expanded(
+              child: messages.isEmpty
+                  ? EmptyStateCard(
+                      icon: CupertinoIcons.chat_bubble,
+                      title: 'Start a Conversation',
+                      message:
+                          'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
+                      backgroundColor: AppColors.brandTeal,
+                    )
+                  : ListView.builder(
+                      controller: _chatScrollController,
+                      padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) => EnhancedChatMessageBubble(
+                        message: messages[index],
+                        onFollowUpTap: _handleSendMessage,
+                        onActionTap: _handleActionTap,
                       ),
-                      child: SuggestedPrompts(
-                        prompts: suggestedPrompts,
-                        onPromptTap: _handleSendMessage,
-                      ),
-                    );
-                  }
-
-                  return EnhancedChatMessageBubble(
-                    message: messages[index],
-                    onFollowUpTap: _handleSendMessage,
-                    onActionTap: _handleActionTap,
-                  );
-                },
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
+                    ),
             ),
-            error: (error, stack) => ErrorRetryWidget(
-              title: 'Failed to load chat',
-              message: 'Unable to load chat history',
-              onRetry: () => ref.invalidate(chatProvider),
+            // Persistent quick prompts always visible above the input
+            Padding(
+              padding: const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
+              child: SuggestedPrompts(
+                prompts: suggestedPrompts,
+                onPromptTap: _handleSendMessage,
+              ),
             ),
-          ),
-        ),
-        ChatInputField(
-          onSend: _handleSendMessage,
-          isLoading: _isProcessing,
-        ),
-      ],
+            ChatInputField(
+              onSend: _handleSendMessage,
+              isLoading: isStreaming,
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => ErrorRetryWidget(
+        title: 'Failed to load chat',
+        message: 'Unable to load chat history',
+        onRetry: () => ref.invalidate(chatProvider),
+      ),
     );
   }
 
   Widget _buildForecastTab() {
     final activeForecastAsync = ref.watch(activeForecastProvider);
     final selectedScenario = ref.watch(selectedForecastScenarioProvider);
+    final currencyFormat = ref.watch(currencyFormat2Provider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -275,50 +267,183 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Scenario selector
-            SegmentedButton<ForecastScenarioType>(
-              segments: ForecastScenarioType.values
-                  .map((t) => ButtonSegment<ForecastScenarioType>(
-                        value: t,
-                        label: Text(
-                          t.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+            // Scenario selector — segmented-control style
+            Row(
+              children: ForecastScenarioType.values.map((type) {
+                final isSelected = selectedScenario == type;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: type != ForecastScenarioType.conservative
+                          ? AppSizes.xs
+                          : 0,
+                      left: type != ForecastScenarioType.baseline
+                          ? AppSizes.xs
+                          : 0,
+                    ),
+                    child: GestureDetector(
+                      onTap: () => ref
+                          .read(selectedForecastScenarioProvider.notifier)
+                          .state = type,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.brandTeal
+                              : cardColor,
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusMd),
+                          border: isSelected
+                              ? null
+                              : Border.all(
+                                  color: isDark
+                                      ? AppColors.borderDark
+                                      : AppColors.borderLight,
+                                ),
                         ),
-                      ))
-                  .toList(),
-              selected: {selectedScenario},
-              onSelectionChanged: (s) => ref
-                  .read(selectedForecastScenarioProvider.notifier)
-                  .state = s.first,
-              style: ButtonStyle(
-                visualDensity: VisualDensity.compact,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                foregroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.6);
-                  }
-                  return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
-                }),
-              ),
-              expandedInsets: EdgeInsets.zero,
+                        alignment: Alignment.center,
+                        child: Text(
+                          type.label,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: AppSizes.md),
             activeForecastAsync.when(
               data: (forecast) {
+                final balance = forecast.currentBalance;
+
+                // Worst-case projected balance over 30 days — drives card color
+                final minProjected = forecast.dailyForecasts.isEmpty
+                    ? balance
+                    : forecast.dailyForecasts
+                        .map((d) => d.projectedBalance)
+                        .reduce((a, b) => a < b ? a : b);
+
+                final projected30 = forecast.dailyForecasts.isNotEmpty
+                    ? forecast.dailyForecasts.last.projectedBalance
+                    : balance;
+                final isProjectedRisk = projected30 < 100;
+
+                final List<Color> gradient;
+                final Color shadowBase;
+                final String oneLiner;
+
+                if (minProjected > 500) {
+                  gradient = [
+                    AppColors.systemGreen,
+                    const Color(0xFF27AE60),
+                  ];
+                  shadowBase = AppColors.systemGreen;
+                  oneLiner = 'Your balance stays healthy throughout the next 30 days.';
+                } else if (minProjected > 100) {
+                  gradient = [
+                    AppColors.systemOrange,
+                    const Color(0xFFE67E22),
+                  ];
+                  shadowBase = AppColors.systemOrange;
+                  final criticalDays = forecast.dailyForecasts
+                      .where((d) => d.status == BalanceStatus.critical)
+                      .length;
+                  oneLiner = criticalDays > 0
+                      ? 'Balance may drop critically low on $criticalDays day${criticalDays == 1 ? '' : 's'} this month.'
+                      : 'Balance will get tight — projected low of ${currencyFormat.format(minProjected)}.';
+                } else {
+                  gradient = [
+                    AppColors.systemRed,
+                    const Color(0xFFC0392B),
+                  ];
+                  shadowBase = AppColors.systemRed;
+                  oneLiner = forecast.warnings.isNotEmpty
+                      ? forecast.warnings.first
+                      : 'Balance is projected to hit a critical low. Review your expenses.';
+                }
+
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    BalanceForecastCard(forecast: forecast),
+                    // Hero card
+                    GradientHeroCard(
+                      gradientColors: gradient,
+                      shadowColor: shadowBase.withValues(alpha: 0.35),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Current Balance',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                          ),
+                          const SizedBox(height: AppSizes.xs),
+                          Text(
+                            currencyFormat.format(balance),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displaySmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: AppSizes.md),
+                          Row(
+                            children: [
+                              HeroStatBadge(
+                                label: 'Safe to Spend',
+                                value: currencyFormat
+                                    .format(forecast.safeToSpend),
+                              ),
+                              const SizedBox(width: AppSizes.sm),
+                              HeroStatBadge(
+                                label: '30-Day Projection',
+                                value: currencyFormat.format(projected30),
+                                highlight: isProjectedRisk,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    // One-liner interpretation
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.xs),
+                      child: Text(
+                        oneLiner,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                    ),
                     const SizedBox(height: AppSizes.md),
                     BalanceTimelineChart(forecast: forecast),
                     const SizedBox(height: AppSizes.md),
-                    _buildForecastDetails(forecast.dailyForecasts.take(7).toList()),
+                    _buildForecastDetails(
+                        forecast.dailyForecasts.take(7).toList(), cardColor),
                   ],
                 );
               },
-              loading: () => Column(
-                children: const [
-                  SkeletonCard(height: 200),
+              loading: () => const Column(
+                children: [
+                  SkeletonCard(height: 180),
                   SizedBox(height: AppSizes.md),
                   SkeletonCard(height: 250),
                 ],
@@ -335,98 +460,140 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     );
   }
 
-  Widget _buildForecastDetails(List forecast) {
+  Widget _buildForecastDetails(List<DailyForecast> forecast, Color cardColor) {
     if (forecast.isEmpty) return const SizedBox.shrink();
 
+    final currencyFormat = ref.watch(currencyFormat0Provider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dividerColor = isDark ? AppColors.separatorDark : AppColors.separator;
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.secondarySystemBackgroundDark
-            : AppColors.systemBackground,
+        color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Next 7 Days Details',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm),
+            child: Text(
+              'Next 7 Days',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
                   ),
             ),
-            const SizedBox(height: AppSizes.md),
-            ...forecast.map((day) {
-              final date = day.date as DateTime;
-              final balance = day.projectedBalance as double;
-              final status = day.status;
-              final transactions = day.scheduledTransactions as List<String>;
+          ),
+          ...forecast.asMap().entries.map((entry) {
+            final i = entry.key;
+            final day = entry.value;
 
-              Color statusColor = AppColors.success;
-              if (status.toString().contains('warning')) {
+            final Color statusColor;
+            final String statusLabel;
+            switch (day.status) {
+              case BalanceStatus.warning:
                 statusColor = AppColors.warning;
-              } else if (status.toString().contains('critical')) {
+                statusLabel = 'Low';
+                break;
+              case BalanceStatus.critical:
                 statusColor = AppColors.error;
-              }
+                statusLabel = 'Critical';
+                break;
+              default:
+                statusColor = AppColors.success;
+                statusLabel = 'Good';
+            }
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSizes.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _formatDate(date),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                              ),
-                        ),
-                        Row(
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (i > 0)
+                  Divider(height: 1, thickness: 0.5, color: dividerColor),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md, vertical: AppSizes.sm),
+                  child: Row(
+                    children: [
+                      // Date + scheduled transactions
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: statusColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.xs),
                             Text(
-                              '\$${balance.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: statusColor.withValues(alpha: 0.6),
-                                    fontWeight: FontWeight.w600,
+                              _formatDate(day.date),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
                                   ),
                             ),
+                            if (day.scheduledTransactions.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              ...day.scheduledTransactions.map(
+                                (tx) => Padding(
+                                  padding: const EdgeInsets.only(top: 1),
+                                  child: Text(
+                                    '· $tx',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                            color: AppColors.textSecondary),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
-                      ],
-                    ),
-                    if (transactions.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      for (final tx in transactions)
-                        Padding(
-                          padding: const EdgeInsets.only(left: AppSizes.sm, top: 2),
-                          child: Text(
-                            tx,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      ),
+                      const SizedBox(width: AppSizes.sm),
+                      // Balance + status pill
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            currencyFormat.format(day.projectedBalance),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                   color: AppColors.textSecondary,
                                 ),
                           ),
-                        ),
+                          const SizedBox(height: 3),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.sm, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.1),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
+                            ),
+                            child: Text(
+                              statusLabel,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                  ],
+                  ),
                 ),
-              );
-            }),
-          ],
-        ),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }

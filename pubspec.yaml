@@ -125,15 +125,14 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/updated_dollar_symbol.png"
+  image_path: "assets/images/money_icon.png"
   remove_alpha_ios: true
-  background_color_ios: "#F5F7FA"
   web:
     generate: true
-    image_path: "assets/images/updated_dollar_symbol.png"
-    background_color: "#F5F7FA"
-  adaptive_icon_background: "#F5F7FA"
-  adaptive_icon_foreground: "assets/images/updated_dollar_symbol.png"
+    image_path: "assets/images/money_icon.png"
+    background_color: "#20808D"
+  adaptive_icon_background: "#20808D"
+  adaptive_icon_foreground: "assets/images/money_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -149,7 +148,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
-    - assets/images/updated_dollar_symbol.png
+    - assets/images/money_icon.png
     - assets/legal/
     - assets/translations/
 

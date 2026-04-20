@@ -92,24 +92,28 @@ class BalanceForecastService {
     }
   }
 
-  /// Get total current balance across all active accounts
+  /// Get true net worth using the same RPC as the Dashboard (assets minus credit card debt)
   Future<double> _getCurrentBalance(String userId) async {
     try {
-      final accounts = await _supabase
-          .from('accounts')
-          .select('balance')
-          .eq('user_id', userId)
-          .eq('is_active', true);
-
-      double total = 0;
-      for (final account in accounts as List) {
-        total += (account['balance'] as num).toDouble();
-      }
-
-      return total;
+      final result = await _supabase
+          .rpc('calculate_true_net_worth', params: {'p_user_id': userId});
+      return (result as num?)?.toDouble() ?? 0.0;
     } catch (e) {
-      // Return 0 if no accounts found or error occurs
-      return 0.0;
+      // Fallback: sum all active account balances
+      try {
+        final accounts = await _supabase
+            .from('accounts')
+            .select('balance')
+            .eq('user_id', userId)
+            .eq('is_active', true);
+        double total = 0;
+        for (final account in accounts as List) {
+          total += (account['balance'] as num).toDouble();
+        }
+        return total;
+      } catch (_) {
+        return 0.0;
+      }
     }
   }
 

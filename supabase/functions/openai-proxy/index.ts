@@ -55,6 +55,27 @@ serve(async (req) => {
       body: JSON.stringify(body),
     });
 
+    // Streaming path — pipe OpenAI SSE directly back to the client.
+    // Auth check already ran above; OpenAI key never leaves this function.
+    if (body.stream === true) {
+      if (!openAiResponse.ok) {
+        return new Response(JSON.stringify({ error: 'OpenAI streaming request failed' }), {
+          status: openAiResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(openAiResponse.body, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'X-Accel-Buffering': 'no',
+        },
+      });
+    }
+
+    // Non-streaming path — existing behaviour unchanged
     const openAiData = await openAiResponse.json();
 
     if (!openAiResponse.ok) {

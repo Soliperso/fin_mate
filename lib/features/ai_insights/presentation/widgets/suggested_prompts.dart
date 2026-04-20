@@ -15,36 +15,20 @@ class SuggestedPrompts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-          child: Text(
-            'Suggestions',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-        const SizedBox(height: AppSizes.sm),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-          child: Row(
-            children: prompts.map((prompt) {
-              return Padding(
-                padding: const EdgeInsets.only(right: AppSizes.sm),
-                child: _PromptChip(
-                  prompt: prompt,
-                  onTap: () => onPromptTap(prompt),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+      child: Row(
+        children: prompts.map((prompt) {
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: _PromptChip(
+              prompt: prompt,
+              onTap: () => onPromptTap(prompt),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
