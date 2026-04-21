@@ -22,7 +22,7 @@ import '../../features/transactions/presentation/pages/add_transaction_page.dart
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
 import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
 // [MVP: AI Insights - Commented out]
-import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
@@ -290,11 +290,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           // [MVP: AI Insights - Commented out]
-          GoRoute(
-            path: '/insights',
-            name: 'insights',
-            builder: (context, state) => const AiInsightsPage(),
-          ),
+          // GoRoute(
+          //   path: '/insights',
+          //   name: 'insights',
+          //   builder: (context, state) => const AiInsightsPage(),
+          // ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',
@@ -527,11 +527,11 @@ class _MainShellState extends State<MainShell>
                   onTap: () => context.go('/debt'),
                 ),
                 _TabItem(
-                  icon: CupertinoIcons.sparkles,
-                  activeIcon: CupertinoIcons.sparkles,
-                  label: 'AI',
+                  icon: CupertinoIcons.person,
+                  activeIcon: CupertinoIcons.person_fill,
+                  label: 'nav.profile'.tr(),
                   isSelected: selectedIndex == 4,
-                  onTap: () => context.go('/insights'),
+                  onTap: () => context.go('/profile'),
                 ),
               ],
             ),
@@ -547,7 +547,7 @@ class _MainShellState extends State<MainShell>
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
     if (location.startsWith('/debt')) return 3;
-    if (location.startsWith('/insights')) return 4;
+    if (location.startsWith('/profile')) return 4;
     return 0;
   }
 }

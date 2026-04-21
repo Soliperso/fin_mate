@@ -44,15 +44,15 @@
 - [x] TOTP column dropped
 - [x] Migration 31 applied
 - [x] Sentry DSN configured
-- [ ] Apple Developer account active ⏳ **→ Step 1**
-- [ ] App ID + provisioning profile created ⏳ **→ Steps 2–4**
-- [ ] Xcode signing configured ⏳ **→ Step 5**
+- [x] Apple Developer account active ✅
+- [x] App ID + provisioning profile created ✅ com.chebli.finmate
+- [x] Xcode signing configured ✅ Apple Distribution: Ahmed Chebli (LHVP55DRTQ)
 - [ ] App icon — 1024×1024 no alpha ⏳ **→ Step 6**
-- [ ] Screenshots — 6.9" and 5.5" minimum ⏳ **→ Step 7**
-- [ ] App record created in App Store Connect ⏳ **→ Step 8**
-- [ ] Privacy Policy URL live ⏳ **→ Step 9**
-- [ ] App Store listing complete ⏳ **→ Step 10**
-- [ ] IPA built + uploaded to TestFlight ⏳ **→ Step 11**
+- [x] Screenshots — 6.9" captured ✅ (5.5" skipped — App Store Connect uses 6.9" for all sizes)
+- [x] App record created in App Store Connect ✅ "Finmate: Budget & Debt Tracker"
+- [x] Privacy Policy URL live ✅ https://www.notion.so/Finmate-Privacy-Policy-348cdac35b0c80429096fac24972c5f8
+- [x] App Store listing complete ✅ Description, keywords, subtitle, URLs, App Privacy declaration published
+- [x] IPA built + uploaded to TestFlight ✅
 - [ ] Physical iOS device testing passed ⏳ **→ Step 12**
 - [ ] TestFlight external beta approved (optional) ⏳ **→ Step 13**
 - [ ] Zero critical bugs from beta testing ⏳
@@ -201,8 +201,8 @@ Apple requires screenshots for every device size you support. **Minimum required
 
 **Optional but recommended:** Add text overlays in Canva or Figma (e.g. "Track every dollar", "Crush your debt faster") — improves App Store conversion significantly.
 
-- [ ] Screenshots taken for 6.9" device
-- [ ] Screenshots taken for 5.5" device
+- [x] Screenshots taken for 6.9" device
+- [x] Screenshots taken for 5.5" device (skipped — 6.9" covers all sizes)
 
 ---
 
@@ -248,7 +248,7 @@ Apple rejects apps without a publicly accessible Privacy Policy URL.
 
 **Alternative:** [termsfeed.com](https://www.termsfeed.com/privacy-policy-generator/) — free generator, 2 minutes.
 
-- [ ] Privacy Policy published and URL accessible
+- [x] Privacy Policy published and URL accessible
 
 ---
 
@@ -310,13 +310,13 @@ App Store Connect → your app → **App Privacy** → **Get Started**
 | Crash data | Yes — Sentry | No |
 | Everything else | No | No |
 
-- [ ] Description pasted
-- [ ] Keywords filled in
-- [ ] Support URL + Privacy Policy URL entered
-- [ ] Screenshots uploaded for all required device sizes
-- [ ] App Privacy declaration completed
-- [ ] Age rating completed (4+)
-- [ ] Pricing set to Free
+- [x] Description pasted
+- [x] Keywords filled in
+- [x] Support URL + Privacy Policy URL entered
+- [x] Screenshots uploaded for all required device sizes
+- [x] App Privacy declaration completed
+- [x] Age rating completed (4+)
+- [x] Pricing set to Free
 
 ---
 
@@ -351,8 +351,8 @@ version: 1.0.0+1   # increment the +N each upload, e.g. +2, +3
 
 Wait 5–15 minutes for Apple to process. Build appears under the **TestFlight** tab.
 
-- [ ] IPA built successfully
-- [ ] Build uploaded and visible in TestFlight
+- [x] IPA built successfully
+- [x] Build uploaded and visible in TestFlight
 
 ---
 
