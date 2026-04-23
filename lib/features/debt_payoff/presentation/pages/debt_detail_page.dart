@@ -96,15 +96,30 @@ class _DebtDetailPageState extends ConsumerState<DebtDetailPage>
           _DetailsTab(debt: debt),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => GlassBottomSheet.show(
-          context: context,
-          child: LogPaymentBottomSheet(debt: debt),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        child: SizedBox(
+          width: double.infinity,
+          height: AppSizes.buttonHeightMd,
+          child: ElevatedButton.icon(
+            onPressed: () => GlassBottomSheet.show(
+              context: context,
+              child: LogPaymentBottomSheet(debt: debt),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+            ),
+            icon: const Icon(CupertinoIcons.add),
+            label: Text('debtCard.logPayment'.tr()),
+          ),
         ),
-        backgroundColor: AppColors.brandTeal,
-        foregroundColor: Colors.white,
-        icon: const Icon(CupertinoIcons.add),
-        label: Text('debtCard.logPayment'.tr()),
       ),
     );
   }
@@ -614,7 +629,10 @@ class _DetailRow extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                      ?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
                   textAlign: TextAlign.right,
                 ),
               ),

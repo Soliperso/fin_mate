@@ -83,4 +83,7 @@ abstract class AuthRepository {
 
   /// Update password for the currently authenticated user
   Future<void> updatePassword(String newPassword);
+
+  /// Permanently delete the current user's account and all associated data
+  Future<void> deleteAccount();
 }

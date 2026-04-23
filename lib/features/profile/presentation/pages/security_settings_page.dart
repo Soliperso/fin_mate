@@ -142,11 +142,381 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 onTap: _showChangePasswordDialog,
               ),
             ]),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Danger Zone ───────────────────────────────────────────────
+            _sectionLabel(context, 'security.dangerZone'.tr()),
+            const SizedBox(height: AppSizes.sm),
+            _buildCard(context, isDark, children: [
+              _buildActionTile(
+                context,
+                isDark: isDark,
+                icon: CupertinoIcons.trash_fill,
+                iconBg: AppColors.systemRed.withValues(alpha: 0.14),
+                iconColor: AppColors.systemRed,
+                title: 'security.deleteAccount'.tr(),
+                subtitle: 'security.deleteAccountSub'.tr(),
+                trailing: const Icon(CupertinoIcons.chevron_right,
+                    size: 16, color: AppColors.systemGray3),
+                onTap: () => _showDeleteAccountWarning(context),
+              ),
+            ]),
             const SizedBox(height: AppSizes.xl),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showDeleteAccountWarning(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('security.deleteAccountWarningTitle'.tr()),
+        content: Text('security.deleteAccountWarning'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.systemRed),
+            child: Text('common.confirm'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    _showDeleteAccountConfirm(context);
+  }
+
+  void _showDeleteAccountConfirm(BuildContext context) {
+    final emailController = TextEditingController();
+    final currentEmail = ref.read(authNotifierProvider).user?.email ?? '';
+
+    GlassBottomSheet.show(
+      context: context,
+      isDismissible: true,
+      child: StatefulBuilder(
+        builder: (ctx, setState) {
+          final isDark = Theme.of(ctx).brightness == Brightness.dark;
+          final screenHeight = MediaQuery.of(ctx).size.height;
+          final typed = emailController.text.trim();
+          final matches = typed == currentEmail;
+          final hasTyped = typed.isNotEmpty;
+          bool isDeleting = false;
+
+          Widget lossChip(IconData icon, String label) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: AppColors.systemRed.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  border: Border.all(
+                      color: AppColors.systemRed.withValues(alpha: 0.18)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 12, color: AppColors.systemRed),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.systemGray
+                                  : AppColors.systemGray2,
+                              fontSize: 11,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+          return SizedBox(
+            height: screenHeight * 0.82,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Drag handle ────────────────────────────────────────
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(
+                        top: AppSizes.md, bottom: AppSizes.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.systemGray4,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      left: AppSizes.lg,
+                      right: AppSizes.lg,
+                      top: AppSizes.md,
+                      bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSizes.sm,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ── Hero icon ────────────────────────────────────
+                        Center(
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: AppColors.systemRed.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.systemRed.withValues(alpha: 0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(CupertinoIcons.trash_fill,
+                                color: AppColors.systemRed, size: 28),
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.md),
+
+                        // ── Title block ───────────────────────────────────
+                        Text(
+                          'security.deleteAccountConfirmTitle'.tr(),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'This action is permanent and cannot be undone.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                color: AppColors.secondaryLabel,
+                              ),
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+
+                        // ── What gets deleted ────────────────────────────
+                        Text(
+                          'PERMANENTLY DELETED',
+                          style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
+                                color: AppColors.systemRed,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                              ),
+                        ),
+                        const SizedBox(height: AppSizes.sm),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            lossChip(CupertinoIcons.arrow_right_arrow_left,
+                                'Transactions & accounts'),
+                            lossChip(CupertinoIcons.chart_bar_fill, 'Budgets'),
+                            lossChip(CupertinoIcons.flag_fill,
+                                'Savings goals'),
+                            lossChip(CupertinoIcons.creditcard_fill,
+                                'Debt payoff plans'),
+                            lossChip(CupertinoIcons.sparkles, 'AI insights'),
+                            lossChip(CupertinoIcons.person_fill,
+                                'Profile & settings'),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+
+                        // ── Email confirmation ────────────────────────────
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                  color: isDark
+                                      ? AppColors.systemGray
+                                      : AppColors.systemGray2,
+                                ),
+                            children: [
+                              const TextSpan(text: 'Type '),
+                              TextSpan(
+                                text: currentEmail,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.systemRed,
+                                ),
+                              ),
+                              const TextSpan(text: ' to confirm:'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.sm),
+                        TextField(
+                          controller: emailController,
+                          onChanged: (_) => setState(() {}),
+                          autofocus: false,
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          style: Theme.of(ctx).textTheme.bodyMedium,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your email address',
+                            hintStyle: TextStyle(
+                              color: isDark
+                                  ? AppColors.systemGray3
+                                  : AppColors.systemGray4,
+                              fontSize: 14,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 14),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusMd),
+                              borderSide: BorderSide(
+                                  color: AppColors.systemGray4, width: 1),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusMd),
+                              borderSide: BorderSide(
+                                  color: hasTyped && !matches
+                                      ? AppColors.systemRed.withValues(alpha: 0.5)
+                                      : AppColors.systemGray4,
+                                  width: 1),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusMd),
+                              borderSide: BorderSide(
+                                color: matches
+                                    ? AppColors.success
+                                    : hasTyped
+                                        ? AppColors.systemRed
+                                        : AppColors.primaryTeal,
+                                width: 1.5,
+                              ),
+                            ),
+                            suffixIcon: hasTyped
+                                ? Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: Icon(
+                                      matches
+                                          ? CupertinoIcons.checkmark_circle_fill
+                                          : CupertinoIcons.xmark_circle_fill,
+                                      color: matches
+                                          ? AppColors.success
+                                          : AppColors.systemRed,
+                                      size: 20,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                        if (hasTyped && !matches) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(CupertinoIcons.exclamationmark_circle,
+                                  size: 12, color: AppColors.systemRed),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Email does not match',
+                                style: Theme.of(ctx)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(color: AppColors.systemRed),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: AppSizes.xl),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Pinned action buttons ──────────────────────────────
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: AppSizes.lg,
+                    right: AppSizes.lg,
+                    bottom:
+                        MediaQuery.of(ctx).padding.bottom + AppSizes.md,
+                    top: AppSizes.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FilledButton(
+                        onPressed: matches && !isDeleting
+                            ? () async {
+                                setState(() => isDeleting = true);
+                                Navigator.pop(ctx);
+                                await _performAccountDeletion(context);
+                              }
+                            : null,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.systemRed,
+                          disabledBackgroundColor:
+                              AppColors.systemRed.withValues(alpha: 0.3),
+                          minimumSize: const Size.fromHeight(52),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusMd),
+                          ),
+                        ),
+                        child: isDeleting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white),
+                              )
+                            : Text(
+                                'security.deleteAccountConfirmButton'.tr(),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15),
+                              ),
+                      ),
+                      const SizedBox(height: AppSizes.sm),
+                      TextButton(
+                        onPressed:
+                            isDeleting ? null : () => Navigator.pop(ctx),
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size.fromHeight(44),
+                        ),
+                        child: Text('common.cancel'.tr()),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _performAccountDeletion(BuildContext context) async {
+    try {
+      await ref.read(authNotifierProvider.notifier).deleteAccount();
+      if (!context.mounted) return;
+      await SuccessDialog.show(
+        context,
+        title: 'common.done'.tr(),
+        message: 'security.deleteAccountSuccess'.tr(),
+        autoDismissDuration: const Duration(seconds: 4),
+      );
+      if (!context.mounted) return;
+      context.go('/login', extra: 'account_deleted');
+    } catch (e) {
+      if (!context.mounted) return;
+      showErrorDialog(context, 'security.deleteAccountFailed'.tr());
+    }
   }
 
   // ── Layout helpers (match Settings page style) ────────────────────────────

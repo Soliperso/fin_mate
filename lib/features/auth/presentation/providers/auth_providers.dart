@@ -7,7 +7,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 // import '../../../../core/config/supabase_client.dart'; // [Biometric]
 import '../../../../core/services/sentry_service.dart';
-// import '../../../../core/services/secure_storage_provider.dart'; // [Biometric]
+import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/providers/analytics_provider.dart';
 
 // ============================================================================
@@ -226,6 +226,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void setError(String message) {
     state = state.copyWith(errorMessage: message);
+  }
+
+  Future<void> deleteAccount() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final analytics = _ref.read(analyticsServiceProvider);
+      await analytics.trackFeatureUsed('account_deleted');
+
+      await _repository.deleteAccount();
+      state = AuthState(user: null, isLoading: false);
+
+      _ref.read(userSessionProvider.notifier).state++;
+      await _clearUserContext();
+      await _ref.read(secureStorageServiceProvider).clearEmail();
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _getErrorMessage(e),
+      );
+      rethrow;
+    }
   }
 
   Future<void> signOut() async {

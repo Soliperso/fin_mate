@@ -234,4 +234,13 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Failed to update password: $e');
     }
   }
+
+  @override
+  Future<void> deleteAccount() async {
+    try {
+      await _remoteDataSource.deleteAccount();
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
 }

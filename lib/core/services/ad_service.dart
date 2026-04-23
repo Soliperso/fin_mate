@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/env_config.dart';
 
@@ -11,16 +12,21 @@ class AdService {
 
   bool _isInitialized = false;
 
-  /// Initialize the Mobile Ads SDK
-  /// Should be called once at app startup
+  /// Initialize the Mobile Ads SDK.
+  /// On iOS, requests App Tracking Transparency permission first (required by
+  /// Apple guideline 5.1.2(i)). Ads load regardless of the user's choice —
+  /// Google automatically serves non-personalized ads when permission is denied.
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // Register test devices to avoid policy violations during development.
-      // Find your device ID in the console log after first run:
-      // "To get test ads on this device, set testDeviceIdentifiers = @[ @"XXXX" ]"
-      // Then add it to the list below.
+      if (Platform.isIOS) {
+        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        }
+      }
+
       MobileAds.instance.updateRequestConfiguration(
         RequestConfiguration(testDeviceIds: _testDeviceIds),
       );

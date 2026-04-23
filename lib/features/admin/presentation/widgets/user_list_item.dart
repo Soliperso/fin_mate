@@ -17,18 +17,29 @@ class UserListItem extends StatelessWidget {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
+    final statusColor = user.isAdmin
+        ? AppColors.brandTeal
+        : user.isActive
+            ? AppColors.systemGreen
+            : (isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3);
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          onTap: () => context.push('/admin/users/${user.id}'),
-          child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 3, color: statusColor),
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => context.push('/admin/users/${user.id}'),
+                  child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.md,
               vertical: AppSizes.sm,
@@ -37,7 +48,7 @@ class UserListItem extends StatelessWidget {
               children: [
                 // Avatar
                 CircleAvatar(
-                  radius: 24,
+                  radius: 28,
                   backgroundColor: AppColors.brandTeal.withValues(alpha: 0.15),
                   backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
                       ? NetworkImage(user.avatarUrl!)
@@ -117,32 +128,37 @@ class UserListItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 5),
-                      Wrap(
-                        spacing: 4,
-                        runSpacing: 2,
-                        children: [
-                          _buildStatChip(
-                            icon: CupertinoIcons.doc_text,
-                            label: '${user.transactionCount} Trans',
-                            color: AppColors.tealBlue,
-                          ),
-                          _buildStatChip(
-                            icon: CupertinoIcons.money_dollar_circle,
-                            label: NumberFormat.compactCurrency(symbol: '\$').format(user.netWorth),
-                            color: AppColors.systemBlue,
-                          ),
-                          if (user.isActive)
-                            _buildStatChip(
-                              icon: CupertinoIcons.checkmark_circle_fill,
-                              label: 'Active',
-                              color: AppColors.systemGreen,
-                            ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
+
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      NumberFormat.compactCurrency(symbol: '\$').format(user.netWorth),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.labelDark : AppColors.label,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${user.transactionCount} txns',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? AppColors.secondaryLabelDark
+                            : AppColors.secondaryLabel,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
 
                 // Arrow Icon
                 Icon(
@@ -153,40 +169,13 @@ class UserListItem extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
+        ),        // InkWell
+      ),          // Material
+    ),            // Expanded
+  ],              // outer Row children
+),                // outer Row
+),                // IntrinsicHeight
     );
   }
 
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

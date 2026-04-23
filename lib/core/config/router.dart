@@ -179,7 +179,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) => LoginPage(
+          reason: state.extra as String?,
+        ),
       ),
       GoRoute(
         path: '/signup',

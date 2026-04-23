@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 
 /// Reusable stat badge used inside gradient hero cards.
@@ -27,7 +26,7 @@ class HeroStatBadge extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: highlight
-              ? const Color(0xFFB52D23).withValues(alpha: 0.55)
+              ? const Color(0xFFD93025).withValues(alpha: 0.72)
               : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
         ),

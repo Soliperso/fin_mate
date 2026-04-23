@@ -14,7 +14,8 @@ import '../../../../core/services/secure_storage_provider.dart';
 import '../providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.reason});
+  final String? reason;
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -30,10 +31,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _rememberMe = false;
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
+  bool _showDeletionBanner = false;
 
   @override
   void initState() {
     super.initState();
+    _showDeletionBanner = widget.reason == 'account_deleted';
     _loadSavedCredentials();
 
     // Clear errors when user types (addListener fires on programmatic clear() too,
@@ -120,6 +123,47 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSizes.xxl),
+                if (_showDeletionBanner) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md, vertical: AppSizes.sm + 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.sm),
+                      border: Border.all(
+                          color: AppColors.primaryTeal.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(CupertinoIcons.checkmark_seal_fill,
+                              color: AppColors.primaryTeal, size: 16),
+                        ),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: Text(
+                            'security.accountDeletedBanner'.tr(),
+                            style: TextStyle(
+                              color: AppColors.primaryTeal,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () =>
+                              setState(() => _showDeletionBanner = false),
+                          child: Icon(CupertinoIcons.xmark,
+                              size: 14,
+                              color: AppColors.primaryTeal.withValues(alpha: 0.7)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                ],
                 if (authState.errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(AppSizes.md),
@@ -150,7 +194,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    onChanged: (_) => _clearError(),
+                    onChanged: (_) {
+                      _clearError();
+                      if (_showDeletionBanner) {
+                        setState(() => _showDeletionBanner = false);
+                      }
+                    },
                     onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     decoration: InputDecoration(
                       labelText: 'auth.login.emailLabel'.tr(),

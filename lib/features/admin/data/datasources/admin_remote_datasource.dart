@@ -103,10 +103,10 @@ class AdminRemoteDataSource {
   /// Disable/deactivate user account
   Future<void> disableUserAccount(String userId) async {
     try {
-      await _supabase
-          .from('user_profiles')
-          .update({'is_active': false})
-          .eq('id', userId);
+      await _supabase.rpc('admin_set_user_active', params: {
+        'p_user_id': userId,
+        'p_active': false,
+      });
     } catch (e) {
       throw Exception('Failed to disable user account: $e');
     }
@@ -115,10 +115,10 @@ class AdminRemoteDataSource {
   /// Enable/reactivate user account
   Future<void> enableUserAccount(String userId) async {
     try {
-      await _supabase
-          .from('user_profiles')
-          .update({'is_active': true})
-          .eq('id', userId);
+      await _supabase.rpc('admin_set_user_active', params: {
+        'p_user_id': userId,
+        'p_active': true,
+      });
     } catch (e) {
       throw Exception('Failed to enable user account: $e');
     }

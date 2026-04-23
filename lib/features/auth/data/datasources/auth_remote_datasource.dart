@@ -114,6 +114,11 @@ class AuthRemoteDataSource {
     await _supabase.auth.signOut();
   }
 
+  /// Permanently delete the current user's account and all associated data
+  Future<void> deleteAccount() async {
+    await _supabase.rpc('delete_user');
+  }
+
   /// Reset password
   Future<void> resetPassword(String email) async {
     await _supabase.auth.resetPasswordForEmail(email);
