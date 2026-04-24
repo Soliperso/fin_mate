@@ -380,20 +380,31 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
-  // ── Section label ──────────────────────────────────────────────────────────
+  // ── Section label with horizontal rule ────────────────────────────────────
 
   Widget _sectionLabel(String text) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        text.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-            ),
-      ),
+    final ruleColor = isDark ? AppColors.separatorDark : AppColors.separator;
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            text.toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isDark
+                      ? AppColors.secondaryLabelDark
+                      : AppColors.secondaryLabel,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+          ),
+        ),
+        const SizedBox(width: AppSizes.sm),
+        Expanded(
+          child: Container(height: 0.5, color: ruleColor),
+        ),
+      ],
     );
   }
 
@@ -407,6 +418,10 @@ class _SystemAnalyticsPageEnhancedState
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: isDark
+            ? null
+            : Border.all(color: AppColors.separator, width: 0.5),
+        boxShadow: AppColors.cardShadow(isDark),
       ),
       padding: const EdgeInsets.all(AppSizes.md),
       child: child,
@@ -435,8 +450,7 @@ class _SystemAnalyticsPageEnhancedState
 
   Widget _buildTrendsTab() {
     final userGrowthAsync = ref.watch(userGrowthTrendsProvider(_dateRange));
-    final financialTrendsAsync =
-        ref.watch(financialTrendsProvider(_dateRange));
+    final financialTrendsAsync = ref.watch(financialTrendsProvider(_dateRange));
 
     return RefreshIndicator(
       color: AppColors.brandTeal,
@@ -460,31 +474,40 @@ class _SystemAnalyticsPageEnhancedState
                       message: 'User growth trends will appear once data is available',
                       backgroundColor: AppColors.brandTeal,
                     )
-                  : Column(
+                  : Row(
                       children: [
-                        _chartCard(
-                          child: AnalyticsLineChart(
-                            dates: trends.map((t) => t.periodStart).toList(),
-                            values:
-                                trends.map((t) => t.newUsers.toDouble()).toList(),
-                            title: 'New Users',
-                            lineColor: AppColors.brandTeal,
+                        Expanded(
+                          child: _chartCard(
+                            child: AnalyticsLineChart(
+                              dates: trends.map((t) => t.periodStart).toList(),
+                              values: trends.map((t) => t.newUsers.toDouble()).toList(),
+                              title: 'New Users',
+                              lineColor: AppColors.brandTeal,
+                              compact: true,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: AppSizes.md),
-                        _chartCard(
-                          child: AnalyticsLineChart(
-                            dates: trends.map((t) => t.periodStart).toList(),
-                            values: trends
-                                .map((t) => t.cumulativeUsers.toDouble())
-                                .toList(),
-                            title: 'Total Users (Cumulative)',
-                            lineColor: AppColors.systemOrange,
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: _chartCard(
+                            child: AnalyticsLineChart(
+                              dates: trends.map((t) => t.periodStart).toList(),
+                              values: trends.map((t) => t.cumulativeUsers.toDouble()).toList(),
+                              title: 'Total Users',
+                              lineColor: AppColors.systemOrange,
+                              compact: true,
+                            ),
                           ),
                         ),
                       ],
                     ),
-              loading: () => _chartCardLoading(),
+              loading: () => Row(
+                children: [
+                  Expanded(child: _chartCardLoading()),
+                  const SizedBox(width: AppSizes.sm),
+                  Expanded(child: _chartCardLoading()),
+                ],
+              ),
               error: (e, _) => EmptyStateCard(
                 icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading Data',
@@ -506,42 +529,52 @@ class _SystemAnalyticsPageEnhancedState
                     )
                   : Column(
                       children: [
-                        _chartCard(
-                          child: AnalyticsLineChart(
-                            dates: trends.map((t) => t.periodStart).toList(),
-                            values: trends.map((t) => t.totalIncome).toList(),
-                            title: 'Income',
-                            lineColor: AppColors.systemGreen,
-                            valuePrefix: '\$',
-                          ),
+                        // Income + Expenses side by side
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _chartCard(
+                                child: AnalyticsLineChart(
+                                  dates: trends.map((t) => t.periodStart).toList(),
+                                  values: trends.map((t) => t.totalIncome).toList(),
+                                  title: 'Income',
+                                  lineColor: AppColors.systemGreen,
+                                  valuePrefix: '\$',
+                                  compact: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSizes.sm),
+                            Expanded(
+                              child: _chartCard(
+                                child: AnalyticsLineChart(
+                                  dates: trends.map((t) => t.periodStart).toList(),
+                                  values: trends.map((t) => t.totalExpense).toList(),
+                                  title: 'Expenses',
+                                  lineColor: AppColors.systemRed,
+                                  valuePrefix: '\$',
+                                  compact: true,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: AppSizes.md),
+                        // Transaction Volume — full width
                         _chartCard(
                           child: AnalyticsLineChart(
                             dates: trends.map((t) => t.periodStart).toList(),
-                            values: trends.map((t) => t.totalExpense).toList(),
-                            title: 'Expenses',
-                            lineColor: AppColors.systemRed,
-                            valuePrefix: '\$',
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.md),
-                        _chartCard(
-                          child: AnalyticsLineChart(
-                            dates: trends.map((t) => t.periodStart).toList(),
-                            values: trends
-                                .map((t) => t.transactionCount.toDouble())
-                                .toList(),
+                            values: trends.map((t) => t.transactionCount.toDouble()).toList(),
                             title: 'Transaction Volume',
                             lineColor: AppColors.tealBlue,
                           ),
                         ),
                         const SizedBox(height: AppSizes.md),
+                        // Net Cash Flow — full width (most important)
                         _chartCard(
                           child: AnalyticsLineChart(
                             dates: trends.map((t) => t.periodStart).toList(),
-                            values:
-                                trends.map((t) => t.netCashflow).toList(),
+                            values: trends.map((t) => t.netCashflow).toList(),
                             title: 'Net Cash Flow · Income − Expenses',
                             lineColor: AppColors.brandTeal,
                             valuePrefix: '\$',
@@ -549,7 +582,21 @@ class _SystemAnalyticsPageEnhancedState
                         ),
                       ],
                     ),
-              loading: () => _chartCardLoading(),
+              loading: () => Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _chartCardLoading()),
+                      const SizedBox(width: AppSizes.sm),
+                      Expanded(child: _chartCardLoading()),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  _chartCardLoading(),
+                  const SizedBox(height: AppSizes.md),
+                  _chartCardLoading(),
+                ],
+              ),
               error: (e, _) => EmptyStateCard(
                 icon: CupertinoIcons.exclamationmark_circle,
                 title: 'Error Loading Data',
@@ -593,17 +640,41 @@ class _SystemAnalyticsPageEnhancedState
             engagementAsync.when(
               data: (metrics) => Column(
                 children: metrics.map((metric) {
+                  final accent = _engagementAccent(metric.metricName);
+                  final isRate = metric.metricName.contains('Rate') ||
+                      metric.metricName.contains('Percentage');
+                  final formattedValue = isRate
+                      ? '${metric.metricValue.toStringAsFixed(1)}%'
+                      : metric.metricValue.toStringAsFixed(1);
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: AppSizes.sm),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.md, vertical: 14),
+                        horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius:
                           BorderRadius.circular(AppSizes.radiusCard),
+                      border: isDark
+                          ? null
+                          : Border.all(
+                              color: AppColors.separator, width: 0.5),
+                      boxShadow: AppColors.cardShadow(isDark),
                     ),
                     child: Row(
                       children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: accent.$2.withValues(alpha: 0.12),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusSm),
+                          ),
+                          child: Icon(accent.$1,
+                              size: 16, color: accent.$2),
+                        ),
+                        const SizedBox(width: AppSizes.sm),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,12 +686,9 @@ class _SystemAnalyticsPageEnhancedState
                                     .bodyMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w500,
-                                      color: isDark
-                                          ? AppColors.secondaryLabelDark
-                                          : AppColors.secondaryLabel,
                                     ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               Text(
                                 metric.metricDescription,
                                 style: Theme.of(context)
@@ -630,22 +698,22 @@ class _SystemAnalyticsPageEnhancedState
                                       color: isDark
                                           ? AppColors.secondaryLabelDark
                                           : AppColors.secondaryLabel,
+                                      fontSize: 11,
                                     ),
                               ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: AppSizes.sm),
                         Text(
-                          metric.metricName.contains('Rate') ||
-                                  metric.metricName.contains('Percentage')
-                              ? '${metric.metricValue.toStringAsFixed(1)}%'
-                              : metric.metricValue.toStringAsFixed(1),
+                          formattedValue,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
                               ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.brandTeal,
+                                fontWeight: FontWeight.w700,
+                                color: accent.$2,
+                                letterSpacing: -0.3,
                               ),
                         ),
                       ],
@@ -722,6 +790,21 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
+  /// Returns (icon, color) for an engagement metric based on its name.
+  (IconData, Color) _engagementAccent(String metricName) {
+    final name = metricName.toLowerCase();
+    if (name.contains('rate') || name.contains('retention')) {
+      return (CupertinoIcons.arrow_up_right_circle, AppColors.systemGreen);
+    }
+    if (name.contains('session') || name.contains('duration')) {
+      return (CupertinoIcons.timer, AppColors.systemOrange);
+    }
+    if (name.contains('transaction')) {
+      return (CupertinoIcons.arrow_right_arrow_left, AppColors.brandTeal);
+    }
+    return (CupertinoIcons.chart_bar, AppColors.systemBlue);
+  }
+
   // ── Features Tab ───────────────────────────────────────────────────────────
 
   Widget _buildFeaturesTab() {
@@ -768,74 +851,88 @@ class _SystemAnalyticsPageEnhancedState
                 const SizedBox(height: AppSizes.lg),
                 _sectionLabel('Details'),
                 const SizedBox(height: AppSizes.sm),
-                ...features.map((feature) => Container(
-                      margin: const EdgeInsets.only(bottom: AppSizes.sm),
-                      padding: const EdgeInsets.all(AppSizes.md),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusCard),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
+                ...features.map((feature) {
+                  final tier = _adoptionTier(feature.adoptionPercentage);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: AppSizes.sm),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius:
+                          BorderRadius.circular(AppSizes.radiusCard),
+                      border: isDark
+                          ? null
+                          : Border.all(
+                              color: AppColors.separator, width: 0.5),
+                      boxShadow: AppColors.cardShadow(isDark),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
                                 feature.featureName,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
-                                      color: isDark
-                                          ? AppColors.secondaryLabelDark
-                                          : AppColors.secondaryLabel,
                                     ),
                               ),
-                              Text(
-                                '${feature.adoptionPercentage.toStringAsFixed(1)}%',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.brandTeal,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSizes.sm),
-                          ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(AppSizes.radiusFull),
-                            child: LinearProgressIndicator(
-                              value: feature.adoptionPercentage / 100,
-                              backgroundColor: isDark
-                                  ? AppColors.tertiarySystemBackgroundDark
-                                  : AppColors.secondarySystemBackground,
-                              valueColor:
-                                  const AlwaysStoppedAnimation<Color>(
-                                      AppColors.brandTeal),
-                              minHeight: 6,
                             ),
-                          ),
-                          const SizedBox(height: AppSizes.sm),
-                          Text(
-                            '${feature.usersUsingFeature} of ${feature.totalUsers} users · ${feature.totalItems} total items',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: isDark
-                                      ? AppColors.secondaryLabelDark
-                                      : AppColors.secondaryLabel,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.sm, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: tier.$1.withValues(alpha: 0.12),
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusFull),
+                              ),
+                              child: Text(
+                                tier.$2,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: tier.$1,
                                 ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.sm),
+                        ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
+                          child: LinearProgressIndicator(
+                            value: feature.adoptionPercentage / 100,
+                            backgroundColor: isDark
+                                ? AppColors.tertiarySystemBackgroundDark
+                                : AppColors.secondarySystemBackground,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(tier.$1),
+                            minHeight: 6,
                           ),
-                        ],
-                      ),
-                    )),
+                        ),
+                        const SizedBox(height: AppSizes.sm),
+                        Text(
+                          '${feature.usersUsingFeature} of ${feature.totalUsers} users · ${feature.totalItems} total items',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: isDark
+                                    ? AppColors.secondaryLabelDark
+                                    : AppColors.secondaryLabel,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
                 const SizedBox(height: AppSizes.xl),
               ],
             ),
@@ -857,6 +954,14 @@ class _SystemAnalyticsPageEnhancedState
         ),
       ),
     );
+  }
+
+  /// Returns (color, tierLabel) for an adoption percentage.
+  (Color, String) _adoptionTier(double pct) {
+    if (pct >= 70) return (AppColors.systemGreen, 'High');
+    if (pct >= 40) return (AppColors.brandTeal, 'Medium');
+    if (pct >= 20) return (AppColors.systemOrange, 'Low');
+    return (AppColors.systemRed, 'Very Low');
   }
 
   // ── Subscription Tab ───────────────────────────────────────────────────────
@@ -883,7 +988,7 @@ class _SystemAnalyticsPageEnhancedState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── KPI Cards ──────────────────────────────────────────────
+            // ── KPI Cards — 2-column grid ──────────────────────────────
             _sectionLabel('Key Metrics'),
             const SizedBox(height: AppSizes.sm),
             churnAsync.when(
@@ -895,9 +1000,15 @@ class _SystemAnalyticsPageEnhancedState
                           'Subscription metrics will appear once users subscribe',
                       backgroundColor: AppColors.systemPurple,
                     )
-                  : Column(
+                  : GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: AppSizes.sm,
+                      crossAxisSpacing: AppSizes.sm,
+                      childAspectRatio: 1.4,
                       children: metrics
-                          .map((m) => _buildChurnKpiCard(
+                          .map((m) => _buildChurnKpiTile(
                                 m.metricLabel,
                                 m.isPercent
                                     ? '${m.metricValue.toStringAsFixed(1)}%'
@@ -910,26 +1021,32 @@ class _SystemAnalyticsPageEnhancedState
                               ))
                           .toList(),
                     ),
-              loading: () => Column(
+              loading: () => GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: AppSizes.sm,
+                crossAxisSpacing: AppSizes.sm,
+                childAspectRatio: 1.4,
                 children: List.generate(
                   6,
                   (_) => Container(
-                    margin: const EdgeInsets.only(bottom: AppSizes.sm),
-                    padding: const EdgeInsets.all(AppSizes.md),
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                     ),
-                    child: Row(
+                    padding: const EdgeInsets.all(AppSizes.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         LoadingSkeleton(
-                            width: 140,
-                            height: 14,
+                            width: 80,
+                            height: 12,
                             borderRadius: BorderRadius.circular(4)),
                         LoadingSkeleton(
-                            width: 60,
-                            height: 14,
+                            width: 50,
+                            height: 20,
                             borderRadius: BorderRadius.circular(4)),
                       ],
                     ),
@@ -1056,6 +1173,11 @@ class _SystemAnalyticsPageEnhancedState
                             color: cardColor,
                             borderRadius:
                                 BorderRadius.circular(AppSizes.radiusCard),
+                            border: isDark
+                                ? null
+                                : Border.all(
+                                    color: AppColors.separator, width: 0.5),
+                            boxShadow: AppColors.cardShadow(isDark),
                           ),
                           child: Column(
                             children: [
@@ -1216,7 +1338,8 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
-  Widget _buildChurnKpiCard(
+  /// Tile layout (vertical) for 2-column subscription KPI grid.
+  Widget _buildChurnKpiTile(
     String label,
     String value,
     double change,
@@ -1225,7 +1348,6 @@ class _SystemAnalyticsPageEnhancedState
     bool isDark,
   ) {
     final isPositiveChange = change > 0;
-    // For lower-is-better metrics, a positive change is bad (red)
     final changeColor = change == 0
         ? (isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel)
         : (lowerIsBetter
@@ -1239,49 +1361,63 @@ class _SystemAnalyticsPageEnhancedState
             : CupertinoIcons.arrow_down_right);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.sm),
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md, vertical: 14),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: isDark
+            ? null
+            : Border.all(color: AppColors.separator, width: 0.5),
+        boxShadow: AppColors.cardShadow(isDark),
       ),
-      child: Row(
+      padding: const EdgeInsets.all(AppSizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? AppColors.secondaryLabelDark
-                        : AppColors.secondaryLabel,
-                  ),
-            ),
-          ),
           Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.brandTeal,
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isDark
+                      ? AppColors.secondaryLabelDark
+                      : AppColors.secondaryLabel,
                 ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(width: AppSizes.sm),
-          if (change != 0)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(changeIcon, size: 12, color: changeColor),
-                const SizedBox(width: 2),
-                Text(
-                  change.abs().toStringAsFixed(1),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: changeColor,
-                        fontWeight: FontWeight.w600,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                value,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.brandTeal,
+                      letterSpacing: -0.5,
+                    ),
+              ),
+              if (change != 0) ...[
+                const SizedBox(width: AppSizes.xs),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(changeIcon, size: 13, color: changeColor),
+                      const SizedBox(width: 2),
+                      Text(
+                        change.abs().toStringAsFixed(1),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: changeColor,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
+                    ],
+                  ),
                 ),
               ],
-            ),
+            ],
+          ),
         ],
       ),
     );
@@ -1308,89 +1444,120 @@ class _SystemAnalyticsPageEnhancedState
             _sectionLabel('Net Worth Distribution'),
             const SizedBox(height: AppSizes.sm),
             percentilesAsync.when(
-              data: (percentiles) => percentiles.isEmpty
-                  ? EmptyStateCard(
-                      icon: CupertinoIcons.info_circle,
-                      title: 'No Percentile Data',
-                      message: 'Net worth distribution data will appear once users create accounts',
-                      backgroundColor: AppColors.brandTeal,
-                    )
-                  : Column(
-                      children: [
-                        _chartCard(
-                          child: AnalyticsBarChart(
-                            labels: percentiles
-                                .map((p) => p.percentile)
-                                .toList(),
-                            values: percentiles
-                                .map((p) => p.netWorthValue)
-                                .toList(),
-                            title: 'Net Worth by Percentile',
-                            barColor: AppColors.brandTeal,
-                            valuePrefix: '\$',
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.md),
-                        ...percentiles.map((p) => Container(
-                              margin:
-                                  const EdgeInsets.only(bottom: AppSizes.sm),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSizes.md, vertical: 14),
-                              decoration: BoxDecoration(
-                                color: cardColor,
-                                borderRadius: BorderRadius.circular(
-                                    AppSizes.radiusCard),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          p.percentile,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                  fontWeight:
-                                                      FontWeight.w500),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          '${p.userCount} users',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelSmall
-                                              ?.copyWith(
-                                                color: isDark
-                                                    ? AppColors
-                                                        .secondaryLabelDark
-                                                    : AppColors
-                                                        .secondaryLabel,
-                                                fontSize: 10,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    NumberFormat.currency(symbol: '\$')
-                                        .format(p.netWorthValue),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.brandTeal,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            )),
-                      ],
+              data: (percentiles) {
+                if (percentiles.isEmpty) {
+                  return EmptyStateCard(
+                    icon: CupertinoIcons.info_circle,
+                    title: 'No Percentile Data',
+                    message: 'Net worth distribution data will appear once users create accounts',
+                    backgroundColor: AppColors.brandTeal,
+                  );
+                }
+                final maxValue = percentiles
+                    .map((p) => p.netWorthValue)
+                    .reduce((a, b) => a > b ? a : b);
+
+                return Column(
+                  children: [
+                    _chartCard(
+                      child: AnalyticsBarChart(
+                        labels: percentiles
+                            .map((p) => p.percentile)
+                            .toList(),
+                        values: percentiles
+                            .map((p) => p.netWorthValue)
+                            .toList(),
+                        title: 'Net Worth by Percentile',
+                        barColor: AppColors.brandTeal,
+                        valuePrefix: '\$',
+                      ),
                     ),
+                    const SizedBox(height: AppSizes.md),
+                    ...percentiles.map((p) {
+                      final relativeValue =
+                          maxValue > 0 ? (p.netWorthValue / maxValue) : 0.0;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: AppSizes.sm),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusCard),
+                          border: isDark
+                              ? null
+                              : Border.all(
+                                  color: AppColors.separator, width: 0.5),
+                          boxShadow: AppColors.cardShadow(isDark),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p.percentile,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        '${p.userCount} users',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: isDark
+                                                  ? AppColors.secondaryLabelDark
+                                                  : AppColors.secondaryLabel,
+                                              fontSize: 10,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  NumberFormat.currency(symbol: '\$')
+                                      .format(p.netWorthValue),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.brandTeal,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSizes.sm),
+                            ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
+                              child: LinearProgressIndicator(
+                                value: relativeValue.toDouble(),
+                                backgroundColor:
+                                    AppColors.brandTeal.withValues(alpha: 0.10),
+                                valueColor:
+                                    const AlwaysStoppedAnimation<Color>(
+                                        AppColors.brandTeal),
+                                minHeight: 4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                );
+              },
               loading: () => _chartCardLoading(),
               error: (e, _) => EmptyStateCard(
                 icon: CupertinoIcons.exclamationmark_circle,
@@ -1408,7 +1575,6 @@ class _SystemAnalyticsPageEnhancedState
 
   Widget _buildCategoryBreakdownChart(
       List<dynamic> categories, bool isDark) {
-    // Take top 5 categories and calculate Others if needed
     final top5 = categories.take(5).toList();
     final hasOthers = categories.length > 5;
 
@@ -1429,8 +1595,7 @@ class _SystemAnalyticsPageEnhancedState
       child: AnalyticsPieChart(
         labels: chartLabels,
         values: chartValues,
-        title:
-            'Top ${hasOthers ? '5+' : '5'} Categories',
+        title: 'Top ${hasOthers ? '5+' : '5'} Categories',
       ),
     );
   }
@@ -1442,27 +1607,48 @@ class _SystemAnalyticsPageEnhancedState
         : AppColors.systemBackground;
 
     return Column(
-      children: categories.map((category) {
+      children: categories.asMap().entries.map((entry) {
+        final rank = entry.key + 1;
+        final category = entry.value;
         final name = category.categoryName as String;
         final amount = category.totalAmount as double;
         final percentage = category.percentageOfTotal as double;
         final formattedAmount =
             NumberFormat.currency(symbol: '\$').format(amount);
-        final formattedPercentage =
-            percentage.toStringAsFixed(1);
+        final formattedPercentage = percentage.toStringAsFixed(1);
 
         return Container(
           margin: const EdgeInsets.only(bottom: AppSizes.sm),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md,
-            vertical: 10,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+            border: isDark
+                ? null
+                : Border.all(color: AppColors.separator, width: 0.5),
+            boxShadow: AppColors.cardShadow(isDark),
           ),
           child: Row(
             children: [
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: AppColors.brandTeal.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '$rank',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.brandTeal,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1474,9 +1660,6 @@ class _SystemAnalyticsPageEnhancedState
                           .bodyMedium
                           ?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? AppColors.labelDark
-                                : AppColors.label,
                           ),
                     ),
                     const SizedBox(height: 2),

@@ -12,6 +12,8 @@ class AnalyticsLineChart extends StatelessWidget {
   final String valuePrefix;
   final bool showGradient;
 
+  final bool compact;
+
   const AnalyticsLineChart({
     super.key,
     required this.dates,
@@ -20,6 +22,7 @@ class AnalyticsLineChart extends StatelessWidget {
     this.lineColor = AppColors.primaryTeal,
     this.valuePrefix = '',
     this.showGradient = true,
+    this.compact = false,
   });
 
   @override
@@ -44,16 +47,19 @@ class AnalyticsLineChart extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.secondaryLabelDark
-                    : AppColors.secondaryLabel,
-              ),
+          style: (compact
+                  ? Theme.of(context).textTheme.bodySmall
+                  : Theme.of(context).textTheme.titleMedium)
+              ?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.secondaryLabelDark
+                : AppColors.secondaryLabel,
+          ),
         ),
-        const SizedBox(height: AppSizes.md),
+        const SizedBox(height: AppSizes.sm),
         SizedBox(
-          height: 200,
+          height: compact ? 120 : 200,
           child: LineChart(
             LineChartData(
               gridData: FlGridData(
@@ -75,8 +81,8 @@ class AnalyticsLineChart extends StatelessWidget {
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 24,
+                    showTitles: !compact,
+                    reservedSize: compact ? 0 : 24,
                     interval: dates.length > 10 ? (dates.length / 5).ceilToDouble() : 1,
                     getTitlesWidget: (value, meta) {
                       final index = value.toInt();
@@ -98,8 +104,8 @@ class AnalyticsLineChart extends StatelessWidget {
                 ),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 52,
+                    showTitles: !compact,
+                    reservedSize: compact ? 0 : 52,
                     interval: interval,
                     getTitlesWidget: (value, meta) {
                       return Text(
