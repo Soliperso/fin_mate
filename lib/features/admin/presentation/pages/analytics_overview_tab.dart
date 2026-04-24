@@ -132,6 +132,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                           .format(stats.totalTransactions),
                       subtitle:
                           '${stats.averageTransactionsPerUser.toStringAsFixed(1)} avg/user',
+                      showWatermark: false,
                     ),
                   ),
                   const SizedBox(width: AppSizes.sm),
@@ -143,6 +144,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                       iconColor: AppColors.systemBlue,
                       label: 'Accounts',
                       value: stats.totalAccounts.toString(),
+                      showWatermark: false,
                     ),
                   ),
                   const SizedBox(width: AppSizes.sm),
@@ -154,6 +156,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                       iconColor: AppColors.systemOrange,
                       label: 'Budgets',
                       value: stats.totalBudgets.toString(),
+                      showWatermark: false,
                     ),
                   ),
                 ],
@@ -161,38 +164,27 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             ),
             const SizedBox(height: AppSizes.lg),
 
-            // ── Quick Actions — 2-column tiles ────────────────────────────
+            // ── Quick Actions — list tiles ─────────────────────────────
             _sectionLabel(context, 'Quick Actions', isDark),
             const SizedBox(height: AppSizes.sm),
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _quickActionTile(
-                      context,
-                      isDark: isDark,
-                      icon: CupertinoIcons.person_2_fill,
-                      iconColor: AppColors.brandTeal,
-                      label: 'Manage Users',
-                      description: 'View, search and edit accounts',
-                      onTap: () => context.push('/admin/users'),
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.sm),
-                  Expanded(
-                    child: _quickActionTile(
-                      context,
-                      isDark: isDark,
-                      icon: CupertinoIcons.gear_alt_fill,
-                      iconColor: AppColors.systemBlue,
-                      label: 'System Settings',
-                      description: 'Flags, maintenance and logs',
-                      onTap: () => context.push('/admin/settings'),
-                    ),
-                  ),
-                ],
-              ),
+            _quickActionCard(
+              context,
+              isDark: isDark,
+              icon: CupertinoIcons.person_2_fill,
+              iconColor: AppColors.brandTeal,
+              label: 'Manage Users',
+              description: 'View, search and edit user accounts',
+              onTap: () => context.push('/admin/users'),
+            ),
+            const SizedBox(height: AppSizes.sm),
+            _quickActionCard(
+              context,
+              isDark: isDark,
+              icon: CupertinoIcons.gear_alt_fill,
+              iconColor: AppColors.systemBlue,
+              label: 'System Settings',
+              description: 'Feature flags, maintenance and logs',
+              onTap: () => context.push('/admin/settings'),
             ),
             const SizedBox(height: AppSizes.xl),
           ],
@@ -283,64 +275,89 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     required String label,
     required String value,
     String? subtitle,
+    bool showWatermark = true,
   }) {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: isDark
-            ? null
-            : Border.all(color: AppColors.separator, width: 0.5),
-        boxShadow: AppColors.cardShadow(isDark),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 15, color: iconColor),
-          const SizedBox(height: AppSizes.sm),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: isDark
+                    ? AppColors.secondaryLabelDark
+                    : AppColors.secondaryLabel,
+                fontWeight: FontWeight.w700,
+                fontSize: 8.5,
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
           Text(
-            label,
+            subtitle,
+            textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: isDark
                       ? AppColors.secondaryLabelDark
                       : AppColors.secondaryLabel,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
                 ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
-                ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? AppColors.secondaryLabelDark
-                        : AppColors.secondaryLabel,
-                    fontSize: 10,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
         ],
+      ],
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 9),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(
+          color: isDark
+              ? AppColors.separatorDark.withValues(alpha: 0.4)
+              : AppColors.separator.withValues(alpha: 0.25),
+          width: 0.7,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1.5),
+                ),
+              ],
       ),
+      child: showWatermark
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, size: 58, color: iconColor.withValues(alpha: 0.10)),
+                content,
+              ],
+            )
+          : content,
     );
   }
 
@@ -360,42 +377,48 @@ class AnalyticsOverviewTab extends ConsumerWidget {
         : AppColors.systemBackground;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 9),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: isDark
-            ? null
-            : Border.all(color: AppColors.separator, width: 0.5),
-        boxShadow: AppColors.cardShadow(isDark),
+        border: Border.all(
+          color: isDark
+              ? AppColors.separatorDark.withValues(alpha: 0.4)
+              : AppColors.separator.withValues(alpha: 0.25),
+          width: 0.7,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1.5),
+                ),
+              ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(height: AppSizes.sm),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: isDark
                       ? AppColors.secondaryLabelDark
                       : AppColors.secondaryLabel,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 8.5,
                 ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
                   letterSpacing: -0.3,
                   color: valueColor,
                 ),
@@ -407,9 +430,9 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     );
   }
 
-  // ── Quick action tile (2-column vertical) ──────────────────────────────────
+  // ── Quick action list tile ─────────────────────────────────────────────────
 
-  Widget _quickActionTile(
+  Widget _quickActionCard(
     BuildContext context, {
     required bool isDark,
     required IconData icon,
@@ -425,7 +448,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -434,47 +457,46 @@ class AnalyticsOverviewTab extends ConsumerWidget {
               : Border.all(color: AppColors.separator, width: 0.5),
           boxShadow: AppColors.cardShadow(isDark),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 18),
-                ),
-                Icon(
-                  CupertinoIcons.chevron_right,
-                  size: 14,
-                  color: isDark
-                      ? AppColors.secondaryLabelDark
-                      : AppColors.secondaryLabel,
-                ),
-              ],
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            const SizedBox(height: AppSizes.sm),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.secondaryLabel,
+                        ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isDark
-                        ? AppColors.secondaryLabelDark
-                        : AppColors.secondaryLabel,
-                    fontSize: 11,
-                  ),
-              maxLines: 2,
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: isDark
+                  ? AppColors.secondaryLabelDark
+                  : AppColors.secondaryLabel,
             ),
           ],
         ),

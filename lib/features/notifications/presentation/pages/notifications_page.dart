@@ -21,6 +21,13 @@ class NotificationsPage extends ConsumerStatefulWidget {
 }
 
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(notificationsProvider.notifier).loadNotifications(),
+    );
+  }
   /// Groups notifications into Today / Yesterday / Earlier buckets.
   String _translateGroup(String key) {
     switch (key) {

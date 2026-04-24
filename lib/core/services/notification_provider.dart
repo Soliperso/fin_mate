@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 import 'notification_service.dart';
 
 /// Provider for NotificationService
@@ -67,6 +68,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       state = state.copyWith(
         notifications: notifications,
         isLoading: false,
+        unreadCount: notifications.where((n) => !n.isRead).length,
       );
     } catch (e) {
       state = state.copyWith(
@@ -213,12 +215,20 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   /// Subscribe to real-time notification updates
   void _subscribeToRealtimeUpdates() {
     _realtimeChannel = _service.subscribeToNotifications(
-      onNotification: (notification) {
-        // Add new notification to the list
-        final updatedNotifications = [notification, ...state.notifications];
+      onInsert: (notification) {
+        final updated = [notification, ...state.notifications];
         state = state.copyWith(
-          notifications: updatedNotifications,
-          unreadCount: state.unreadCount + 1,
+          notifications: updated,
+          unreadCount: updated.where((n) => !n.isRead).length,
+        );
+      },
+      onUpdate: (notification) {
+        final updated = state.notifications
+            .map((n) => n.id == notification.id ? notification : n)
+            .toList();
+        state = state.copyWith(
+          notifications: updated,
+          unreadCount: updated.where((n) => !n.isRead).length,
         );
       },
     );
@@ -231,9 +241,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 }
 
-/// Provider for notifications state
+/// Provider for notifications state — re-created on auth session change
 final notificationsProvider =
     StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
+  ref.watch(userSessionProvider);
   final service = ref.watch(notificationServiceProvider);
   return NotificationsNotifier(service);
 });

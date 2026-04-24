@@ -306,24 +306,36 @@ class NotificationService {
     }
   }
 
-  /// Subscribe to real-time notifications
+  /// Subscribe to real-time notifications (inserts + updates)
   RealtimeChannel subscribeToNotifications({
-    required void Function(AppNotification) onNotification,
+    required void Function(AppNotification) onInsert,
+    required void Function(AppNotification) onUpdate,
   }) {
+    final userId = _supabase.auth.currentUser?.id;
+    final filter = PostgresChangeFilter(
+      type: PostgresChangeFilterType.eq,
+      column: 'user_id',
+      value: userId,
+    );
+
     final channel = _supabase
-        .channel('notifications')
+        .channel('notifications:$userId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
           table: 'notifications',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'user_id',
-            value: _supabase.auth.currentUser?.id,
-          ),
+          filter: filter,
           callback: (payload) {
-            final notification = AppNotification.fromJson(payload.newRecord);
-            onNotification(notification);
+            onInsert(AppNotification.fromJson(payload.newRecord));
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'notifications',
+          filter: filter,
+          callback: (payload) {
+            onUpdate(AppNotification.fromJson(payload.newRecord));
           },
         )
         .subscribe();

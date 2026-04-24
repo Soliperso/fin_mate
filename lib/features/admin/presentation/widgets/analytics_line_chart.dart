@@ -1,5 +1,6 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -11,8 +12,16 @@ class AnalyticsLineChart extends StatelessWidget {
   final Color lineColor;
   final String valuePrefix;
   final bool showGradient;
-
   final bool compact;
+  final bool showTrendBadge;
+
+  /// Optional second series for a dual-line chart (e.g. Income vs Expenses).
+  final List<double>? secondValues;
+  final Color secondLineColor;
+
+  /// Legend labels — shown when [secondValues] is provided.
+  final String? firstLabel;
+  final String? secondLabel;
 
   const AnalyticsLineChart({
     super.key,
@@ -23,76 +32,124 @@ class AnalyticsLineChart extends StatelessWidget {
     this.valuePrefix = '',
     this.showGradient = true,
     this.compact = false,
+    this.showTrendBadge = true,
+    this.secondValues,
+    this.secondLineColor = AppColors.systemRed,
+    this.firstLabel,
+    this.secondLabel,
   });
+
+  bool get _isDual =>
+      secondValues != null && secondValues!.isNotEmpty;
+
+  double get _trendPct {
+    if (values.length < 2) return 0;
+    final first = values.first;
+    final last = values.last;
+    if (first == 0) return last > 0 ? 100 : 0;
+    return ((last - first) / first) * 100;
+  }
 
   @override
   Widget build(BuildContext context) {
     if (dates.isEmpty || values.isEmpty) {
-      return const SizedBox(
-        height: 200,
-        child: Center(child: Text('No data available')),
+      return SizedBox(
+        height: compact ? 140 : 220,
+        child: Center(
+          child: Text(
+            'No data available',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ),
       );
     }
 
-    final maxValue = values.reduce((a, b) => a > b ? a : b);
-    final minValue = values.reduce((a, b) => a < b ? a : b);
-    final range = (maxValue - minValue).abs();
-    final safeMinY = range > 0 ? minValue * 0.9 : -1.0;
-    final safeMaxY = range > 0 ? maxValue * 1.1 : 1.0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final interval = _calculateInterval(safeMaxY);
+    final allValues = [...values, if (_isDual) ...secondValues!];
+    final maxVal = allValues.reduce((a, b) => a > b ? a : b);
+    final minVal = allValues.reduce((a, b) => a < b ? a : b);
+    final range = (maxVal - minVal).abs();
+    final safeMinY = range > 0 ? minVal - range * 0.1 : -1.0;
+    final safeMaxY = range > 0 ? maxVal + range * 0.15 : 1.0;
+    final interval = _interval(safeMaxY - safeMinY);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: (compact
-                  ? Theme.of(context).textTheme.bodySmall
-                  : Theme.of(context).textTheme.titleMedium)
-              ?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? AppColors.secondaryLabelDark
-                : AppColors.secondaryLabel,
-          ),
+        // ── Header row ────────────────────────────────────────────────────
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: (compact
+                        ? Theme.of(context).textTheme.bodySmall
+                        : Theme.of(context).textTheme.titleMedium)
+                    ?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.secondaryLabelDark
+                      : AppColors.secondaryLabel,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (showTrendBadge && !_isDual && values.length >= 2)
+              _trendBadge(context),
+          ],
         ),
+
+        // ── Legend (dual-line only) ────────────────────────────────────────
+        if (_isDual && firstLabel != null && secondLabel != null) ...[
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _legendDot(context, lineColor, firstLabel!),
+              const SizedBox(width: AppSizes.md),
+              _legendDot(context, secondLineColor, secondLabel!),
+            ],
+          ),
+        ],
+
         const SizedBox(height: AppSizes.sm),
+
+        // ── Chart ─────────────────────────────────────────────────────────
         SizedBox(
-          height: compact ? 120 : 200,
+          height: compact ? 140 : 220,
           child: LineChart(
             LineChartData(
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
                 horizontalInterval: interval,
-                getDrawingHorizontalLine: (value) => FlLine(
+                getDrawingHorizontalLine: (_) => FlLine(
                   color: AppColors.textTertiary.withValues(alpha: 0.06),
                   strokeWidth: 1,
                 ),
               ),
               titlesData: FlTitlesData(
-                show: true,
                 rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
+                    sideTitles: SideTitles(showTitles: false)),
                 topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
+                    sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: !compact,
                     reservedSize: compact ? 0 : 24,
-                    interval: dates.length > 10 ? (dates.length / 5).ceilToDouble() : 1,
-                    getTitlesWidget: (value, meta) {
-                      final index = value.toInt();
-                      if (index < 0 || index >= dates.length) {
-                        return const SizedBox.shrink();
-                      }
+                    interval: dates.length > 10
+                        ? (dates.length / 5).ceilToDouble()
+                        : 1,
+                    getTitlesWidget: (v, _) {
+                      final i = v.toInt();
+                      if (i < 0 || i >= dates.length) return const SizedBox.shrink();
                       return Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
+                        padding: const EdgeInsets.only(top: 6),
                         child: Text(
-                          DateFormat('MM/dd').format(dates[index]),
+                          DateFormat('MMM d').format(dates[i]),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontSize: 9,
                                 color: AppColors.textSecondary,
@@ -107,15 +164,13 @@ class AnalyticsLineChart extends StatelessWidget {
                     showTitles: !compact,
                     reservedSize: compact ? 0 : 52,
                     interval: interval,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        '$valuePrefix${_formatValue(value)}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
-                              color: AppColors.textSecondary,
-                            ),
-                      );
-                    },
+                    getTitlesWidget: (v, _) => Text(
+                      '$valuePrefix${_fmt(v)}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
                   ),
                 ),
               ),
@@ -125,47 +180,28 @@ class AnalyticsLineChart extends StatelessWidget {
               minY: safeMinY,
               maxY: safeMaxY,
               lineBarsData: [
-                LineChartBarData(
-                  spots: List.generate(
-                    values.length,
-                    (index) => FlSpot(index.toDouble(), values[index]),
-                  ),
-                  isCurved: true,
-                  curveSmoothness: 0.3,
-                  color: lineColor,
-                  barWidth: 2.5,
-                  isStrokeCapRound: true,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: showGradient
-                      ? BarAreaData(
-                          show: true,
-                          gradient: LinearGradient(
-                            colors: [
-                              lineColor.withValues(alpha: 0.2),
-                              lineColor.withValues(alpha: 0.0),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        )
-                      : BarAreaData(show: false),
-                ),
+                _line(values, lineColor),
+                if (_isDual) _line(secondValues!, secondLineColor),
               ],
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((spot) {
-                      final date = dates[spot.x.toInt()];
-                      return LineTooltipItem(
-                        '${DateFormat('MMM dd').format(date)}\n$valuePrefix${_formatValue(spot.y)}',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      );
-                    }).toList();
-                  },
+                  getTooltipItems: (spots) => spots.map((spot) {
+                    final date = dates[spot.x.toInt()];
+                    final isSecond = spot.barIndex == 1;
+                    final lbl = isSecond
+                        ? (secondLabel ?? '')
+                        : (firstLabel ?? '');
+                    return LineTooltipItem(
+                      '${lbl.isNotEmpty ? '$lbl · ' : ''}'
+                      '${DateFormat('MMM d').format(date)}\n'
+                      '$valuePrefix${_fmt(spot.y)}',
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -175,9 +211,90 @@ class AnalyticsLineChart extends StatelessWidget {
     );
   }
 
-  double _calculateInterval(double maxY) {
-    final raw = maxY / 4;
+  LineChartBarData _line(List<double> data, Color color) =>
+      LineChartBarData(
+        spots: List.generate(
+            data.length, (i) => FlSpot(i.toDouble(), data[i])),
+        isCurved: true,
+        curveSmoothness: 0.3,
+        color: color,
+        barWidth: 1.5,
+        isStrokeCapRound: true,
+        dotData: const FlDotData(show: false),
+        belowBarData: showGradient
+            ? BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  colors: [
+                    color.withValues(alpha: 0.22),
+                    color.withValues(alpha: 0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              )
+            : BarAreaData(show: false),
+      );
+
+  Widget _trendBadge(BuildContext context) {
+    final pct = _trendPct;
+    final up = pct >= 0;
+    final color = up ? AppColors.systemGreen : AppColors.systemRed;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            up ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
+            size: 11,
+            color: color,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            '${up ? '+' : ''}${pct.toStringAsFixed(1)}%',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _legendDot(BuildContext context, Color color, String label) =>
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
+          ),
+        ],
+      );
+
+  double _interval(double range) {
+    final raw = range / 4;
     if (raw <= 0) return 1;
+    if (raw < 5) return 5;
+    if (raw < 10) return 10;
+    if (raw < 25) return 25;
+    if (raw < 50) return 50;
     if (raw < 100) return 100;
     if (raw < 500) return 500;
     if (raw < 1000) return 1000;
@@ -185,12 +302,9 @@ class AnalyticsLineChart extends StatelessWidget {
     return (raw / 1000).ceilToDouble() * 1000;
   }
 
-  String _formatValue(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
-    }
-    return value.toStringAsFixed(0);
+  String _fmt(double v) {
+    if (v.abs() >= 1000000) return '${(v / 1000000).toStringAsFixed(1)}M';
+    if (v.abs() >= 1000) return '${(v / 1000).toStringAsFixed(1)}K';
+    return v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
   }
 }

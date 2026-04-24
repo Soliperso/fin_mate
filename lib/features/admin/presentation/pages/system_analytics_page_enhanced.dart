@@ -418,12 +418,23 @@ class _SystemAnalyticsPageEnhancedState
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: isDark
-            ? null
-            : Border.all(color: AppColors.separator, width: 0.5),
-        boxShadow: AppColors.cardShadow(isDark),
+        border: Border.all(
+          color: isDark
+              ? AppColors.separatorDark.withValues(alpha: 0.4)
+              : AppColors.separator.withValues(alpha: 0.25),
+          width: 0.7,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1.5),
+                ),
+              ],
       ),
-      padding: const EdgeInsets.all(AppSizes.md),
+      padding: const EdgeInsets.all(AppSizes.lg),
       child: child,
     );
   }
@@ -529,35 +540,20 @@ class _SystemAnalyticsPageEnhancedState
                     )
                   : Column(
                       children: [
-                        // Income + Expenses side by side
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _chartCard(
-                                child: AnalyticsLineChart(
-                                  dates: trends.map((t) => t.periodStart).toList(),
-                                  values: trends.map((t) => t.totalIncome).toList(),
-                                  title: 'Income',
-                                  lineColor: AppColors.systemGreen,
-                                  valuePrefix: '\$',
-                                  compact: true,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.sm),
-                            Expanded(
-                              child: _chartCard(
-                                child: AnalyticsLineChart(
-                                  dates: trends.map((t) => t.periodStart).toList(),
-                                  values: trends.map((t) => t.totalExpense).toList(),
-                                  title: 'Expenses',
-                                  lineColor: AppColors.systemRed,
-                                  valuePrefix: '\$',
-                                  compact: true,
-                                ),
-                              ),
-                            ),
-                          ],
+                        // Income vs Expenses — combined dual-line (matches dashboard)
+                        _chartCard(
+                          child: AnalyticsLineChart(
+                            dates: trends.map((t) => t.periodStart).toList(),
+                            values: trends.map((t) => t.totalIncome).toList(),
+                            secondValues: trends.map((t) => t.totalExpense).toList(),
+                            title: 'Income vs Expenses',
+                            lineColor: AppColors.systemGreen,
+                            secondLineColor: AppColors.systemRed,
+                            firstLabel: 'Income',
+                            secondLabel: 'Expenses',
+                            valuePrefix: '\$',
+                            showTrendBadge: false,
+                          ),
                         ),
                         const SizedBox(height: AppSizes.md),
                         // Transaction Volume — full width
@@ -570,7 +566,7 @@ class _SystemAnalyticsPageEnhancedState
                           ),
                         ),
                         const SizedBox(height: AppSizes.md),
-                        // Net Cash Flow — full width (most important)
+                        // Net Cash Flow — full width
                         _chartCard(
                           child: AnalyticsLineChart(
                             dates: trends.map((t) => t.periodStart).toList(),
@@ -1009,6 +1005,7 @@ class _SystemAnalyticsPageEnhancedState
                       childAspectRatio: 1.4,
                       children: metrics
                           .map((m) => _buildChurnKpiTile(
+                                m.metricKey,
                                 m.metricLabel,
                                 m.isPercent
                                     ? '${m.metricValue.toStringAsFixed(1)}%'
@@ -1338,8 +1335,20 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
+  IconData _churnKpiIcon(String metricKey) => switch (metricKey) {
+        'active_subscribers'   => CupertinoIcons.checkmark_seal_fill,
+        'new_subscriptions'    => CupertinoIcons.plus_circle_fill,
+        'cancellations'        => CupertinoIcons.xmark_circle_fill,
+        'renewals'             => CupertinoIcons.arrow_clockwise,
+        'trial_conversion_rate'=> CupertinoIcons.chart_bar_fill,
+        'churn_rate'           => CupertinoIcons.arrow_down_right_circle,
+        'revenue_churn_rate'   => CupertinoIcons.minus_circle,
+        _                      => CupertinoIcons.creditcard,
+      };
+
   /// Tile layout (vertical) for 2-column subscription KPI grid.
   Widget _buildChurnKpiTile(
+    String metricKey,
     String label,
     String value,
     double change,
@@ -1364,61 +1373,97 @@ class _SystemAnalyticsPageEnhancedState
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: isDark
-            ? null
-            : Border.all(color: AppColors.separator, width: 0.5),
-        boxShadow: AppColors.cardShadow(isDark),
-      ),
-      padding: const EdgeInsets.all(AppSizes.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? AppColors.secondaryLabelDark
-                      : AppColors.secondaryLabel,
-                ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.brandTeal,
-                      letterSpacing: -0.5,
-                    ),
-              ),
-              if (change != 0) ...[
-                const SizedBox(width: AppSizes.xs),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(changeIcon, size: 13, color: changeColor),
-                      const SizedBox(width: 2),
-                      Text(
-                        change.abs().toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: changeColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ],
-                  ),
+        border: Border.all(
+          color: isDark
+              ? AppColors.separatorDark.withValues(alpha: 0.4)
+              : AppColors.separator.withValues(alpha: 0.25),
+          width: 0.7,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 1.5),
                 ),
               ],
-            ],
-          ),
-        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: FractionallySizedBox(
+                widthFactor: 0.75,
+                heightFactor: 0.75,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Icon(
+                    _churnKpiIcon(metricKey),
+                    color: AppColors.brandTeal.withValues(alpha: 0.10),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 9),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 9.4,
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.secondaryLabel,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15.4,
+                          color: AppColors.brandTeal,
+                          letterSpacing: -0.3,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (change != 0) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(changeIcon, size: 12.1, color: changeColor),
+                        const SizedBox(width: 2),
+                        Text(
+                          change.abs().toStringAsFixed(1),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: changeColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11.0,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1477,9 +1522,9 @@ class _SystemAnalyticsPageEnhancedState
                       final relativeValue =
                           maxValue > 0 ? (p.netWorthValue / maxValue) : 0.0;
                       return Container(
-                        margin: const EdgeInsets.only(bottom: AppSizes.sm),
+                        margin: const EdgeInsets.only(bottom: AppSizes.xs),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
+                            horizontal: 12, vertical: 7),
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius:
@@ -1506,9 +1551,10 @@ class _SystemAnalyticsPageEnhancedState
                                             .textTheme
                                             .bodyMedium
                                             ?.copyWith(
-                                                fontWeight: FontWeight.w600),
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12.8),
                                       ),
-                                      const SizedBox(height: 3),
+                                      const SizedBox(height: 2),
                                       Text(
                                         '${p.userCount} users',
                                         style: Theme.of(context)
@@ -1518,7 +1564,7 @@ class _SystemAnalyticsPageEnhancedState
                                               color: isDark
                                                   ? AppColors.secondaryLabelDark
                                                   : AppColors.secondaryLabel,
-                                              fontSize: 10,
+                                              fontSize: 9.1,
                                             ),
                                       ),
                                     ],
@@ -1532,12 +1578,13 @@ class _SystemAnalyticsPageEnhancedState
                                       .bodyMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.w700,
+                                        fontSize: 12.8,
                                         color: AppColors.brandTeal,
                                       ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSizes.sm),
+                            const SizedBox(height: 5),
                             ClipRRect(
                               borderRadius:
                                   BorderRadius.circular(AppSizes.radiusFull),
@@ -1548,7 +1595,7 @@ class _SystemAnalyticsPageEnhancedState
                                 valueColor:
                                     const AlwaysStoppedAnimation<Color>(
                                         AppColors.brandTeal),
-                                minHeight: 4,
+                                minHeight: 3,
                               ),
                             ),
                           ],
