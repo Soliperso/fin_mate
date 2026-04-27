@@ -42,6 +42,10 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
 
   /// Initialize settings
   Future<void> initialize() async {
+    if (_userId.isEmpty) {
+      state = const AsyncValue.data(null);
+      return;
+    }
     state = const AsyncValue.loading();
     try {
       final settings = await _repository.getSettings(_userId);

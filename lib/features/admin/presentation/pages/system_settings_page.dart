@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../data/datasources/admin_remote_datasource.dart';
 import '../providers/admin_providers.dart';
 
 class SystemSettingsPage extends ConsumerWidget {
@@ -87,7 +91,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.systemRed,
                 title: 'Clean Old Data',
                 subtitle: 'Remove old logs and temporary data',
-                onTap: () => _showComingSoon(context, 'Clean Old Data'),
+                onTap: () => _cleanOldData(context, ref),
               ),
               _SettingsTileData(
                 icon: CupertinoIcons.archivebox,
@@ -101,7 +105,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.tealBlue,
                 title: 'Export All Data',
                 subtitle: 'Export complete system data (CSV / JSON)',
-                onTap: () => _showComingSoon(context, 'Export All Data'),
+                onTap: () => _exportAllData(context, ref),
               ),
             ]),
             const SizedBox(height: AppSizes.lg),
@@ -115,7 +119,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.systemOrange,
                 title: 'System Notifications',
                 subtitle: 'Send notifications to all users',
-                onTap: () => _showComingSoon(context, 'System Notifications'),
+                onTap: () => _showBroadcastSheet(context, ref),
               ),
               _SettingsTileData(
                 icon: CupertinoIcons.envelope,
@@ -273,6 +277,84 @@ class SystemSettingsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _exportAllData(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final box = context.findRenderObject() as RenderBox?;
+    final shareRect = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : Rect.fromCenter(center: const Offset(200, 400), width: 1, height: 1);
+
+    try {
+      final csv = await ref.read(adminRemoteDataSourceProvider).exportAllTransactionsCsv();
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/finmate_export.csv');
+      await file.writeAsString(csv);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'text/csv')],
+        subject: 'Finmate System Data Export',
+        sharePositionOrigin: shareRect,
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Export failed: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _cleanOldData(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clean Old Data'),
+        content: const Text(
+          'This will permanently delete analytics events older than 90 days. This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.systemRed),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(adminRemoteDataSourceProvider).cleanOldData();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Old analytics data removed successfully.')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  void _showBroadcastSheet(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final datasource = ref.read(adminRemoteDataSourceProvider);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _BroadcastSheet(isDark: isDark, datasource: datasource),
     );
   }
 
@@ -510,4 +592,219 @@ class _SettingsTileData {
     required this.subtitle,
     required this.onTap,
   });
+}
+
+class _BroadcastSheet extends StatefulWidget {
+  const _BroadcastSheet({required this.isDark, required this.datasource});
+
+  final bool isDark;
+  final AdminRemoteDataSource datasource;
+
+  @override
+  State<_BroadcastSheet> createState() => _BroadcastSheetState();
+}
+
+class _BroadcastSheetState extends State<_BroadcastSheet> {
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+  bool _loading = false;
+  String? _errorMessage;
+
+  static const int _maxTitle = 60;
+  static const int _maxBody = 200;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _bodyController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final title = _titleController.text.trim();
+    final body = _bodyController.text.trim();
+    if (title.isEmpty || body.isEmpty) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+    try {
+      await widget.datasource.broadcastNotification(title, body);
+      navigator.pop();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Notification sent to all users.')),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final sheetColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: sheetColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSizes.radiusCard),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.pagePadding,
+          AppSizes.md,
+          AppSizes.pagePadding,
+          AppSizes.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.tertiaryLabelDark
+                      : AppColors.systemGray4,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.lg),
+            Text(
+              'Send Broadcast',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'This notification will be sent to every user.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                  ),
+            ),
+            const SizedBox(height: AppSizes.lg),
+
+            // Title field
+            ListenableBuilder(
+              listenable: _titleController,
+              builder: (context, _) => TextField(
+                controller: _titleController,
+                maxLength: _maxTitle,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  counterText:
+                      '${_titleController.text.length}/$_maxTitle',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.md),
+
+            // Body field
+            ListenableBuilder(
+              listenable: _bodyController,
+              builder: (context, _) => TextField(
+                controller: _bodyController,
+                maxLength: _maxBody,
+                maxLines: 4,
+                minLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: 'Message',
+                  alignLabelWithHint: true,
+                  counterText:
+                      '${_bodyController.text.length}/$_maxBody',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  ),
+                ),
+              ),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: AppSizes.sm),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSizes.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.systemRed.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.systemRed,
+                      ),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSizes.lg),
+
+            // Send button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.brandTeal, AppColors.tealBlue],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: TextButton(
+                  onPressed: _loading ? null : _send,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    ),
+                  ),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Send to All Users',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

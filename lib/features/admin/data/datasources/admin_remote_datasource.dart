@@ -323,6 +323,53 @@ class AdminRemoteDataSource {
     }
   }
 
+  /// Export all transactions system-wide as a CSV string (admin only)
+  Future<String> exportAllTransactionsCsv() async {
+    final response = await _supabase.rpc('admin_export_all_transactions');
+    final rows = List<Map<String, dynamic>>.from(response as List);
+
+    const headers = [
+      'Date', 'Type', 'Amount', 'Account', 'Category',
+      'Description', 'Notes', 'Tags', 'User ID',
+    ];
+    final lines = [
+      headers.join(','),
+      ...rows.map((r) => [
+            r['date'],
+            r['type'],
+            r['amount'],
+            _csvCell(r['account']),
+            _csvCell(r['category']),
+            _csvCell(r['description']),
+            _csvCell(r['notes']),
+            _csvCell(r['tags']),
+            r['user_id'],
+          ].join(',')),
+    ];
+    return lines.join('\n');
+  }
+
+  String _csvCell(dynamic value) {
+    final s = (value ?? '').toString();
+    if (s.contains(',') || s.contains('"') || s.contains('\n')) {
+      return '"${s.replaceAll('"', '""')}"';
+    }
+    return s;
+  }
+
+  /// Delete analytics_events older than 90 days
+  Future<void> cleanOldData() async {
+    await _supabase.rpc('cleanup_old_analytics');
+  }
+
+  /// Broadcast a notification to all users in the system
+  Future<void> broadcastNotification(String title, String body) async {
+    await _supabase.rpc('admin_broadcast_notification', params: {
+      'p_title': title,
+      'p_body': body,
+    });
+  }
+
   /// Get system-wide audit log
   Future<List<Map<String, dynamic>>> getSystemAuditLog() async {
     try {
