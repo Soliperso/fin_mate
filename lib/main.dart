@@ -25,6 +25,7 @@ import 'shared/widgets/offline_indicator.dart';
 import 'features/transactions/data/datasources/reminder_remote_datasource.dart';
 import 'features/budgets/data/datasources/budget_remote_datasource.dart';
 import 'core/services/auto_backup_service.dart';
+import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
 
@@ -106,6 +107,8 @@ void main() async {
       // Uncomment below to enable payments:
       // final paymentService = PaymentService();
       // await paymentService.initialize();
+
+      await ReviewService.instance.recordAppOpen();
 
       // Run app
       runApp(

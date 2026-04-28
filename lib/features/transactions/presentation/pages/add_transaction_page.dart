@@ -18,6 +18,7 @@ import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
 import '../../domain/entities/receipt_data.dart';
 import '../../data/services/receipt_categorizer_service.dart';
+import '../../../../core/services/review_service.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
@@ -1753,6 +1754,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       if (mounted) {
         final ctx = loadingDialogContext;
         if (ctx != null && ctx.mounted) Navigator.pop(ctx);
+        if (!_isEditing) {
+          await ReviewService.instance.maybePromptAfterTransaction();
+        }
         if (mounted) context.pop(true);
       }
     } catch (e) {
