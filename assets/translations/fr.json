@@ -836,10 +836,16 @@
     "upcoming": "À venir",
     "noDueDates": "Aucune date d'échéance. Modifiez une dette pour en ajouter une.",
     "paymentLogged": "Paiement enregistré",
+    "paymentDue": "Paiement dû",
     "missedThisMonth": "Manqué ce mois-ci",
     "dueToday": "Échéance aujourd'hui",
     "dueTomorrow": "Échéance demain",
-    "dueInDays": "Échéance dans {days} jours"
+    "dueInDays": "Échéance dans {days} jours",
+    "markAsPaid": "Marquer comme payé",
+    "today": "Aujourd'hui",
+    "dayDetails": "Jour {day}",
+    "nothingOnThisDay": "Aucun paiement ce jour.",
+    "alreadyPaid": "Payé"
   },
   "debtDetail": {
     "progress": "Progression",

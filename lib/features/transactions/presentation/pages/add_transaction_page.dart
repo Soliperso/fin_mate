@@ -886,7 +886,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   // ── Recurring row ─────────────────────────────────────────────────────────
 
   Widget _buildRecurringRow(BuildContext context, bool isDark) {
-    const intervals = ['daily', 'weekly', 'monthly', 'yearly'];
+    const intervals = ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'];
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -907,7 +907,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 ),
               ),
               Transform.scale(
-                scale: 0.75,
+                scale: 0.65,
                 child: CupertinoSwitch(
                   value: _isRecurring,
                   activeTrackColor: AppColors.primaryTeal,
@@ -925,17 +925,19 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             secondChild: Padding(
               padding: const EdgeInsets.only(top: AppSizes.sm),
               child: Row(
-                children: intervals.map((interval) {
+                children: intervals.asMap().entries.map((e) {
+                  final i = e.key;
+                  final interval = e.value;
                   final isSelected = _recurringInterval == interval;
                   return Padding(
-                    padding: const EdgeInsets.only(right: AppSizes.sm),
+                    padding: EdgeInsets.only(right: i < intervals.length - 1 ? 4 : 0),
                     child: GestureDetector(
                       onTap: () =>
                           setState(() => _recurringInterval = interval),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            horizontal: 9, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.primaryTeal.withValues(alpha: 0.12)

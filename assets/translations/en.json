@@ -844,10 +844,16 @@
     "upcoming": "Upcoming",
     "noDueDates": "No due dates set. Edit a debt to add one.",
     "paymentLogged": "Payment logged",
+    "paymentDue": "Payment due",
     "missedThisMonth": "Missed this month",
     "dueToday": "Due today",
     "dueTomorrow": "Due tomorrow",
-    "dueInDays": "Due in {days} days"
+    "dueInDays": "Due in {days} days",
+    "markAsPaid": "Mark as paid",
+    "today": "Today",
+    "dayDetails": "Day {day}",
+    "nothingOnThisDay": "No payments on this day.",
+    "alreadyPaid": "Paid"
   },
   "debtDetail": {
     "progress": "Progress",

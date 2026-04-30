@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -304,7 +304,7 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   const SizedBox(height: AppSizes.md),
 
                   // Carry-Over Toggle
-                  SwitchListTile(
+                  ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('createBudget.carryOver'.tr()),
                     subtitle: Text(
@@ -312,10 +312,16 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                       style: const TextStyle(
                           color: AppColors.textSecondary, fontSize: 12),
                     ),
-                    value: _carryOverEnabled,
-                    activeTrackColor: AppColors.brandTeal,
-                    activeThumbColor: AppColors.white,
-                    onChanged: (val) => setState(() => _carryOverEnabled = val),
+                    trailing: Transform.scale(
+                      scale: 0.75,
+                      child: CupertinoSwitch(
+                        value: _carryOverEnabled,
+                        activeTrackColor: AppColors.brandTeal,
+                        thumbColor: AppColors.white,
+                        onChanged: (val) =>
+                            setState(() => _carryOverEnabled = val),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: AppSizes.md),
 

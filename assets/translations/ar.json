@@ -836,10 +836,16 @@
     "upcoming": "القادم",
     "noDueDates": "لا توجد تواريخ استحقاق. عدّل ديناً لإضافة تاريخ.",
     "paymentLogged": "تم تسجيل الدفعة",
+    "paymentDue": "دفعة مستحقة",
     "missedThisMonth": "لم يُدفع هذا الشهر",
     "dueToday": "مستحق اليوم",
     "dueTomorrow": "مستحق غداً",
-    "dueInDays": "مستحق خلال {days} أيام"
+    "dueInDays": "مستحق خلال {days} أيام",
+    "markAsPaid": "تعيين كمدفوع",
+    "today": "اليوم",
+    "dayDetails": "يوم {day}",
+    "nothingOnThisDay": "لا دفعات في هذا اليوم.",
+    "alreadyPaid": "مدفوع"
   },
   "debtDetail": {
     "progress": "التقدم",

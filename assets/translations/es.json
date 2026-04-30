@@ -836,10 +836,16 @@
     "upcoming": "Próximas",
     "noDueDates": "Sin fechas de vencimiento. Edita una deuda para agregar una.",
     "paymentLogged": "Pago registrado",
+    "paymentDue": "Pago pendiente",
     "missedThisMonth": "Sin pago este mes",
     "dueToday": "Vence hoy",
     "dueTomorrow": "Vence mañana",
-    "dueInDays": "Vence en {days} días"
+    "dueInDays": "Vence en {days} días",
+    "markAsPaid": "Marcar como pagado",
+    "today": "Hoy",
+    "dayDetails": "Día {day}",
+    "nothingOnThisDay": "Sin pagos en este día.",
+    "alreadyPaid": "Pagado"
   },
   "debtDetail": {
     "progress": "Progreso",
