@@ -38,6 +38,9 @@ class EnvConfig {
       String.fromEnvironment('ADMOB_INTERSTITIAL_ANDROID');
   static const _admobInterstitialIos =
       String.fromEnvironment('ADMOB_INTERSTITIAL_IOS');
+  static const _admobNativeAndroid =
+      String.fromEnvironment('ADMOB_NATIVE_ANDROID');
+  static const _admobNativeIos = String.fromEnvironment('ADMOB_NATIVE_IOS');
 
   // Supabase Configuration
   static String get supabaseUrl =>
@@ -108,6 +111,16 @@ class EnvConfig {
       _admobInterstitialIos.isNotEmpty
           ? _admobInterstitialIos
           : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ?? '';
+
+  static String get admobNativeAndroid =>
+      _admobNativeAndroid.isNotEmpty
+          ? _admobNativeAndroid
+          : dotenv.env['ADMOB_NATIVE_ANDROID'] ?? '';
+
+  static String get admobNativeIos =>
+      _admobNativeIos.isNotEmpty
+          ? _admobNativeIos
+          : dotenv.env['ADMOB_NATIVE_IOS'] ?? '';
 
   // Environment
   static String get environment =>

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/env_config.dart';
 
 /// Service for managing Google Mobile Ads
@@ -49,6 +51,8 @@ class AdService {
   static const _testBannerIos = 'ca-app-pub-3940256099942544/2934735716';
   static const _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';
   static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
+  static const _testNativeAndroid = 'ca-app-pub-3940256099942544/2247696110';
+  static const _testNativeIos = 'ca-app-pub-3940256099942544/3986624511';
 
   /// Get the appropriate banner ad unit ID for the current platform.
   /// Uses the value from .env / --dart-define when set; falls back to Google's
@@ -74,6 +78,7 @@ class AdService {
       return id.isNotEmpty ? id : _testInterstitialAndroid;
     }
     if (Platform.isIOS) {
+      if (!kReleaseMode) return _testInterstitialIos;
       final id = EnvConfig.admobInterstitialIos;
       return id.isNotEmpty ? id : _testInterstitialIos;
     }
@@ -127,7 +132,7 @@ class AdService {
       return null;
     }
 
-    InterstitialAd? interstitialAd;
+    final completer = Completer<InterstitialAd?>();
 
     try {
       await InterstitialAd.load(
@@ -135,8 +140,6 @@ class AdService {
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
-            interstitialAd = ad;
-
             ad.fullScreenContentCallback = FullScreenContentCallback(
               onAdDismissedFullScreenContent: (ad) {
                 ad.dispose();
@@ -146,19 +149,72 @@ class AdService {
                 ad.dispose();
               },
             );
+            if (!completer.isCompleted) completer.complete(ad);
           },
           onAdFailedToLoad: (error) {
-            // interstitialAd is null when load fails — skip the callback
+            if (!completer.isCompleted) completer.complete(null);
           },
         ),
       );
+      return await completer.future;
     } catch (e) {
+      if (!completer.isCompleted) completer.complete(null);
       return null;
     }
+  }
 
-    return interstitialAd;
+  /// Get the appropriate native ad unit ID for the current platform.
+  String get nativeAdUnitId {
+    if (Platform.isAndroid) {
+      final id = EnvConfig.admobNativeAndroid;
+      return id.isNotEmpty ? id : _testNativeAndroid;
+    }
+    if (Platform.isIOS) {
+      final id = EnvConfig.admobNativeIos;
+      return id.isNotEmpty ? id : _testNativeIos;
+    }
+    throw UnsupportedError('Unsupported platform');
+  }
+
+  InterstitialAd? _preloadedInterstitial;
+
+  /// Preload an interstitial ad silently. No-op if already loaded.
+  Future<void> preloadInterstitial() async {
+    if (_preloadedInterstitial != null) return;
+    // Self-heal: wait for SDK before trying to load
+    if (!_isInitialized) await initialize();
+    if (!_isInitialized) return;
+
+    _preloadedInterstitial = await loadInterstitialAd(
+      onAdDismissedFullScreenContent: (_) {
+        _preloadedInterstitial = null;
+        preloadInterstitial();
+      },
+    );
+  }
+
+  /// Show the preloaded interstitial on every Nth app session.
+  /// Pass [shouldShow] = false for premium users to skip entirely.
+  Future<void> showInterstitialIfEligible({bool shouldShow = true}) async {
+    if (!shouldShow) return;
+    if (_preloadedInterstitial == null) return;
+    if (!await _SessionCounter.shouldShowAd()) return;
+    await _preloadedInterstitial?.show();
   }
 
   /// Check if the SDK is initialized
   bool get isInitialized => _isInitialized;
+}
+
+// ── Session counter — shows interstitial every 3rd cold launch ────────────────
+class _SessionCounter {
+  static const _key = 'finmate_session_count';
+  static const _interval = 3;
+
+  static Future<bool> shouldShowAd() async {
+    final prefs = await SharedPreferences.getInstance();
+    final next = (prefs.getInt(_key) ?? 0) + 1;
+    await prefs.setInt(_key, next);
+    return next % _interval == 0;
+  }
 }

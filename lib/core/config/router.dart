@@ -49,6 +49,8 @@ import '../../features/admin/presentation/pages/system_settings_page.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
+import '../services/ad_service.dart';
+import '../providers/ad_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -419,19 +421,20 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 /// iOS-style tab bar shell — Apple Wallet / Pay aesthetic
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const MainShell({required this.child, super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell>
+class _MainShellState extends ConsumerState<MainShell>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   String _currentTabRoot = '';
+  bool _interstitialShownThisSession = false;
 
   @override
   void initState() {
@@ -441,6 +444,16 @@ class _MainShellState extends State<MainShell>
       duration: const Duration(milliseconds: 250),
       value: 1.0,
     );
+    unawaited(AdService.instance.preloadInterstitial());
+  }
+
+  Future<void> _showInterstitialOnTransactions() async {
+    if (_interstitialShownThisSession) return;
+    final shouldShow = await ref.read(shouldShowAdsProvider.future);
+    if (!shouldShow) return;
+    await AdService.instance.preloadInterstitial();
+    await AdService.instance.showInterstitialIfEligible(shouldShow: shouldShow);
+    _interstitialShownThisSession = true;
   }
 
   @override
@@ -512,7 +525,10 @@ class _MainShellState extends State<MainShell>
                   activeIcon: CupertinoIcons.arrow_right_arrow_left,
                   label: 'nav.transactions'.tr(),
                   isSelected: selectedIndex == 1,
-                  onTap: () => context.go('/transactions'),
+                  onTap: () {
+                    context.go('/transactions');
+                    unawaited(_showInterstitialOnTransactions());
+                  },
                 ),
                 _TabItem(
                   icon: CupertinoIcons.chart_pie,

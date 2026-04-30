@@ -1,3 +1,4 @@
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/ad_service.dart';
 import 'subscription_provider.dart';
@@ -30,3 +31,55 @@ final shouldShowAdsProvider = FutureProvider<bool>((ref) async {
     return true;
   }
 });
+
+// ============================================================================
+// Native Ad Provider
+// ============================================================================
+
+/// Loads and holds the native ad. Returns null if premium or load fails.
+final nativeAdProvider =
+    StateNotifierProvider<NativeAdNotifier, NativeAd?>((ref) {
+  return NativeAdNotifier(ref);
+});
+
+class NativeAdNotifier extends StateNotifier<NativeAd?> {
+  NativeAdNotifier(this._ref) : super(null) {
+    _load();
+  }
+
+  final Ref _ref;
+
+  Future<void> _load() async {
+    try {
+      final shouldShow = await _ref.read(shouldShowAdsProvider.future);
+      if (!shouldShow) return;
+
+      if (!AdService.instance.isInitialized) {
+        await AdService.instance.initialize();
+      }
+
+      final ad = NativeAd(
+        adUnitId: AdService.instance.nativeAdUnitId,
+        request: const AdRequest(),
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            if (mounted) state = ad as NativeAd;
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+          },
+        ),
+        nativeTemplateStyle: NativeTemplateStyle(
+          templateType: TemplateType.medium,
+        ),
+      );
+      ad.load();
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    state?.dispose();
+    super.dispose();
+  }
+}

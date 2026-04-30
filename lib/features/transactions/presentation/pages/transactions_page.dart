@@ -890,9 +890,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       color: AppColors.brandTeal,
       onRefresh: () => notifier.refresh(),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.pagePadding,
-          vertical: AppSizes.md,
+        padding: const EdgeInsets.only(
+          left: AppSizes.pagePadding,
+          right: AppSizes.pagePadding,
+          top: AppSizes.md,
+          bottom: 96, // clears the FAB + its margin
         ),
         itemCount: groups.length + 1, // +1 for ad banner
         itemBuilder: (context, groupIndex) {
@@ -908,7 +910,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               ? AppColors.secondarySystemBackgroundDark
               : AppColors.systemBackground;
 
-          return TweenAnimationBuilder<double>(
+          final groupCard = TweenAnimationBuilder<double>(
             key: ValueKey(entry.key),
             tween: Tween(begin: 0.0, end: 1.0),
             duration: const Duration(milliseconds: 350),
@@ -963,6 +965,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               ],
             ),
           );
+
+          return groupCard;
         },
       ),
     );
