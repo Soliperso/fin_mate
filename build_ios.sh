@@ -20,8 +20,15 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
-# Load environment variables from .env
-export $(grep -v '^#' .env | xargs)
+# Load environment variables from .env safely (no shell execution of values)
+while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line//$'\r'/}"
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line//[[:space:]]/}" ]] && continue
+    if [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*) ]]; then
+        export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+    fi
+done < .env
 
 # Validate required variables
 if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
@@ -40,6 +47,9 @@ BUILD_ARGS=(
     "--dart-define=STRIPE_MONTHLY_PRICE_ID=$STRIPE_MONTHLY_PRICE_ID"
     "--dart-define=STRIPE_ANNUAL_PRICE_ID=$STRIPE_ANNUAL_PRICE_ID"
     "--dart-define=SENTRY_DSN=$SENTRY_DSN"
+    "--dart-define=ADMOB_APP_ID_IOS=$ADMOB_APP_ID_IOS"
+    "--dart-define=ADMOB_BANNER_IOS=$ADMOB_BANNER_IOS"
+    "--dart-define=ADMOB_INTERSTITIAL_IOS=$ADMOB_INTERSTITIAL_IOS"
     "--dart-define=ENVIRONMENT=$ENVIRONMENT"
 )
 
