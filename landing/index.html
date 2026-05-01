@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finmate — Budget & Debt Tracker</title>
+<meta name="description" content="See exactly where your money goes. Track budgets, crush debt, and build real financial clarity — all in one clean app.">
+<meta property="og:title" content="Finmate — Budget & Debt Tracker">
+<meta property="og:description" content="See exactly where your money goes. Track budgets, crush debt, and build real financial clarity.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ─── Design Tokens ─────────────────────────────────── */
+:root {
+  --ink:        #0d0d0d;
+  --paper:      #f5f2eb;
+  --gold:       #c8a84b;
+  --gold-light: #e8d08a;
+  --teal:       #3d7a72;
+  --teal-dark:  #2c5c56;
+  --teal-light: #e4f0ee;
+  --red:        #c0392b;
+  --muted:      #7a7060;
+  --border:     #d4cfc4;
+  --card:       #ffffff;
+  --radius:     2px;
+}
+
+/* ─── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* ─── Utilities ─────────────────────────────────────── */
+.container { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+.tag {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  padding: 4px 12px;
+  text-transform: uppercase;
+}
+.tag-outline {
+  background: transparent;
+  border: 1px solid rgba(200,168,75,0.4);
+  color: var(--gold);
+}
+.tag-teal {
+  background: var(--teal-light);
+  color: var(--teal);
+  border: 1px solid rgba(61,122,114,0.25);
+}
+.serif { font-family: 'Lora', serif; }
+.syne { font-family: 'Syne', sans-serif; }
+
+/* ─── NAV ────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(245,242,235,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.nav-logo span { color: var(--teal); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-cta {
+  background: var(--teal) !important;
+  color: var(--paper) !important;
+  padding: 8px 20px;
+  font-size: 11px !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: background 0.15s !important;
+}
+.nav-cta:hover { background: var(--teal-dark) !important; color: var(--paper) !important; }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.nav-hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); }
+
+/* ─── HERO ───────────────────────────────────────────── */
+.hero {
+  background: var(--teal);
+  padding: 140px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: 'FM';
+  position: absolute;
+  right: -40px; top: -60px;
+  font-family: 'Syne', sans-serif;
+  font-size: 400px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.07);
+  pointer-events: none;
+  line-height: 1;
+  user-select: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(200,168,75,0.3);
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.hero-kicker-line {
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+}
+.hero-kicker span {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  margin-bottom: 20px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(245,242,235,0.65);
+  margin-bottom: 36px;
+  max-width: 420px;
+}
+.hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  transition: background 0.15s, transform 0.1s;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(245,242,235,0.6);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+  padding: 14px 0;
+}
+.btn-ghost:hover { color: rgba(245,242,235,0.9); }
+.hero-note {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(245,242,235,0.4);
+  letter-spacing: 0.04em;
+}
+.hero-note::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.5;
+}
+
+/* Phone mockup */
+.hero-visual { display: flex; justify-content: center; align-items: flex-end; position: relative; }
+.phone-frame {
+  width: 240px;
+  background: var(--ink);
+  border-radius: 36px;
+  border: 2px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  position: relative;
+  z-index: 2;
+}
+.phone-notch {
+  width: 80px;
+  height: 20px;
+  background: var(--ink);
+  border-radius: 0 0 14px 14px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 3;
+}
+.phone-screen {
+  background: #1a1a1a;
+  padding: 16px;
+  min-height: 460px;
+}
+.phone-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.phone-time { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.phone-icons { display: flex; gap: 4px; }
+.phone-icons span { display: block; width: 14px; height: 7px; background: rgba(255,255,255,0.4); border-radius: 1px; }
+.dash-greeting { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.dash-balance {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+.dash-balance span { color: var(--gold); font-size: 14px; vertical-align: super; }
+.dash-label { font-size: 8px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.dash-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.dash-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 10px;
+}
+.dash-card-label { font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.dash-card-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff; }
+.dash-card-val.up { color: #4caf8a; }
+.dash-card-val.down { color: #e05252; }
+.dash-section-label { font-size: 8px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.budget-item { margin-bottom: 8px; }
+.budget-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.budget-item-name { font-size: 9px; color: rgba(255,255,255,0.65); }
+.budget-item-pct { font-size: 8px; color: rgba(255,255,255,0.4); }
+.budget-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.budget-bar-fill { height: 100%; border-radius: 2px; }
+.phone-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0 6px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 12px;
+}
+.phone-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.phone-nav-icon { width: 18px; height: 14px; display: flex; align-items: center; justify-content: center; }
+.phone-nav-icon svg { width: 14px; height: 14px; opacity: 0.35; }
+.phone-nav-item.active .phone-nav-icon svg { opacity: 1; }
+.phone-nav-dot { width: 3px; height: 3px; border-radius: 50%; }
+.phone-nav-item.active .phone-nav-dot { background: var(--gold); }
+.phone-glow {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 120px;
+  background: radial-gradient(ellipse, rgba(61,122,114,0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.phone-second {
+  position: absolute;
+  right: -30px;
+  bottom: 60px;
+  width: 160px;
+  background: var(--ink);
+  border-radius: 26px;
+  border: 2px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  opacity: 0.7;
+  z-index: 1;
+}
+.phone-second .phone-screen {
+  min-height: 0;
+  padding: 12px;
+}
+
+/* ─── STAT STRIP ─────────────────────────────────────── */
+.stat-strip {
+  background: var(--ink);
+  border-bottom: 1px solid rgba(200,168,75,0.15);
+}
+.stat-strip-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.stat-item {
+  padding: 24px 28px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.stat-item:last-child { border-right: none; }
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 10px;
+  color: rgba(245,242,235,0.4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* ─── SECTION COMMON ─────────────────────────────────── */
+section { padding: 96px 0; }
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.eyebrow-line { width: 28px; height: 1px; background: var(--gold); }
+.eyebrow-text {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.section-lead {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--muted);
+  max-width: 600px;
+}
+
+/* ─── PROBLEM ────────────────────────────────────────── */
+.problem { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.problem-quote {
+  border-left: 3px solid var(--gold);
+  padding-left: 24px;
+  margin: 32px 0;
+}
+.problem-quote blockquote {
+  font-family: 'Lora', serif;
+  font-size: 19px;
+  line-height: 1.65;
+  font-style: italic;
+  color: var(--ink);
+}
+.problem-stats { display: flex; flex-direction: column; gap: 1px; }
+.problem-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  background: var(--paper);
+  position: relative;
+  overflow: hidden;
+}
+.problem-stat::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--teal);
+}
+.problem-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--teal);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  min-width: 80px;
+}
+.problem-stat-text {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.problem-stat-text strong { color: var(--ink); font-family: 'Syne', sans-serif; font-weight: 700; }
+
+/* ─── FEATURES ───────────────────────────────────────── */
+.features { background: var(--paper); }
+.features-header { margin-bottom: 56px; }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.feature-card:hover { transform: translateY(-2px); }
+.feature-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 36px; right: 36px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.feature-card:hover::after { opacity: 1; }
+.feature-num {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--teal-light);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.feature-icon svg { width: 22px; height: 22px; color: var(--teal); }
+.feature-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.feature-desc {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.feature-list li {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.5;
+}
+.feature-list li::before {
+  content: '→';
+  color: var(--teal);
+  font-size: 11px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.feature-card-highlight {
+  background: var(--ink);
+  grid-column: span 2;
+}
+.feature-card-highlight .feature-title { color: var(--paper); }
+.feature-card-highlight .feature-desc { color: rgba(245,242,235,0.55); }
+.feature-card-highlight .feature-list li { color: rgba(245,242,235,0.55); }
+.feature-card-highlight .feature-list li::before { color: var(--gold); }
+.feature-card-highlight .feature-num { color: var(--gold); }
+.feature-card-highlight .feature-icon { background: rgba(200,168,75,0.12); }
+.feature-card-highlight .feature-icon svg { color: var(--gold); }
+.feature-highlight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.feature-coming-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(200,168,75,0.1);
+  border: 1px solid rgba(200,168,75,0.25);
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  margin-top: 16px;
+}
+.feature-coming-soon::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+/* AI mockup inside feature card */
+.ai-mockup {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ai-mockup-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; }
+.ai-mockup-title { font-size: 10px; color: rgba(245,242,235,0.5); letter-spacing: 0.06em; }
+.ai-chat { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.ai-bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.ai-bubble-user {
+  background: rgba(61,122,114,0.25);
+  border: 1px solid rgba(61,122,114,0.2);
+  color: rgba(245,242,235,0.75);
+  align-self: flex-end;
+  border-radius: 10px 10px 2px 10px;
+}
+.ai-bubble-bot {
+  background: rgba(200,168,75,0.1);
+  border: 1px solid rgba(200,168,75,0.15);
+  color: rgba(245,242,235,0.65);
+  align-self: flex-start;
+  border-radius: 2px 10px 10px 10px;
+  position: relative;
+}
+.ai-blur-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(13,13,13,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-blur-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+
+/* ─── HOW IT WORKS ───────────────────────────────────── */
+.how { background: var(--teal); padding: 96px 0; position: relative; overflow: hidden; }
+.how::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(200,168,75,0.2);
+}
+.how-title { color: var(--paper); }
+.how-lead { color: rgba(245,242,235,0.55); }
+.how-eyebrow .eyebrow-text { color: var(--gold); }
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 56px;
+}
+.how-step {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 36px 32px;
+  position: relative;
+}
+.step-connector {
+  position: absolute;
+  top: 52px;
+  right: -16px;
+  z-index: 2;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(200,168,75,0.4);
+  font-size: 16px;
+}
+.how-step:last-child .step-connector { display: none; }
+.step-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  color: rgba(200,168,75,0.15);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 10px;
+}
+.step-desc {
+  font-family: 'Lora', serif;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(245,242,235,0.5);
+}
+
+/* ─── TESTIMONIALS ───────────────────────────────────── */
+.testimonials { background: var(--card); border-top: 1px solid var(--border); }
+.testimonials-header { margin-bottom: 48px; }
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.testimonial-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  position: relative;
+  background: var(--paper);
+}
+.testimonial-stars {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 14px;
+}
+.star { color: var(--gold); font-size: 12px; }
+.testimonial-text {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+.testimonial-text strong { font-style: normal; color: var(--teal); }
+.testimonial-author { display: flex; align-items: center; gap: 10px; }
+.testimonial-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.testimonial-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.testimonial-role { font-size: 10px; color: var(--muted); letter-spacing: 0.04em; margin-top: 1px; }
+.testimonial-source { font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+
+/* ─── CTA SECTION ────────────────────────────────────── */
+.cta-section {
+  background: var(--ink);
+  padding: 96px 0;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '→';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Syne', sans-serif;
+  font-size: 320px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.02);
+  pointer-events: none;
+  line-height: 1;
+}
+.cta-inner { text-align: center; max-width: 640px; margin: 0 auto; }
+.cta-inner h2 {
+  color: var(--paper);
+  font-size: clamp(32px, 5vw, 52px);
+  margin-bottom: 16px;
+}
+.cta-inner h2 span { color: var(--gold); }
+.cta-lead {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: rgba(245,242,235,0.5);
+  margin-bottom: 40px;
+}
+.cta-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.cta-note {
+  margin-top: 20px;
+  font-size: 11px;
+  color: rgba(245,242,235,0.25);
+  letter-spacing: 0.06em;
+}
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(245,242,235,0.2);
+  color: rgba(245,242,235,0.55);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ─── FAQ ────────────────────────────────────────────── */
+.faq { background: var(--paper); }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 48px; }
+.faq-item {
+  border: 1px solid var(--border);
+  padding: 28px 32px;
+  background: var(--card);
+  cursor: pointer;
+}
+.faq-q {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.faq-q-icon { color: var(--teal); font-size: 18px; flex-shrink: 0; margin-top: -2px; }
+.faq-a {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+footer {
+  background: var(--ink);
+  border-top: 1px solid rgba(200,168,75,0.15);
+  padding: 48px 0;
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.footer-brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--paper);
+  margin-bottom: 8px;
+}
+.footer-brand-name span { color: var(--teal); }
+.footer-tagline {
+  font-size: 12px;
+  color: rgba(245,242,235,0.35);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 240px;
+}
+.footer-col-title {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a {
+  font-size: 12px;
+  color: rgba(245,242,235,0.4);
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: rgba(245,242,235,0.8); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.footer-copy {
+  font-size: 11px;
+  color: rgba(245,242,235,0.25);
+  letter-spacing: 0.04em;
+}
+.footer-copy span { color: var(--gold); opacity: 0.6; }
+.footer-legal {
+  display: flex;
+  gap: 20px;
+}
+.footer-legal a {
+  font-size: 10px;
+  color: rgba(245,242,235,0.2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.footer-legal a:hover { color: rgba(245,242,235,0.5); }
+
+/* ─── MOBILE NAV MENU ────────────────────────────────── */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 60px; left: 0; right: 0; bottom: 0;
+  background: var(--paper);
+  z-index: 99;
+  padding: 32px 24px;
+  flex-direction: column;
+  gap: 24px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.15s;
+}
+.mobile-menu a:hover { color: var(--teal); }
+.mobile-menu .btn-primary { width: 100%; justify-content: center; margin-top: 8px; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+  .hero-visual { display: none; }
+  .stat-strip-inner { grid-template-columns: repeat(2, 1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card-highlight { grid-column: span 1; }
+  .feature-highlight-grid { grid-template-columns: 1fr; gap: 28px; }
+  .how-steps { grid-template-columns: 1fr; gap: 2px; }
+  .step-connector { display: none; }
+  .testimonials-grid { grid-template-columns: 1fr; gap: 16px; }
+  .faq-grid { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+}
+@media (max-width: 600px) {
+  section { padding: 64px 0; }
+  .hero { padding: 100px 0 60px; }
+  .hero::before { font-size: 200px; }
+  .stat-strip-inner { grid-template-columns: repeat(2, 1fr); }
+  .stat-item { padding: 18px 20px; }
+  .stat-val { font-size: 22px; }
+  .cta-section { padding: 64px 0; }
+  .cta-section::before { display: none; }
+}
+
+/* ─── ANIMATIONS ─────────────────────────────────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ══════════════════════════════════════════════ -->
+<!-- TODO: Replace APP_STORE_URL below with your App Store Connect numeric ID URL,
+     e.g. https://apps.apple.com/app/finmate-budget-debt-tracker/id6XXXXXXXXX
+     Find your numeric ID in App Store Connect → Your App → App Information → Apple ID -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">Fin<span>mate</span></a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="https://apps.apple.com/search?term=finmate+budget+debt+tracker" class="nav-cta" target="_blank" rel="noopener">Download Free</a></li>
+    </ul>
+    <div class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" onclick="toggleMenu()">Features</a>
+  <a href="#how" onclick="toggleMenu()">How It Works</a>
+  <a href="#faq" onclick="toggleMenu()">FAQ</a>
+  <a href="https://apps.apple.com/search?term=finmate+budget+debt+tracker" class="btn-primary" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+    Download on App Store
+  </a>
+</div>
+
+<!-- ═══ HERO ══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-content">
+      <div class="hero-kicker">
+        <div class="hero-kicker-line"></div>
+        <span>Personal Finance · Free on iOS</span>
+      </div>
+      <h1>Stop guessing.<br>Start <em>winning</em><br>with money.</h1>
+      <p class="hero-sub">Finmate gives you a brutally honest view of your financial life — budgets, spending, and debt — so you can finally move the needle instead of hoping for the best.</p>
+      <div class="hero-actions">
+        <a href="https://apps.apple.com/search?term=finmate+budget+debt+tracker" class="btn-primary" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download Free
+        </a>
+        <a href="#features" class="btn-ghost">
+          See features
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="hero-note">Free forever · No bank linking required</div>
+    </div>
+
+    <div class="hero-visual">
+      <div style="position:relative; padding-bottom: 60px;">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-status">
+              <span class="phone-time">9:41</span>
+              <div class="phone-icons">
+                <span style="width:20px;height:7px;background:rgba(255,255,255,0.3);border-radius:1px;"></span>
+                <span style="width:14px;height:7px;background:rgba(255,255,255,0.3);border-radius:1px;"></span>
+                <span style="width:12px;height:7px;background:rgba(255,255,255,0.2);border-radius:1px;"></span>
+              </div>
+            </div>
+            <div class="dash-greeting">Good morning</div>
+            <div class="dash-balance"><span>$</span>12,840</div>
+            <div class="dash-label">Net Worth</div>
+            <div class="dash-row">
+              <div class="dash-card">
+                <div class="dash-card-label">Income</div>
+                <div class="dash-card-val up">+$4,200</div>
+              </div>
+              <div class="dash-card">
+                <div class="dash-card-label">Spending</div>
+                <div class="dash-card-val down">−$2,840</div>
+              </div>
+            </div>
+            <div class="dash-row">
+              <div class="dash-card">
+                <div class="dash-card-label">Debt Left</div>
+                <div class="dash-card-val" style="color:#e8b84b;">$8,200</div>
+              </div>
+              <div class="dash-card">
+                <div class="dash-card-label">Savings</div>
+                <div class="dash-card-val up">$2,100</div>
+              </div>
+            </div>
+            <div class="dash-section-label">Budgets this month</div>
+            <div class="budget-item">
+              <div class="budget-item-top">
+                <span class="budget-item-name">Groceries</span>
+                <span class="budget-item-pct">72%</span>
+              </div>
+              <div class="budget-bar"><div class="budget-bar-fill" style="width:72%;background:#4caf8a;"></div></div>
+            </div>
+            <div class="budget-item">
+              <div class="budget-item-top">
+                <span class="budget-item-name">Dining Out</span>
+                <span class="budget-item-pct">94%</span>
+              </div>
+              <div class="budget-bar"><div class="budget-bar-fill" style="width:94%;background:#e8b84b;"></div></div>
+            </div>
+            <div class="budget-item">
+              <div class="budget-item-top">
+                <span class="budget-item-name">Transport</span>
+                <span class="budget-item-pct">41%</span>
+              </div>
+              <div class="budget-bar"><div class="budget-bar-fill" style="width:41%;background:#3d7a72;"></div></div>
+            </div>
+            <div class="phone-nav">
+              <div class="phone-nav-item active">
+                <div class="phone-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="phone-nav-dot"></div>
+              </div>
+              <div class="phone-nav-item">
+                <div class="phone-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <div class="phone-nav-dot"></div>
+              </div>
+              <div class="phone-nav-item">
+                <div class="phone-nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                </div>
+                <div class="phone-nav-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAT STRIP ═════════════════════════════════════════ -->
+<div class="stat-strip">
+  <div class="container">
+    <div class="stat-strip-inner">
+      <div class="stat-item fade-up">
+        <div class="stat-val">$340</div>
+        <div class="stat-label">avg. invisible spending users find in month one</div>
+      </div>
+      <div class="stat-item fade-up">
+        <div class="stat-val">4.8★</div>
+        <div class="stat-label">App Store rating from early users</div>
+      </div>
+      <div class="stat-item fade-up">
+        <div class="stat-val">Free</div>
+        <div class="stat-label">core features — no paywall on the essentials</div>
+      </div>
+      <div class="stat-item fade-up">
+        <div class="stat-val">2 min</div>
+        <div class="stat-label">to set up your first budget and see the picture</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROBLEM ════════════════════════════════════════════ -->
+<section class="problem">
+  <div class="container">
+    <div class="problem-grid">
+      <div class="fade-up">
+        <div class="section-eyebrow">
+          <div class="eyebrow-line"></div>
+          <span class="eyebrow-text">The real issue</span>
+        </div>
+        <h2>You don't have a money problem. You have a visibility problem.</h2>
+        <div class="problem-quote">
+          <blockquote>"Most people aren't bad with money — they're just flying blind. The moment you can see exactly where every dollar goes, you naturally make better decisions. Not because of willpower. Because of awareness."</blockquote>
+        </div>
+        <p class="section-lead">Finmate was built on one belief: <strong>clarity changes behavior</strong>. You can't fix what you can't see. Finmate shows you everything.</p>
+      </div>
+
+      <div class="problem-stats fade-up">
+        <div class="problem-stat">
+          <div class="problem-stat-num">78%</div>
+          <div class="problem-stat-text"><strong>of people underestimate</strong> their monthly spending — often by hundreds of dollars, according to consumer finance research.</div>
+        </div>
+        <div class="problem-stat">
+          <div class="problem-stat-num">$4k+</div>
+          <div class="problem-stat-text"><strong>lost annually</strong> to "invisible spending" — small transactions that individually feel harmless but compound into real money.</div>
+        </div>
+        <div class="problem-stat">
+          <div class="problem-stat-num">1 in 3</div>
+          <div class="problem-stat-text"><strong>adults have no budget</strong> — not because they don't want one, but because most tools are too complex to actually use every day.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══════════════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-eyebrow">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">Everything you need</span>
+      </div>
+      <h2>Built for people who are serious about their money.</h2>
+      <p class="section-lead">Four tools that work together — not four separate apps you have to stitch together yourself.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card fade-up">
+        <div class="feature-num">01 /</div>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="feature-title">Dashboard</div>
+        <p class="feature-desc">Your complete financial picture — net worth, cash flow, budget status, and debt progress — unified in one clean view the moment you open the app.</p>
+        <ul class="feature-list">
+          <li>Net worth tracking across all accounts</li>
+          <li>Cash flow at a glance: income vs. spending</li>
+          <li>Money health score — know where you stand</li>
+          <li>Emergency fund progress tracker</li>
+        </ul>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-num">02 /</div>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        </div>
+        <div class="feature-title">Transactions</div>
+        <p class="feature-desc">Log every expense in seconds. Finmate categorizes your spending automatically and surfaces patterns you'd never notice on a bank statement.</p>
+        <ul class="feature-list">
+          <li>Quick-add with category and account</li>
+          <li>Scan receipts with your camera (ML Kit)</li>
+          <li>Filter, search, and see trends over time</li>
+          <li>Split categories — groceries vs. dining out</li>
+        </ul>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-num">03 /</div>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="feature-title">Budgets</div>
+        <p class="feature-desc">Set monthly limits by category. Finmate tracks them in real time — so you know exactly where you stand before you overspend, not after.</p>
+        <ul class="feature-list">
+          <li>Per-category monthly budgets</li>
+          <li>Live progress bars as you spend</li>
+          <li>Over-budget alerts before it's too late</li>
+          <li>Month-over-month comparison view</li>
+        </ul>
+      </div>
+
+      <div class="feature-card fade-up">
+        <div class="feature-num">04 /</div>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="feature-title">Debt Tracker</div>
+        <p class="feature-desc">Stop avoiding the number. Finmate visualizes your payoff journey — Avalanche or Snowball — so every payment you make feels like progress instead of pain.</p>
+        <ul class="feature-list">
+          <li>Track every debt: cards, loans, anything</li>
+          <li>Avalanche & Snowball payoff strategies</li>
+          <li>Progress bars that move with each payment</li>
+          <li>Payoff date projections to stay motivated</li>
+        </ul>
+      </div>
+
+      <!-- AI Feature — full-width highlight -->
+      <div class="feature-card feature-card-highlight fade-up">
+        <div class="feature-highlight-grid">
+          <div>
+            <div class="feature-num">05 /</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+            </div>
+            <div class="feature-title">AI Insights</div>
+            <p class="feature-desc">Not generic advice. Guidance built on your actual data — your spending patterns, your debts, your specific situation. Like a financial advisor who's actually seen your numbers.</p>
+            <ul class="feature-list">
+              <li>30-day balance forecasting</li>
+              <li>Personalized spending alerts</li>
+              <li>AI chat trained on your own data</li>
+              <li>Overspending pattern detection</li>
+            </ul>
+            <div class="feature-coming-soon">Coming to V1.1 — Download now to be first</div>
+          </div>
+          <div>
+            <div class="ai-mockup">
+              <div class="ai-mockup-header">
+                <div class="ai-dot" style="background:#e05252;"></div>
+                <div class="ai-dot" style="background:#e8b84b;"></div>
+                <div class="ai-dot" style="background:#4caf8a;"></div>
+                <span class="ai-mockup-title">AI Insights · Beta Preview</span>
+              </div>
+              <div class="ai-chat" style="position:relative;">
+                <div class="ai-bubble ai-bubble-user">Why am I always short at month end?</div>
+                <div class="ai-bubble ai-bubble-bot" style="position:relative;">
+                  Looking at your last 3 months... your dining spend peaks in week 3 — you're averaging $180 over budget every month. If you cap dining at $220, you'll end the month with $180 surplus.
+                  <div class="ai-blur-overlay"><span class="ai-blur-label">Coming Soon</span></div>
+                </div>
+                <div class="ai-bubble ai-bubble-user">How fast can I pay off my credit card?</div>
+                <div class="ai-bubble ai-bubble-bot" style="position:relative;">
+                  At your current payment rate, 14 months. But if you redirect the $180 dining surplus, it drops to 9 months. You'd save ~$340 in interest.
+                  <div class="ai-blur-overlay"><span class="ai-blur-label">Coming Soon</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ════════════════════════════════════════ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-eyebrow how-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Getting started</span>
+    </div>
+    <h2 class="how-title">Up and running<br>in under 2 minutes.</h2>
+    <p class="section-lead how-lead">No bank linking. No data sharing. No complicated setup. Just you, your numbers, and total clarity.</p>
+
+    <div class="how-steps">
+      <div class="how-step fade-up">
+        <div class="step-num">01</div>
+        <div class="step-title">Download & create your account</div>
+        <p class="step-desc">Free on the App Store. Sign up with email — no social login required. Your data stays yours, encrypted and private.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="how-step fade-up">
+        <div class="step-num">02</div>
+        <div class="step-title">Add your accounts & first budget</div>
+        <p class="step-desc">Add your checking, savings, and credit card balances manually. Set your first monthly budget by category. Takes 90 seconds.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="how-step fade-up">
+        <div class="step-num">03</div>
+        <div class="step-title">Log transactions as you spend</div>
+        <p class="step-desc">Scan a receipt or tap to add. The more you log, the clearer your picture gets — and the more the dashboard reveals about your patterns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ════════════════════════════════════════ -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testimonials-header">
+      <div class="section-eyebrow">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">Early users</span>
+      </div>
+      <h2>Real results from<br>real Finmate users.</h2>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testimonial-text">"I genuinely didn't know I was spending <strong>$280/month on takeout</strong>. I thought it was half that. The moment I saw the category breakdown I was embarrassed — and I haven't eaten out as much since."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">MR</div>
+          <div>
+            <div class="testimonial-name">Marcus R.</div>
+            <div class="testimonial-role">Software Engineer, 29</div>
+            <div class="testimonial-source">App Store Review</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testimonial-text">"The debt tracker is the thing that keeps me going. Watching that progress bar move — even by a little — is <strong>more motivating than any spreadsheet</strong> I've ever made. Three months in, down $1,400."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">JL</div>
+          <div>
+            <div class="testimonial-name">Jamie L.</div>
+            <div class="testimonial-role">Nurse, 34 — paying off student loans</div>
+            <div class="testimonial-source">App Store Review</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testimonial-text">"I've tried Mint, YNAB, spreadsheets. <strong>Finmate is the first one that stuck</strong>. It's simple enough that I actually log my expenses every day — and detailed enough that I actually learn something from it."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">AS</div>
+          <div>
+            <div class="testimonial-name">Alexis S.</div>
+            <div class="testimonial-role">Teacher, 27</div>
+            <div class="testimonial-source">App Store Review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ════════════════════════════════════════════════ -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Questions</span>
+    </div>
+    <h2>The honest answers.</h2>
+
+    <div class="faq-grid">
+      <div class="faq-item fade-up">
+        <div class="faq-q">Does Finmate connect to my bank? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">No. Finmate is fully manual — you enter your transactions and balances yourself. This is intentional. No bank credentials, no data sharing, no third-party access to your accounts. Your financial data never leaves your device except to your private Supabase account.</p>
+      </div>
+
+      <div class="faq-item fade-up">
+        <div class="faq-q">Is it actually free? What's the catch? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">The core app — dashboard, transactions, budgets, debt tracker — is free. We show non-intrusive ads. AI Insights will be a premium feature when it launches in V1.1. There's no hidden paywall blocking the tools that matter most.</p>
+      </div>
+
+      <div class="faq-item fade-up">
+        <div class="faq-q">Is my data private and secure? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">Yes. All data is stored in a private, authenticated Supabase database with row-level security — meaning only your account can access your data. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices.</p>
+      </div>
+
+      <div class="faq-item fade-up">
+        <div class="faq-q">When is AI Insights coming? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">AI Insights is the next major feature — coming in V1.1. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns. Download now and you'll get it automatically when it drops.</p>
+      </div>
+
+      <div class="faq-item fade-up">
+        <div class="faq-q">Is it available on Android? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">Finmate is currently iOS-only. An Android version is planned and being actively developed. Sign up via the app on iOS and you'll be notified when Android is available.</p>
+      </div>
+
+      <div class="faq-item fade-up">
+        <div class="faq-q">What if I want to export my data? <span class="faq-q-icon">?</span></div>
+        <p class="faq-a">CSV and PDF data export is on the roadmap for V1.1. Your data is always accessible through the app, and because it's stored in a standard Postgres database, export will be straightforward when the feature ships.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ════════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner fade-up">
+      <div class="tag tag-outline" style="margin-bottom: 24px;">Free on App Store</div>
+      <h2>See everything.<br><span>Owe less.</span><br>Start today.</h2>
+      <p class="cta-lead">Two minutes to set up. No bank account required. Just the clarity you've been putting off — finally in one place.</p>
+      <div class="cta-actions">
+        <a href="https://apps.apple.com/search?term=finmate+budget+debt+tracker" class="btn-primary" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download on App Store
+        </a>
+        <a href="#features" class="btn-outline">
+          See all features
+        </a>
+      </div>
+      <p class="cta-note">iOS 16+ · Free · No bank linking · Privacy-first</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-name">Fin<span>mate</span></div>
+        <p class="footer-tagline">Budget & Debt Tracker. See everything. Owe less. Built for people who are serious about their money.</p>
+        <a href="https://apps.apple.com/search?term=finmate+budget+debt+tracker" class="btn-primary" style="font-size:11px;padding:10px 20px;" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Free on App Store
+        </a>
+      </div>
+      <div>
+        <div class="footer-col-title">Features</div>
+        <ul class="footer-links">
+          <li><a href="#features">Dashboard</a></li>
+          <li><a href="#features">Transactions</a></li>
+          <li><a href="#features">Budgets</a></li>
+          <li><a href="#features">Debt Tracker</a></li>
+          <li><a href="#features">AI Insights (soon)</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="mailto:support@finmateapp.com">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 <span>Finmate</span>. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="mailto:support@finmateapp.com">Support</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ── Mobile menu ── */
+  function toggleMenu() {
+    const m = document.getElementById('mobileMenu');
+    m.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobileMenu');
+    const nav = document.querySelector('nav');
+    if (menu.classList.contains('open') && !nav.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  /* ── Scroll animations ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  /* ── Smooth scroll for anchor links ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
