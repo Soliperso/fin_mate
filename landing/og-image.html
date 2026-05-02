@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1200px; height: 630px; overflow: hidden; }
+body {
+  background: #3d7a72;
+  font-family: 'DM Mono', monospace;
+  position: relative;
+}
+
+/* Background watermark */
+.watermark {
+  position: absolute;
+  right: -60px;
+  top: -80px;
+  font-family: 'Syne', sans-serif;
+  font-size: 520px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.08);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+
+/* Bottom gold line */
+.gold-line {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c8a84b 0%, rgba(200,168,75,0.3) 60%, transparent 100%);
+}
+
+/* Left accent bar */
+.accent-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: #c8a84b;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 72px 52px;
+}
+
+/* Top: logo + tag */
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #f5f2eb;
+  letter-spacing: -0.02em;
+}
+.logo span { color: #c8a84b; }
+.tag {
+  background: rgba(200,168,75,0.15);
+  border: 1px solid rgba(200,168,75,0.4);
+  color: #c8a84b;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  margin-top: 4px;
+}
+
+/* Middle: headline */
+.middle { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0; }
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kicker-line { width: 28px; height: 1px; background: #c8a84b; }
+.kicker-text { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(200,168,75,0.8); }
+.headline {
+  font-family: 'Syne', sans-serif;
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: #f5f2eb;
+  margin-bottom: 20px;
+}
+.headline em { font-style: normal; color: #c8a84b; }
+.subline {
+  font-size: 18px;
+  color: rgba(245,242,235,0.55);
+  line-height: 1.5;
+  max-width: 580px;
+}
+
+/* Bottom: stats + platforms */
+.bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.stats { display: flex; gap: 40px; }
+.stat-item {}
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #c8a84b;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+.stat-label { font-size: 11px; color: rgba(245,242,235,0.4); letter-spacing: 0.06em; text-transform: uppercase; }
+.platforms {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.platform-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(245,242,235,0.08);
+  border: 1px solid rgba(245,242,235,0.12);
+  padding: 10px 20px;
+  border-radius: 2px;
+  color: rgba(245,242,235,0.7);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  width: 220px;
+}
+.platform-badge svg { flex-shrink: 0; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="watermark">FM</div>
+<div class="gold-line"></div>
+<div class="accent-bar"></div>
+
+<div class="inner">
+  <div class="top">
+    <div class="logo">Fin<span>mate</span></div>
+    <div class="tag">Free · iOS &amp; Android</div>
+  </div>
+
+  <div class="middle">
+    <div class="kicker">
+      <div class="kicker-line"></div>
+      <span class="kicker-text">Personal Finance App</span>
+    </div>
+    <div class="headline">See where your<br>money <em>actually</em> goes.</div>
+    <div class="subline">Track budgets, crush debt, and build real financial clarity — no bank linking required.</div>
+  </div>
+
+  <div class="bottom">
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-val">5.0★</div>
+        <div class="stat-label">App Store</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">Free</div>
+        <div class="stat-label">Core features</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">2 min</div>
+        <div class="stat-label">To set up</div>
+      </div>
+    </div>
+
+    <div class="platforms">
+      <div class="platform-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on App Store
+      </div>
+      <div class="platform-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
+        Get it on Google Play
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
