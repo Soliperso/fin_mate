@@ -81,10 +81,15 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     if (!mounted) return;
 
-    // Await auth result — usually already resolved by now
+    // Await auth result — usually already resolved by now.
+    // Timeout guards against a hung Supabase network call (e.g. profile fetch
+    // when the device is offline but has a cached session).
     Object? user;
     try {
-      user = await userFuture;
+      user = await userFuture.timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => null,
+      );
     } catch (_) {
       // Network error or Supabase unavailable — navigate to onboarding
     }
