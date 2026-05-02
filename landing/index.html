@@ -459,7 +459,8 @@ h2 {
   color: var(--teal);
   letter-spacing: -0.03em;
   line-height: 1;
-  min-width: 80px;
+  width: 92px;
+  flex-shrink: 0;
 }
 .problem-stat-text {
   font-family: 'Lora', serif;
@@ -702,59 +703,6 @@ h2 {
   color: rgba(245,242,235,0.5);
 }
 
-/* ─── TESTIMONIALS ───────────────────────────────────── */
-.testimonials { background: var(--card); border-top: 1px solid var(--border); }
-.testimonials-header { margin-bottom: 48px; }
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-.testimonial-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
-  position: relative;
-  background: var(--paper);
-}
-.testimonial-stars {
-  display: flex;
-  gap: 3px;
-  margin-bottom: 14px;
-}
-.star { color: var(--gold); font-size: 12px; }
-.testimonial-text {
-  font-family: 'Lora', serif;
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--ink);
-  margin-bottom: 20px;
-  font-style: italic;
-}
-.testimonial-text strong { font-style: normal; color: var(--teal); }
-.testimonial-author { display: flex; align-items: center; gap: 10px; }
-.testimonial-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold);
-  flex-shrink: 0;
-}
-.testimonial-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink);
-}
-.testimonial-role { font-size: 10px; color: var(--muted); letter-spacing: 0.04em; margin-top: 1px; }
-.testimonial-source { font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
-
 /* ─── CTA SECTION ────────────────────────────────────── */
 .cta-section {
   background: var(--ink);
@@ -944,8 +892,7 @@ footer {
   .feature-highlight-grid { grid-template-columns: 1fr; gap: 28px; }
   .how-steps { grid-template-columns: 1fr; gap: 2px; }
   .step-connector { display: none; }
-  .testimonials-grid { grid-template-columns: 1fr; gap: 16px; }
-  .faq-grid { grid-template-columns: 1fr; }
+.faq-grid { grid-template-columns: 1fr; }
   .footer-inner { grid-template-columns: 1fr; gap: 32px; }
   .footer-bottom { flex-direction: column; text-align: center; }
   .nav-links { display: none; }
@@ -1003,6 +950,10 @@ footer {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
     Download on App Store
   </a>
+  <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
+    Get it on Google Play
+  </a>
 </div>
 
 <!-- ═══ HERO ══════════════════════════════════════════════ -->
@@ -1011,14 +962,18 @@ footer {
     <div class="hero-content">
       <div class="hero-kicker">
         <div class="hero-kicker-line"></div>
-        <span>Personal Finance · Free on iOS</span>
+        <span>Personal Finance · Free on iOS &amp; Android</span>
       </div>
       <h1>Stop guessing.<br>Start <em>winning</em><br>with money.</h1>
       <p class="hero-sub">Finmate gives you a brutally honest view of your financial life — budgets, spending, and debt — so you can finally move the needle instead of hoping for the best.</p>
       <div class="hero-actions">
         <a href="https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716" class="btn-primary" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          Download Free
+          App Store
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
+          Google Play
         </a>
         <a href="#features" class="btn-ghost">
           See features
@@ -1325,66 +1280,6 @@ footer {
   </div>
 </section>
 
-<!-- ═══ TESTIMONIALS ════════════════════════════════════════ -->
-<section class="testimonials">
-  <div class="container">
-    <div class="testimonials-header">
-      <div class="section-eyebrow">
-        <div class="eyebrow-line"></div>
-        <span class="eyebrow-text">Early users</span>
-      </div>
-      <h2>Real results from<br>real Finmate users.</h2>
-    </div>
-
-    <div class="testimonials-grid">
-      <div class="testimonial-card fade-up">
-        <div class="testimonial-stars">
-          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-        </div>
-        <p class="testimonial-text">"I genuinely didn't know I was spending <strong>$280/month on takeout</strong>. I thought it was half that. The moment I saw the category breakdown I was embarrassed — and I haven't eaten out as much since."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">MR</div>
-          <div>
-            <div class="testimonial-name">Marcus R.</div>
-            <div class="testimonial-role">Software Engineer, 29</div>
-            <div class="testimonial-source">App Store Review</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="testimonial-card fade-up">
-        <div class="testimonial-stars">
-          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-        </div>
-        <p class="testimonial-text">"The debt tracker is the thing that keeps me going. Watching that progress bar move — even by a little — is <strong>more motivating than any spreadsheet</strong> I've ever made. Three months in, down $1,400."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">JL</div>
-          <div>
-            <div class="testimonial-name">Jamie L.</div>
-            <div class="testimonial-role">Nurse, 34 — paying off student loans</div>
-            <div class="testimonial-source">App Store Review</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="testimonial-card fade-up">
-        <div class="testimonial-stars">
-          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-        </div>
-        <p class="testimonial-text">"I've tried Mint, YNAB, spreadsheets. <strong>Finmate is the first one that stuck</strong>. It's simple enough that I actually log my expenses every day — and detailed enough that I actually learn something from it."</p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">AS</div>
-          <div>
-            <div class="testimonial-name">Alexis S.</div>
-            <div class="testimonial-role">Teacher, 27</div>
-            <div class="testimonial-source">App Store Review</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ═══ FAQ ════════════════════════════════════════════════ -->
 <section class="faq" id="faq">
   <div class="container">
@@ -1417,7 +1312,7 @@ footer {
 
       <div class="faq-item fade-up">
         <div class="faq-q">Is it available on Android? <span class="faq-q-icon">?</span></div>
-        <p class="faq-a">Finmate is currently iOS-only. An Android version is planned and being actively developed. Sign up via the app on iOS and you'll be notified when Android is available.</p>
+        <p class="faq-a">Yes! Finmate is available on both iOS (App Store) and Android (Google Play). Download free on either platform — your data is private, stays in your account, and everything syncs across devices.</p>
       </div>
 
       <div class="faq-item fade-up">
@@ -1432,19 +1327,23 @@ footer {
 <section class="cta-section">
   <div class="container">
     <div class="cta-inner fade-up">
-      <div class="tag tag-outline" style="margin-bottom: 24px;">Free on App Store</div>
+      <div class="tag tag-outline" style="margin-bottom: 24px;">Free on App Store &amp; Google Play</div>
       <h2>See everything.<br><span>Owe less.</span><br>Start today.</h2>
       <p class="cta-lead">Two minutes to set up. No bank account required. Just the clarity you've been putting off — finally in one place.</p>
       <div class="cta-actions">
         <a href="https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716" class="btn-primary" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          Download on App Store
+          App Store
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
+          Google Play
         </a>
         <a href="#features" class="btn-outline">
           See all features
         </a>
       </div>
-      <p class="cta-note">iOS 16+ · Free · No bank linking · Privacy-first</p>
+      <p class="cta-note">iOS &amp; Android · Free · No bank linking · Privacy-first</p>
     </div>
   </div>
 </section>
@@ -1458,7 +1357,11 @@ footer {
         <p class="footer-tagline">Budget & Debt Tracker. See everything. Owe less. Built for people who are serious about their money.</p>
         <a href="https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716" class="btn-primary" style="font-size:11px;padding:10px 20px;" target="_blank" rel="noopener">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          Free on App Store
+          App Store
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" style="font-size:11px;padding:10px 20px;" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
+          Google Play
         </a>
       </div>
       <div>
