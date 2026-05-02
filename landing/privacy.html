@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Finmate</title>
+<meta name="description" content="Finmate Privacy Policy — how we collect, use, and protect your data.">
+<link rel="canonical" href="https://get-finmate.netlify.app/privacy.html">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0d0d; --paper: #f5f2eb; --teal: #3d7a72; --teal-dark: #2c5c56;
+  --gold: #c8a84b; --muted: #7a7060; --border: #d4cfc4; --card: #ffffff;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: 'DM Mono', monospace; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,242,235,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
+.nav-logo span { color: var(--teal); }
+.nav-back { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+.nav-back:hover { color: var(--ink); text-decoration: none; }
+main { padding: 100px 0 80px; }
+.legal-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+.legal-header h1 { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+.legal-meta { font-size: 12px; color: var(--muted); }
+.legal-body h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin: 40px 0 12px; }
+.legal-body p { font-family: 'Lora', serif; font-size: 15px; line-height: 1.75; color: var(--muted); margin-bottom: 16px; }
+.legal-body ul { font-family: 'Lora', serif; font-size: 15px; line-height: 1.75; color: var(--muted); margin: 0 0 16px 20px; }
+.legal-body ul li { margin-bottom: 6px; }
+.legal-body strong { color: var(--ink); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+footer { border-top: 1px solid var(--border); padding: 32px 0; }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.footer-copy { font-size: 11px; color: var(--muted); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">Fin<span>mate</span></a>
+    <a href="index.html" class="nav-back">← Back to home</a>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+    <div class="legal-header">
+      <h1>Privacy Policy</h1>
+      <p class="legal-meta">Effective date: May 1, 2026 &nbsp;·&nbsp; Last updated: May 1, 2026</p>
+    </div>
+
+    <div class="legal-body">
+      <p>Finmate ("we", "our", or "us") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights. If you have questions, contact us at <a href="mailto:support@finmateapp.com">support@finmateapp.com</a>.</p>
+
+      <h2>1. What We Collect</h2>
+      <p><strong>Account data</strong> — your email address, created when you sign up. No other personal information is required.</p>
+      <p><strong>Financial data you enter</strong> — transactions, account balances, budgets, debts, and savings goals you manually input into the app. This data is stored in your private account and is never shared with third parties.</p>
+      <p><strong>Device & usage data</strong> — anonymous crash reports and error logs via Sentry (error tracking). Financial amounts and personally identifiable information are explicitly excluded from these logs.</p>
+      <p><strong>Advertising data</strong> — if you use the free tier, Google Mobile Ads may collect your device advertising ID to serve relevant ads, subject to your device's ad tracking settings and App Tracking Transparency consent (iOS). We do not sell this data.</p>
+
+      <h2>2. What We Do NOT Collect</h2>
+      <ul>
+        <li>Bank account credentials or direct bank connections</li>
+        <li>Financial amounts in analytics or crash reports</li>
+        <li>Social login data (we use email/password only)</li>
+        <li>Location data</li>
+        <li>Contacts or camera data beyond receipt scanning (ML Kit, on-device only)</li>
+      </ul>
+
+      <h2>3. How We Store Your Data</h2>
+      <p>All financial data is stored in a private, authenticated <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a> database with row-level security (RLS). This means only your authenticated account can read or write your data — not other users, not Finmate staff, and not third parties.</p>
+      <p>Data is encrypted in transit (TLS) and at rest. Authentication tokens and sensitive credentials on your device are stored in the platform keychain using Flutter Secure Storage.</p>
+
+      <h2>4. Third-Party Services</h2>
+      <ul>
+        <li><strong>Supabase</strong> — database, authentication, and storage (<a href="https://supabase.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>)</li>
+        <li><strong>Google Mobile Ads</strong> — advertising on the free tier (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>)</li>
+        <li><strong>Sentry</strong> — crash and error reporting, financial data excluded (<a href="https://sentry.io/privacy/" target="_blank" rel="noopener">Privacy Policy</a>)</li>
+        <li><strong>OpenAI</strong> — AI Insights feature (V1.1, not yet active). When enabled, anonymized spending summaries may be sent to OpenAI's API to generate insights. No raw transaction data or personal identifiers are included.</li>
+        <li><strong>Google ML Kit</strong> — receipt scanning, processed entirely on-device. No image data leaves your device.</li>
+      </ul>
+
+      <h2>5. Your Rights</h2>
+      <p>You may request deletion of your account and all associated data at any time by contacting <a href="mailto:support@finmateapp.com">support@finmateapp.com</a> or using the delete account option in the app's Settings → Data & Privacy.</p>
+      <p>Data export (CSV/PDF) is on the roadmap for V1.1. Until then, your data is accessible and readable within the app at all times.</p>
+
+      <h2>6. Children</h2>
+      <p>Finmate is not directed to children under 13. We do not knowingly collect data from children under 13. If you believe a child has provided us data, please contact us and we will delete it promptly.</p>
+
+      <h2>7. Changes to This Policy</h2>
+      <p>We may update this policy. Material changes will be communicated via in-app notification or email. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+      <h2>8. Contact</h2>
+      <p>Questions or requests: <a href="mailto:support@finmateapp.com">support@finmateapp.com</a></p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <p class="footer-copy">© 2026 Finmate. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="mailto:support@finmateapp.com">Support</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

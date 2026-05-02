@@ -11,7 +11,31 @@
 <meta property="og:url" content="https://get-finmate.netlify.app/">
 <link rel="canonical" href="https://get-finmate.netlify.app/">
 <link rel="icon" type="image/png" href="favicon.png">
+<meta property="og:image" content="https://get-finmate.netlify.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Finmate — Budget & Debt Tracker">
+<meta name="twitter:description" content="See exactly where your money goes. Free on iOS & Android. No bank linking required.">
+<meta name="twitter:image" content="https://get-finmate.netlify.app/og-image.png">
+<meta name="theme-color" content="#3d7a72">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Finmate",
+  "description": "Personal finance app for tracking budgets, transactions, and debt payoff. Manual entry only — no bank linking required.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "iOS, Android",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "4" },
+  "url": "https://get-finmate.netlify.app",
+  "downloadUrl": "https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716"
+}
+</script>
 <style>
 /* ─── Design Tokens ─────────────────────────────────── */
 :root {
@@ -766,25 +790,39 @@ h2 {
   padding: 28px 32px;
   background: var(--card);
   cursor: pointer;
+  transition: background 0.15s;
 }
+.faq-item:hover { background: var(--paper); }
 .faq-q {
   font-family: 'Syne', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--ink);
-  margin-bottom: 12px;
+  margin-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
+  user-select: none;
 }
-.faq-q-icon { color: var(--teal); font-size: 18px; flex-shrink: 0; margin-top: -2px; }
+.faq-item.open .faq-q { margin-bottom: 12px; }
+.faq-q-icon {
+  color: var(--teal);
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: -2px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+.faq-item.open .faq-q-icon { transform: rotate(45deg); }
 .faq-a {
   font-family: 'Lora', serif;
   font-size: 14px;
   line-height: 1.75;
   color: var(--muted);
+  display: none;
 }
+.faq-item.open .faq-a { display: block; }
 
 /* ─── FOOTER ─────────────────────────────────────────── */
 footer {
@@ -922,9 +960,6 @@ footer {
 <body>
 
 <!-- ═══ NAV ══════════════════════════════════════════════ -->
-<!-- TODO: Replace APP_STORE_URL below with your App Store Connect numeric ID URL,
-     e.g. https://apps.apple.com/app/finmate-budget-debt-tracker/id6XXXXXXXXX
-     Find your numeric ID in App Store Connect → Your App → App Information → Apple ID -->
 <nav>
   <div class="container nav-inner">
     <a href="#" class="nav-logo">Fin<span>mate</span></a>
@@ -1077,7 +1112,7 @@ footer {
       </div>
       <div class="stat-item fade-up">
         <div class="stat-val">5.0★</div>
-        <div class="stat-label">App Store rating — 4 reviews</div>
+        <div class="stat-label">App Store rating</div>
       </div>
       <div class="stat-item fade-up">
         <div class="stat-val">Free</div>
@@ -1288,33 +1323,33 @@ footer {
     <h2>The honest answers.</h2>
 
     <div class="faq-grid">
-      <div class="faq-item fade-up">
-        <div class="faq-q">Does Finmate connect to my bank? <span class="faq-q-icon">?</span></div>
+      <div class="faq-item fade-up open">
+        <div class="faq-q">Does Finmate connect to my bank? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">No. Finmate is fully manual — you enter your transactions and balances yourself. This is intentional. No bank credentials, no data sharing, no third-party access to your accounts. Your financial data never leaves your device except to your private Supabase account.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">Is it actually free? What's the catch? <span class="faq-q-icon">?</span></div>
+        <div class="faq-q">Is it actually free? What's the catch? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">The core app — dashboard, transactions, budgets, debt tracker — is free. We show non-intrusive ads. AI Insights will be a premium feature when it launches in V1.1. There's no hidden paywall blocking the tools that matter most.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">Is my data private and secure? <span class="faq-q-icon">?</span></div>
+        <div class="faq-q">Is my data private and secure? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">Yes. All data is stored in a private, authenticated Supabase database with row-level security — meaning only your account can access your data. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">When is AI Insights coming? <span class="faq-q-icon">?</span></div>
+        <div class="faq-q">When is AI Insights coming? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">AI Insights is the next major feature — coming in V1.1. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns. Download now and you'll get it automatically when it drops.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">Is it available on Android? <span class="faq-q-icon">?</span></div>
+        <div class="faq-q">Is it available on Android? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">Yes! Finmate is available on both iOS (App Store) and Android (Google Play). Download free on either platform — your data is private, stays in your account, and everything syncs across devices.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">What if I want to export my data? <span class="faq-q-icon">?</span></div>
+        <div class="faq-q">What if I want to export my data? <span class="faq-q-icon">+</span></div>
         <p class="faq-a">CSV and PDF data export is on the roadmap for V1.1. Your data is always accessible through the app, and because it's stored in a standard Postgres database, export will be straightforward when the feature ships.</p>
       </div>
     </div>
@@ -1428,6 +1463,52 @@ footer {
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
+
+  /* ── FAQ accordion ── */
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
+  });
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does Finmate connect to my bank?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Finmate is fully manual — you enter your transactions and balances yourself. No bank credentials, no data sharing, no third-party access to your accounts." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it actually free? What's the catch?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The core app — dashboard, transactions, budgets, debt tracker — is free. We show non-intrusive ads. AI Insights will be a premium feature in V1.1. There's no hidden paywall blocking the tools that matter most." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data private and secure?",
+      "acceptedAnswer": { "@type": "Answer", "text": "All data is stored in a private, authenticated Supabase database with row-level security. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices." }
+    },
+    {
+      "@type": "Question",
+      "name": "When is AI Insights coming?",
+      "acceptedAnswer": { "@type": "Answer", "text": "AI Insights is coming in V1.1. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it available on Android?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Finmate is available on both iOS (App Store) and Android (Google Play). Download free on either platform." }
+    },
+    {
+      "@type": "Question",
+      "name": "What if I want to export my data?",
+      "acceptedAnswer": { "@type": "Answer", "text": "CSV and PDF data export is on the roadmap for V1.1. Your data is always accessible through the app and will be straightforward to export when the feature ships." }
+    }
+  ]
+}
 </script>
 </body>
 </html>
