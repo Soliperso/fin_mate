@@ -38,19 +38,29 @@ class DebtPage extends ConsumerStatefulWidget {
 }
 
 class _DebtPageState extends ConsumerState<DebtPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabController;
+  bool _keyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    final bottom = View.of(context).viewInsets.bottom;
+    final visible = bottom > 0;
+    if (visible != _keyboardVisible) setState(() => _keyboardVisible = visible);
   }
 
   List<DebtEntity> _sortedDebts(List<DebtEntity> debts) {
@@ -150,7 +160,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
       ),
       floatingActionButtonAnimator: const InstantFabAnimator(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true
+      floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true &&
+              !_keyboardVisible
           ? Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
               child: SizedBox(
@@ -175,8 +186,11 @@ class _DebtPageState extends ConsumerState<DebtPage>
                 ),
               ),
             )
-          : const SizedBox.shrink(),
-      body: debtsAsync.when(
+          : null,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: debtsAsync.when(
         loading: () => _buildLoading(),
         error: (e, _) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -569,6 +583,7 @@ class _DebtPageState extends ConsumerState<DebtPage>
             ],
           );
         },
+        ),
       ),
     );
   }

@@ -1,24 +1,63 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
 
-class ExtraPaymentCard extends ConsumerWidget {
+class ExtraPaymentCard extends ConsumerStatefulWidget {
   final double totalMinimum;
 
   const ExtraPaymentCard({super.key, this.totalMinimum = 0});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExtraPaymentCard> createState() => _ExtraPaymentCardState();
+}
+
+class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
+  late TextEditingController _controller;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = ref.read(extraPaymentProvider);
+    _controller = TextEditingController(
+      text: initial > 0 ? initial.toInt().toString() : '',
+    );
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged(String value) {
+    final parsed = double.tryParse(value) ?? 0;
+    final clamped = parsed.clamp(0, 2000).toDouble();
+    ref.read(extraPaymentProvider.notifier).state = clamped;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final extra = ref.watch(extraPaymentProvider);
     final baseResult = ref.watch(payoffResultProvider);
     final simResult = ref.watch(simulatedPayoffProvider);
-
     final currencyFormat = ref.watch(currencyFormat0Provider);
+
+    // Sync slider → text field when not actively typing
+    ref.listen<double>(extraPaymentProvider, (_, next) {
+      if (!_focusNode.hasFocus) {
+        final newText = next > 0 ? next.toInt().toString() : '';
+        if (_controller.text != newText) _controller.text = newText;
+      }
+    });
 
     int? monthsSaved;
     double? interestSaved;
@@ -39,6 +78,7 @@ class ExtraPaymentCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,10 +105,10 @@ class ExtraPaymentCard extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                             ),
                       ),
-                      if (totalMinimum > 0) ...[
+                      if (widget.totalMinimum > 0) ...[
                         const SizedBox(height: 2),
                         Text(
-                          'extraPayment.requiredMinimum'.tr(namedArgs: {'amount': currencyFormat.format(totalMinimum)}),
+                          'extraPayment.requiredMinimum'.tr(namedArgs: {'amount': currencyFormat.format(widget.totalMinimum)}),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -80,6 +120,61 @@ class ExtraPaymentCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: AppSizes.md),
+
+            // Value label — above the slider
+            Center(
+              child: Text(
+                extra == 0
+                    ? 'extraPayment.moveSlider'.tr()
+                    : 'extraPayment.extraPerMonth'.tr(namedArgs: {'amount': currencyFormat.format(extra)}),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: extra == 0
+                          ? AppColors.textSecondary
+                          : AppColors.success,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.sm),
+
+            // Manual text input
+            TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+              decoration: InputDecoration(
+                prefixText: '\$ ',
+                suffixText: '/mo',
+                hintText: '0',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.sm,
+                  vertical: AppSizes.xs + 2,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  borderSide: BorderSide(
+                    color: AppColors.success.withValues(alpha: 0.4),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  borderSide: const BorderSide(color: AppColors.success),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  borderSide: BorderSide(
+                    color: AppColors.success.withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+              onChanged: _onTextChanged,
+              onSubmitted: (_) => _focusNode.unfocus(),
+            ),
+            const SizedBox(height: AppSizes.sm),
 
             // Slider
             Row(
@@ -119,26 +214,10 @@ class ExtraPaymentCard extends ConsumerWidget {
               ],
             ),
 
-            // Current value label
-            Center(
-              child: Text(
-                extra == 0
-                    ? 'extraPayment.moveSlider'.tr()
-                    : 'extraPayment.extraPerMonth'.tr(namedArgs: {'amount': currencyFormat.format(extra)}),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: extra == 0
-                          ? AppColors.textSecondary
-                          : AppColors.success,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-
             // Impact summary
             if (monthsSaved != null && interestSaved != null && extra > 0 && simResult != null) ...[
               const SizedBox(height: AppSizes.md),
               if (baseHitCap) ...[
-                // Baseline never pays off — show the danger warning + simulated upside
                 Container(
                   padding: const EdgeInsets.all(AppSizes.sm),
                   decoration: BoxDecoration(
@@ -183,7 +262,6 @@ class ExtraPaymentCard extends ConsumerWidget {
                   ),
                 ),
               ] else ...[
-                // Normal case — both baseline and simulated have a finite payoff
                 Container(
                   padding: const EdgeInsets.all(AppSizes.sm),
                   decoration: BoxDecoration(

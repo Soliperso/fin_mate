@@ -42,7 +42,9 @@ class AdService {
   /// Add your physical device IDs here during development.
   /// These IDs are printed in the console on first AdMob init.
   /// Safe to leave empty — only affects dev/test builds.
-  static const List<String> _testDeviceIds = [];
+  static const List<String> _testDeviceIds = [
+    'cf94d0b94170631b703bfff3b4b78855', // Ed :) iPhone
+  ];
 
   // Google's official test ad unit IDs — safe to use in development.
   // Replace via ADMOB_BANNER_* / ADMOB_INTERSTITIAL_* in .env or --dart-define
