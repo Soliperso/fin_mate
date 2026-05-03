@@ -128,15 +128,21 @@ class AdminRemoteDataSource {
   Future<List<Map<String, dynamic>>> getUserAuditLog(String userId) async {
     try {
       final response = await _supabase
-          .from('audit_log')
-          .select('*')
+          .from('analytics_events')
+          .select('event_name, created_at, event_properties, screen_name')
           .eq('user_id', userId)
           .order('created_at', ascending: false)
           .limit(50);
 
-      return List<Map<String, dynamic>>.from(response);
+      return List<Map<String, dynamic>>.from(response).map((e) {
+        return {
+          'action': e['event_name'],
+          'created_at': e['created_at'],
+          'screen_name': e['screen_name'],
+          'properties': e['event_properties'],
+        };
+      }).toList();
     } catch (e) {
-      // If audit_log table doesn't exist, return empty list gracefully
       return [];
     }
   }
@@ -374,14 +380,21 @@ class AdminRemoteDataSource {
   Future<List<Map<String, dynamic>>> getSystemAuditLog() async {
     try {
       final response = await _supabase
-          .from('audit_log')
-          .select('*')
+          .from('analytics_events')
+          .select('event_name, created_at, user_id, event_properties, screen_name')
           .order('created_at', ascending: false)
           .limit(100);
 
-      return List<Map<String, dynamic>>.from(response);
+      return List<Map<String, dynamic>>.from(response).map((e) {
+        return {
+          'action': e['event_name'],
+          'created_at': e['created_at'],
+          'user_id': e['user_id'],
+          'screen_name': e['screen_name'],
+          'properties': e['event_properties'],
+        };
+      }).toList();
     } catch (e) {
-      // graceful fallback if table doesn't exist
       return [];
     }
   }

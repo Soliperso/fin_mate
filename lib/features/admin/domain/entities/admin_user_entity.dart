@@ -13,6 +13,7 @@ class AdminUserEntity extends Equatable {
   final double totalExpense;
   final double netWorth;
   final bool isActive; // Has transactions in last 30 days
+  final DateTime? lastActive;
 
   const AdminUserEntity({
     required this.id,
@@ -21,6 +22,7 @@ class AdminUserEntity extends Equatable {
     this.avatarUrl,
     required this.role,
     required this.createdAt,
+    this.lastActive,
     this.transactionCount = 0,
     this.totalIncome = 0.0,
     this.totalExpense = 0.0,
@@ -36,6 +38,7 @@ class AdminUserEntity extends Equatable {
         avatarUrl,
         role,
         createdAt,
+        lastActive,
         transactionCount,
         totalIncome,
         totalExpense,

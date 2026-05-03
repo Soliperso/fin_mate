@@ -9,6 +9,7 @@ class AdminUserModel extends AdminUserEntity {
     super.avatarUrl,
     required super.role,
     required super.createdAt,
+    super.lastActive,
     super.transactionCount,
     super.totalIncome,
     super.totalExpense,
@@ -17,6 +18,7 @@ class AdminUserModel extends AdminUserEntity {
   });
 
   factory AdminUserModel.fromJson(Map<String, dynamic> json) {
+    final rawLastSignIn = json['last_sign_in_at'] as String?;
     return AdminUserModel(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -24,6 +26,7 @@ class AdminUserModel extends AdminUserEntity {
       avatarUrl: json['avatar_url'] as String?,
       role: (json['role'] as String?) ?? 'user',
       createdAt: DateTime.parse(json['created_at'] as String),
+      lastActive: rawLastSignIn != null ? DateTime.parse(rawLastSignIn) : null,
       transactionCount: (json['transaction_count'] as int?) ?? 0,
       totalIncome: ((json['total_income'] as num?) ?? 0).toDouble(),
       totalExpense: ((json['total_expense'] as num?) ?? 0).toDouble(),
@@ -40,6 +43,7 @@ class AdminUserModel extends AdminUserEntity {
       'avatar_url': avatarUrl,
       'role': role,
       'created_at': createdAt.toIso8601String(),
+      'last_sign_in_at': lastActive?.toIso8601String(),
       'transaction_count': transactionCount,
       'total_income': totalIncome,
       'total_expense': totalExpense,

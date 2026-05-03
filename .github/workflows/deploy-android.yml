@@ -60,7 +60,25 @@ jobs:
           EOF
 
       - name: Build App Bundle
-        run: flutter build appbundle --release
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          ADMOB_BANNER_ANDROID: ${{ secrets.ADMOB_BANNER_ANDROID }}
+          ADMOB_INTERSTITIAL_ANDROID: ${{ secrets.ADMOB_INTERSTITIAL_ANDROID }}
+          ADMOB_NATIVE_ANDROID: ${{ secrets.ADMOB_NATIVE_ANDROID }}
+        run: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=OPENAI_API_KEY=$OPENAI_API_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN \
+            --dart-define=ADMOB_APP_ID_ANDROID=ca-app-pub-3849377083349686~5584600488 \
+            --dart-define=ADMOB_BANNER_ANDROID=$ADMOB_BANNER_ANDROID \
+            --dart-define=ADMOB_INTERSTITIAL_ANDROID=$ADMOB_INTERSTITIAL_ANDROID \
+            --dart-define=ADMOB_NATIVE_ANDROID=$ADMOB_NATIVE_ANDROID \
+            --dart-define=ENVIRONMENT=production
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1

@@ -18,18 +18,6 @@ class UserDetailPage extends ConsumerWidget {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  Color _avatarColor(String name) {
-    const colors = [
-      AppColors.brandTeal,
-      AppColors.systemBlue,
-      AppColors.systemGreen,
-      AppColors.tealBlue,
-      AppColors.systemRed,
-      AppColors.error,
-    ];
-    return colors[name.hashCode.abs() % colors.length];
-  }
-
   void _copyEmail(BuildContext context, String email) {
     Clipboard.setData(ClipboardData(text: email));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +50,7 @@ class UserDetailPage extends ConsumerWidget {
           const SizedBox(height: 12),
           ListTile(
             leading: const Icon(CupertinoIcons.lock,
-                color: AppColors.systemBlue),
+                color: AppColors.brandTeal),
             title: const Text('Reset Password'),
             onTap: () {
               Navigator.pop(ctx);
@@ -181,7 +169,7 @@ class UserDetailPage extends ConsumerWidget {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
     final auditAsync = ref.watch(userAuditLogProvider(user.id));
-    final accentColor = _avatarColor(user.displayName);
+    const accentColor = AppColors.brandTeal;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
@@ -359,19 +347,23 @@ class UserDetailPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.brandTeal, AppColors.tealBlue],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: cardColor,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.brandTeal.withValues(alpha: 0.30),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              border: Border.all(
+                color: isDark
+                    ? AppColors.separatorDark.withValues(alpha: 0.4)
+                    : AppColors.separator.withValues(alpha: 0.25),
+                width: 0.7,
+              ),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,17 +372,19 @@ class UserDetailPage extends ConsumerWidget {
                   children: [
                     Icon(
                       CupertinoIcons.money_dollar_circle,
-                      color: Colors.white.withValues(alpha: 0.75),
+                      color: AppColors.brandTeal,
                       size: 18,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Net Worth',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.75),
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppColors.secondaryLabelDark
+                                : AppColors.secondaryLabel,
+                          ),
                     ),
                   ],
                 ),
@@ -400,7 +394,7 @@ class UserDetailPage extends ConsumerWidget {
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: -1.0,
-                        color: Colors.white,
+                        color: AppColors.brandTeal,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -408,10 +402,10 @@ class UserDetailPage extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           // Financial health bar — income vs expense proportion
           _buildHealthBar(context, isDark, user),
-          const SizedBox(height: 9),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -423,11 +417,7 @@ class UserDetailPage extends ConsumerWidget {
                   label: 'Total Income',
                   value: NumberFormat.compactCurrency(symbol: '\$')
                       .format(user.totalIncome),
-                  gradient: const LinearGradient(
-                    colors: [AppColors.systemGreen, AppColors.systemMint],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  valueColor: AppColors.systemGreen,
                 ),
               ),
               const SizedBox(width: 9),
@@ -440,11 +430,7 @@ class UserDetailPage extends ConsumerWidget {
                   label: 'Total Expenses',
                   value: NumberFormat.compactCurrency(symbol: '\$')
                       .format(user.totalExpense),
-                  gradient: const LinearGradient(
-                    colors: [AppColors.systemRed, AppColors.systemOrange],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  valueColor: AppColors.systemRed,
                 ),
               ),
             ],
@@ -487,7 +473,7 @@ class UserDetailPage extends ConsumerWidget {
                 _divider(context),
                 _infoRowTappable(context, isDark,
                     icon: CupertinoIcons.person_badge_plus,
-                    iconColor: AppColors.systemBlue,
+                    iconColor: AppColors.brandTeal,
                     label: 'Role',
                     value: user.role.toUpperCase(),
                     onTap: () => _handleRoleChange(context, ref, user)),
@@ -500,9 +486,9 @@ class UserDetailPage extends ConsumerWidget {
                 _divider(context),
                 _infoRow(context, isDark,
                     icon: CupertinoIcons.clock_fill,
-                    iconColor: AppColors.systemBlue,
+                    iconColor: AppColors.brandTeal,
                     label: 'Last Active',
-                    value: 'Today'),
+                    value: _formatLastActive(user.lastActive)),
               ],
             ),
           ),
@@ -558,7 +544,7 @@ class UserDetailPage extends ConsumerWidget {
                   context,
                   icon: CupertinoIcons.lock,
                   label: 'Reset Password',
-                  color: AppColors.systemBlue,
+                  color: AppColors.brandTeal,
                   onTap: () => _handleResetPassword(context, ref, user),
                 ),
               ),
@@ -568,7 +554,7 @@ class UserDetailPage extends ConsumerWidget {
                   context,
                   icon: CupertinoIcons.doc_text,
                   label: 'View Audit Log',
-                  color: AppColors.systemBlue,
+                  color: AppColors.brandTeal,
                   onTap: () => _handleViewAuditLog(context, ref, user),
                 ),
               ),
@@ -600,7 +586,7 @@ class UserDetailPage extends ConsumerWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: SizedBox(
-            height: 12,
+            height: 5,
             child: Row(
               children: [
                 Expanded(
@@ -801,27 +787,76 @@ class UserDetailPage extends ConsumerWidget {
               ),
             );
           }
-          final recent = entries.take(5).toList();
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              children: [
-                for (int i = 0; i < recent.length; i++)
-                  _timelineRow(
-                    context,
-                    isDark,
-                    recent[i],
-                    isLast: i == recent.length - 1,
+          final grouped = _groupByDay(entries);
+          final dayLabels = grouped.keys.toList();
+          return Column(
+            children: [
+              for (int gi = 0; gi < dayLabels.length; gi++) ...[
+                if (gi > 0)
+                  Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: isDark
+                        ? AppColors.separatorDark.withValues(alpha: 0.4)
+                        : AppColors.separator.withValues(alpha: 0.3),
                   ),
+                _ActivityDayGroup(
+                  label: dayLabels[gi],
+                  entries: grouped[dayLabels[gi]]!,
+                  isFirst: gi == 0,
+                  isDark: isDark,
+                  rowBuilder: (entry, isLast) =>
+                      _timelineRow(context, isDark, entry, isLast: isLast),
+                ),
               ],
-            ),
+            ],
           );
         },
       ),
     );
   }
 
-  String _formatAction(String raw) {
+  static Map<String, List<Map<String, dynamic>>> _groupByDay(
+      List<Map<String, dynamic>> entries) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final yesterday = today.subtract(const Duration(days: 1));
+    final result = <String, List<Map<String, dynamic>>>{};
+    for (final entry in entries) {
+      final rawDate = entry['created_at'] as String?;
+      if (rawDate == null) continue;
+      DateTime dt;
+      try {
+        dt = DateTime.parse(rawDate).toLocal();
+      } catch (_) {
+        continue;
+      }
+      final day = DateUtils.dateOnly(dt);
+      final String label;
+      if (day == today) {
+        label = 'Today';
+      } else if (day == yesterday) {
+        label = 'Yesterday';
+      } else {
+        label = DateFormat('MMM d, yyyy').format(dt);
+      }
+      result.putIfAbsent(label, () => []).add(entry);
+    }
+    return result;
+  }
+
+  static String _formatLastActive(DateTime? lastActive) {
+    if (lastActive == null) return 'Never';
+    final local = lastActive.toLocal();
+    final today = DateUtils.dateOnly(DateTime.now());
+    final day = DateUtils.dateOnly(local);
+    if (day == today) return 'Today';
+    if (day == today.subtract(const Duration(days: 1))) return 'Yesterday';
+    final diff = today.difference(day).inDays;
+    if (diff < 7) return '$diff days ago';
+    return DateFormat('MMM d, yyyy').format(local);
+  }
+
+  static String _formatAction(String raw) {
     return raw
         .replaceAll('_', ' ')
         .split(' ')
@@ -835,6 +870,7 @@ class UserDetailPage extends ConsumerWidget {
     bool isDark,
     Map<String, dynamic> entry, {
     bool isLast = false,
+    String? subtitle,
   }) {
     final raw = entry['action'] as String? ?? 'unknown_action';
     final action = _formatAction(raw);
@@ -939,6 +975,18 @@ class UserDetailPage extends ConsumerWidget {
                             color: isDark
                                 ? AppColors.secondaryLabelDark
                                 : AppColors.secondaryLabel,
+                          ),
+                    ),
+                  ],
+                  if (subtitle != null && subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontSize: 10,
+                            color: isDark
+                                ? AppColors.tertiaryLabelDark
+                                : AppColors.systemGray3,
                           ),
                     ),
                   ],
@@ -1177,7 +1225,7 @@ class UserDetailPage extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.systemBlue),
+            style: TextButton.styleFrom(foregroundColor: AppColors.brandTeal),
             child: const Text('Send'),
           ),
         ],
@@ -1214,69 +1262,155 @@ class UserDetailPage extends ConsumerWidget {
 
   Future<void> _handleViewAuditLog(
       BuildContext context, WidgetRef ref, AdminUserEntity user) async {
-    showDialog(
+    final auditAsync = ref.read(userAuditLogProvider(user.id));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Loading Audit Log'),
-        content: const SizedBox(
-            height: 50, child: Center(child: CircularProgressIndicator())),
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: sheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-    );
-    try {
-      final auditLog = await ref.read(userAuditLogProvider(user.id).future);
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      if (!context.mounted) return;
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Audit Log'),
-          content: auditLog.isEmpty
-              ? const Text('No audit log entries found')
-              : SizedBox(
-                  width: double.maxFinite,
-                  child: ListView.separated(
-                    itemCount: auditLog.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final entry = auditLog[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(entry['action'] ?? 'Unknown Action',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(entry['created_at'] ?? 'N/A',
-                                style: const TextStyle(fontSize: 12)),
-                          ],
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (ctx, scrollController) {
+            return auditAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => Center(
+                child: Text('Could not load audit log',
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.secondaryLabelDark
+                          : AppColors.secondaryLabel,
+                    )),
+              ),
+              data: (entries) {
+                final grouped = _groupByDay(entries);
+                final dayLabels = grouped.keys.toList();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Handle bar
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.separatorDark
+                              : AppColors.separator,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                      );
-                    },
-                  ),
-                ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading audit log: ${e.toString()}'),
-          backgroundColor: AppColors.systemRed,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
+                      ),
+                    ),
+                    // Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Audit Log',
+                            style: Theme.of(ctx)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5,
+                                  color: isDark
+                                      ? AppColors.labelDark
+                                      : AppColors.label,
+                                ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${entries.length} events',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.brandTeal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: isDark
+                          ? AppColors.separatorDark.withValues(alpha: 0.5)
+                          : AppColors.separator.withValues(alpha: 0.4),
+                    ),
+                    // Grouped list
+                    Expanded(
+                      child: entries.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No activity recorded',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? AppColors.secondaryLabelDark
+                                      : AppColors.secondaryLabel,
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              controller: scrollController,
+                              itemCount: dayLabels.length,
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                thickness: 0.5,
+                                color: isDark
+                                    ? AppColors.separatorDark
+                                        .withValues(alpha: 0.4)
+                                    : AppColors.separator
+                                        .withValues(alpha: 0.3),
+                              ),
+                              itemBuilder: (ctx, gi) {
+                                final label = dayLabels[gi];
+                                final dayEntries = grouped[label]!;
+                                return _ActivityDayGroup(
+                                  label: label,
+                                  entries: dayEntries,
+                                  isFirst: gi == 0,
+                                  isDark: isDark,
+                                  rowBuilder: (entry, isLast) {
+                                    final screen =
+                                        entry['screen_name'] as String?;
+                                    final formattedScreen = screen != null &&
+                                            screen.isNotEmpty
+                                        ? _formatAction(screen)
+                                        : null;
+                                    return _timelineRow(
+                                      ctx,
+                                      isDark,
+                                      entry,
+                                      isLast: isLast,
+                                      subtitle: formattedScreen,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _handleDisableAccount(
@@ -1404,7 +1538,7 @@ class UserDetailPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(CupertinoIcons.person,
-                color: AppColors.systemBlue),
+                color: AppColors.brandTeal),
             title: const Text('User'),
             trailing: currentRole == 'user'
                 ? const Icon(CupertinoIcons.checkmark,
@@ -1755,7 +1889,7 @@ class UserDetailPage extends ConsumerWidget {
     );
   }
 
-  // ── Loading skeleton (unchanged) ─────────────────────────────────────────
+  // ── Loading skeleton ─────────────────────────────────────────────────────
 
   Widget _buildSkeleton(BuildContext context, bool isDark) {
     final cardColor = isDark
@@ -1890,6 +2024,110 @@ class UserDetailPage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
         ],
       ),
+    );
+  }
+}
+
+class _ActivityDayGroup extends StatefulWidget {
+  final String label;
+  final List<Map<String, dynamic>> entries;
+  final bool isFirst;
+  final bool isDark;
+  final Widget Function(Map<String, dynamic> entry, bool isLast) rowBuilder;
+
+  const _ActivityDayGroup({
+    required this.label,
+    required this.entries,
+    required this.isFirst,
+    required this.isDark,
+    required this.rowBuilder,
+  });
+
+  @override
+  State<_ActivityDayGroup> createState() => _ActivityDayGroupState();
+}
+
+class _ActivityDayGroupState extends State<_ActivityDayGroup> {
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.isFirst;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final count = widget.entries.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Text(
+                  widget.label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.secondaryLabelDark
+                            : AppColors.secondaryLabel,
+                      ),
+                ),
+                const Spacer(),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: _expanded ? 0.0 : 1.0,
+                  child: Text(
+                    '$count ${count == 1 ? 'event' : 'events'}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.brandTeal,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedRotation(
+                  turns: _expanded ? 0.25 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 12,
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 220),
+          crossFadeState:
+              _expanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          firstChild: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Column(
+              children: [
+                for (int i = 0; i < widget.entries.length; i++)
+                  widget.rowBuilder(
+                    widget.entries[i],
+                    i == widget.entries.length - 1,
+                  ),
+              ],
+            ),
+          ),
+          secondChild: const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }

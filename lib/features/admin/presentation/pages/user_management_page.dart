@@ -171,7 +171,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
       alignment: isStart ? Alignment.centerLeft : Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
       decoration: BoxDecoration(
-        color: isStart ? AppColors.systemBlue : AppColors.error,
+        color: isStart ? AppColors.brandTeal : AppColors.error,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       ),
       child: Column(
@@ -635,7 +635,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               context,
               isDark,
               icon: CupertinoIcons.star,
-              iconColor: AppColors.systemBlue,
+              iconColor: AppColors.brandTeal,
               label: 'New',
               value: stats.newUsersThisMonth?.toString() ?? '0',
             ),
