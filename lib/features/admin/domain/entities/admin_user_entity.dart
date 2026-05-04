@@ -46,7 +46,10 @@ class AdminUserEntity extends Equatable {
         isActive,
       ];
 
-  String get displayName => fullName ?? email.split('@').first;
+  String get displayName {
+    final name = fullName ?? email.split('@').first;
+    return name.split(' ').map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1)).join(' ');
+  }
 
   String get initials {
     if (fullName != null && fullName!.isNotEmpty) {

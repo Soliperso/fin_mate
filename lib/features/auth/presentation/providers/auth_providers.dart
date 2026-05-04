@@ -103,7 +103,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _setUserContext(user);
       }
     } catch (e) {
-      state = AuthState(isLoading: false, errorMessage: e.toString());
+      state = AuthState(isLoading: false, errorMessage: _getErrorMessage(e));
     }
 
     // Subscribe to Supabase auth events so external session changes
@@ -382,8 +382,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return 'Too many attempts. Please wait a few minutes and try again.';
     } else if (errorStr.contains('password')) {
       return 'Password does not meet requirements';
-    } else if (errorStr.contains('network') || errorStr.contains('socket')) {
-      return 'Network error. Please check your connection';
+    } else if (errorStr.contains('network') ||
+        errorStr.contains('socket') ||
+        errorStr.contains('host lookup') ||
+        errorStr.contains('authretryablefetch') ||
+        errorStr.contains('failed to connect')) {
+      return 'No internet connection. Please check your network and try again.';
     } else if (errorStr.contains('banned') ||
         errorStr.contains('user is banned')) {
       return 'Your account has been disabled. Please contact support.';
