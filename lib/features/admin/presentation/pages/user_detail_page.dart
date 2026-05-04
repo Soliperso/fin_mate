@@ -11,10 +11,16 @@ import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../domain/entities/admin_user_entity.dart';
 import '../providers/admin_providers.dart';
 
-class UserDetailPage extends ConsumerWidget {
+class UserDetailPage extends ConsumerStatefulWidget {
   final String userId;
 
   const UserDetailPage({super.key, required this.userId});
+
+  @override
+  ConsumerState<UserDetailPage> createState() => _UserDetailPageState();
+}
+
+class _UserDetailPageState extends ConsumerState<UserDetailPage> {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -49,31 +55,33 @@ class UserDetailPage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           ListTile(
-            leading: const Icon(CupertinoIcons.lock,
-                color: AppColors.brandTeal),
-            title: const Text('Reset Password'),
+            leading: _quickActionIcon(CupertinoIcons.lock_fill, AppColors.brandTeal),
+            title: const Text('Reset Password', style: TextStyle(fontWeight: FontWeight.w500)),
             onTap: () {
               Navigator.pop(ctx);
               _handleResetPassword(context, ref, user);
             },
           ),
           ListTile(
-            leading: const Icon(CupertinoIcons.shield,
-                color: AppColors.brandTeal),
-            title: const Text('Change Role'),
+            leading: _quickActionIcon(CupertinoIcons.shield_fill, AppColors.brandTeal),
+            title: const Text('Change Role', style: TextStyle(fontWeight: FontWeight.w500)),
             onTap: () {
               Navigator.pop(ctx);
               _handleRoleChange(context, ref, user);
             },
           ),
           ListTile(
-            leading: Icon(
-              user.isActive
-                  ? CupertinoIcons.xmark_circle
-                  : CupertinoIcons.checkmark_circle,
-              color: user.isActive ? AppColors.systemRed : AppColors.systemGreen,
+            leading: _quickActionIcon(
+              user.isActive ? CupertinoIcons.xmark_circle_fill : CupertinoIcons.checkmark_circle_fill,
+              user.isActive ? AppColors.systemRed : AppColors.systemGreen,
             ),
-            title: Text(user.isActive ? 'Disable Account' : 'Enable Account'),
+            title: Text(
+              user.isActive ? 'Disable Account' : 'Enable Account',
+              style: TextStyle(
+                color: user.isActive ? AppColors.systemRed : AppColors.systemGreen,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             onTap: () {
               Navigator.pop(ctx);
               if (user.isActive) {
@@ -89,11 +97,23 @@ class UserDetailPage extends ConsumerWidget {
     );
   }
 
+  Widget _quickActionIcon(IconData icon, Color color) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: 19),
+    );
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userDetailsProvider(userId));
+  Widget build(BuildContext context) {
+    final userAsync = ref.watch(userDetailsProvider(widget.userId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -146,7 +166,7 @@ class UserDetailPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton.icon(
-                  onPressed: () => ref.invalidate(userDetailsProvider(userId)),
+                  onPressed: () => ref.invalidate(userDetailsProvider(widget.userId)),
                   icon: const Icon(CupertinoIcons.arrow_counterclockwise,
                       size: 16),
                   label: const Text('Retry'),
@@ -217,31 +237,54 @@ class UserDetailPage extends ConsumerWidget {
                       child: GestureDetector(
                         onLongPress: () =>
                             _showQuickActions(context, ref, user),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: cardColor,
-                          ),
-                          child: CircleAvatar(
-                            radius: 48,
-                            backgroundColor: accentColor.withValues(alpha: 0.2),
-                            backgroundImage: user.avatarUrl != null &&
-                                    user.avatarUrl!.isNotEmpty
-                                ? NetworkImage(user.avatarUrl!)
-                                : null,
-                            child: user.avatarUrl == null ||
-                                    user.avatarUrl!.isEmpty
-                                ? Text(
-                                    user.initials,
-                                    style: TextStyle(
-                                      color: accentColor,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 24,
-                                    ),
-                                  )
-                                : null,
-                          ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: cardColor,
+                              ),
+                              child: CircleAvatar(
+                                radius: 48,
+                                backgroundColor: accentColor.withValues(alpha: 0.2),
+                                backgroundImage: user.avatarUrl != null &&
+                                        user.avatarUrl!.isNotEmpty
+                                    ? NetworkImage(user.avatarUrl!)
+                                    : null,
+                                child: user.avatarUrl == null ||
+                                        user.avatarUrl!.isEmpty
+                                    ? Text(
+                                        user.initials,
+                                        style: TextStyle(
+                                          color: accentColor,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 24,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            if (!user.isActive)
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.systemRed,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: cardColor, width: 2),
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.lock_fill,
+                                    size: 11,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -1172,15 +1215,14 @@ class UserDetailPage extends ConsumerWidget {
     required VoidCallback onTap,
     Color? color,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-      decoration: BoxDecoration(
-        color: color ?? AppColors.systemRed,
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+        decoration: BoxDecoration(
+          color: color ?? AppColors.systemRed,
+          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1244,7 +1286,6 @@ class UserDetailPage extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Password reset email sent to ${user.email}'),
-          backgroundColor: AppColors.systemGreen,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1253,7 +1294,7 @@ class UserDetailPage extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.systemRed,
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1447,17 +1488,18 @@ class UserDetailPage extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user.displayName}\'s account has been disabled'),
-          backgroundColor: AppColors.systemGreen,
           duration: const Duration(seconds: 3),
         ),
       );
-      ref.invalidate(userDetailsProvider(user.id));
+      // ignore: unused_result
+      ref.refresh(userDetailsProvider(user.id));
+      ref.invalidate(usersListProvider);
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.systemRed,
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1498,17 +1540,18 @@ class UserDetailPage extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user.displayName}\'s account has been enabled'),
-          backgroundColor: AppColors.systemGreen,
           duration: const Duration(seconds: 3),
         ),
       );
-      ref.invalidate(userDetailsProvider(user.id));
+      // ignore: unused_result
+      ref.refresh(userDetailsProvider(user.id));
+      ref.invalidate(usersListProvider);
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.systemRed,
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1579,17 +1622,17 @@ class UserDetailPage extends ConsumerWidget {
         SnackBar(
           content: Text(
               '${user.displayName}\'s role changed to ${newRole.toUpperCase()}'),
-          backgroundColor: AppColors.systemGreen,
           duration: const Duration(seconds: 3),
         ),
       );
-      ref.invalidate(userDetailsProvider(user.id));
+      // ignore: unused_result
+      ref.refresh(userDetailsProvider(user.id));
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.systemRed,
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),
       );

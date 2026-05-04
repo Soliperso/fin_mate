@@ -618,7 +618,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               value: stats.totalUsers?.toString() ?? '0',
             ),
           ),
-          const SizedBox(width: 9),
+          const SizedBox(width: 6),
           Expanded(
             child: _statChip(
               context,
@@ -629,7 +629,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               value: stats.activeUsers?.toString() ?? '0',
             ),
           ),
-          const SizedBox(width: 9),
+          const SizedBox(width: 6),
           Expanded(
             child: _statChip(
               context,
@@ -638,6 +638,17 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               iconColor: AppColors.brandTeal,
               label: 'New',
               value: stats.newUsersThisMonth?.toString() ?? '0',
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _statChip(
+              context,
+              isDark,
+              icon: CupertinoIcons.xmark_circle,
+              iconColor: AppColors.systemRed,
+              label: 'Inactive',
+              value: stats.disabledUsers.toString(),
             ),
           ),
         ],

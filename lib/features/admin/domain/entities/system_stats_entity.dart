@@ -12,6 +12,7 @@ class SystemStatsEntity extends Equatable {
   final int totalAccounts;
   final int totalBudgets;
   final int totalBillGroups;
+  final int disabledUsers; // Users with is_active = false (admin-disabled)
 
   const SystemStatsEntity({
     required this.totalUsers,
@@ -24,6 +25,7 @@ class SystemStatsEntity extends Equatable {
     required this.totalAccounts,
     required this.totalBudgets,
     required this.totalBillGroups,
+    this.disabledUsers = 0,
   });
 
   @override
@@ -38,6 +40,7 @@ class SystemStatsEntity extends Equatable {
         totalAccounts,
         totalBudgets,
         totalBillGroups,
+        disabledUsers,
       ];
 
   double get activeUserPercentage =>

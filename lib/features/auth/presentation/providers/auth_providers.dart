@@ -384,6 +384,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return 'Password does not meet requirements';
     } else if (errorStr.contains('network') || errorStr.contains('socket')) {
       return 'Network error. Please check your connection';
+    } else if (errorStr.contains('banned') ||
+        errorStr.contains('user is banned')) {
+      return 'Your account has been disabled. Please contact support.';
     } else if (errorStr.contains('database error') ||
         errorStr.contains('server error')) {
       return 'A server error occurred. Please try again.';

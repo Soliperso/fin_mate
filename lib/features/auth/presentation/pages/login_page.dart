@@ -165,26 +165,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: AppSizes.md),
                 ],
                 if (authState.errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSizes.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSizes.sm),
-                      border: Border.all(color: AppColors.error),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
-                        const SizedBox(width: AppSizes.sm),
-                        Expanded(
-                          child: Text(
-                            authState.errorMessage!,
-                            style: TextStyle(color: AppColors.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  if (authState.errorMessage!.contains('disabled'))
+                    _buildDisabledAccountBanner()
+                  else
+                    _buildGenericErrorBanner(authState.errorMessage!),
                   const SizedBox(height: AppSizes.md),
                 ],
                 Semantics(
@@ -458,6 +442,69 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } else {
       context.go('/forgot-password');
     }
+  }
+
+  Widget _buildDisabledAccountBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.systemOrange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(color: AppColors.systemOrange.withValues(alpha: 0.6)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.systemOrange.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(CupertinoIcons.lock_fill,
+                color: AppColors.systemOrange, size: 18),
+          ),
+          const SizedBox(width: AppSizes.sm),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Account Disabled',
+                    style: TextStyle(
+                        color: AppColors.systemOrange,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14)),
+                SizedBox(height: 2),
+                Text('Please contact support to restore access.',
+                    style: TextStyle(
+                        color: AppColors.systemOrange,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenericErrorBanner(String message) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.md),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSizes.sm),
+        border: Border.all(color: AppColors.error),
+      ),
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
+          const SizedBox(width: AppSizes.sm),
+          Expanded(
+            child: Text(message, style: const TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -117,6 +117,39 @@ class UserListItem extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          if (!user.isActive)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.systemRed.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    CupertinoIcons.lock_fill,
+                                    size: 11,
+                                    color: AppColors.systemRed,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'Disabled',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: AppColors.systemRed,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 10,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 3),
@@ -127,6 +160,15 @@ class UserListItem extends StatelessWidget {
                             ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        _formatJoinDate(user.createdAt),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
+                        ),
                       ),
                     ],
                   ),
@@ -178,4 +220,11 @@ class UserListItem extends StatelessWidget {
     );
   }
 
+  String _formatJoinDate(DateTime date) {
+    final now = DateTime.now();
+    if (date.year == now.year) {
+      return 'Joined ${DateFormat('MMM d').format(date)}';
+    }
+    return 'Joined ${DateFormat('MMM d, y').format(date)}';
+  }
 }

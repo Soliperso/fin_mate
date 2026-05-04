@@ -13,6 +13,7 @@ class SystemStatsModel extends SystemStatsEntity {
     required super.totalAccounts,
     required super.totalBudgets,
     required super.totalBillGroups,
+    super.disabledUsers,
   });
 
   factory SystemStatsModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +28,7 @@ class SystemStatsModel extends SystemStatsEntity {
       totalAccounts: (json['total_accounts'] as int?) ?? 0,
       totalBudgets: (json['total_budgets'] as int?) ?? 0,
       totalBillGroups: (json['total_bill_groups'] as int?) ?? 0,
+      disabledUsers: (json['disabled_users'] as int?) ?? 0,
     );
   }
 }
