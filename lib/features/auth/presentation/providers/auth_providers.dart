@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 // import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent; // [Biometric]
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -170,6 +171,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Bump session key so all data providers re-run for the new user
       _ref.read(userSessionProvider.notifier).state++;
 
+      // Identify user in RevenueCat so entitlements load correctly
+      unawaited(() async {
+        try { await Purchases.logIn(user.id); } catch (_) {}
+      }());
+
       // Set user context in Sentry and track sign in
       await _setUserContext(user);
 
@@ -237,6 +243,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _repository.deleteAccount();
       state = AuthState(user: null, isLoading: false);
 
+      unawaited(() async {
+        try { await Purchases.logOut(); } catch (_) {}
+      }());
+
       _ref.read(userSessionProvider.notifier).state++;
       await _clearUserContext();
       await _ref.read(secureStorageServiceProvider).clearEmail();
@@ -258,6 +268,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
+
+      unawaited(() async {
+        try { await Purchases.logOut(); } catch (_) {}
+      }());
 
       // Bump session key so all cached data providers are cleared
       _ref.read(userSessionProvider.notifier).state++;

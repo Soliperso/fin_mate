@@ -9,7 +9,9 @@ import '../../../../core/services/theme_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../../core/providers/subscription_provider.dart';
 import '../providers/profile_providers.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -181,6 +183,28 @@ class ProfilePage extends ConsumerWidget {
                             title: 'profile.savingsGoals'.tr(),
                             subtitle: 'profile.savingsGoalsSub'.tr(),
                             onTap: () => context.push('/goals'),
+                          ),
+                        ]),
+                        const SizedBox(height: AppSizes.lg),
+
+                        // ── Subscription ──────────────────────────────────
+                        _sectionLabel(context, 'Subscription'),
+                        const SizedBox(height: AppSizes.sm),
+                        _buildSettingsCard(context, isDark, children: [
+                          _buildSettingsTile(
+                            context: context,
+                            icon: CupertinoIcons.star,
+                            title: 'Upgrade to Premium',
+                            subtitle: 'Unlock unlimited AI, receipt scanning & more',
+                            onTap: () => context.push('/paywall'),
+                          ),
+                          _buildDivider(context, isDark),
+                          _buildSettingsTile(
+                            context: context,
+                            icon: CupertinoIcons.arrow_counterclockwise,
+                            title: 'Restore Purchases',
+                            subtitle: 'Already subscribed? Tap to restore',
+                            onTap: () => _restorePurchases(context, ref),
                           ),
                         ]),
                         const SizedBox(height: AppSizes.lg),
@@ -589,6 +613,30 @@ class ProfilePage extends ConsumerWidget {
         return 'settings.themeDark'.tr();
       case ThemeMode.system:
         return 'settings.themeSystem'.tr();
+    }
+  }
+
+  Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {
+    try {
+      final result = await Purchases.restorePurchases();
+      ref.invalidate(isPremiumProvider);
+      ref.invalidate(subscriptionTierProvider);
+      if (!context.mounted) return;
+      if (result.entitlements.active.containsKey('premium')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Premium restored successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No active subscription found.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Restore failed. Please try again.')),
+        );
+      }
     }
   }
 

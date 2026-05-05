@@ -94,6 +94,9 @@ dependencies:
   # App Info
   package_info_plus: ^8.0.0
 
+  # In-App Purchases (RevenueCat)
+  purchases_flutter: ^10.0.1
+
   # Payment Processing (Stripe SDK removed — not active in MVP, uses server-side only)
   http: ^1.6.0
 

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_client.dart';
 import '../services/payment_service.dart';
@@ -84,13 +85,16 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // Premium Status Provider
 // ============================================================================
 
-/// Computed provider that returns true if user has an active premium subscription.
-///
-/// Reads `subscription_tier` from `user_profiles`. Returns `true` only when the
-/// tier is 'premium'. Freemium users (or null) see ads and hit feature gates.
+/// Returns true when the user has an active RevenueCat 'premium' entitlement.
+/// Falls back to the Supabase subscription_tier column if RC is unreachable.
 final isPremiumProvider = FutureProvider<bool>((ref) async {
-  final tier = await ref.watch(subscriptionTierProvider.future);
-  return tier == 'premium';
+  try {
+    final customerInfo = await Purchases.getCustomerInfo();
+    return customerInfo.entitlements.active.containsKey('premium');
+  } catch (_) {
+    final tier = await ref.read(subscriptionTierProvider.future);
+    return tier == 'premium';
+  }
 });
 
 // ============================================================================

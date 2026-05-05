@@ -25,6 +25,8 @@ import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/domain/entities/debt_entity.dart';
 import '../../../debt_payoff/presentation/providers/debt_providers.dart';
 import '../../data/datasources/reminder_remote_datasource.dart';
+import '../../../../core/providers/subscription_provider.dart';
+import '../../../../shared/widgets/premium_feature_dialog.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -1034,6 +1036,21 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   }
 
   Future<void> _pickAttachment() async {
+    final isPremium = await ref.read(isPremiumProvider.future);
+    if (!mounted) return;
+    if (!isPremium) {
+      await PremiumFeatureDialog.show(
+        context,
+        featureName: 'Receipt Scanning',
+        benefits: const [
+          'Scan any receipt with your camera',
+          'AI auto-fills amount, date & merchant',
+          'Works with any store or restaurant',
+        ],
+        onUpgradePressed: () => context.push('/paywall'),
+      );
+      return;
+    }
     try {
       final result =
           await context.push<ReceiptData>('/transactions/scan-receipt');
@@ -1561,6 +1578,21 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   }
 
   Future<void> _openScanReceipt() async {
+    final isPremium = await ref.read(isPremiumProvider.future);
+    if (!mounted) return;
+    if (!isPremium) {
+      await PremiumFeatureDialog.show(
+        context,
+        featureName: 'Receipt Scanning',
+        benefits: const [
+          'Scan any receipt with your camera',
+          'AI auto-fills amount, date & merchant',
+          'Works with any store or restaurant',
+        ],
+        onUpgradePressed: () => context.push('/paywall'),
+      );
+      return;
+    }
     try {
       final result =
           await context.push<ReceiptData>('/transactions/scan-receipt');

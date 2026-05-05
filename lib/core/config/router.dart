@@ -33,6 +33,7 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/security_settings_page.dart';
 import '../../features/profile/presentation/pages/legal_page.dart';
+import '../../features/subscription/presentation/pages/paywall_page.dart';
 // [MVP: Subscription Management - Commented out for initial launch]
 // import '../../features/subscription/presentation/pages/subscription_page.dart';
 // import '../../features/subscription/presentation/pages/payment_methods_page.dart';
@@ -176,6 +177,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         name: 'onboarding',
         builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: '/paywall',
+        name: 'paywall',
+        pageBuilder: (context, state) =>
+            _FadeTransitionPage(child: const PaywallPage()),
       ),
       GoRoute(
         path: '/login',

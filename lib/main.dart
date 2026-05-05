@@ -29,6 +29,7 @@ import 'core/services/auto_backup_service.dart';
 import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -67,6 +68,19 @@ void main() async {
           autoRefreshToken: true,
         ),
       );
+
+      // RevenueCat — initialize after Supabase so we can identify the current user
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        await Purchases.configure(
+          PurchasesConfiguration(EnvConfig.revenueCatApiKey),
+        );
+        final existingUser = Supabase.instance.client.auth.currentUser;
+        if (existingUser != null) {
+          unawaited(() async {
+            try { await Purchases.logIn(existingUser.id); } catch (_) {}
+          }());
+        }
+      }
 
       // Listen for deep link authentication (email confirmation)
       Supabase.instance.client.auth.onAuthStateChange.listen((data) {

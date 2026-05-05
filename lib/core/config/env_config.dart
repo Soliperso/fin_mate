@@ -25,6 +25,7 @@ class EnvConfig {
   static const _stripeAnnualPriceId =
       String.fromEnvironment('STRIPE_ANNUAL_PRICE_ID');
   static const _openAiApiKey = String.fromEnvironment('OPENAI_API_KEY');
+  static const _revenueCatApiKey = String.fromEnvironment('REVENUECAT_API_KEY');
   static const _environment = String.fromEnvironment('ENVIRONMENT');
 
   // AdMob (compile-time constants)
@@ -78,6 +79,12 @@ class EnvConfig {
       _openAiApiKey.isNotEmpty
           ? _openAiApiKey
           : dotenv.env['OPENAI_API_KEY'] ?? '';
+
+  // RevenueCat
+  static String get revenueCatApiKey =>
+      _revenueCatApiKey.isNotEmpty
+          ? _revenueCatApiKey
+          : dotenv.env['REVENUECAT_API_KEY'] ?? '';
 
   // AdMob
   // PRODUCTION: set all ADMOB_* values via --dart-define or .env (local dev only).
