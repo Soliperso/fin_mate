@@ -11,7 +11,7 @@ import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
-import '../../../../shared/widgets/ads/ad_banner_widget.dart';
+// RE-ENABLE: import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
@@ -187,6 +187,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 MoneyHealthScore(score: stats.moneyHealthScore),
                 const SizedBox(height: AppSizes.md),
 
+                // ── AI Insights CTA ───────────────────────────────────────
+                const _AiInsightsCard(),
+                const SizedBox(height: AppSizes.md),
+
                 // ── DTI ratio ─────────────────────────────────────────────
                 const DtiWidget(),
                 const SizedBox(height: AppSizes.md),
@@ -256,9 +260,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isDark: isDark,
                 ),
 
-                // Ad banner
-                const SizedBox(height: AppSizes.md),
-                const AdBannerWidget(),
+                // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
+                // const SizedBox(height: AppSizes.md),
+                // const AdBannerWidget(),
                 const SizedBox(height: AppSizes.md),
               ],
             ),
@@ -311,6 +315,78 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── AI Insights CTA card ──────────────────────────────────────────────────────
+
+class _AiInsightsCard extends StatelessWidget {
+  const _AiInsightsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () => context.go('/insights'),
+      child: Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF1A4A50), const Color(0xFF0D2E33)]
+                : [const Color(0xFF20808D), const Color(0xFF145C66)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              ),
+              child: const Icon(
+                CupertinoIcons.sparkles,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ask AI about your finances',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '10 free questions per month',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.75),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              color: Colors.white.withValues(alpha: 0.75),
+              size: 16,
+            ),
+          ],
         ),
       ),
     );

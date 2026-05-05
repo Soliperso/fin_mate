@@ -48,7 +48,7 @@ import '../../features/admin/presentation/pages/system_settings_page.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
-import '../services/ad_service.dart';
+// RE-ENABLE: import '../services/ad_service.dart';
 // RE-ENABLE: import '../providers/ad_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();

@@ -726,12 +726,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Premium subscriptions coming soon. Stay tuned!'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
+              // TODO Sprint 2: call RevenueCat purchase flow here
             },
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brandTeal,

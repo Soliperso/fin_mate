@@ -115,12 +115,13 @@ class PremiumFeatureDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.lg),
 
-            // [MVP: Upgrade button - Modified for free beta launch]
-            // All features are free during MVP testing
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onUpgradePressed?.call();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryTeal,
                   padding: const EdgeInsets.symmetric(
@@ -128,7 +129,7 @@ class PremiumFeatureDialog extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Coming Soon',
+                  'Upgrade to Premium',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
