@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finmate — Budget & Debt Tracker</title>
-<meta name="description" content="See exactly where your money goes. Track budgets, crush debt, and build real financial clarity — all in one clean app.">
-<meta property="og:title" content="Finmate — Budget & Debt Tracker">
-<meta property="og:description" content="See exactly where your money goes. Track budgets, crush debt, and build real financial clarity.">
+<meta name="description" content="AI-powered personal finance app for iOS. Track budgets, crush debt, and get AI insights — without linking your bank account. Free to start.">
+<meta property="og:title" content="Finmate — AI Budget & Debt Tracker">
+<meta property="og:description" content="AI-powered personal finance. No bank linking required. Track budgets, pay off debt, and ask AI about your finances — free on iOS.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://get-finmate.netlify.app/">
 <link rel="canonical" href="https://get-finmate.netlify.app/">
@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Finmate — Budget & Debt Tracker">
-<meta name="twitter:description" content="See exactly where your money goes. Free on iOS & Android. No bank linking required.">
+<meta name="twitter:description" content="AI-powered personal finance for iOS. No bank linking required. Ask AI about your finances, track budgets, crush debt.">
 <meta name="twitter:image" content="https://get-finmate.netlify.app/og-image.png">
 <meta name="theme-color" content="#3d7a72">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,8 +29,12 @@
   "name": "Finmate",
   "description": "Personal finance app for tracking budgets, transactions, and debt payoff. Manual entry only — no bank linking required.",
   "applicationCategory": "FinanceApplication",
-  "operatingSystem": "iOS, Android",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "operatingSystem": "iOS",
+  "offers": [
+    { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
+    { "@type": "Offer", "price": "9.99", "priceCurrency": "USD", "name": "Premium Monthly" },
+    { "@type": "Offer", "price": "49.99", "priceCurrency": "USD", "name": "Premium Annual" }
+  ],
   "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "4" },
   "url": "https://get-finmate.netlify.app",
   "downloadUrl": "https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716"
@@ -983,10 +987,6 @@ footer {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
     Download on App Store
   </a>
-  <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
-    Get it on Google Play
-  </a>
 </div>
 
 <!-- ═══ HERO ══════════════════════════════════════════════ -->
@@ -995,18 +995,14 @@ footer {
     <div class="hero-content">
       <div class="hero-kicker">
         <div class="hero-kicker-line"></div>
-        <span>Personal Finance · Free on iOS &amp; Android</span>
+        <span>Personal Finance · Free on iOS · AI-Powered</span>
       </div>
       <h1>Stop guessing.<br>Start <em>winning</em><br>with money.</h1>
       <p class="hero-sub">Finmate gives you a brutally honest view of your financial life — budgets, spending, and debt — so you can finally move the needle instead of hoping for the best.</p>
       <div class="hero-actions">
         <a href="https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716" class="btn-primary" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          App Store
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
-          Google Play
+          Download on App Store
         </a>
         <a href="#features" class="btn-ghost">
           See features
@@ -1116,7 +1112,7 @@ footer {
       </div>
       <div class="stat-item fade-up">
         <div class="stat-val">Free</div>
-        <div class="stat-label">core features — no paywall on the essentials</div>
+        <div class="stat-label">to start — premium unlocks unlimited AI &amp; more</div>
       </div>
       <div class="stat-item fade-up">
         <div class="stat-val">2 min</div>
@@ -1250,7 +1246,7 @@ footer {
               <li>AI chat trained on your own data</li>
               <li>Overspending pattern detection</li>
             </ul>
-            <div class="feature-coming-soon">Coming to V1.1 — Download now to be first</div>
+            <div class="feature-coming-soon" style="background:rgba(61,122,114,0.15);border-color:rgba(61,122,114,0.3);color:#3d7a72;">&#x2714;&nbsp; Available now — 10 free questions/month</div>
           </div>
           <div>
             <div class="ai-mockup">
@@ -1258,18 +1254,16 @@ footer {
                 <div class="ai-dot" style="background:#e05252;"></div>
                 <div class="ai-dot" style="background:#e8b84b;"></div>
                 <div class="ai-dot" style="background:#4caf8a;"></div>
-                <span class="ai-mockup-title">AI Insights · Beta Preview</span>
+                <span class="ai-mockup-title">AI Insights · Live</span>
               </div>
               <div class="ai-chat" style="position:relative;">
                 <div class="ai-bubble ai-bubble-user">Why am I always short at month end?</div>
                 <div class="ai-bubble ai-bubble-bot" style="position:relative;">
                   Looking at your last 3 months... your dining spend peaks in week 3 — you're averaging $180 over budget every month. If you cap dining at $220, you'll end the month with $180 surplus.
-                  <div class="ai-blur-overlay"><span class="ai-blur-label">Coming Soon</span></div>
                 </div>
                 <div class="ai-bubble ai-bubble-user">How fast can I pay off my credit card?</div>
                 <div class="ai-bubble ai-bubble-bot" style="position:relative;">
                   At your current payment rate, 14 months. But if you redirect the $180 dining surplus, it drops to 9 months. You'd save ~$340 in interest.
-                  <div class="ai-blur-overlay"><span class="ai-blur-label">Coming Soon</span></div>
                 </div>
               </div>
             </div>
@@ -1330,22 +1324,22 @@ footer {
 
       <div class="faq-item fade-up">
         <div class="faq-q">Is it actually free? What's the catch? <span class="faq-q-icon">+</span></div>
-        <p class="faq-a">The core app — dashboard, transactions, budgets, debt tracker — is free. We show non-intrusive ads. AI Insights will be a premium feature when it launches in V1.1. There's no hidden paywall blocking the tools that matter most.</p>
+        <p class="faq-a">The core app — dashboard, transactions, budgets, debt tracker — is free, forever. Premium ($9.99/month or $49.99/year) unlocks unlimited AI Insights, receipt scanning, and document storage. There's a 7-day free trial, no credit card required to start.</p>
       </div>
 
       <div class="faq-item fade-up">
         <div class="faq-q">Is my data private and secure? <span class="faq-q-icon">+</span></div>
-        <p class="faq-a">Yes. All data is stored in a private, authenticated Supabase database with row-level security — meaning only your account can access your data. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices.</p>
+        <p class="faq-a">Yes. All data is encrypted at rest and in transit, stored in a private authenticated database — only your account can access your data. Financial amounts are never logged in analytics or shared with third parties. Biometric authentication is supported on all devices.</p>
       </div>
 
       <div class="faq-item fade-up">
-        <div class="faq-q">When is AI Insights coming? <span class="faq-q-icon">+</span></div>
-        <p class="faq-a">AI Insights is the next major feature — coming in V1.1. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns. Download now and you'll get it automatically when it drops.</p>
+        <div class="faq-q">How does AI Insights work? <span class="faq-q-icon">+</span></div>
+        <p class="faq-a">AI Insights is live now. Ask anything about your finances — why you're short at month end, how fast you can pay off a debt, where your money actually goes — and get answers based on your real data, not generic advice. Free users get 10 questions per month. Premium unlocks unlimited access plus a 30-day balance forecast and personalized spending alerts.</p>
       </div>
 
       <div class="faq-item fade-up">
         <div class="faq-q">Is it available on Android? <span class="faq-q-icon">+</span></div>
-        <p class="faq-a">Yes! Finmate is available on both iOS (App Store) and Android (Google Play). Download free on either platform — your data is private, stays in your account, and everything syncs across devices.</p>
+        <p class="faq-a">Finmate is currently available on iOS only (App Store). Android is on the roadmap — follow us for updates on when it launches.</p>
       </div>
 
       <div class="faq-item fade-up">
@@ -1360,17 +1354,13 @@ footer {
 <section class="cta-section">
   <div class="container">
     <div class="cta-inner fade-up">
-      <div class="tag tag-outline" style="margin-bottom: 24px;">Free on App Store &amp; Google Play</div>
+      <div class="tag tag-outline" style="margin-bottom: 24px;">Free on the App Store · iOS</div>
       <h2>See everything.<br><span>Owe less.</span><br>Start today.</h2>
       <p class="cta-lead">Two minutes to set up. No bank account required. Just the clarity you've been putting off — finally in one place.</p>
       <div class="cta-actions">
         <a href="https://apps.apple.com/app/finmate-budget-debt-tracker/id6762636716" class="btn-primary" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          App Store
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" target="_blank" rel="noopener">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
-          Google Play
+          Download on App Store
         </a>
         <a href="#features" class="btn-outline">
           See all features
@@ -1392,10 +1382,6 @@ footer {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
           App Store
         </a>
-        <a href="https://play.google.com/store/apps/details?id=com.chebli.finmate" class="btn-primary" style="font-size:11px;padding:10px 20px;" target="_blank" rel="noopener">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.19l13.12-7.57-2.79-2.79-11.32 10.17zm-1.67-20.5C1.19 3.6 1 4.03 1 4.56v14.88c0 .53.19.96.51 1.28l.07.06 8.34-8.34v-.2L1.58 3.2l-.07.06zm18.12 8.58-2.82-1.63-3.12 3.12 3.12 3.12 2.85-1.65c.81-.47.81-1.24-.03-1.96zM4.17.24L17.29 7.81l-2.79 2.79L3.18.43A1.28 1.28 0 0 1 4.17.24z"/></svg>
-          Google Play
-        </a>
       </div>
       <div>
         <div class="footer-col-title">Features</div>
@@ -1404,7 +1390,7 @@ footer {
           <li><a href="#features">Transactions</a></li>
           <li><a href="#features">Budgets</a></li>
           <li><a href="#features">Debt Tracker</a></li>
-          <li><a href="#features">AI Insights (soon)</a></li>
+          <li><a href="#features">AI Insights</a></li>
         </ul>
       </div>
       <div>
@@ -1485,22 +1471,22 @@ footer {
     {
       "@type": "Question",
       "name": "Is it actually free? What's the catch?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The core app — dashboard, transactions, budgets, debt tracker — is free. We show non-intrusive ads. AI Insights will be a premium feature in V1.1. There's no hidden paywall blocking the tools that matter most." }
+      "acceptedAnswer": { "@type": "Answer", "text": "The core app — dashboard, transactions, budgets, debt tracker — is free. Premium unlocks unlimited AI Insights, receipt scanning, and document storage. Premium costs $9.99/month or $49.99/year, both with a 7-day free trial. No hidden paywall on the tools that matter most." }
     },
     {
       "@type": "Question",
       "name": "Is my data private and secure?",
-      "acceptedAnswer": { "@type": "Answer", "text": "All data is stored in a private, authenticated Supabase database with row-level security. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices." }
+      "acceptedAnswer": { "@type": "Answer", "text": "All your data is stored privately and securely — only you can access it. Financial amounts are never logged in analytics or error tracking. Biometric authentication is supported on all devices." }
     },
     {
       "@type": "Question",
-      "name": "When is AI Insights coming?",
-      "acceptedAnswer": { "@type": "Answer", "text": "AI Insights is coming in V1.1. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns." }
+      "name": "How does AI Insights work?",
+      "acceptedAnswer": { "@type": "Answer", "text": "AI Insights is live now. It includes a 30-day balance forecast, personalized spending alerts, and a chat interface that answers questions about your actual financial patterns. Free users get 10 questions per month; Premium users get unlimited access." }
     },
     {
       "@type": "Question",
       "name": "Is it available on Android?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Finmate is available on both iOS (App Store) and Android (Google Play). Download free on either platform." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Finmate is currently available on iOS (App Store). Android support is on the roadmap. Download free on iPhone today." }
     },
     {
       "@type": "Question",

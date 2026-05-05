@@ -4,26 +4,23 @@
 
 ---
 
-## SPRINT 1 — Fix the Product
+## SPRINT 1 — Fix the Product ✅ COMPLETE
 > Unlock the differentiators. No user who downloads today should hit a dead end.
-> **Time estimate: 2–3 days**
 
-### 1.1 Enable AI Insights
-- [ ] Uncomment `/insights` route import in `lib/core/config/router.dart`
-- [ ] Uncomment the `/insights` GoRoute block in `router.dart`
-- [ ] Add AI entry point to the bottom nav (5th tab) in `lib/core/config/router.dart` → `MainShell`
-- [ ] Verify the 10 free query gate works end-to-end (`lib/core/providers/ai_query_limit_provider.dart`)
-- [ ] Test: open app as free user → navigate to AI tab → ask 10 questions → confirm limit dialog shows
+### 1.1 Enable AI Insights ✅
+- [x] Uncomment `/insights` route import in `lib/core/config/router.dart`
+- [x] Uncomment the `/insights` GoRoute block in `router.dart`
+- [x] Added `_AiInsightsCard` to dashboard (below Money Health Score) — navigates to `/insights`
+- [x] 10 free query gate already live in `lib/core/providers/ai_query_limit_provider.dart`
 
-### 1.2 Kill the Ads
-- [ ] Comment out `AdBannerWidget` in `lib/features/dashboard/presentation/pages/dashboard_page.dart`
-- [ ] Comment out the interstitial ad trigger in the transactions tab
-- [ ] Add comment above both: `// RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%`
+### 1.2 Kill the Ads ✅
+- [x] Commented out `AdBannerWidget` in `lib/features/dashboard/presentation/pages/dashboard_page.dart`
+- [x] Commented out interstitial call + preload in `lib/core/config/router.dart`
+- [x] RE-ENABLE comments in place for when DAU > 1,000 and 30-day retention > 20%
 
-### 1.3 Fix Receipt Scanning CTA
-- [ ] Find where `PremiumFeatureDialog` shows "Coming Soon" for receipt scanning
-- [ ] Replace "Coming Soon" label with "Unlock with Premium" (paywall wired in Sprint 2)
-- [ ] Test: tap receipt scan button → confirm updated dialog shows
+### 1.3 Fix "Coming Soon" CTAs ✅
+- [x] `lib/shared/widgets/premium_feature_dialog.dart` — button now says "Upgrade to Premium", wired to `onUpgradePressed` callback
+- [x] `lib/features/ai_insights/presentation/pages/ai_insights_page.dart` — "coming soon" snackbar replaced with `TODO Sprint 2` RevenueCat hook
 
 ---
 
@@ -31,12 +28,11 @@
 > Money must be able to change hands. Nothing else matters until this works.
 > **Time estimate: 3–5 days**
 
-### 2.1 App Store Connect Setup
-- [ ] Log into App Store Connect → your app → Subscriptions
-- [ ] Create Subscription Group: "Finmate Premium"
-- [ ] Create product: `finmate_premium_monthly` — $9.99/month, 7-day free trial
-- [ ] Create product: `finmate_premium_annual` — $49.99/year, 7-day free trial
-- [ ] Set annual as the featured/default product in the group
+### 2.1 App Store Connect Setup ✅
+- [x] Created Subscription Group: "Finmate Premium"
+- [x] Created product: `finmate_premium_monthly` — $9.99/month, 7-day free trial
+- [x] Created product: `finmate_premium_annual` — $49.99/year, 7-day free trial
+- [x] Annual set as featured/default product in the group
 
 ### 2.2 RevenueCat Dashboard Setup
 - [ ] Create account at revenuecat.com
@@ -96,6 +92,25 @@
 - [ ] Remove the "Coming Soon" gate from receipt scanning
 - [ ] Wrap behind `isPremiumProvider` — premium users go straight to scanner, free users see upgrade dialog
 - [ ] Test: free user → taps scan → upgrade dialog. Premium user → taps scan → camera opens.
+
+---
+
+## WEBSITE — Marketing Page Updated ✅ COMPLETE
+> `landing/index.html` deployed at https://get-finmate.netlify.app/
+
+- [x] Meta description updated to reflect iOS-only, AI-powered positioning
+- [x] Schema.org: removed Android from `operatingSystem`, updated pricing offers
+- [x] Hero: "Free on iOS · AI-Powered" kicker, Google Play button removed
+- [x] Stat strip: updated free tier messaging to reflect premium upsell
+- [x] AI Insights card: "Coming to V1.1" → "✓ Available now — 10 free questions/month"
+- [x] AI mockup status: "Beta Preview" → "Live"; blur overlays removed
+- [x] FAQ: "Is it free?" updated with $9.99/mo · $49.99/yr · 7-day trial pricing
+- [x] FAQ: "When is AI Insights coming?" → "How does AI Insights work?" (live description)
+- [x] FAQ: Android answer updated to iOS-only with Android on roadmap
+- [x] FAQ: Security answer — removed technical jargon (Supabase, row-level security)
+- [x] CTA section: Google Play button removed, iOS-only messaging
+- [x] Footer: Google Play button removed, "AI Insights (soon)" → "AI Insights"
+- [x] JSON-LD FAQ schema updated to match all FAQ changes
 
 ---
 
