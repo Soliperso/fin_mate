@@ -203,13 +203,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withValues(alpha: 0.18),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
-              ],
             ),
             child: Column(
               children: [
@@ -398,15 +391,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     : AppColors.separator.withValues(alpha: 0.25),
                 width: 0.7,
               ),
-              boxShadow: isDark
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -494,15 +479,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     : AppColors.separator.withValues(alpha: 0.3),
                 width: 0.8,
               ),
-              boxShadow: isDark
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+
             ),
             clipBehavior: Clip.hardEdge,
             child: Column(
@@ -722,15 +699,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               : AppColors.separator.withValues(alpha: 0.3),
           width: 0.8,
         ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+
       ),
       clipBehavior: Clip.hardEdge,
       child: auditAsync.when(
@@ -944,13 +913,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.brandTeal,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.brandTeal.withValues(alpha: 0.35),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
                 ),
               ),
               if (!isLast)
@@ -1163,13 +1125,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.28),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: isFullWidth
             ? Row(
@@ -1801,17 +1756,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     : AppColors.separator.withValues(alpha: 0.25),
                 width: 0.7,
               ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: hasGradient
-                      ? iconColor.withValues(alpha: 0.18)
-                      : Colors.black.withValues(alpha: 0.03),
-                  blurRadius: hasGradient ? 10 : 6,
-                  offset: const Offset(0, 1.5),
-                ),
-              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1883,15 +1827,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               : AppColors.separator.withValues(alpha: 0.25),
           width: 0.7,
         ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 1.5),
-                ),
-              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

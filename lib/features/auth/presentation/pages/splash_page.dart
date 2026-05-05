@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/services/secure_storage_provider.dart';
 import '../providers/auth_providers.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -102,7 +103,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
       if (user != null) {
         context.go('/dashboard');
       } else {
-        context.go('/onboarding');
+        final storage = ref.read(secureStorageServiceProvider);
+        final seen = await storage.getHasSeenOnboarding();
+        if (mounted) context.go(seen ? '/login' : '/onboarding');
       }
     }
   }

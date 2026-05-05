@@ -16,6 +16,15 @@ class SecureStorageService {
   static const _keyMfaEnabled = 'mfa_enabled';
   static const _keyMfaMethod = 'mfa_method';
   static const _keyTotpSecret = 'totp_secret';
+  static const _keyHasSeenOnboarding = 'has_seen_onboarding';
+
+  Future<void> saveHasSeenOnboarding() async {
+    await _storage.write(key: _keyHasSeenOnboarding, value: 'true');
+  }
+
+  Future<bool> getHasSeenOnboarding() async {
+    return await _storage.read(key: _keyHasSeenOnboarding) == 'true';
+  }
 
   /// Save email for auto-fill
   Future<void> saveEmail(String email) async {

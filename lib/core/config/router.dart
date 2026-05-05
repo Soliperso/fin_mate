@@ -21,8 +21,7 @@ import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
 import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
-// [MVP: AI Insights - Commented out]
-// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
@@ -50,7 +49,7 @@ import '../../features/recurring_transactions/presentation/pages/recurring_trans
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
 import '../services/ad_service.dart';
-import '../providers/ad_provider.dart';
+// RE-ENABLE: import '../providers/ad_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -293,12 +292,11 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // [MVP: AI Insights - Commented out]
-          // GoRoute(
-          //   path: '/insights',
-          //   name: 'insights',
-          //   builder: (context, state) => const AiInsightsPage(),
-          // ),
+          GoRoute(
+            path: '/insights',
+            name: 'insights',
+            pageBuilder: (context, state) => _FadeTransitionPage(child: const AiInsightsPage()),
+          ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',
@@ -434,7 +432,7 @@ class _MainShellState extends ConsumerState<MainShell>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   String _currentTabRoot = '';
-  bool _interstitialShownThisSession = false;
+  // RE-ENABLE: bool _interstitialShownThisSession = false;
 
   @override
   void initState() {
@@ -444,17 +442,18 @@ class _MainShellState extends ConsumerState<MainShell>
       duration: const Duration(milliseconds: 250),
       value: 1.0,
     );
-    unawaited(AdService.instance.preloadInterstitial());
+    // RE-ENABLE: unawaited(AdService.instance.preloadInterstitial());
   }
 
-  Future<void> _showInterstitialOnTransactions() async {
-    if (_interstitialShownThisSession) return;
-    final shouldShow = await ref.read(shouldShowAdsProvider.future);
-    if (!shouldShow) return;
-    await AdService.instance.preloadInterstitial();
-    await AdService.instance.showInterstitialIfEligible(shouldShow: shouldShow);
-    _interstitialShownThisSession = true;
-  }
+  // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
+  // Future<void> _showInterstitialOnTransactions() async {
+  //   if (_interstitialShownThisSession) return;
+  //   final shouldShow = await ref.read(shouldShowAdsProvider.future);
+  //   if (!shouldShow) return;
+  //   await AdService.instance.preloadInterstitial();
+  //   await AdService.instance.showInterstitialIfEligible(shouldShow: shouldShow);
+  //   _interstitialShownThisSession = true;
+  // }
 
   @override
   void didChangeDependencies() {
@@ -527,7 +526,8 @@ class _MainShellState extends ConsumerState<MainShell>
                   isSelected: selectedIndex == 1,
                   onTap: () {
                     context.go('/transactions');
-                    unawaited(_showInterstitialOnTransactions());
+                    // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
+                    // unawaited(_showInterstitialOnTransactions());
                   },
                 ),
                 _TabItem(
