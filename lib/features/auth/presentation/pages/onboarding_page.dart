@@ -23,7 +23,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   late Animation<double> _entranceFade;
 
   late AnimationController _hintController;
-  late Animation<double> _hintFade;
+  Animation<double> _hintFade = const AlwaysStoppedAnimation(0.0);
 
   List<OnboardingSlide> get _slides => [
     OnboardingSlide(
