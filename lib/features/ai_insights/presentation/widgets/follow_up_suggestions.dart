@@ -19,7 +19,7 @@ class FollowUpSuggestions extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: AppSizes.md),
-      padding: const EdgeInsets.all(AppSizes.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm + 2, vertical: AppSizes.sm),
       decoration: BoxDecoration(
         color: AppColors.primaryTeal.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -40,7 +40,7 @@ class FollowUpSuggestions extends StatelessWidget {
               ),
               const SizedBox(width: AppSizes.xs),
               Text(
-                'You might also want to ask:',
+                'Ask next',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.primaryTeal,
                       fontWeight: FontWeight.w600,

@@ -4,9 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../data/services/csv_export_service.dart';
 import '../../data/services/csv_import_service.dart';
 import '../widgets/import_preview_bottom_sheet.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -198,7 +201,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           padding: const EdgeInsets.only(right: AppSizes.sm),
                           child: CircularIconButton(
                             icon: CupertinoIcons.arrow_down_to_line,
-                            onTap: () => _importCsv(context),
+                            onTap: () => _showCsvOptions(context),
                           ),
                         ),
                         Padding(
@@ -633,6 +636,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final fmt = ref.watch(currencyFormat2Provider);
     final income = _totalIncome(state.filteredTransactions);
     final expense = _totalExpense(state.filteredTransactions);
+    final remaining = income - expense;
+    final remainingColor =
+        remaining >= 0 ? AppColors.brandTeal : AppColors.systemRed;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark
         ? AppColors.secondarySystemBackgroundDark
@@ -648,108 +654,83 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         ),
         child: Row(
           children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.md, vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: AppColors.systemGreen.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(CupertinoIcons.arrow_up,
-                          size: 14, color: AppColors.systemGreen),
-                    ),
-                    const SizedBox(width: AppSizes.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'transactions.filterIncome'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                          Text(
-                            fmt.format(income),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.systemGreen,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _buildSummaryCell(
+              context: context,
+              icon: CupertinoIcons.arrow_up,
+              color: AppColors.systemGreen,
+              label: 'transactions.filterIncome'.tr(),
+              amount: fmt.format(income),
             ),
             VerticalDivider(
               width: 1,
               thickness: 0.5,
               color: Theme.of(context).dividerColor,
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.md, vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: AppColors.systemRed.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(CupertinoIcons.arrow_down,
-                          size: 14, color: AppColors.systemRed),
-                    ),
-                    const SizedBox(width: AppSizes.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'transactions.filterExpense'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                          Text(
-                            fmt.format(expense),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.systemRed,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            _buildSummaryCell(
+              context: context,
+              icon: CupertinoIcons.arrow_down,
+              color: AppColors.systemRed,
+              label: 'transactions.filterExpense'.tr(),
+              amount: fmt.format(expense),
+            ),
+            VerticalDivider(
+              width: 1,
+              thickness: 0.5,
+              color: Theme.of(context).dividerColor,
+            ),
+            _buildSummaryCell(
+              context: context,
+              icon: Icons.account_balance_wallet_outlined,
+              color: remainingColor,
+              label: 'Remaining',
+              amount: fmt.format(remaining.abs()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCell({
+    required BuildContext context,
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String amount,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
               ),
+              child: Icon(icon, size: 13, color: color),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 1),
+            Text(
+              amount,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -878,9 +859,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Group transactions by date
+    // Group transactions by date, newest first
+    final sortedTxns = [...state.filteredTransactions]
+      ..sort((a, b) => b.date.compareTo(a.date));
     final grouped = <String, List<TransactionEntity>>{};
-    for (final tx in state.filteredTransactions) {
+    for (final tx in sortedTxns) {
       final key = DateFormat('MMMM d, yyyy').format(tx.date);
       grouped.putIfAbsent(key, () => []).add(tx);
     }
@@ -1102,12 +1085,24 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               ),
             ),
             const SizedBox(width: AppSizes.sm),
-            Text(
-              '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: iconColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: iconColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  DateFormat('h:mm a').format(transaction.createdAt.toLocal()),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1283,6 +1278,104 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCsvOptions(BuildContext context) {
+    GlassBottomSheet.show(
+      context: context,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.sm,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: AppSizes.sm),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                'CSV OPTIONS',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.8,
+                    ),
+              ),
+              const SizedBox(height: AppSizes.xs),
+              _CsvOptionTile(
+                icon: CupertinoIcons.arrow_up_to_line,
+                title: 'Export CSV',
+                subtitle: 'Share filtered transactions as a spreadsheet',
+                onTap: () {
+                  Navigator.pop(context);
+                  _exportCsv(context);
+                },
+              ),
+              Divider(
+                height: 1,
+                indent: 40,
+                color: AppColors.separator.withValues(alpha: 0.5),
+              ),
+              _CsvOptionTile(
+                icon: CupertinoIcons.arrow_down_to_line,
+                title: 'Import CSV',
+                subtitle: 'Add transactions from a CSV file',
+                onTap: () {
+                  Navigator.pop(context);
+                  _importCsv(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportCsv(BuildContext context) async {
+    final transactions =
+        ref.read(transactionListProvider).filteredTransactions;
+
+    if (transactions.isEmpty) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No transactions to export.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final csv = CsvExportService().export(transactions);
+    final dir = await getTemporaryDirectory();
+    final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final file = File('${dir.path}/finmate_transactions_$stamp.csv');
+    await file.writeAsString(csv);
+
+    if (!context.mounted) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 100, 100);
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'text/csv')],
+      subject: 'Finmate transactions export',
+      sharePositionOrigin: origin,
     );
   }
 
@@ -1574,6 +1667,63 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CsvOptionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _CsvOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.brandTeal, size: 18),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textTertiary,
+                          fontSize: 10,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 12,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
       ),
     );
   }

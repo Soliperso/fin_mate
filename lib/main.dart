@@ -102,7 +102,7 @@ void main() async {
       ]);
 
       // Read saved theme + display format + locale from already-loaded prefs
-      final savedTheme = prefs.getString('theme_mode') ?? 'dark';
+      final savedTheme = prefs.getString('theme_mode') ?? 'system';
       final initialThemeMode = savedTheme == 'light'
           ? ThemeMode.light
           : savedTheme == 'system'

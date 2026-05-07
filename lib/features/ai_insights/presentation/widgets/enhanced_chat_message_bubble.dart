@@ -127,6 +127,8 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                                 message.content,
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       color: _getTextColor(isUser, context),
+                                      height: 1.45,
+                                      fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
                                     ),
                               ),
                             ),
@@ -139,6 +141,8 @@ class EnhancedChatMessageBubble extends StatelessWidget {
                           message.content,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: _getTextColor(isUser, context),
+                                height: 1.45,
+                                fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
                               ),
                         ),
 
@@ -215,12 +219,25 @@ class EnhancedChatMessageBubble extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isUser ? AppColors.primaryTeal : AppColors.tealLight,
+        gradient: LinearGradient(
+          colors: isUser
+              ? [AppColors.brandTeal, AppColors.tealDark]
+              : [AppColors.brandTeal, AppColors.tealLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandTeal.withValues(alpha: 0.25),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Icon(
-        isUser ? CupertinoIcons.person : CupertinoIcons.sparkles,
-        size: 18,
+        isUser ? CupertinoIcons.person_fill : CupertinoIcons.sparkles,
+        size: 16,
         color: Colors.white,
       ),
     );

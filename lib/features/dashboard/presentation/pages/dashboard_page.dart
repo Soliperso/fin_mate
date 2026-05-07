@@ -188,8 +188,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 const SizedBox(height: AppSizes.md),
 
                 // ── AI Insights CTA ───────────────────────────────────────
-                const _AiInsightsCard(),
-                const SizedBox(height: AppSizes.md),
+                // [AI Insights - Commented out]
+                // const _AiInsightsCard(),
+                // const SizedBox(height: AppSizes.md),
 
                 // ── DTI ratio ─────────────────────────────────────────────
                 const DtiWidget(),
@@ -322,76 +323,76 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 }
 
 // ── AI Insights CTA card ──────────────────────────────────────────────────────
-
-class _AiInsightsCard extends StatelessWidget {
-  const _AiInsightsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: () => context.go('/insights'),
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF1A4A50), const Color(0xFF0D2E33)]
-                : [const Color(0xFF20808D), const Color(0xFF145C66)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              ),
-              child: const Icon(
-                CupertinoIcons.sparkles,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: AppSizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ask AI about your finances',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '10 free questions per month',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.75),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              CupertinoIcons.chevron_right,
-              color: Colors.white.withValues(alpha: 0.75),
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// [AI Insights - Commented out]
+// class _AiInsightsCard extends StatelessWidget {
+//   const _AiInsightsCard();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+//
+//     return GestureDetector(
+//       onTap: () => context.go('/insights'),
+//       child: Container(
+//         padding: const EdgeInsets.all(AppSizes.md),
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             colors: isDark
+//                 ? [const Color(0xFF1A4A50), const Color(0xFF0D2E33)]
+//                 : [const Color(0xFF20808D), const Color(0xFF145C66)],
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//           ),
+//           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+//         ),
+//         child: Row(
+//           children: [
+//             Container(
+//               width: 44,
+//               height: 44,
+//               decoration: BoxDecoration(
+//                 color: Colors.white.withValues(alpha: 0.15),
+//                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+//               ),
+//               child: const Icon(
+//                 CupertinoIcons.sparkles,
+//                 color: Colors.white,
+//                 size: 22,
+//               ),
+//             ),
+//             const SizedBox(width: AppSizes.md),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     'Ask AI about your finances',
+//                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+//                           color: Colors.white,
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                   ),
+//                   const SizedBox(height: 2),
+//                   Text(
+//                     '10 free questions per month',
+//                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
+//                           color: Colors.white.withValues(alpha: 0.75),
+//                         ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             Icon(
+//               CupertinoIcons.chevron_right,
+//               color: Colors.white.withValues(alpha: 0.75),
+//               size: 16,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // ── Section header ────────────────────────────────────────────────────────────
 

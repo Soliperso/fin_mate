@@ -48,16 +48,6 @@ class BalanceTimelineChart extends ConsumerWidget {
               _buildStatusBadge(context, hasCritical),
             ],
           ),
-          const SizedBox(height: AppSizes.sm),
-          Row(
-            children: [
-              _buildLegendItem(context, color: AppColors.success, label: 'Healthy'),
-              const SizedBox(width: AppSizes.md),
-              _buildLegendItem(context, color: AppColors.warning, label: 'Warning'),
-              const SizedBox(width: AppSizes.md),
-              _buildLegendItem(context, color: AppColors.error, label: 'Critical'),
-            ],
-          ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
             height: 200,
@@ -152,6 +142,27 @@ class BalanceTimelineChart extends ConsumerWidget {
                     ),
                   ),
                 ],
+                extraLinesData: ExtraLinesData(
+                  verticalLines: [
+                    VerticalLine(
+                      x: 0,
+                      color: AppColors.textTertiary.withValues(alpha: 0.5),
+                      strokeWidth: 1.5,
+                      dashArray: [4, 4],
+                      label: VerticalLineLabel(
+                        show: true,
+                        alignment: Alignment.topRight,
+                        padding: const EdgeInsets.only(left: 4, bottom: 4),
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: AppColors.textTertiary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        labelResolver: (_) => 'Today',
+                      ),
+                    ),
+                  ],
+                ),
                 lineTouchData: LineTouchData(
                   enabled: true,
                   touchTooltipData: LineTouchTooltipData(
@@ -176,6 +187,17 @@ class BalanceTimelineChart extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegendItem(context, color: AppColors.success, label: 'Healthy'),
+              const SizedBox(width: AppSizes.md),
+              _buildLegendItem(context, color: AppColors.warning, label: 'Warning'),
+              const SizedBox(width: AppSizes.md),
+              _buildLegendItem(context, color: AppColors.error, label: 'Critical'),
+            ],
           ),
         ],
       ),

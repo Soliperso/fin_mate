@@ -10,7 +10,23 @@ import '../../domain/entities/admin_user_entity.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/user_list_item.dart';
 
-enum _SortOrder { aToZ, zToA }
+enum _SortOption {
+  nameAZ,
+  newestJoined,
+  mostActive;
+
+  String get label => switch (this) {
+        _SortOption.nameAZ => 'Name (A → Z)',
+        _SortOption.newestJoined => 'Newest joined',
+        _SortOption.mostActive => 'Most active',
+      };
+
+  IconData get icon => switch (this) {
+        _SortOption.nameAZ => CupertinoIcons.textformat_abc,
+        _SortOption.newestJoined => CupertinoIcons.calendar,
+        _SortOption.mostActive => CupertinoIcons.chart_bar,
+      };
+}
 
 enum _FilterType {
   all,
@@ -36,7 +52,7 @@ class UserManagementPage extends ConsumerStatefulWidget {
 class _UserManagementPageState extends ConsumerState<UserManagementPage> {
   final TextEditingController _searchController = TextEditingController();
   String? _searchQuery;
-  _SortOrder _sortOrder = _SortOrder.aToZ;
+  _SortOption _sortOption = _SortOption.nameAZ;
   _FilterType _activeFilter = _FilterType.all;
   List<AdminUserEntity> _sourceUsers = [];
   List<AdminUserEntity> _displayUsers = [];
@@ -57,10 +73,174 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
 
   List<AdminUserEntity> _applySort(List<AdminUserEntity> users) {
     final copy = [...users];
-    copy.sort((a, b) => _sortOrder == _SortOrder.aToZ
-        ? a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase())
-        : b.displayName.toLowerCase().compareTo(a.displayName.toLowerCase()));
+    switch (_sortOption) {
+      case _SortOption.nameAZ:
+        copy.sort((a, b) =>
+            a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()));
+      case _SortOption.newestJoined:
+        copy.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case _SortOption.mostActive:
+        copy.sort((a, b) => b.transactionCount.compareTo(a.transactionCount));
+    }
     return copy;
+  }
+
+  void _showSortSheet(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor:
+          isDark ? AppColors.secondarySystemBackgroundDark : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final cardBg = isDark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFF2F2F7);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.pagePadding, 12, AppSizes.pagePadding, 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.separatorDark : AppColors.separator,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Sort by',
+                    style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                  ),
+                  child: Column(
+                    children: [
+                      for (int i = 0; i < _SortOption.values.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            indent: 56,
+                            color: isDark
+                                ? AppColors.separatorDark.withValues(alpha: 0.4)
+                                : AppColors.separator.withValues(alpha: 0.4),
+                          ),
+                        _buildSortRow(
+                          ctx,
+                          _SortOption.values[i],
+                          isDark,
+                          isFirst: i == 0,
+                          isLast: i == _SortOption.values.length - 1,
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            final picked = _SortOption.values[i];
+                            if (_sortOption == picked) return;
+                            setState(() {
+                              _sortOption = picked;
+                              if (_sourceUsers.isNotEmpty) {
+                                _sourceUsers = _applySort(_sourceUsers);
+                                _displayUsers = _filterUsers(_sourceUsers);
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSortRow(
+    BuildContext context,
+    _SortOption option,
+    bool isDark, {
+    required bool isFirst,
+    required bool isLast,
+    required VoidCallback onTap,
+  }) {
+    final isSelected = _sortOption == option;
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(
+        top: isFirst ? const Radius.circular(AppSizes.radiusCard) : Radius.zero,
+        bottom: isLast ? const Radius.circular(AppSizes.radiusCard) : Radius.zero,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.brandTeal
+                        : (isDark
+                            ? AppColors.separatorDark.withValues(alpha: 0.6)
+                            : Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    option.icon,
+                    size: 15,
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark
+                            ? AppColors.secondaryLabelDark
+                            : AppColors.secondaryLabel),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    option.label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? AppColors.brandTeal
+                          : (isDark ? AppColors.labelDark : AppColors.label),
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    CupertinoIcons.checkmark,
+                    size: 15,
+                    color: AppColors.brandTeal,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   List<AdminUserEntity> _filterUsers(List<AdminUserEntity> users) =>
@@ -253,18 +433,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
             padding: const EdgeInsets.only(right: 8),
             child: Center(
               child: CircularIconButton(
-                icon: _sortOrder == _SortOrder.aToZ
-                    ? CupertinoIcons.sort_down
-                    : CupertinoIcons.sort_up,
-                onTap: () => setState(() {
-                  _sortOrder = _sortOrder == _SortOrder.aToZ
-                      ? _SortOrder.zToA
-                      : _SortOrder.aToZ;
-                  if (_sourceUsers.isNotEmpty) {
-                    _sourceUsers = _applySort(_sourceUsers);
-                    _displayUsers = _filterUsers(_sourceUsers);
-                  }
-                }),
+                icon: CupertinoIcons.sort_down,
+                onTap: () => _showSortSheet(context),
               ),
             ),
           ),
@@ -525,6 +695,16 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                     itemCount: display.length,
                     itemBuilder: (context, index) {
                       final user = display[index];
+                      final child = Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: UserListItem(user: user),
+                      );
+                      if (user.isAdmin) {
+                        return KeyedSubtree(
+                          key: ValueKey(user.id),
+                          child: child,
+                        );
+                      }
                       return Dismissible(
                         key: ValueKey(user.id),
                         background: _buildSwipeBackground(isStart: true),
@@ -532,10 +712,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                             _buildSwipeBackground(isStart: false),
                         confirmDismiss: (direction) =>
                             _handleSwipeAction(direction, user),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: UserListItem(user: user),
-                        ),
+                        child: child,
                       );
                     },
                   ),

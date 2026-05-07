@@ -21,7 +21,8 @@ import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
 import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
-import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+// [AI Insights - Commented out]
+// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
@@ -299,11 +300,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(
-            path: '/insights',
-            name: 'insights',
-            pageBuilder: (context, state) => _FadeTransitionPage(child: const AiInsightsPage()),
-          ),
+          // [AI Insights - Commented out]
+          // GoRoute(
+          //   path: '/insights',
+          //   name: 'insights',
+          //   pageBuilder: (context, state) => _FadeTransitionPage(child: const AiInsightsPage()),
+          // ),
           GoRoute(
             path: '/notifications',
             name: 'notifications',

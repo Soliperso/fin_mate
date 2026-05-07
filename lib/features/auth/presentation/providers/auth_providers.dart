@@ -7,6 +7,7 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 // import '../../../../core/config/supabase_client.dart'; // [Biometric]
+import '../../../../core/config/env_config.dart';
 import '../../../../core/services/sentry_service.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -172,9 +173,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       _ref.read(userSessionProvider.notifier).state++;
 
       // Identify user in RevenueCat so entitlements load correctly
-      unawaited(() async {
-        try { await Purchases.logIn(user.id); } catch (_) {}
-      }());
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        unawaited(() async {
+          try { await Purchases.logIn(user.id); } catch (_) {}
+        }());
+      }
 
       // Set user context in Sentry and track sign in
       await _setUserContext(user);
@@ -243,9 +246,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _repository.deleteAccount();
       state = AuthState(user: null, isLoading: false);
 
-      unawaited(() async {
-        try { await Purchases.logOut(); } catch (_) {}
-      }());
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        unawaited(() async {
+          try { await Purchases.logOut(); } catch (_) {}
+        }());
+      }
 
       _ref.read(userSessionProvider.notifier).state++;
       await _clearUserContext();
@@ -269,9 +274,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
 
-      unawaited(() async {
-        try { await Purchases.logOut(); } catch (_) {}
-      }());
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        unawaited(() async {
+          try { await Purchases.logOut(); } catch (_) {}
+        }());
+      }
 
       // Bump session key so all cached data providers are cleared
       _ref.read(userSessionProvider.notifier).state++;

@@ -16,10 +16,10 @@ import '../widgets/chat_input_field.dart';
 import '../widgets/suggested_prompts.dart';
 import '../widgets/balance_timeline_chart.dart';
 import '../widgets/query_limit_banner.dart';
+import '../widgets/ai_observations_card.dart';
 import '../../../../shared/widgets/gradient_hero_card.dart';
 import '../../../../shared/widgets/hero_stat_badge.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import './insights_tab.dart';
 
@@ -34,13 +34,41 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _chatScrollController = ScrollController();
-  // True only during the brief query-limit check before streaming starts
   bool _isSendingCheck = false;
+
+  // Quick-action cards shown on the chat welcome screen
+  static const _quickActions = [
+    (
+      icon: CupertinoIcons.chart_bar_alt_fill,
+      label: 'Spending\nthis month',
+      prompt: 'Show my spending by category this month',
+      color: AppColors.brandTeal,
+    ),
+    (
+      icon: CupertinoIcons.calendar_badge_plus,
+      label: 'Upcoming\nbills',
+      prompt: 'What bills are due in the next 7 days?',
+      color: AppColors.systemPurple,
+    ),
+    (
+      icon: CupertinoIcons.graph_circle,
+      label: 'Balance\nforecast',
+      prompt: 'What is my 30-day balance forecast?',
+      color: AppColors.systemBlue,
+    ),
+    (
+      icon: CupertinoIcons.lightbulb,
+      label: 'Save more\nmoney',
+      prompt: 'Give me tips to reduce my spending',
+      color: AppColors.systemGreen,
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -78,7 +106,6 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
       return;
     }
 
-    // Increment query count — continue even if this fails
     try {
       await ref.read(aiQueryOperationsProvider).incrementQueryCount();
     } catch (e) {
@@ -87,21 +114,17 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
     if (!mounted) return;
 
-    // Streaming starts immediately inside the notifier; no need to await
     ref.read(chatProvider.notifier).sendMessage(text);
     _scrollToBottom();
     ref.invalidate(dynamicPromptsProvider);
   }
 
   void _handleActionTap(String actionType) {
-    // Handle action button taps
     switch (actionType) {
       case 'view_accounts':
-        // Navigate to transactions page to view all accounts
         context.go('/transactions');
         break;
       case 'add_transaction':
-        // Navigate to add transaction page
         context.push('/transactions/add');
         break;
       case 'view_details':
@@ -117,7 +140,52 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('AI Insights'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Gradient sparkles orb
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.brandTeal, AppColors.tealLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                CupertinoIcons.sparkles,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: AppSizes.sm),
+            Text(
+              'AI Insights',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(width: AppSizes.xs + 2),
+            // Beta chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.brandTeal.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+              child: Text(
+                'Beta',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.brandTeal,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (_tabController.index == 0)
             PopupMenuButton<String>(
@@ -158,19 +226,14 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
           labelColor: AppColors.brandTeal,
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.brandTeal,
+          indicatorWeight: 2.5,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          unselectedLabelStyle:
+              const TextStyle(fontWeight: FontWeight.w400, fontSize: 12),
           tabs: const [
-            Tab(
-              icon: Icon(CupertinoIcons.chat_bubble_text, size: 20),
-              text: 'Chat',
-            ),
-            Tab(
-              icon: Icon(CupertinoIcons.chart_bar_alt_fill, size: 20),
-              text: 'Insights',
-            ),
-            Tab(
-              icon: Icon(CupertinoIcons.graph_circle, size: 20),
-              text: 'Forecast',
-            ),
+            Tab(icon: Icon(CupertinoIcons.chat_bubble_text, size: 20), text: 'Chat'),
+            Tab(icon: Icon(CupertinoIcons.chart_bar_alt_fill, size: 20), text: 'Insights'),
+            Tab(icon: Icon(CupertinoIcons.graph_circle, size: 20), text: 'Forecast'),
           ],
         ),
       ),
@@ -185,6 +248,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     );
   }
 
+  // ── Chat tab ───────────────────────────────────────────────────────────────
+
   Widget _buildChatTab() {
     final chatMessagesAsync = ref.watch(chatProvider);
     final List<String> suggestedPrompts =
@@ -193,25 +258,16 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
 
     return chatMessagesAsync.when(
       data: (messages) {
-        final isStreaming =
-            _isSendingCheck || messages.any((m) => m.status == MessageStatus.streaming);
-
-        // Auto-scroll when a streaming message grows
+        final isStreaming = _isSendingCheck ||
+            messages.any((m) => m.status == MessageStatus.streaming);
         if (isStreaming) _scrollToBottom();
 
         return Column(
           children: [
-            // Query limit banner — only visible ≥7/10 queries, chat tab only
             const QueryLimitBanner(),
             Expanded(
               child: messages.isEmpty
-                  ? EmptyStateCard(
-                      icon: CupertinoIcons.chat_bubble,
-                      title: 'Start a Conversation',
-                      message:
-                          'Ask me anything about your finances! I can help you understand your spending patterns, track budgets, and make smarter financial decisions.',
-                      backgroundColor: AppColors.brandTeal,
-                    )
+                  ? _buildChatWelcome()
                   : ListView.builder(
                       controller: _chatScrollController,
                       padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
@@ -223,9 +279,9 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                       ),
                     ),
             ),
-            // Persistent quick prompts always visible above the input
             Padding(
-              padding: const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
+              padding:
+                  const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
               child: SuggestedPrompts(
                 prompts: suggestedPrompts,
                 onPromptTap: _handleSendMessage,
@@ -247,6 +303,112 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     );
   }
 
+  Widget _buildChatWelcome() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: AppSizes.xl,
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: AppSizes.xl),
+          // AI identity orb
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.brandTeal, AppColors.tealLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.brandTeal.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Icon(
+              CupertinoIcons.sparkles,
+              size: 32,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: AppSizes.md),
+          Text(
+            'Fin',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppSizes.xs),
+          Text(
+            'Your AI financial assistant',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          const SizedBox(height: AppSizes.xl),
+          // 2×2 quick-action grid
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: AppSizes.sm,
+            mainAxisSpacing: AppSizes.sm,
+            childAspectRatio: 1.6,
+            children: _quickActions.map((action) {
+              return GestureDetector(
+                onTap: () => _handleSendMessage(action.prompt),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                    boxShadow: AppColors.cardShadow(isDark),
+                  ),
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: action.color.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(action.icon, size: 18, color: action.color),
+                      ),
+                      Text(
+                        action.label,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: AppSizes.xl),
+        ],
+      ),
+    );
+  }
+
+  // ── Forecast tab ───────────────────────────────────────────────────────────
+
   Widget _buildForecastTab() {
     final activeForecastAsync = ref.watch(activeForecastProvider);
     final selectedScenario = ref.watch(selectedForecastScenarioProvider);
@@ -267,7 +429,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Scenario selector — segmented-control style
+            // Scenario selector with icons
             Row(
               children: ForecastScenarioType.values.map((type) {
                 final isSelected = selectedScenario == type;
@@ -287,11 +449,11 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                           .state = type,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSizes.sm + 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.brandTeal
-                              : cardColor,
+                          color: isSelected ? AppColors.brandTeal : cardColor,
                           borderRadius:
                               BorderRadius.circular(AppSizes.radiusMd),
                           border: isSelected
@@ -303,17 +465,30 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                                 ),
                         ),
                         alignment: Alignment.center,
-                        child: Text(
-                          type.label,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
-                              ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _scenarioIcon(type),
+                              size: 18,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textSecondary,
+                            ),
+                            const SizedBox(height: AppSizes.xs),
+                            Text(
+                              type.label,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.textSecondary,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -325,14 +500,11 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
             activeForecastAsync.when(
               data: (forecast) {
                 final balance = forecast.currentBalance;
-
-                // Worst-case projected balance over 30 days — drives card color
                 final minProjected = forecast.dailyForecasts.isEmpty
                     ? balance
                     : forecast.dailyForecasts
                         .map((d) => d.projectedBalance)
                         .reduce((a, b) => a < b ? a : b);
-
                 final projected30 = forecast.dailyForecasts.isNotEmpty
                     ? forecast.dailyForecasts.last.projectedBalance
                     : balance;
@@ -343,12 +515,10 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                 final String oneLiner;
 
                 if (minProjected > 500) {
-                  gradient = [
-                    AppColors.systemGreen,
-                    const Color(0xFF27AE60),
-                  ];
+                  gradient = [AppColors.systemGreen, const Color(0xFF27AE60)];
                   shadowBase = AppColors.systemGreen;
-                  oneLiner = 'Your balance stays healthy throughout the next 30 days.';
+                  oneLiner =
+                      'Your balance stays healthy throughout the next 30 days.';
                 } else if (minProjected > 100) {
                   gradient = [
                     AppColors.systemOrange,
@@ -362,10 +532,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                       ? 'Balance may drop critically low on $criticalDays day${criticalDays == 1 ? '' : 's'} this month.'
                       : 'Balance will get tight — projected low of ${currencyFormat.format(minProjected)}.';
                 } else {
-                  gradient = [
-                    AppColors.systemRed,
-                    const Color(0xFFC0392B),
-                  ];
+                  gradient = [AppColors.systemRed, const Color(0xFFC0392B)];
                   shadowBase = AppColors.systemRed;
                   oneLiner = forecast.warnings.isNotEmpty
                       ? forecast.warnings.first
@@ -375,7 +542,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Hero card
+                    // Hero card with trend indicator
                     GradientHeroCard(
                       gradientColors: gradient,
                       shadowColor: shadowBase.withValues(alpha: 0.35),
@@ -402,6 +569,34 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
+                          if (balance != 0) ...[
+                            const SizedBox(height: AppSizes.xs),
+                            Row(
+                              children: [
+                                Icon(
+                                  projected30 >= balance
+                                      ? CupertinoIcons.arrow_up_right
+                                      : CupertinoIcons.arrow_down_right,
+                                  size: 14,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  projected30 >= balance
+                                      ? '+${((projected30 - balance) / balance * 100).abs().toStringAsFixed(1)}% in 30 days'
+                                      : '−${((balance - projected30) / balance * 100).abs().toStringAsFixed(1)}% in 30 days',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.9),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: AppSizes.md),
                           Row(
                             children: [
@@ -422,22 +617,26 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                       ),
                     ),
                     const SizedBox(height: AppSizes.sm),
-                    // One-liner interpretation
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppSizes.xs),
                       child: Text(
                         oneLiner,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: AppColors.textSecondary),
                       ),
                     ),
                     const SizedBox(height: AppSizes.md),
                     BalanceTimelineChart(forecast: forecast),
                     const SizedBox(height: AppSizes.md),
+                    AiObservationsCard(forecast: forecast),
+                    const SizedBox(height: AppSizes.md),
                     _buildForecastDetails(
-                        forecast.dailyForecasts.take(7).toList(), cardColor),
+                      forecast.dailyForecasts.take(7).toList(),
+                      cardColor,
+                    ),
                   ],
                 );
               },
@@ -458,6 +657,17 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
         ),
       ),
     );
+  }
+
+  IconData _scenarioIcon(ForecastScenarioType type) {
+    switch (type) {
+      case ForecastScenarioType.baseline:
+        return CupertinoIcons.chart_bar_alt_fill;
+      case ForecastScenarioType.optimistic:
+        return CupertinoIcons.arrow_up_right_circle;
+      case ForecastScenarioType.conservative:
+        return CupertinoIcons.shield;
+    }
   }
 
   Widget _buildForecastDetails(List<DailyForecast> forecast, Color cardColor) {
@@ -513,26 +723,55 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   Divider(height: 1, thickness: 0.5, color: dividerColor),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.md, vertical: AppSizes.sm),
+                    horizontal: AppSizes.md,
+                    vertical: AppSizes.sm,
+                  ),
                   child: Row(
                     children: [
-                      // Date + scheduled transactions
+                      // Day circle badge
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _shortWeekday(day.date),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 9,
+                                  ),
+                            ),
+                            Text(
+                              '${day.date.day}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 10,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.sm),
+                      // Scheduled transactions
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              _formatDate(day.date),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textSecondary,
-                                  ),
-                            ),
-                            if (day.scheduledTransactions.isNotEmpty) ...[
-                              const SizedBox(height: 2),
+                            if (day.scheduledTransactions.isNotEmpty)
                               ...day.scheduledTransactions.map(
                                 (tx) => Padding(
                                   padding: const EdgeInsets.only(top: 1),
@@ -545,8 +784,15 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                                             color: AppColors.textSecondary),
                                   ),
                                 ),
+                              )
+                            else
+                              Text(
+                                'No scheduled payments',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: AppColors.textTertiary),
                               ),
-                            ],
                           ],
                         ),
                       ),
@@ -568,7 +814,9 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                           const SizedBox(height: 3),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.sm, vertical: 2),
+                              horizontal: AppSizes.sm,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor.withValues(alpha: 0.1),
                               borderRadius:
@@ -598,19 +846,15 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _shortWeekday(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
     final dateOnly = DateTime(date.year, date.month, date.day);
-
     if (dateOnly == today) return 'Today';
-    if (dateOnly == tomorrow) return 'Tomorrow';
-
-    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+    if (dateOnly == tomorrow) return 'Tmrw';
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[date.weekday - 1];
   }
 
   void _showClearChatDialog() {
@@ -618,7 +862,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Chat History'),
-        content: const Text('Are you sure you want to clear all chat messages?'),
+        content:
+            const Text('Are you sure you want to clear all chat messages?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -681,16 +926,13 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                 children: [
                   Text(
                     'Upgrade to Premium for:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(CupertinoIcons.checkmark_circle_fill,
-                        color: AppColors.success, size: 16),
+                          color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Unlimited AI queries'),
                     ],
@@ -699,7 +941,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   Row(
                     children: [
                       Icon(CupertinoIcons.checkmark_circle_fill,
-                        color: AppColors.success, size: 16),
+                          color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Advanced insights & forecasting'),
                     ],
@@ -708,7 +950,7 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   Row(
                     children: [
                       Icon(CupertinoIcons.checkmark_circle_fill,
-                        color: AppColors.success, size: 16),
+                          color: AppColors.success, size: 16),
                       SizedBox(width: 8),
                       Text('Receipt scanning & more'),
                     ],
@@ -726,11 +968,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO Sprint 2: call RevenueCat purchase flow here
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.brandTeal,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.brandTeal),
             child: const Text('Upgrade to Premium'),
           ),
         ],

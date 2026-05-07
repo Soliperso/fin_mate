@@ -11,6 +11,8 @@ import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/section_header.dart';
+import '../../../../shared/widgets/gradient_hero_card.dart';
+import '../../../../shared/widgets/hero_stat_badge.dart';
 import '../providers/insights_providers.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
@@ -24,6 +26,15 @@ class InsightsTab extends ConsumerStatefulWidget {
 }
 
 class _InsightsTabState extends ConsumerState<InsightsTab> {
+  // Index-based color palette for category breakdown
+  static const _categoryPalette = [
+    AppColors.systemBlue,
+    AppColors.systemPurple,
+    AppColors.systemOrange,
+    AppColors.systemGreen,
+    AppColors.systemIndigo,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final categoryBreakdownAsync = ref.watch(defaultCategoryBreakdownProvider);
@@ -72,15 +83,77 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
             const SectionHeader(title: 'Spending by Category'),
             const SizedBox(height: AppSizes.sm),
             categoryBreakdownAsync.when(
-              data: (categories) => categories.isEmpty
-                  ? EmptyStateCard(
-                      icon: CupertinoIcons.chart_pie_fill,
-                      title: 'No Spending Data',
-                      message: 'Add some expenses to see your category breakdown.',
-                      backgroundColor: AppColors.primaryTeal,
-                    )
-                  : _buildCategoryCard(categories, cardColor),
-              loading: () => const SkeletonCard(height: 160),
+              data: (categories) {
+                if (categories.isEmpty) {
+                  return EmptyStateCard(
+                    icon: CupertinoIcons.chart_pie_fill,
+                    title: 'No Spending Data',
+                    message:
+                        'Add some expenses to see your category breakdown.',
+                    backgroundColor: AppColors.primaryTeal,
+                  );
+                }
+                final currencyFormat = ref.watch(currencyFormat2Provider);
+                final total = categories.fold(
+                  0.0,
+                  (sum, c) => sum + (c['total_amount'] as double),
+                );
+                return Column(
+                  children: [
+                    // Summary hero card
+                    GradientHeroCard(
+                      gradientColors: [
+                        AppColors.brandTeal,
+                        AppColors.tealLight,
+                      ],
+                      shadowColor: AppColors.brandTeal.withValues(alpha: 0.3),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'This Month',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                          ),
+                          const SizedBox(height: AppSizes.xs),
+                          Text(
+                            currencyFormat.format(total),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displaySmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: AppSizes.md),
+                          Row(
+                            children: [
+                              HeroStatBadge(
+                                label: 'Categories',
+                                value: '${categories.length}',
+                              ),
+                              const SizedBox(width: AppSizes.sm),
+                              HeroStatBadge(
+                                label: 'Largest',
+                                value: categories.first['category_name']
+                                    as String,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    _buildCategoryCard(categories, cardColor, total),
+                  ],
+                );
+              },
+              loading: () => const SkeletonCard(height: 280),
               error: (_, __) => ErrorRetryWidget(
                 title: 'Failed to load categories',
                 message: 'Unable to load spending breakdown',
@@ -98,7 +171,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   ? EmptyStateCard(
                       icon: CupertinoIcons.checkmark_shield,
                       title: 'Spending on Track',
-                      message: 'No unusual spending detected. Your patterns look consistent.',
+                      message:
+                          'No unusual spending detected. Your patterns look consistent.',
                       backgroundColor: AppColors.success,
                     )
                   : Column(
@@ -128,7 +202,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   children: [
                     const SectionHeader(title: 'Price Changes'),
                     const SizedBox(height: AppSizes.sm),
-                    ...priceChanges.map((p) => _buildPriceChangeCard(p, cardColor)),
+                    ...priceChanges
+                        .map((p) => _buildPriceChangeCard(p, cardColor)),
                     const SizedBox(height: AppSizes.lg),
                   ],
                 );
@@ -157,11 +232,27 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         severity = AppColors.primaryTeal;
     }
 
+    final String severityLabel;
+    switch (alert.severity) {
+      case AlertSeverity.critical:
+        severityLabel = 'Critical';
+        break;
+      case AlertSeverity.high:
+        severityLabel = 'High';
+        break;
+      case AlertSeverity.medium:
+        severityLabel = 'Medium';
+        break;
+      default:
+        severityLabel = 'Low';
+    }
+
     return Dismissible(
       key: Key(alert.id),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) =>
-          ref.read(dismissedAlertIdsProvider.notifier).update((s) => {...s, alert.id}),
+      onDismissed: (_) => ref
+          .read(dismissedAlertIdsProvider.notifier)
+          .update((s) => {...s, alert.id}),
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSizes.md),
@@ -178,19 +269,63 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         decoration: BoxDecoration(
           color: severity.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          border: Border(left: BorderSide(color: severity, width: 4)),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: severity.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              ),
+              child: Icon(
+                _alertIcon(alert.type),
+                color: severity,
+                size: AppSizes.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    alert.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          alert.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
+                      ),
+                      const SizedBox(width: AppSizes.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: severity.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
+                        ),
+                        child: Text(
+                          severityLabel,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: severity,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: AppSizes.xs),
                   Text(
@@ -202,21 +337,35 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                 ],
               ),
             ),
-            Icon(CupertinoIcons.chevron_left,
-                color: AppColors.textSecondary, size: AppSizes.iconXs),
           ],
         ),
       ),
     );
   }
 
+  IconData _alertIcon(AlertType type) {
+    switch (type) {
+      case AlertType.cashFlowWarning:
+        return CupertinoIcons.arrow_down_right_circle;
+      case AlertType.billCollision:
+        return CupertinoIcons.calendar_badge_minus;
+      case AlertType.lowBalance:
+        return CupertinoIcons.exclamationmark_circle;
+      case AlertType.unusualSpending:
+        return CupertinoIcons.chart_bar_alt_fill;
+      default:
+        return CupertinoIcons.info_circle;
+    }
+  }
+
   // ── Category card ──────────────────────────────────────────────────────────
 
   Widget _buildCategoryCard(
-      List<Map<String, dynamic>> categories, Color cardColor) {
+    List<Map<String, dynamic>> categories,
+    Color cardColor,
+    double total,
+  ) {
     final currencyFormat = ref.watch(currencyFormat2Provider);
-    final total =
-        categories.fold(0.0, (sum, c) => sum + (c['total_amount'] as double));
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
@@ -225,13 +374,27 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       ),
       child: Column(
-        children: categories.take(5).map((category) {
+        children: categories.take(5).toList().asMap().entries.map((entry) {
+          final i = entry.key;
+          final category = entry.value;
+          final accentColor = _categoryPalette[i % _categoryPalette.length];
           final amount = category['total_amount'] as double;
           final pct = total > 0 ? amount / total : 0.0;
+
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSizes.sm),
             child: Row(
               children: [
+                // Colored rank dot
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: AppSizes.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,12 +404,16 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                         children: [
                           Text(
                             category['category_name'] as String,
-                            style: Theme.of(context).textTheme.bodySmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
                                 ?.copyWith(fontWeight: FontWeight.w500),
                           ),
                           Text(
                             '${(pct * 100).toStringAsFixed(0)}% · ${currencyFormat.format(amount)}',
-                            style: Theme.of(context).textTheme.bodySmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
                                 ?.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
@@ -254,13 +421,15 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                       const SizedBox(height: 4),
                       LinearProgressIndicator(
                         value: pct,
-                        backgroundColor: Theme.of(context).brightness == Brightness.dark
-                            ? AppColors.systemGray4.withValues(alpha: 0.15)
-                            : AppColors.systemGray4.withValues(alpha: 0.35),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryTeal.withValues(alpha: 0.65)),
-                        minHeight: 4,
-                        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.systemGray4.withValues(alpha: 0.15)
+                                : AppColors.systemGray4.withValues(alpha: 0.35),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(accentColor),
+                        minHeight: 5,
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusXs),
                       ),
                     ],
                   ),
@@ -310,8 +479,11 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   color: severity.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
-                child: Icon(CupertinoIcons.exclamationmark_triangle,
-                    color: severity, size: AppSizes.iconSm),
+                child: Icon(
+                  CupertinoIcons.exclamationmark_triangle,
+                  color: severity,
+                  size: AppSizes.iconSm,
+                ),
               ),
               const SizedBox(width: AppSizes.md),
               Expanded(
@@ -335,6 +507,26 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   ],
                 ),
               ),
+              if (anomaly.deviationPercentage != null) ...[
+                const SizedBox(width: AppSizes.xs),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.sm,
+                    vertical: AppSizes.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: severity.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                  ),
+                  child: Text(
+                    '+${anomaly.deviationPercentage!.toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: severity,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: AppSizes.sm),
@@ -347,7 +539,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   onPressed: () => context.go('/transactions'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primaryTeal,
-                    side: BorderSide(color: AppColors.primaryTeal),
+                    side: const BorderSide(color: AppColors.primaryTeal),
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -374,7 +566,9 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
   // ── Price change card ──────────────────────────────────────────────────────
 
   Widget _buildPriceChangeCard(
-      RecurringExpensePattern pattern, Color cardColor) {
+    RecurringExpensePattern pattern,
+    Color cardColor,
+  ) {
     final currencyFormat = ref.watch(currencyFormat2Provider);
 
     return Container(
@@ -392,8 +586,11 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSizes.radiusSm),
             ),
-            child: const Icon(CupertinoIcons.arrow_up_right,
-                color: AppColors.warning, size: AppSizes.iconSm),
+            child: const Icon(
+              CupertinoIcons.arrow_up_right,
+              color: AppColors.warning,
+              size: AppSizes.iconSm,
+            ),
           ),
           const SizedBox(width: AppSizes.md),
           Expanded(
@@ -434,7 +631,9 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
               side: const BorderSide(color: AppColors.warning),
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.sm, vertical: AppSizes.xs),
+                horizontal: AppSizes.sm,
+                vertical: AppSizes.xs,
+              ),
             ),
             child: const Text('Update'),
           ),
@@ -453,14 +652,17 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration:
-              const InputDecoration(labelText: 'New amount', prefixText: '\$'),
+          decoration: const InputDecoration(
+            labelText: 'New amount',
+            prefixText: '\$',
+          ),
           autofocus: true,
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () async {
               final newAmount = double.tryParse(controller.text);
@@ -477,13 +679,15 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                   }
                 } catch (e) {
                   debugPrint(
-                      '[InsightsTab] Failed to update recurring transaction: $e');
+                    '[InsightsTab] Failed to update recurring transaction: $e',
+                  );
                 }
               }
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            style:
-                FilledButton.styleFrom(backgroundColor: AppColors.brandTeal),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brandTeal,
+            ),
             child: const Text('Update'),
           ),
         ],

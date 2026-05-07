@@ -6,9 +6,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../../../../core/providers/subscription_provider.dart';
-import '../../../../shared/widgets/glass_container.dart';
 
-/// Banner showing AI query usage limit for freemium users
+/// Compact single-row strip showing AI query usage for freemium users.
 class QueryLimitBanner extends ConsumerWidget {
   const QueryLimitBanner({super.key});
 
@@ -23,9 +22,8 @@ class QueryLimitBanner extends ConsumerWidget {
 
         return queryUsageAsync.when(
           data: (usage) {
-            // Hidden below 7 queries — not worth the visual noise
             if (usage.queriesUsed < 7) return const SizedBox.shrink();
-            return _FreemiumBanner(usage: usage);
+            return _CompactStrip(usage: usage);
           },
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
@@ -37,10 +35,9 @@ class QueryLimitBanner extends ConsumerWidget {
   }
 }
 
-class _FreemiumBanner extends ConsumerWidget {
+class _CompactStrip extends ConsumerWidget {
   final AIQueryUsage usage;
-
-  const _FreemiumBanner({required this.usage});
+  const _CompactStrip({required this.usage});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,123 +45,75 @@ class _FreemiumBanner extends ConsumerWidget {
     final daysUntilReset = operations.getDaysUntilReset();
     final hasReachedLimit = usage.hasReachedLimit;
 
-    return GlassContainer(
-      padding: const EdgeInsets.all(AppSizes.lg),
-      enableGlass: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final accentColor = hasReachedLimit ? AppColors.error : AppColors.brandTeal;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSizes.md, AppSizes.xs, AppSizes.md, 0,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: AppSizes.sm + 2,
+      ),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        border: Border.all(
+          color: accentColor.withValues(alpha: hasReachedLimit ? 0.25 : 0.2),
+        ),
+      ),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: hasReachedLimit
-                      ? AppColors.error.withValues(alpha: 0.1)
-                      : AppColors.primaryTeal.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  hasReachedLimit
-                      ? CupertinoIcons.nosign
-                      : CupertinoIcons.chat_bubble,
+          Icon(
+            hasReachedLimit ? CupertinoIcons.nosign : CupertinoIcons.sparkles,
+            size: 16,
+            color: accentColor,
+          ),
+          const SizedBox(width: AppSizes.sm),
+          Text(
+            '${usage.queriesUsed}/10 queries',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                   color: hasReachedLimit
                       ? AppColors.error
-                      : AppColors.primaryTeal,
-                  size: 20,
+                      : AppColors.textPrimary,
                 ),
-              ),
-              const SizedBox(width: AppSizes.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hasReachedLimit
-                          ? 'Query Limit Reached'
-                          : 'AI Queries',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${usage.queriesUsed} of 10 used this month • Resets in $daysUntilReset days',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (hasReachedLimit)
-                TextButton(
-                  onPressed: () => context.push('/pricing'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primaryTeal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  child: const Text(
-                    'Upgrade',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-            ],
           ),
-          const SizedBox(height: AppSizes.md),
-          // Progress bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: usage.usagePercentage,
-              backgroundColor: AppColors.lightGray,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                hasReachedLimit ? AppColors.error : AppColors.primaryTeal,
+          const SizedBox(width: AppSizes.sm),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              child: LinearProgressIndicator(
+                value: usage.usagePercentage,
+                minHeight: 4,
+                backgroundColor: AppColors.systemGray5,
+                valueColor: AlwaysStoppedAnimation<Color>(accentColor),
               ),
-              minHeight: 6,
             ),
           ),
-          if (hasReachedLimit) ...[
-            const SizedBox(height: AppSizes.md),
-            Container(
-              padding: const EdgeInsets.all(AppSizes.md),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.error.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.info_circle,
-                    color: AppColors.error,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Upgrade to Premium for unlimited AI queries',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.error,
-                      ),
+          const SizedBox(width: AppSizes.sm),
+          if (hasReachedLimit)
+            GestureDetector(
+              onTap: () => context.push('/pricing'),
+              child: Text(
+                'Upgrade',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.brandTeal,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.brandTeal,
                     ),
-                  ),
-                ],
               ),
+            )
+          else
+            Text(
+              'Resets in ${daysUntilReset}d',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
             ),
-          ],
         ],
       ),
     );
   }
 }
-
-

@@ -9,7 +9,7 @@ final themeServiceProvider = Provider<ThemeService>((ref) {
 
 /// Holds the theme mode read from SharedPreferences before runApp().
 /// Overridden in main.dart so the correct theme is applied on frame one.
-final initialThemeModeProvider = Provider<ThemeMode>((_) => ThemeMode.dark);
+final initialThemeModeProvider = Provider<ThemeMode>((_) => ThemeMode.system);
 
 /// Riverpod notifier for theme mode state management
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {

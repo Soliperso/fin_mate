@@ -23,7 +23,7 @@ final userSettingsProvider = FutureProvider<SettingsEntity?>((ref) async {
   final authState = ref.watch(authNotifierProvider);
   final user = authState.user;
 
-  if (user == null) {
+  if (user == null || user.id.trim().isEmpty) {
     return null;
   }
 

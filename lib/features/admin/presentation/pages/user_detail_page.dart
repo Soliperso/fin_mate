@@ -63,14 +63,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             },
           ),
           ListTile(
-            leading: _quickActionIcon(CupertinoIcons.shield_fill, AppColors.brandTeal),
-            title: const Text('Change Role', style: TextStyle(fontWeight: FontWeight.w500)),
-            onTap: () {
-              Navigator.pop(ctx);
-              _handleRoleChange(context, ref, user);
-            },
-          ),
-          ListTile(
             leading: _quickActionIcon(
               user.isActive ? CupertinoIcons.xmark_circle_fill : CupertinoIcons.checkmark_circle_fill,
               user.isActive ? AppColors.systemRed : AppColors.systemGreen,
@@ -281,6 +273,25 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                         ),
                       ),
                     ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: GestureDetector(
+                        onTap: () => _showQuickActions(context, ref, user),
+                        child: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.ellipsis,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 62), // avatar radius 48 + 14 gap
@@ -322,17 +333,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                             : AppColors.systemGray3,
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Hold avatar for quick actions',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark
-                        ? AppColors.tertiaryLabelDark
-                        : AppColors.systemGray3,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -422,7 +422,11 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: -1.0,
-                        color: AppColors.brandTeal,
+                        color: user.netWorth < 0
+                            ? AppColors.systemRed
+                            : user.netWorth > 0
+                                ? AppColors.systemGreen
+                                : AppColors.brandTeal,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -463,6 +467,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               ),
             ],
           ),
+          const SizedBox(height: 9),
+          _buildCashFlowCard(context, isDark, user),
           const SizedBox(height: 24),
 
           // ── Account Details ──────────────────────────────────────────────
@@ -491,13 +497,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     value:
                         DateFormat('MMM d, yyyy').format(user.createdAt)),
                 _divider(context),
-                _infoRowTappable(context, isDark,
-                    icon: CupertinoIcons.person_badge_plus,
-                    iconColor: AppColors.brandTeal,
-                    label: 'Role',
-                    value: user.role.toUpperCase(),
-                    onTap: () => _handleRoleChange(context, ref, user)),
-                _divider(context),
+
                 _infoRow(context, isDark,
                     icon: CupertinoIcons.doc_text,
                     iconColor: AppColors.brandTeal,
@@ -509,6 +509,12 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     iconColor: AppColors.brandTeal,
                     label: 'Last Active',
                     value: _formatLastActive(user.lastActive)),
+                _divider(context),
+                _infoRow(context, isDark,
+                    icon: CupertinoIcons.hourglass,
+                    iconColor: AppColors.tealBlue,
+                    label: 'Member For',
+                    value: _formatMemberDuration(user.createdAt)),
               ],
             ),
           ),
@@ -535,7 +541,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   iconColor: AppColors.brandTeal,
                   label: 'Avg Monthly Spend',
                   value: NumberFormat.compactCurrency(symbol: '\$')
-                      .format(user.totalExpense / 12),
+                      .format(user.totalExpense / _monthsSince(user.createdAt)),
                 ),
               ),
               const SizedBox(width: 9),
@@ -583,8 +589,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           const SizedBox(height: 24),
 
           // ── Danger Zone ──────────────────────────────────────────────────
-          _buildDangerZone(context, isDark, user, ref),
-          const SizedBox(height: 24),
+          if (!user.isAdmin) ...[
+            _buildDangerZone(context, isDark, user, ref),
+            const SizedBox(height: 24),
+          ],
         ],
       ),
     );
@@ -680,6 +688,69 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCashFlowCard(
+      BuildContext context, bool isDark, AdminUserEntity user) {
+    final cashFlow = user.totalIncome - user.totalExpense;
+    final isPositive = cashFlow >= 0;
+    final color = isPositive ? AppColors.systemGreen : AppColors.systemRed;
+    final fmt = NumberFormat.compactCurrency(symbol: '\$');
+    final cardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(
+              isPositive
+                  ? CupertinoIcons.arrow_up_right
+                  : CupertinoIcons.arrow_down_right,
+              color: color,
+              size: 17,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Net Cash Flow',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isDark
+                        ? AppColors.secondaryLabelDark
+                        : AppColors.secondaryLabel,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+            ),
+          ),
+          Text(
+            '${isPositive ? '+' : ''}${fmt.format(cashFlow)}',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                  letterSpacing: -0.3,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -868,6 +939,26 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     return DateFormat('MMM d, yyyy').format(local);
   }
 
+  static String _formatMemberDuration(DateTime createdAt) {
+    final now = DateTime.now();
+    final months =
+        (now.year - createdAt.year) * 12 + (now.month - createdAt.month);
+    if (months < 1) return 'Less than a month';
+    if (months == 1) return '1 month';
+    if (months < 12) return '$months months';
+    final years = months ~/ 12;
+    final rem = months % 12;
+    if (rem == 0) return years == 1 ? '1 year' : '$years years';
+    return '${years}y ${rem}mo';
+  }
+
+  static double _monthsSince(DateTime date) {
+    final now = DateTime.now();
+    final months =
+        (now.year - date.year) * 12 + (now.month - date.month);
+    return months < 1 ? 1.0 : months.toDouble();
+  }
+
   static String _formatAction(String raw) {
     return raw
         .replaceAll('_', ' ')
@@ -1004,71 +1095,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     );
   }
 
-  Widget _buildDangerZone(BuildContext context, bool isDark,
-      AdminUserEntity user, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.systemRed.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: Border.all(
-          color: AppColors.systemRed.withValues(alpha: 0.40),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                CupertinoIcons.exclamationmark_triangle_fill,
-                color: AppColors.systemRed,
-                size: 20,
-              ),
-              const SizedBox(width: 7),
-              Text(
-                'Danger Zone',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.systemRed,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'These actions are irreversible. Proceed with caution.',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.systemRed.withValues(alpha: 0.75),
-                  fontSize: 12,
-                ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: user.isActive
-                ? _prominentActionButton(
-                    context,
-                    icon: CupertinoIcons.xmark_circle,
-                    label: 'Disable Account',
-                    color: AppColors.systemRed,
-                    onTap: () => _handleDisableAccount(context, ref, user),
-                  )
-                : _prominentActionButton(
-                    context,
-                    icon: CupertinoIcons.checkmark_circle,
-                    label: 'Enable Account',
-                    color: AppColors.systemGreen,
-                    onTap: () => _handleEnableAccount(context, ref, user),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ── Shared sub-widgets ───────────────────────────────────────────────────
 
   Widget _buildSectionHeader(BuildContext context, String title,
@@ -1159,6 +1185,71 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildDangerZone(BuildContext context, bool isDark,
+      AdminUserEntity user, WidgetRef ref) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.systemRed.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        border: Border.all(
+          color: AppColors.systemRed.withValues(alpha: 0.40),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                CupertinoIcons.exclamationmark_triangle_fill,
+                color: AppColors.systemRed,
+                size: 20,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.systemRed,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'These actions are irreversible. Proceed with caution.',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.systemRed.withValues(alpha: 0.75),
+                  fontSize: 12,
+                ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: user.isActive
+                ? _prominentActionButton(
+                    context,
+                    icon: CupertinoIcons.xmark_circle,
+                    label: 'Disable Account',
+                    color: AppColors.systemRed,
+                    onTap: () => _handleDisableAccount(context, ref, user),
+                  )
+                : _prominentActionButton(
+                    context,
+                    icon: CupertinoIcons.checkmark_circle,
+                    label: 'Enable Account',
+                    color: AppColors.systemGreen,
+                    onTap: () => _handleEnableAccount(context, ref, user),
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -1513,87 +1604,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     }
   }
 
-  Future<void> _handleRoleChange(
-      BuildContext context, WidgetRef ref, AdminUserEntity user) async {
-    final currentRole = user.role.toLowerCase();
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-      ),
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Select Role',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w800),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(CupertinoIcons.person,
-                color: AppColors.brandTeal),
-            title: const Text('User'),
-            trailing: currentRole == 'user'
-                ? const Icon(CupertinoIcons.checkmark,
-                    color: AppColors.systemGreen)
-                : null,
-            onTap: () => _updateRole(context, ref, user, 'user'),
-          ),
-          ListTile(
-            leading:
-                const Icon(CupertinoIcons.shield, color: AppColors.brandTeal),
-            title: const Text('Admin'),
-            trailing: currentRole == 'admin'
-                ? const Icon(CupertinoIcons.checkmark,
-                    color: AppColors.systemGreen)
-                : null,
-            onTap: () => _updateRole(context, ref, user, 'admin'),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _updateRole(BuildContext context, WidgetRef ref,
-      AdminUserEntity user, String newRole) async {
-    Navigator.pop(context);
-    if (user.role.toLowerCase() == newRole.toLowerCase()) return;
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Updating role…'), duration: Duration(seconds: 1)),
-    );
-    try {
-      await ref
-          .read(updateUserRoleProvider((userId: user.id, role: newRole)).future);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              '${user.displayName}\'s role changed to ${newRole.toUpperCase()}'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-      // ignore: unused_result
-      ref.refresh(userDetailsProvider(user.id));
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
   // ── Reusable row/card widgets ────────────────────────────────────────────
 
   Widget _badge(BuildContext context,
@@ -1665,57 +1675,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _infoRowTappable(BuildContext context, bool isDark,
-      {required IconData icon,
-      required Color iconColor,
-      required String label,
-      required String value,
-      required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Icon(icon, color: iconColor, size: 17),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? AppColors.secondaryLabelDark
-                          : AppColors.secondaryLabel,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-              ),
-            ),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? AppColors.labelDark : AppColors.label,
-                    letterSpacing: -0.3,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(CupertinoIcons.pencil,
-                size: 13, color: AppColors.brandTeal),
-          ],
-        ),
       ),
     );
   }
@@ -2031,7 +1990,7 @@ class _ActivityDayGroupState extends State<_ActivityDayGroup> {
   @override
   void initState() {
     super.initState();
-    _expanded = widget.isFirst;
+    _expanded = false;
   }
 
   @override

@@ -11,7 +11,7 @@ class SettingsRemoteDataSource {
 
   /// Get user settings
   Future<SettingsModel?> getSettings(String userId) async {
-    if (userId.isEmpty) return null;
+    if (userId.trim().isEmpty) return null;
     try {
       final response = await _supabase
           .from('user_profiles')
@@ -27,7 +27,7 @@ class SettingsRemoteDataSource {
 
   /// Update theme mode
   Future<SettingsModel> updateThemeMode(String userId, String themeMode) async {
-    if (userId.isEmpty) throw Exception('User not authenticated');
+    if (userId.trim().isEmpty) throw Exception('User not authenticated');
     try {
       final response = await _supabase
           .from('user_profiles')
@@ -44,7 +44,7 @@ class SettingsRemoteDataSource {
 
   /// Update language
   Future<SettingsModel> updateLanguage(String userId, String language) async {
-    if (userId.isEmpty) throw Exception('User not authenticated');
+    if (userId.trim().isEmpty) throw Exception('User not authenticated');
     try {
       final response = await _supabase
           .from('user_profiles')
@@ -64,7 +64,7 @@ class SettingsRemoteDataSource {
     String userId,
     NotificationPreferencesModel preferences,
   ) async {
-    if (userId.isEmpty) throw Exception('User not authenticated');
+    if (userId.trim().isEmpty) throw Exception('User not authenticated');
     try {
       final response = await _supabase
           .from('user_profiles')
@@ -81,7 +81,7 @@ class SettingsRemoteDataSource {
 
   /// Delete user account and all associated data
   Future<void> deleteAccount(String userId) async {
-    if (userId.isEmpty) throw Exception('User not authenticated');
+    if (userId.trim().isEmpty) throw Exception('User not authenticated');
     try {
       // Delete all user data cascading from user_profiles
       // Due to RLS, deletion is restricted to the user's own profile
