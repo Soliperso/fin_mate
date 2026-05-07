@@ -121,7 +121,10 @@ class AuthRemoteDataSource {
 
   /// Reset password
   Future<void> resetPassword(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'io.supabase.finmate://reset-callback/',
+    );
   }
 
   /// Update user profile

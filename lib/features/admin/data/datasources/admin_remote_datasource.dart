@@ -94,9 +94,17 @@ class AdminRemoteDataSource {
   /// Send password reset email to user
   Future<void> resetUserPassword(String email) async {
     try {
-      await _supabase.auth.resetPasswordForEmail(email);
+      await _supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'io.supabase.finmate://reset-callback/',
+      );
     } catch (e) {
-      throw Exception('Failed to send password reset email: $e');
+      final msg = e.toString();
+      if (msg.contains('rate_limit') || msg.contains('429')) {
+        throw Exception(
+            'Too many reset emails sent. Please wait a few minutes and try again.');
+      }
+      throw Exception('Failed to send password reset email. Please try again.');
     }
   }
 

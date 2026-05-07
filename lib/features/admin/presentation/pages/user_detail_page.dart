@@ -1339,7 +1339,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString()}'),
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
           backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),

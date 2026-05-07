@@ -14,6 +14,7 @@ import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/verify_email_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/auth_callback_page.dart';
+import '../../features/auth/presentation/pages/set_new_password_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
@@ -123,8 +124,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/verify-email') ||
           state.matchedLocation.startsWith('/forgot-password') ||
           state.matchedLocation.startsWith('/auth/callback') ||
+          state.matchedLocation.startsWith('/set-new-password') ||
           state.matchedLocation == '/';
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
+
+      // Password recovery takes priority — always redirect to set-new-password.
+      if (authState.isPasswordRecovery &&
+          state.matchedLocation != '/set-new-password') {
+        return '/set-new-password';
+      }
 
       // If not authenticated and trying to access protected route
       if (!isAuthenticated && !isAuthRoute) {
@@ -217,6 +225,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/callback',
         name: 'auth-callback',
         builder: (context, state) => const AuthCallbackPage(),
+      ),
+      GoRoute(
+        path: '/set-new-password',
+        name: 'set-new-password',
+        builder: (context, state) => const SetNewPasswordPage(),
       ),
 
       // Main App Shell with Bottom Navigation

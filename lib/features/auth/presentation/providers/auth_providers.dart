@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent; // [Biometric]
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-// import '../../../../core/config/supabase_client.dart'; // [Biometric]
+import '../../../../core/config/supabase_client.dart';
 import '../../../../core/config/env_config.dart';
 import '../../../../core/services/sentry_service.dart';
 import '../../../../core/services/secure_storage_provider.dart';
@@ -63,11 +63,13 @@ class AuthState {
   final UserEntity? user;
   final bool isLoading;
   final String? errorMessage;
+  final bool isPasswordRecovery;
 
   AuthState({
     this.user,
     this.isLoading = false,
     this.errorMessage,
+    this.isPasswordRecovery = false,
   });
 
   AuthState copyWith({
@@ -75,11 +77,13 @@ class AuthState {
     bool? isLoading,
     String? errorMessage,
     bool clearError = false,
+    bool? isPasswordRecovery,
   }) {
     return AuthState(
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      isPasswordRecovery: isPasswordRecovery ?? this.isPasswordRecovery,
     );
   }
 }
@@ -88,6 +92,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   final Ref _ref;
   StreamSubscription<UserEntity?>? _authSubscription;
+  StreamSubscription? _recoverySubscription;
   // StreamSubscription? _tokenSyncSubscription; // [Biometric]
 
   AuthNotifier(this._repository, this._ref) : super(AuthState()) {
@@ -120,6 +125,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
     });
 
+    // Listen for PASSWORD_RECOVERY events so the router can redirect to
+    // the set-new-password page when the user opens a reset email link.
+    _recoverySubscription = supabase.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.passwordRecovery) {
+        state = state.copyWith(isPasswordRecovery: true);
+      }
+    });
+
     // [Biometric: commented out — token sync subscription for refresh token rotation]
     // final storage = _ref.read(secureStorageServiceProvider);
     // _tokenSyncSubscription = supabase.auth.onAuthStateChange.listen((event) {
@@ -136,8 +149,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _recoverySubscription?.cancel();
     // _tokenSyncSubscription?.cancel(); // [Biometric]
     super.dispose();
+  }
+
+  void clearPasswordRecovery() {
+    state = state.copyWith(isPasswordRecovery: false);
   }
 
   Future<void> _setUserContext(UserEntity user) async {
