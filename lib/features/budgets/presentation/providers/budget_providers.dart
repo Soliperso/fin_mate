@@ -26,8 +26,9 @@ final budgetsWithSpendingProvider = FutureProvider<List<BudgetEntity>>((ref) asy
 class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   final BudgetRepository _repository;
   final AnalyticsService _analytics;
+  final Ref _ref;
 
-  BudgetNotifier(this._repository, this._analytics) : super(const AsyncValue.loading()) {
+  BudgetNotifier(this._repository, this._analytics, this._ref) : super(const AsyncValue.loading()) {
     loadBudgets();
   }
 
@@ -37,6 +38,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
     try {
       final budgets = await _repository.getBudgetsWithSpending();
       state = AsyncValue.data(budgets);
+      _ref.invalidate(budgetsWithSpendingProvider);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -56,7 +58,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
         amount: created.amount,
         category: created.categoryName,
       ));
-      await loadBudgets(); // Reload all budgets
+      await loadBudgets();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
       rethrow;
@@ -68,7 +70,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
     try {
       await _repository.updateBudget(id, budget);
       unawaited(_analytics.trackBudgetUpdated(budgetId: id));
-      await loadBudgets(); // Reload all budgets
+      await loadBudgets();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
       rethrow;
@@ -80,7 +82,7 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
     try {
       await _repository.deleteBudget(id);
       unawaited(_analytics.trackBudgetDeleted(budgetId: id));
-      await loadBudgets(); // Reload all budgets
+      await loadBudgets();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
       rethrow;
@@ -92,5 +94,5 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
 final budgetNotifierProvider = StateNotifierProvider<BudgetNotifier, AsyncValue<List<BudgetEntity>>>((ref) {
   final repository = ref.watch(budgetRepositoryProvider);
   final analytics = ref.watch(analyticsServiceProvider);
-  return BudgetNotifier(repository, analytics);
+  return BudgetNotifier(repository, analytics, ref);
 });

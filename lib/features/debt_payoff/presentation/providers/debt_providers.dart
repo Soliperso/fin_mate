@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/global_error_handler.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -42,7 +43,24 @@ final debtSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 
 final selectedStrategyProvider = StateProvider<DebtStrategy>((ref) => DebtStrategy.avalanche);
 
-final extraPaymentProvider = StateProvider<double>((ref) => 0.0);
+class ExtraPaymentNotifier extends StateNotifier<double> {
+  static const _key = 'extra_payment_slider';
+
+  ExtraPaymentNotifier() : super(0.0) {
+    SharedPreferences.getInstance().then((prefs) {
+      if (mounted) state = prefs.getDouble(_key) ?? 0.0;
+    });
+  }
+
+  void setValue(double value) {
+    state = value;
+    SharedPreferences.getInstance().then((prefs) => prefs.setDouble(_key, value));
+  }
+}
+
+final extraPaymentProvider = StateNotifierProvider<ExtraPaymentNotifier, double>(
+  (ref) => ExtraPaymentNotifier(),
+);
 
 // ── Payoff calculation providers ────────────────────────────────────────────
 

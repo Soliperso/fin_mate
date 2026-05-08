@@ -49,9 +49,11 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     state = const AsyncValue.loading();
     try {
       final settings = await _repository.getSettings(_userId);
+      if (!mounted) return;
       state = AsyncValue.data(settings);
     } catch (e, stack) {
       GlobalErrorHandler.handleError(e, stack, context: 'settings.initialize');
+      if (!mounted) return;
       state = const AsyncValue.data(null);
     }
   }
@@ -61,9 +63,11 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     final previous = state;
     try {
       final settings = await _repository.updateThemeMode(_userId, themeMode);
+      if (!mounted) return;
       state = AsyncValue.data(settings);
     } catch (e, stack) {
       GlobalErrorHandler.handleError(e, stack, context: 'settings.updateThemeMode');
+      if (!mounted) return;
       state = previous;
     }
   }
@@ -73,9 +77,11 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     final previous = state;
     try {
       final settings = await _repository.updateLanguage(_userId, language);
+      if (!mounted) return;
       state = AsyncValue.data(settings);
     } catch (e, stack) {
       GlobalErrorHandler.handleError(e, stack, context: 'settings.updateLanguage');
+      if (!mounted) return;
       state = previous;
     }
   }
@@ -97,10 +103,12 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
         _userId,
         preferences,
       );
+      if (!mounted) return false;
       state = AsyncValue.data(settings);
       return true;
     } catch (e, stack) {
       GlobalErrorHandler.handleError(e, stack, context: 'settings.updateNotificationPreferences');
+      if (!mounted) return false;
       state = previous;
       return false;
     }
@@ -111,6 +119,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
     try {
       await _repository.deleteAccount(_userId);
     } catch (e, stackTrace) {
+      if (!mounted) return;
       state = AsyncValue.error(e, stackTrace);
     }
   }

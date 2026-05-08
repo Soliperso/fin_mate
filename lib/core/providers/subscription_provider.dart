@@ -3,6 +3,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_client.dart';
 import '../services/payment_service.dart';
+import '../services/revenue_cat_state.dart';
 
 // ============================================================================
 // Payment Service Provider
@@ -86,15 +87,16 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // ============================================================================
 
 /// Returns true when the user has an active RevenueCat 'premium' entitlement.
-/// Falls back to the Supabase subscription_tier column if RC is unreachable.
+/// Falls back to the Supabase subscription_tier column if RC is not configured.
 final isPremiumProvider = FutureProvider<bool>((ref) async {
-  try {
-    final customerInfo = await Purchases.getCustomerInfo();
-    return customerInfo.entitlements.active.containsKey('premium');
-  } catch (_) {
-    final tier = await ref.read(subscriptionTierProvider.future);
-    return tier == 'premium';
+  if (RevenueCatState.configured) {
+    try {
+      final customerInfo = await Purchases.getCustomerInfo();
+      return customerInfo.entitlements.active.containsKey('premium');
+    } catch (_) {}
   }
+  final tier = await ref.read(subscriptionTierProvider.future);
+  return tier == 'premium';
 });
 
 // ============================================================================

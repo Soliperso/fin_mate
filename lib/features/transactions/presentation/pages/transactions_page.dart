@@ -879,7 +879,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           top: AppSizes.md,
           bottom: 96, // clears the FAB + its margin
         ),
-        itemCount: groups.length + 1, // +1 for ad banner
+        itemCount: groups.length + 1, // +1 for banner
         itemBuilder: (context, groupIndex) {
           if (groupIndex == groups.length) {
             return const Padding(

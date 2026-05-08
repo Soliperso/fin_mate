@@ -16,8 +16,8 @@ import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
-import '../../domain/entities/receipt_data.dart';
-import '../../data/services/receipt_categorizer_service.dart';
+// import '../../domain/entities/receipt_data.dart'; // [V1.1: Attachment]
+// import '../../data/services/receipt_categorizer_service.dart'; // [V1.1: Attachment]
 import '../../../../core/services/review_service.dart';
 import '../providers/transaction_providers.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
@@ -25,8 +25,8 @@ import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/domain/entities/debt_entity.dart';
 import '../../../debt_payoff/presentation/providers/debt_providers.dart';
 import '../../data/datasources/reminder_remote_datasource.dart';
-import '../../../../core/providers/subscription_provider.dart';
-import '../../../../shared/widgets/premium_feature_dialog.dart';
+// import '../../../../core/providers/subscription_provider.dart'; // [V1.1: Attachment]
+// import '../../../../shared/widgets/premium_feature_dialog.dart'; // [V1.1: Attachment]
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionType; // 'expense' or 'income'
@@ -306,52 +306,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               _buildReminderSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
 
-              // ── Receipt scan ────────────────────────────────────────────
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: _openScanReceipt,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.md, vertical: AppSizes.md),
-                      child: Row(
-                        children: [
-                          _rowIcon(CupertinoIcons.camera,
-                              accentColor: AppColors.brandTeal, isDark: isDark),
-                          const SizedBox(width: AppSizes.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('addTransaction.scanReceipt'.tr()),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'addTransaction.scanReceiptSub'.tr(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            CupertinoIcons.chevron_right,
-                            size: 14,
-                            color: AppColors.systemGray3,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                ],
-              ),
+              // [V1.1: Receipt Scan - AI feature, hidden until next release]
+              // Column(
+              //   children: [
+              //     GestureDetector(
+              //       onTap: _openScanReceipt,
+              //       ...
+              //     ),
+              //     const SizedBox(height: AppSizes.md),
+              //   ],
+              // ),
 
               const SizedBox(height: AppSizes.lg),
             ],
@@ -877,8 +841,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           _divider(isDark),
           _buildRecurringRow(context, isDark),
 
-          _divider(isDark),
-          _buildAttachmentRow(context, isDark),
+          // [V1.1: Attachment — hidden until file upload is stable]
+          // _divider(isDark),
+          // _buildAttachmentRow(context, isDark),
         ],
       ),
     );
@@ -977,102 +942,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   }
 
   // ── Attachment row ────────────────────────────────────────────────────────
-
-  Widget _buildAttachmentRow(BuildContext context, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md, vertical: AppSizes.sm),
-      child: Row(
-        children: [
-          _rowIcon(CupertinoIcons.paperclip, accentColor: _typeColor, isDark: isDark),
-          const SizedBox(width: AppSizes.md),
-          Expanded(
-            child: _attachmentFile != null
-                ? Wrap(
-                    children: [
-                      Chip(
-                        label: Text(
-                          _attachmentFile!.name,
-                          style: Theme.of(context).textTheme.labelSmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        deleteIcon:
-                            const Icon(CupertinoIcons.xmark, size: 12),
-                        onDeleted: () =>
-                            setState(() => _attachmentFile = null),
-                        materialTapTargetSize:
-                            MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 4),
-                        labelPadding: const EdgeInsets.only(left: 4),
-                      ),
-                    ],
-                  )
-                : GestureDetector(
-                    onTap: _pickAttachment,
-                    child: Row(
-                      children: [
-                        Text(
-                          'addTransaction.attachFile'.tr(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: AppColors.tertiaryLabel),
-                        ),
-                        const Spacer(),
-                        const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: AppColors.systemGray3,
-                        ),
-                      ],
-                    ),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _pickAttachment() async {
-    final isPremium = await ref.read(isPremiumProvider.future);
-    if (!mounted) return;
-    if (!isPremium) {
-      await PremiumFeatureDialog.show(
-        context,
-        featureName: 'Receipt Scanning',
-        benefits: const [
-          'Scan any receipt with your camera',
-          'AI auto-fills amount, date & merchant',
-          'Works with any store or restaurant',
-        ],
-        onUpgradePressed: () => context.push('/paywall'),
-      );
-      return;
-    }
-    try {
-      final result =
-          await context.push<ReceiptData>('/transactions/scan-receipt');
-      if (result != null && mounted) {
-        setState(() {
-          _titleController.text = result.merchant;
-          _amountController.text = result.amount.toStringAsFixed(2);
-          _selectedDate = result.date;
-          final suggestedCategory = ReceiptCategorizerService.suggestCategory(
-            result.merchant,
-            result.items,
-          );
-          _selectedCategory =
-              suggestedCategory.substring(0, 1).toUpperCase() +
-                  suggestedCategory.substring(1);
-          _selectedType = 'expense';
-        });
-      }
-    } catch (e) {
-      if (mounted) showErrorDialog(context, 'Failed to scan receipt: $e');
-    }
-  }
+  // [V1.1: Attachment — hidden until file upload is stable]
+  //
+  // Widget _buildAttachmentRow(BuildContext context, bool isDark) { ... }
+  // Future<void> _pickAttachment() async { ... }
 
   void _showCategoryPicker() {
     final categories = _loadedCategories;
@@ -1577,47 +1450,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }
 
-  Future<void> _openScanReceipt() async {
-    final isPremium = await ref.read(isPremiumProvider.future);
-    if (!mounted) return;
-    if (!isPremium) {
-      await PremiumFeatureDialog.show(
-        context,
-        featureName: 'Receipt Scanning',
-        benefits: const [
-          'Scan any receipt with your camera',
-          'AI auto-fills amount, date & merchant',
-          'Works with any store or restaurant',
-        ],
-        onUpgradePressed: () => context.push('/paywall'),
-      );
-      return;
-    }
-    try {
-      final result =
-          await context.push<ReceiptData>('/transactions/scan-receipt');
-
-      if (result != null) {
-        setState(() {
-          _titleController.text = result.merchant;
-          _amountController.text = result.amount.toStringAsFixed(2);
-          _selectedDate = result.date;
-
-          final suggestedCategory = ReceiptCategorizerService.suggestCategory(
-            result.merchant,
-            result.items,
-          );
-          _selectedCategory = suggestedCategory.substring(0, 1).toUpperCase() +
-              suggestedCategory.substring(1);
-          _selectedType = 'expense';
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        showErrorDialog(context, 'Failed to scan receipt: $e');
-      }
-    }
-  }
+  // [V1.1: Receipt Scan - removed from UI until AI features are released]
+  // Future<void> _openScanReceipt() async { ... }
 
   Future<void> _handleSubmit() async {
     // Validate amount

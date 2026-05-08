@@ -11,7 +11,7 @@ import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
-// RE-ENABLE: import '../../../../shared/widgets/ads/ad_banner_widget.dart';
+// import '../../../../shared/widgets/ads/finmate_native_ad_widget.dart'; // [Ads - commented out: intrusive]
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
@@ -22,6 +22,8 @@ import '../widgets/cash_flow_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
 import '../widgets/upcoming_bills_card.dart';
+import '../../../budgets/presentation/providers/budget_providers.dart';
+import '../widgets/budget_snapshot_card.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
 
@@ -33,14 +35,21 @@ class DashboardPage extends ConsumerStatefulWidget {
 }
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
+  final PageController _metricsController = PageController();
+  int _metricsPage = 0;
+
   @override
   void initState() {
     super.initState();
-    // Refresh the badge count every time the dashboard is mounted so the
-    // count stays accurate after reading notifications or switching tabs.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(notificationsProvider.notifier).updateUnreadCount();
     });
+  }
+
+  @override
+  void dispose() {
+    _metricsController.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,6 +68,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       return '${names.first[0]}${names.last[0]}'.toUpperCase();
     }
 
+    String greeting() {
+      final firstName = user?.fullName?.trim().split(' ').first ?? 'there';
+      final hour = DateTime.now().hour;
+      final timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+      return 'Good $timeOfDay, $firstName';
+    }
+
     final avatarUrl = profileState.profile?.avatarUrl;
     final hasValidAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
 
@@ -69,7 +85,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'nav.dashboard'.tr(),
+              greeting(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
@@ -183,8 +199,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const SizedBox(height: AppSizes.md),
 
-                // ── Money health ──────────────────────────────────────────
-                MoneyHealthScore(score: stats.moneyHealthScore),
+                // ── Metrics carousel: Health score | Budget snapshot ──────
+                Consumer(
+                  builder: (context, ref, _) {
+                    final budgets = ref.watch(budgetsWithSpendingProvider).valueOrNull;
+                    final hasActiveBudgets = budgets?.any((b) => b.isActive) ?? false;
+                    if (!hasActiveBudgets) {
+                      return MoneyHealthScore(score: stats.moneyHealthScore);
+                    }
+                    return Column(
+                      children: [
+                        SizedBox(
+                          height: 148,
+                          child: PageView(
+                            controller: _metricsController,
+                            onPageChanged: (p) => setState(() => _metricsPage = p),
+                            children: [
+                              MoneyHealthScore(score: stats.moneyHealthScore),
+                              const BudgetSnapshotCard(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.md),
+                        _PageDots(count: 2, current: _metricsPage),
+                      ],
+                    );
+                  },
+                ),
                 const SizedBox(height: AppSizes.md),
 
                 // ── AI Insights CTA ───────────────────────────────────────
@@ -261,9 +302,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isDark: isDark,
                 ),
 
-                // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
+                // [Ads - commented out: intrusive]
                 // const SizedBox(height: AppSizes.md),
-                // const AdBannerWidget(),
+                // const FinmateNativeAdWidget(),
                 const SizedBox(height: AppSizes.md),
               ],
             ),
@@ -395,6 +436,37 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 // }
 
 // ── Section header ────────────────────────────────────────────────────────────
+
+// ── Page dot indicator ────────────────────────────────────────────────────────
+
+class _PageDots extends StatelessWidget {
+  final int count;
+  final int current;
+  const _PageDots({required this.count, required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (i) {
+        final isActive = i == current;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: isActive ? 20 : 6,
+          height: 4,
+          decoration: BoxDecoration(
+            color: isActive
+                ? AppColors.brandTeal
+                : AppColors.systemGray3,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        );
+      }),
+    );
+  }
+}
 
 // ── Recent transactions card ──────────────────────────────────────────────────
 

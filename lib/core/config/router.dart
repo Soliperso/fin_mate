@@ -51,8 +51,8 @@ import '../../features/admin/presentation/pages/system_settings_page.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
-// RE-ENABLE: import '../services/ad_service.dart';
-// RE-ENABLE: import '../providers/ad_provider.dart';
+import '../services/ad_service.dart';
+import '../providers/ad_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -454,7 +454,7 @@ class _MainShellState extends ConsumerState<MainShell>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
   String _currentTabRoot = '';
-  // RE-ENABLE: bool _interstitialShownThisSession = false;
+  bool _interstitialShownThisSession = false;
 
   @override
   void initState() {
@@ -464,18 +464,17 @@ class _MainShellState extends ConsumerState<MainShell>
       duration: const Duration(milliseconds: 250),
       value: 1.0,
     );
-    // RE-ENABLE: unawaited(AdService.instance.preloadInterstitial());
+    unawaited(AdService.instance.preloadInterstitial());
   }
 
-  // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
-  // Future<void> _showInterstitialOnTransactions() async {
-  //   if (_interstitialShownThisSession) return;
-  //   final shouldShow = await ref.read(shouldShowAdsProvider.future);
-  //   if (!shouldShow) return;
-  //   await AdService.instance.preloadInterstitial();
-  //   await AdService.instance.showInterstitialIfEligible(shouldShow: shouldShow);
-  //   _interstitialShownThisSession = true;
-  // }
+  Future<void> _showInterstitialOnTransactions() async {
+    if (_interstitialShownThisSession) return;
+    final shouldShow = await ref.read(shouldShowAdsProvider.future);
+    if (!shouldShow) return;
+    await AdService.instance.preloadInterstitial();
+    await AdService.instance.showInterstitialIfEligible(shouldShow: shouldShow);
+    _interstitialShownThisSession = true;
+  }
 
   @override
   void didChangeDependencies() {
@@ -548,8 +547,7 @@ class _MainShellState extends ConsumerState<MainShell>
                   isSelected: selectedIndex == 1,
                   onTap: () {
                     context.go('/transactions');
-                    // RE-ENABLE: when DAU > 1,000 and 30-day retention > 20%
-                    // unawaited(_showInterstitialOnTransactions());
+                    unawaited(_showInterstitialOnTransactions());
                   },
                 ),
                 _TabItem(

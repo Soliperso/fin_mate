@@ -18,7 +18,6 @@ import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
 // import 'core/services/payment_service.dart';
 import 'core/services/theme_provider.dart';
-import 'core/services/session_timeout_provider.dart';
 import 'core/providers/display_format_provider.dart';
 import 'core/error/global_error_handler.dart';
 import 'core/l10n/locale_bridge.dart';
@@ -29,7 +28,7 @@ import 'core/services/auto_backup_service.dart';
 import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+// import 'package:purchases_flutter/purchases_flutter.dart'; // [V1.1: RevenueCat]
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -69,18 +68,19 @@ void main() async {
         ),
       );
 
-      // RevenueCat — initialize after Supabase so we can identify the current user
-      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-        await Purchases.configure(
-          PurchasesConfiguration(EnvConfig.revenueCatApiKey),
-        );
-        final existingUser = Supabase.instance.client.auth.currentUser;
-        if (existingUser != null) {
-          unawaited(() async {
-            try { await Purchases.logIn(existingUser.id); } catch (_) {}
-          }());
-        }
-      }
+      // [V1.1: RevenueCat — disabled until production key is configured]
+      // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //   await Purchases.configure(
+      //     PurchasesConfiguration(EnvConfig.revenueCatApiKey),
+      //   );
+      //   RevenueCatState.configured = true;
+      //   final existingUser = Supabase.instance.client.auth.currentUser;
+      //   if (existingUser != null) {
+      //     unawaited(() async {
+      //       try { await Purchases.logIn(existingUser.id); } catch (_) {}
+      //     }());
+      //   }
+      // }
 
       // Listen for deep link authentication (email confirmation)
       Supabase.instance.client.auth.onAuthStateChange.listen((data) {
@@ -176,9 +176,6 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
       await themeService.initialize();
       await ref.read(themeModeProvider.notifier).initialize();
 
-      // Start session timeout monitoring
-      ref.read(sessionTimeoutServiceProvider).startMonitoring();
-
       // Deferred: non-critical inits that don't affect the first frame
       unawaited(AdService.instance.initialize().catchError((_) {}));
       unawaited(DeviceSecurityService().getSecurityStatus().then((status) {
@@ -215,21 +212,17 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
     final themeMode = ref.watch(themeModeProvider);
 
     return OfflineIndicator(
-      child: Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: (_) => ref.read(sessionTimeoutServiceProvider).recordActivity(),
-        child: MaterialApp.router(
-          title: 'Finmate',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme(),
-          darkTheme: AppTheme.darkTheme(),
-          themeMode: themeMode,
-          routerConfig: router,
-          locale: context.locale,
-          supportedLocales: context.supportedLocales,
-          localizationsDelegates: context.localizationDelegates,
-          builder: (context, child) => LocaleBridge(child: child ?? const SizedBox()),
-        ),
+      child: MaterialApp.router(
+        title: 'Finmate',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme(),
+        darkTheme: AppTheme.darkTheme(),
+        themeMode: themeMode,
+        routerConfig: router,
+        locale: context.locale,
+        supportedLocales: context.supportedLocales,
+        localizationsDelegates: context.localizationDelegates,
+        builder: (context, child) => LocaleBridge(child: child ?? const SizedBox()),
       ),
     );
   }

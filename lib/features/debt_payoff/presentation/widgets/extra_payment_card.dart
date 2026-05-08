@@ -41,7 +41,7 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
   void _onTextChanged(String value) {
     final parsed = double.tryParse(value) ?? 0;
     final clamped = parsed.clamp(0, 2000).toDouble();
-    ref.read(extraPaymentProvider.notifier).state = clamped;
+    ref.read(extraPaymentProvider.notifier).setValue(clamped);
   }
 
   @override
@@ -201,7 +201,7 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                       max: 2000,
                       divisions: 80,
                       onChanged: (v) =>
-                          ref.read(extraPaymentProvider.notifier).state = v,
+                          ref.read(extraPaymentProvider.notifier).setValue(v),
                     ),
                   ),
                 ),

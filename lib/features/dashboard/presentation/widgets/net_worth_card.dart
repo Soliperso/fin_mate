@@ -101,6 +101,19 @@ class NetWorthCard extends ConsumerWidget {
 
           const SizedBox(height: AppSizes.md),
 
+          // Monthly cash flow label
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(
+              'This Month',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
+                  ),
+            ),
+          ),
+
           // Monthly stats mini-row
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
