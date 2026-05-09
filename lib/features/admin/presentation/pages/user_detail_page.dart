@@ -513,8 +513,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 _infoRow(context, isDark,
                     icon: CupertinoIcons.hourglass,
                     iconColor: AppColors.tealBlue,
-                    label: 'Member For',
-                    value: _formatMemberDuration(user.createdAt)),
+                    label: 'Member Since',
+                    value: _formatJoinDate(user.createdAt)),
               ],
             ),
           ),
@@ -587,12 +587,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             ],
           ),
           const SizedBox(height: 24),
-
-          // ── Danger Zone ──────────────────────────────────────────────────
-          if (!user.isAdmin) ...[
-            _buildDangerZone(context, isDark, user, ref),
-            const SizedBox(height: 24),
-          ],
         ],
       ),
     );
@@ -932,25 +926,16 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     final local = lastActive.toLocal();
     final today = DateUtils.dateOnly(DateTime.now());
     final day = DateUtils.dateOnly(local);
-    if (day == today) return 'Today';
-    if (day == today.subtract(const Duration(days: 1))) return 'Yesterday';
+    final timeStr = DateFormat('h:mm a').format(local);
+    if (day == today) return 'Today, $timeStr';
+    if (day == today.subtract(const Duration(days: 1))) return 'Yesterday, $timeStr';
     final diff = today.difference(day).inDays;
     if (diff < 7) return '$diff days ago';
     return DateFormat('MMM d, yyyy').format(local);
   }
 
-  static String _formatMemberDuration(DateTime createdAt) {
-    final now = DateTime.now();
-    final months =
-        (now.year - createdAt.year) * 12 + (now.month - createdAt.month);
-    if (months < 1) return 'Less than a month';
-    if (months == 1) return '1 month';
-    if (months < 12) return '$months months';
-    final years = months ~/ 12;
-    final rem = months % 12;
-    if (rem == 0) return years == 1 ? '1 year' : '$years years';
-    return '${years}y ${rem}mo';
-  }
+  static String _formatJoinDate(DateTime createdAt) =>
+      DateFormat('MMM d, yyyy').format(createdAt.toLocal());
 
   static double _monthsSince(DateTime date) {
     final now = DateTime.now();
@@ -1185,106 +1170,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   ),
                 ],
               ),
-      ),
-    );
-  }
-
-  Widget _buildDangerZone(BuildContext context, bool isDark,
-      AdminUserEntity user, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.systemRed.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: Border.all(
-          color: AppColors.systemRed.withValues(alpha: 0.40),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                CupertinoIcons.exclamationmark_triangle_fill,
-                color: AppColors.systemRed,
-                size: 20,
-              ),
-              const SizedBox(width: 7),
-              Text(
-                'Danger Zone',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.systemRed,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'These actions are irreversible. Proceed with caution.',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.systemRed.withValues(alpha: 0.75),
-                  fontSize: 12,
-                ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: user.isActive
-                ? _prominentActionButton(
-                    context,
-                    icon: CupertinoIcons.xmark_circle,
-                    label: 'Disable Account',
-                    color: AppColors.systemRed,
-                    onTap: () => _handleDisableAccount(context, ref, user),
-                  )
-                : _prominentActionButton(
-                    context,
-                    icon: CupertinoIcons.checkmark_circle,
-                    label: 'Enable Account',
-                    color: AppColors.systemGreen,
-                    onTap: () => _handleEnableAccount(context, ref, user),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _prominentActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-        decoration: BoxDecoration(
-          color: color ?? AppColors.systemRed,
-          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.3,
-                    fontSize: 15,
-                  ),
-            ),
-          ],
-        ),
       ),
     );
   }

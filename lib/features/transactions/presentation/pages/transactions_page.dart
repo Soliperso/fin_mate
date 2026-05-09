@@ -634,11 +634,32 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget _buildSummaryRow(
       BuildContext context, TransactionListState state, WidgetRef ref) {
     final fmt = ref.watch(currencyFormat2Provider);
-    final income = _totalIncome(state.filteredTransactions);
-    final expense = _totalExpense(state.filteredTransactions);
+
+    // Compute income/expense ignoring the type-chip filter so the summary
+    // always shows the full period picture (only date range + hide-future applied).
+    var periodTxns = List<TransactionEntity>.from(state.transactions);
+    if (state.hideFutureTransactions) {
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+      periodTxns = periodTxns.where((t) {
+        final txDate = DateTime(t.date.year, t.date.month, t.date.day);
+        return !txDate.isAfter(todayDate);
+      }).toList();
+    }
+    if (state.dateRange != null) {
+      periodTxns = periodTxns.where((t) {
+        return t.date.isAfter(
+                state.dateRange!.start.subtract(const Duration(days: 1))) &&
+            t.date
+                .isBefore(state.dateRange!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    final income = _totalIncome(periodTxns);
+    final expense = _totalExpense(periodTxns);
     final remaining = income - expense;
     final remainingColor =
-        remaining >= 0 ? AppColors.brandTeal : AppColors.systemRed;
+        remaining >= 0 ? AppColors.systemGreen : AppColors.systemRed;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark
         ? AppColors.secondarySystemBackgroundDark

@@ -225,9 +225,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       } catch (e) {
         if (mounted) {
           setState(() => _isLoading = false);
+          final stateError = ref.read(authNotifierProvider).errorMessage;
           ErrorSnackbar.show(
             context,
-            message: 'auth.forgotPassword.failedToSend'.tr(),
+            message: stateError ?? 'auth.forgotPassword.failedToSend'.tr(),
           );
         }
       }
@@ -251,9 +252,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+        final stateError = ref.read(authNotifierProvider).errorMessage;
         ErrorSnackbar.show(
           context,
-          message: 'auth.forgotPassword.failedToResend'.tr(),
+          message: stateError ?? 'auth.forgotPassword.failedToResend'.tr(),
         );
       }
     }

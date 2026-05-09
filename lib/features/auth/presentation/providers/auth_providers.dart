@@ -117,7 +117,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // (biometric refreshSession, deep-link sign-in, token rotation) automatically
     // update the notifier — no explicit refreshCurrentUser() call needed.
     _authSubscription = _repository.authStateChanges.listen((user) {
-      state = AuthState(user: user, isLoading: false);
+      state = AuthState(
+        user: user,
+        isLoading: false,
+        isPasswordRecovery: state.isPasswordRecovery,
+      );
       if (user != null) {
         _setUserContext(user);
       } else {
