@@ -24,7 +24,8 @@ class ChatMessageBubble extends StatelessWidget {
         vertical: AppSizes.xs,
       ),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
@@ -33,7 +34,8 @@ class ChatMessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -41,12 +43,12 @@ class ChatMessageBubble extends StatelessWidget {
                     vertical: AppSizes.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: isUser
-                        ? AppColors.brandTeal
-                        : AppColors.lightGray,
+                    color: isUser ? AppColors.brandTeal : AppColors.lightGray,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
-                      topRight: Radius.circular(isUser ? AppSizes.radiusSm : AppSizes.radiusMd),
+                      topLeft: Radius.circular(
+                          isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
+                      topRight: Radius.circular(
+                          isUser ? AppSizes.radiusSm : AppSizes.radiusMd),
                       bottomLeft: const Radius.circular(AppSizes.radiusMd),
                       bottomRight: const Radius.circular(AppSizes.radiusMd),
                     ),

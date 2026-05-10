@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
@@ -93,6 +94,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final Ref _ref;
   StreamSubscription<UserEntity?>? _authSubscription;
   StreamSubscription? _recoverySubscription;
+  StreamSubscription? _deepLinkSubscription;
   // StreamSubscription? _tokenSyncSubscription; // [Biometric]
 
   AuthNotifier(this._repository, this._ref) : super(AuthState()) {
@@ -137,6 +139,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
     });
 
+    // PKCE flow does not emit passwordRecovery — detect the recovery deep
+    // link directly so the router redirects to Set New Password regardless.
+    final appLinks = AppLinks();
+    appLinks.getInitialLink().then((uri) {
+      if (uri != null && uri.queryParameters.containsKey('code')) {
+        state = state.copyWith(isPasswordRecovery: true);
+      }
+    });
+    _deepLinkSubscription = appLinks.uriLinkStream.listen((uri) {
+      if (uri.queryParameters.containsKey('code')) {
+        state = state.copyWith(isPasswordRecovery: true);
+      }
+    });
+
     // [Biometric: commented out — token sync subscription for refresh token rotation]
     // final storage = _ref.read(secureStorageServiceProvider);
     // _tokenSyncSubscription = supabase.auth.onAuthStateChange.listen((event) {
@@ -154,6 +170,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void dispose() {
     _authSubscription?.cancel();
     _recoverySubscription?.cancel();
+    _deepLinkSubscription?.cancel();
     // _tokenSyncSubscription?.cancel(); // [Biometric]
     super.dispose();
   }
@@ -197,7 +214,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Identify user in RevenueCat so entitlements load correctly
       if (EnvConfig.revenueCatApiKey.isNotEmpty) {
         unawaited(() async {
-          try { await Purchases.logIn(user.id); } catch (_) {}
+          try {
+            await Purchases.logIn(user.id);
+          } catch (_) {}
         }());
       }
 
@@ -270,7 +289,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (EnvConfig.revenueCatApiKey.isNotEmpty) {
         unawaited(() async {
-          try { await Purchases.logOut(); } catch (_) {}
+          try {
+            await Purchases.logOut();
+          } catch (_) {}
         }());
       }
 
@@ -298,7 +319,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (EnvConfig.revenueCatApiKey.isNotEmpty) {
         unawaited(() async {
-          try { await Purchases.logOut(); } catch (_) {}
+          try {
+            await Purchases.logOut();
+          } catch (_) {}
         }());
       }
 
@@ -386,7 +409,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
     } catch (e, stack) {
       // Keep existing state on error; do not wipe out a valid session.
-      SentryService.captureException(e, stackTrace: stack, hint: 'refreshCurrentUser failed');
+      SentryService.captureException(e,
+          stackTrace: stack, hint: 'refreshCurrentUser failed');
     }
   }
 

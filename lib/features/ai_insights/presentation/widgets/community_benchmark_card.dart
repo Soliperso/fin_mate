@@ -248,7 +248,8 @@ class _BenchmarkRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 child: LinearProgressIndicator(
                   value: (communityPct / 50).clamp(0.0, 1.0),
-                  backgroundColor: AppColors.systemPurple.withValues(alpha: 0.08),
+                  backgroundColor:
+                      AppColors.systemPurple.withValues(alpha: 0.08),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     AppColors.systemPurple.withValues(alpha: 0.3),
                   ),
@@ -261,7 +262,8 @@ class _BenchmarkRow extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: (userPct / 50).clamp(0.0, 1.0),
                   backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.brandTeal),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppColors.brandTeal),
                   minHeight: 6,
                 ),
               ),

@@ -139,9 +139,12 @@ class DebtCostSplitCard extends ConsumerWidget {
             // ── Legend ────────────────────────────────────────────────────
             Row(
               children: [
-                _LegendDot(color: AppColors.brandTeal, label: 'debtCost.principal'.tr()),
+                _LegendDot(
+                    color: AppColors.brandTeal,
+                    label: 'debtCost.principal'.tr()),
                 const SizedBox(width: AppSizes.md),
-                _LegendDot(color: AppColors.error, label: 'debtCost.interest'.tr()),
+                _LegendDot(
+                    color: AppColors.error, label: 'debtCost.interest'.tr()),
               ],
             ),
 
@@ -185,9 +188,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                   _AmountColumn(
                     label: 'debtCost.total'.tr(),
                     value: currency.format(total),
-                    color: isDark
-                        ? AppColors.labelDark
-                        : AppColors.label,
+                    color: isDark ? AppColors.labelDark : AppColors.label,
                   ),
                 ],
               ),
@@ -198,7 +199,8 @@ class DebtCostSplitCard extends ConsumerWidget {
             // ── Insight line ──────────────────────────────────────────────
             Center(
               child: Text(
-                'debtCost.youllPay'.tr(namedArgs: {'pct': interestExtraPercent}),
+                'debtCost.youllPay'
+                    .tr(namedArgs: {'pct': interestExtraPercent}),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,

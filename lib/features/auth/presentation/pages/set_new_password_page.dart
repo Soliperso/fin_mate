@@ -123,9 +123,11 @@ class _SetNewPasswordPageState extends ConsumerState<SetNewPasswordPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
+                          child: Icon(CupertinoIcons.lock,
+                              size: 17, color: iconColor),
                         ),
                       ),
                       suffixIcon: IconButton(
@@ -136,8 +138,8 @@ class _SetNewPasswordPageState extends ConsumerState<SetNewPasswordPage> {
                           size: 20,
                           color: AppColors.textSecondary,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                     validator: (value) {
@@ -167,9 +169,11 @@ class _SetNewPasswordPageState extends ConsumerState<SetNewPasswordPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: Icon(CupertinoIcons.lock_fill, size: 17, color: iconColor),
+                          child: Icon(CupertinoIcons.lock_fill,
+                              size: 17, color: iconColor),
                         ),
                       ),
                       suffixIcon: IconButton(
@@ -213,7 +217,9 @@ class _SetNewPasswordPageState extends ConsumerState<SetNewPasswordPage> {
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        ref.read(authNotifierProvider.notifier).clearPasswordRecovery();
+                        ref
+                            .read(authNotifierProvider.notifier)
+                            .clearPasswordRecovery();
                         context.go('/login');
                       },
                       child: const Text(

@@ -17,7 +17,8 @@ final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
 ///
 /// This is the main provider for displaying budgets in the UI
 /// as it includes real-time spending calculations
-final budgetsWithSpendingProvider = FutureProvider<List<BudgetEntity>>((ref) async {
+final budgetsWithSpendingProvider =
+    FutureProvider<List<BudgetEntity>>((ref) async {
   final repository = ref.watch(budgetRepositoryProvider);
   return repository.getBudgetsWithSpending();
 });
@@ -28,7 +29,8 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
   final AnalyticsService _analytics;
   final Ref _ref;
 
-  BudgetNotifier(this._repository, this._analytics, this._ref) : super(const AsyncValue.loading()) {
+  BudgetNotifier(this._repository, this._analytics, this._ref)
+      : super(const AsyncValue.loading()) {
     loadBudgets();
   }
 
@@ -91,7 +93,9 @@ class BudgetNotifier extends StateNotifier<AsyncValue<List<BudgetEntity>>> {
 }
 
 /// Provider for budget notifier
-final budgetNotifierProvider = StateNotifierProvider<BudgetNotifier, AsyncValue<List<BudgetEntity>>>((ref) {
+final budgetNotifierProvider =
+    StateNotifierProvider<BudgetNotifier, AsyncValue<List<BudgetEntity>>>(
+        (ref) {
   final repository = ref.watch(budgetRepositoryProvider);
   final analytics = ref.watch(analyticsServiceProvider);
   return BudgetNotifier(repository, analytics, ref);

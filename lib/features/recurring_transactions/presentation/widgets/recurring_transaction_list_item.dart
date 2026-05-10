@@ -48,8 +48,10 @@ class RecurringTransactionListItem extends ConsumerWidget {
   }
 
   IconData _typeIcon() {
-    if (transaction.type == 'income') return CupertinoIcons.arrow_down_circle_fill;
-    if (transaction.type == 'expense') return CupertinoIcons.arrow_up_circle_fill;
+    if (transaction.type == 'income')
+      return CupertinoIcons.arrow_down_circle_fill;
+    if (transaction.type == 'expense')
+      return CupertinoIcons.arrow_up_circle_fill;
     return CupertinoIcons.arrow_left_right_circle_fill;
   }
 
@@ -266,7 +268,9 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            if (onMarkPaid != null && isExpense && isActive) ...[
+                            if (onMarkPaid != null &&
+                                isExpense &&
+                                isActive) ...[
                               const SizedBox(height: 7),
                               GestureDetector(
                                 onTap: onMarkPaid,
@@ -305,7 +309,8 @@ class RecurringTransactionListItem extends ConsumerWidget {
                           child: Icon(
                             CupertinoIcons.ellipsis_vertical,
                             size: 16,
-                            color: AppColors.textSecondary.withValues(alpha: 0.5),
+                            color:
+                                AppColors.textSecondary.withValues(alpha: 0.5),
                           ),
                         ),
                       ],

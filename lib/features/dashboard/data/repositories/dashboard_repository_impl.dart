@@ -77,11 +77,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
         monthlyIncome: monthlyIncome,
         monthlyExpenses: monthlyExpenses,
         moneyHealthScore: healthScore,
-        recentTransactions: recentTransactions.map((model) => model.toEntity()).toList(),
+        recentTransactions:
+            recentTransactions.map((model) => model.toEntity()).toList(),
         upcomingBills: upcomingBills,
       );
     } catch (e, st) {
-      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getDashboardStats');
+      await GlobalErrorHandler.handleError(e, st,
+          context: 'DashboardRepository.getDashboardStats');
       return DashboardStats.empty;
     }
   }
@@ -138,7 +140,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final previousMonthStart = DateTime(prevYear, prevMonth, 1);
       final previousMonthEnd = DateTime(prevYear, prevMonth + 1, 0);
 
-      final fallbackResponse = await _supabase.rpc('get_net_worth_snapshots', params: {
+      final fallbackResponse =
+          await _supabase.rpc('get_net_worth_snapshots', params: {
         'p_user_id': _supabase.auth.currentUser?.id,
         'p_start_date': previousMonthStart.toIso8601String().split('T')[0],
         'p_end_date': previousMonthEnd.toIso8601String().split('T')[0],
@@ -177,7 +180,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   /// Get total expenses for a date range
-  Future<double> _getMonthlyExpenses(DateTime startDate, DateTime endDate) async {
+  Future<double> _getMonthlyExpenses(
+      DateTime startDate, DateTime endDate) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
@@ -220,10 +224,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
         categories(name),
         accounts!transactions_account_id_fkey(name),
         to_account:accounts!transactions_to_account_id_fkey(name)
-      ''')
-          .eq('user_id', userId)
-          .order('date', ascending: false)
-          .limit(limit);
+      ''').eq('user_id', userId).order('date', ascending: false).limit(limit);
 
       return (response as List).map((json) {
         final data = Map<String, dynamic>.from(json);
@@ -261,7 +262,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
           .eq('user_id', userId)
           .eq('is_active', true)
           .gte('next_occurrence', now.toIso8601String().split('T')[0])
-          .lte('next_occurrence', thirtyDaysFromNow.toIso8601String().split('T')[0])
+          .lte('next_occurrence',
+              thirtyDaysFromNow.toIso8601String().split('T')[0])
           .order('next_occurrence')
           .limit(limit);
 
@@ -296,7 +298,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
           year -= 1;
         }
         final start = DateTime(year, month, 1);
-        final end = month == 12 ? DateTime(year + 1, 1, 0) : DateTime(year, month + 1, 0);
+        final end = month == 12
+            ? DateTime(year + 1, 1, 0)
+            : DateTime(year, month + 1, 0);
         ranges.add((start: start, end: end));
       }
 
@@ -315,7 +319,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
           ),
       ];
     } catch (e, st) {
-      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getMonthlyFlowData');
+      await GlobalErrorHandler.handleError(e, st,
+          context: 'DashboardRepository.getMonthlyFlowData');
       return [];
     }
   }
@@ -343,7 +348,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         );
       }).toList();
     } catch (e, st) {
-      await GlobalErrorHandler.handleError(e, st, context: 'DashboardRepository.getNetWorthSnapshots');
+      await GlobalErrorHandler.handleError(e, st,
+          context: 'DashboardRepository.getNetWorthSnapshots');
       return [];
     }
   }

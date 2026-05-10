@@ -63,21 +63,23 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
           children: [
             // ── 1. Proactive Alerts ──────────────────────────────────────
             alertsAsync.whenOrNull(
-              data: (alerts) {
-                final active =
-                    alerts.where((a) => !dismissedIds.contains(a.id)).toList();
-                if (active.isEmpty) return null;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SectionHeader(title: 'Alerts'),
-                    const SizedBox(height: AppSizes.sm),
-                    ...active.map((a) => _buildAlertCard(a)),
-                    const SizedBox(height: AppSizes.lg),
-                  ],
-                );
-              },
-            ) ?? const SizedBox.shrink(),
+                  data: (alerts) {
+                    final active = alerts
+                        .where((a) => !dismissedIds.contains(a.id))
+                        .toList();
+                    if (active.isEmpty) return null;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SectionHeader(title: 'Alerts'),
+                        const SizedBox(height: AppSizes.sm),
+                        ...active.map((a) => _buildAlertCard(a)),
+                        const SizedBox(height: AppSizes.lg),
+                      ],
+                    );
+                  },
+                ) ??
+                const SizedBox.shrink(),
 
             // ── 2. Spending by Category ──────────────────────────────────
             const SectionHeader(title: 'Spending by Category'),
@@ -140,8 +142,8 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                               const SizedBox(width: AppSizes.sm),
                               HeroStatBadge(
                                 label: 'Largest',
-                                value: categories.first['category_name']
-                                    as String,
+                                value:
+                                    categories.first['category_name'] as String,
                               ),
                             ],
                           ),
@@ -316,13 +318,11 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                         ),
                         child: Text(
                           severityLabel,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                color: severity,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: severity,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                         ),
                       ),
                     ],
@@ -425,11 +425,9 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                             Theme.of(context).brightness == Brightness.dark
                                 ? AppColors.systemGray4.withValues(alpha: 0.15)
                                 : AppColors.systemGray4.withValues(alpha: 0.35),
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(accentColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                         minHeight: 5,
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusXs),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
                       ),
                     ],
                   ),

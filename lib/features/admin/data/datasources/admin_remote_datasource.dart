@@ -84,8 +84,7 @@ class AdminRemoteDataSource {
     try {
       await _supabase
           .from('user_profiles')
-          .update({'role': role})
-          .eq('id', userId);
+          .update({'role': role}).eq('id', userId);
     } catch (e) {
       throw Exception('Failed to update user role: $e');
     }
@@ -271,7 +270,9 @@ class AdminRemoteDataSource {
       if (response == null) return [];
 
       final List<dynamic> data = response as List<dynamic>;
-      return data.map((json) => NetWorthPercentileModel.fromJson(json)).toList();
+      return data
+          .map((json) => NetWorthPercentileModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch net worth percentiles: $e');
     }
@@ -308,7 +309,9 @@ class AdminRemoteDataSource {
       if (response == null) return [];
 
       final List<dynamic> data = response as List<dynamic>;
-      return data.map((json) => SubscriptionCohortModel.fromJson(json)).toList();
+      return data
+          .map((json) => SubscriptionCohortModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch subscription cohorts: $e');
     }
@@ -331,7 +334,9 @@ class AdminRemoteDataSource {
       if (response == null) return [];
 
       final List<dynamic> data = response as List<dynamic>;
-      return data.map((json) => SubscriptionTimelineModel.fromJson(json)).toList();
+      return data
+          .map((json) => SubscriptionTimelineModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch subscription timeline: $e');
     }
@@ -343,8 +348,15 @@ class AdminRemoteDataSource {
     final rows = List<Map<String, dynamic>>.from(response as List);
 
     const headers = [
-      'Date', 'Type', 'Amount', 'Account', 'Category',
-      'Description', 'Notes', 'Tags', 'User ID',
+      'Date',
+      'Type',
+      'Amount',
+      'Account',
+      'Category',
+      'Description',
+      'Notes',
+      'Tags',
+      'User ID',
     ];
     final lines = [
       headers.join(','),
@@ -389,7 +401,8 @@ class AdminRemoteDataSource {
     try {
       final response = await _supabase
           .from('analytics_events')
-          .select('event_name, created_at, user_id, event_properties, screen_name')
+          .select(
+              'event_name, created_at, user_id, event_properties, screen_name')
           .order('created_at', ascending: false)
           .limit(100);
 

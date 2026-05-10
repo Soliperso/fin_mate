@@ -39,7 +39,8 @@ class InsightsService {
   }
 
   /// Get category breakdown for spending
-  Future<List<Map<String, dynamic>>> getCategoryBreakdown({int days = 30}) async {
+  Future<List<Map<String, dynamic>>> getCategoryBreakdown(
+      {int days = 30}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -60,7 +61,8 @@ class InsightsService {
   }
 
   /// Generate cashflow forecast for next 3-6 months
-  Future<List<Map<String, dynamic>>> generateCashflowForecast({int months = 3}) async {
+  Future<List<Map<String, dynamic>>> generateCashflowForecast(
+      {int months = 3}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -91,7 +93,8 @@ class InsightsService {
         insights.add({
           'type': 'top_spending',
           'title': 'Top Spending Category',
-          'message': 'You spent \$${topCategory['total_amount']?.toStringAsFixed(2)} on ${topCategory['category_name']} this month',
+          'message':
+              'You spent \$${topCategory['total_amount']?.toStringAsFixed(2)} on ${topCategory['category_name']} this month',
           'icon': 'trending_up',
           'color': 'warning',
         });
@@ -105,7 +108,8 @@ class InsightsService {
         insights.add({
           'type': 'spending_trend',
           'title': 'Spending Increasing',
-          'message': 'Your daily spending has increased. Average: \$${avgDaily.toStringAsFixed(2)}/day',
+          'message':
+              'Your daily spending has increased. Average: \$${avgDaily.toStringAsFixed(2)}/day',
           'icon': 'warning',
           'color': 'error',
         });
@@ -125,7 +129,8 @@ class InsightsService {
         insights.add({
           'type': 'unusual_spending',
           'title': 'Unusual Activity',
-          'message': 'Higher than usual spending detected in ${unusualCategories.length} categories',
+          'message':
+              'Higher than usual spending detected in ${unusualCategories.length} categories',
           'icon': 'info',
           'color': 'info',
         });
@@ -137,7 +142,8 @@ class InsightsService {
         insights.add({
           'type': 'savings_opportunity',
           'title': 'Savings Opportunity',
-          'message': 'You could save up to \$${savingsOpportunity.toStringAsFixed(2)} by reducing non-essential spending',
+          'message':
+              'You could save up to \$${savingsOpportunity.toStringAsFixed(2)} by reducing non-essential spending',
           'icon': 'savings',
           'color': 'success',
         });
@@ -169,7 +175,8 @@ class InsightsService {
         final amount = (tx['amount'] as num).toDouble();
         totalSpending += amount;
 
-        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final category =
+            tx['categories']?['name'] as String? ?? 'Uncategorized';
         categorySpending[category] = (categorySpending[category] ?? 0) + amount;
       }
     }
@@ -178,7 +185,8 @@ class InsightsService {
 
     // Determine trend (simplified)
     final recentTotal = _calculateRecentSpending(transactions, 30);
-    final olderTotal = _calculateRecentSpending(transactions.skip(30).toList(), 30);
+    final olderTotal =
+        _calculateRecentSpending(transactions.skip(30).toList(), 30);
 
     String trend = 'stable';
     if (recentTotal > olderTotal * 1.1) {
@@ -224,7 +232,8 @@ class InsightsService {
     return unusual;
   }
 
-  Future<List<Map<String, dynamic>>> _getCategoryBreakdownFallback(int days) async {
+  Future<List<Map<String, dynamic>>> _getCategoryBreakdownFallback(
+      int days) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
@@ -250,7 +259,8 @@ class InsightsService {
               'total_amount': e.value,
             })
         .toList()
-      ..sort((a, b) => (b['total_amount'] as double).compareTo(a['total_amount'] as double));
+      ..sort((a, b) =>
+          (b['total_amount'] as double).compareTo(a['total_amount'] as double));
 
     return result;
   }
@@ -278,9 +288,11 @@ class InsightsService {
 
       final amount = (tx['amount'] as num).toDouble();
       if (tx['type'] == 'income') {
-        monthlyData[monthKey]!['income'] = monthlyData[monthKey]!['income']! + amount;
+        monthlyData[monthKey]!['income'] =
+            monthlyData[monthKey]!['income']! + amount;
       } else {
-        monthlyData[monthKey]!['expense'] = monthlyData[monthKey]!['expense']! + amount;
+        monthlyData[monthKey]!['expense'] =
+            monthlyData[monthKey]!['expense']! + amount;
       }
     }
 
@@ -294,7 +306,8 @@ class InsightsService {
         .toList();
   }
 
-  List<Map<String, dynamic>> _calculateForecast(List<Map<String, dynamic>> historical, int months) {
+  List<Map<String, dynamic>> _calculateForecast(
+      List<Map<String, dynamic>> historical, int months) {
     if (historical.isEmpty) return [];
 
     // Calculate averages
@@ -315,7 +328,8 @@ class InsightsService {
 
     for (int i = 1; i <= months; i++) {
       final forecastDate = DateTime(now.year, now.month + i, 1);
-      final monthKey = '${forecastDate.year}-${forecastDate.month.toString().padLeft(2, '0')}';
+      final monthKey =
+          '${forecastDate.year}-${forecastDate.month.toString().padLeft(2, '0')}';
 
       // Add some variance (±10%)
       final incomeVariance = (avgIncome * 0.1 * (i % 2 == 0 ? 1 : -1));
@@ -340,7 +354,8 @@ class InsightsService {
     double opportunity = 0;
     for (final category in breakdown) {
       if (nonEssential.contains(category['category_name'])) {
-        opportunity += (category['total_amount'] as double) * 0.2; // 20% reduction potential
+        opportunity += (category['total_amount'] as double) *
+            0.2; // 20% reduction potential
       }
     }
 
@@ -362,7 +377,8 @@ class InsightsService {
           'type': 'bill_reminder',
           'severity': 'info',
           'title': 'Upcoming Bills',
-          'message': 'You have ${upcomingBills.length} bills due in the next 7 days',
+          'message':
+              'You have ${upcomingBills.length} bills due in the next 7 days',
           'count': upcomingBills.length,
         });
       }
@@ -376,7 +392,8 @@ class InsightsService {
           'type': 'spending_increase',
           'severity': 'warning',
           'title': 'Spending Trending Up',
-          'message': 'Your daily spending has increased to \$${avgDaily.toStringAsFixed(2)}/day',
+          'message':
+              'Your daily spending has increased to \$${avgDaily.toStringAsFixed(2)}/day',
         });
       }
 
@@ -387,7 +404,8 @@ class InsightsService {
   }
 
   /// Get upcoming bills
-  Future<List<Map<String, dynamic>>> _getUpcomingBills(String userId, int days) async {
+  Future<List<Map<String, dynamic>>> _getUpcomingBills(
+      String userId, int days) async {
     final endDate = DateTime.now().add(Duration(days: days));
     final bills = await _supabase
         .from('transactions')
@@ -448,7 +466,8 @@ class InsightsService {
   }
 
   /// Detect recurring expenses (subscriptions, regular bills)
-  Future<List<RecurringExpensePattern>> detectRecurringExpenses({int daysToAnalyze = 180}) async {
+  Future<List<RecurringExpensePattern>> detectRecurringExpenses(
+      {int daysToAnalyze = 180}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -468,7 +487,8 @@ class InsightsService {
       final merchantGroups = <String, List<Map<String, dynamic>>>{};
 
       for (final tx in transactions) {
-        final merchant = _normalizeMerchantName(tx['description'] as String? ?? 'Unknown');
+        final merchant =
+            _normalizeMerchantName(tx['description'] as String? ?? 'Unknown');
         merchantGroups[merchant] ??= [];
         merchantGroups[merchant]!.add(tx);
       }
@@ -499,7 +519,8 @@ class InsightsService {
   }
 
   /// Detect spending anomalies
-  Future<List<SpendingAnomaly>> detectSpendingAnomalies({int daysToAnalyze = 90}) async {
+  Future<List<SpendingAnomaly>> detectSpendingAnomalies(
+      {int daysToAnalyze = 90}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -519,7 +540,8 @@ class InsightsService {
       final categoryStats = <String, Map<String, dynamic>>{};
 
       for (final tx in transactions) {
-        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final category =
+            tx['categories']?['name'] as String? ?? 'Uncategorized';
         final amount = (tx['amount'] as num).toDouble();
 
         categoryStats[category] ??= {
@@ -537,7 +559,8 @@ class InsightsService {
       final anomalies = <SpendingAnomaly>[];
 
       for (final tx in transactions) {
-        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final category =
+            tx['categories']?['name'] as String? ?? 'Uncategorized';
         final amount = (tx['amount'] as num).toDouble();
         final stats = categoryStats[category]!;
         final average = (stats['total'] as double) / (stats['count'] as int);
@@ -550,9 +573,11 @@ class InsightsService {
             id: '${tx['id']}_anomaly',
             transactionId: tx['id'] as String,
             type: AnomalyType.unusualAmount,
-            severity: deviation > 300 ? AnomalySeverity.high : AnomalySeverity.medium,
+            severity:
+                deviation > 300 ? AnomalySeverity.high : AnomalySeverity.medium,
             title: 'Unusual $category Spending',
-            description: 'You spent \$${amount.toStringAsFixed(2)}, which is ${deviation.toStringAsFixed(0)}% higher than your average of \$${average.toStringAsFixed(2)}',
+            description:
+                'You spent \$${amount.toStringAsFixed(2)}, which is ${deviation.toStringAsFixed(0)}% higher than your average of \$${average.toStringAsFixed(2)}',
             transactionAmount: amount,
             categoryAverage: average,
             deviationPercentage: deviation,
@@ -570,7 +595,8 @@ class InsightsService {
   }
 
   /// Analyze merchant frequency and spending
-  Future<List<MerchantInsight>> analyzeMerchantFrequency({int daysToAnalyze = 90}) async {
+  Future<List<MerchantInsight>> analyzeMerchantFrequency(
+      {int daysToAnalyze = 90}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -591,7 +617,8 @@ class InsightsService {
 
       for (final tx in transactions) {
         final merchant = tx['description'] as String? ?? 'Unknown';
-        final category = tx['categories']?['name'] as String? ?? 'Uncategorized';
+        final category =
+            tx['categories']?['name'] as String? ?? 'Uncategorized';
         final amount = (tx['amount'] as num).toDouble();
         final date = DateTime.parse(tx['date'] as String);
 
@@ -611,7 +638,8 @@ class InsightsService {
       final categoryTotals = <String, double>{};
       for (final stat in merchantData.values) {
         final category = stat['category'] as String;
-        categoryTotals[category] = (categoryTotals[category] ?? 0) + (stat['total'] as double);
+        categoryTotals[category] =
+            (categoryTotals[category] ?? 0) + (stat['total'] as double);
       }
 
       // Create insights
@@ -659,7 +687,8 @@ class InsightsService {
   }
 
   /// Analyze weekend vs weekday spending
-  Future<Map<String, dynamic>> getWeekendVsWeekdaySpending({int daysToAnalyze = 90}) async {
+  Future<Map<String, dynamic>> getWeekendVsWeekdaySpending(
+      {int daysToAnalyze = 90}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
@@ -728,16 +757,26 @@ class InsightsService {
   String _normalizeMerchantName(String name) {
     // Remove common suffixes and normalize
     var normalized = name.toLowerCase().trim();
-    const suffixes = [' inc', ' ltd', ' co', ' corp', ' llc', ' store', ' shop'];
+    const suffixes = [
+      ' inc',
+      ' ltd',
+      ' co',
+      ' corp',
+      ' llc',
+      ' store',
+      ' shop'
+    ];
     for (final suffix in suffixes) {
       if (normalized.endsWith(suffix)) {
-        normalized = normalized.substring(0, normalized.length - suffix.length).trim();
+        normalized =
+            normalized.substring(0, normalized.length - suffix.length).trim();
       }
     }
     return normalized;
   }
 
-  RecurringExpensePattern? _analyzeRecurringPattern(String merchant, List<Map<String, dynamic>> transactions) {
+  RecurringExpensePattern? _analyzeRecurringPattern(
+      String merchant, List<Map<String, dynamic>> transactions) {
     if (transactions.length < 2) return null;
 
     // Extract amounts and dates
@@ -751,9 +790,11 @@ class InsightsService {
 
     // Check amount consistency (±5%)
     final avgAmount = amounts.fold<double>(0, (a, b) => a + b) / amounts.length;
-    final variance = amounts.where((a) => (a - avgAmount).abs() / avgAmount <= 0.05).length;
+    final variance =
+        amounts.where((a) => (a - avgAmount).abs() / avgAmount <= 0.05).length;
 
-    if (variance < amounts.length * 0.7) return null; // Less than 70% consistent
+    if (variance < amounts.length * 0.7)
+      return null; // Less than 70% consistent
 
     // Detect interval pattern
     final intervals = <int>[];
@@ -763,7 +804,8 @@ class InsightsService {
 
     if (intervals.isEmpty) return null;
 
-    final avgInterval = intervals.fold<int>(0, (a, b) => a + b) ~/ intervals.length;
+    final avgInterval =
+        intervals.fold<int>(0, (a, b) => a + b) ~/ intervals.length;
     final interval = _detectInterval(avgInterval);
 
     if (interval == RecurringInterval.unknown) return null;
@@ -773,8 +815,14 @@ class InsightsService {
     double? priceChangePercent;
 
     if (amounts.length >= 2) {
-      final recentAvg = amounts.sublist((amounts.length / 2).toInt()).fold<double>(0, (a, b) => a + b) / (amounts.length / 2).toInt();
-      final oldAvg = amounts.sublist(0, (amounts.length / 2).toInt()).fold<double>(0, (a, b) => a + b) / (amounts.length / 2).toInt();
+      final recentAvg = amounts
+              .sublist((amounts.length / 2).toInt())
+              .fold<double>(0, (a, b) => a + b) /
+          (amounts.length / 2).toInt();
+      final oldAvg = amounts
+              .sublist(0, (amounts.length / 2).toInt())
+              .fold<double>(0, (a, b) => a + b) /
+          (amounts.length / 2).toInt();
 
       priceChangePercent = ((recentAvg - oldAvg) / oldAvg * 100).abs();
       isPriceIncreased = recentAvg > oldAvg && priceChangePercent > 5;
@@ -784,7 +832,8 @@ class InsightsService {
     final lastDate = dates.last;
     final nextExpectedDate = lastDate.add(Duration(days: avgInterval));
 
-    final category = transactions.first['categories']?['name'] as String? ?? 'Uncategorized';
+    final category =
+        transactions.first['categories']?['name'] as String? ?? 'Uncategorized';
 
     return RecurringExpensePattern(
       id: merchant.hashCode.toString(),
@@ -813,7 +862,8 @@ class InsightsService {
 
   // Phase 3: Proactive Alerts
 
-  Future<List<CashFlowWarning>> detectCashFlowWarnings({int daysToAnalyze = 90}) async {
+  Future<List<CashFlowWarning>> detectCashFlowWarnings(
+      {int daysToAnalyze = 90}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return [];
@@ -844,18 +894,21 @@ class InsightsService {
         totalSpend += (t['amount'] as num).toDouble();
       }
 
-      final dailyBurnRate = daysToAnalyze > 0 ? totalSpend / daysToAnalyze : 0.0;
+      final dailyBurnRate =
+          daysToAnalyze > 0 ? totalSpend / daysToAnalyze : 0.0;
       if (dailyBurnRate <= 0) return [];
 
       const safeThreshold = BalanceForecastService.warningThreshold;
-      final daysUntilLow = ((currentBalance - safeThreshold) / dailyBurnRate).floor();
+      final daysUntilLow =
+          ((currentBalance - safeThreshold) / dailyBurnRate).floor();
 
       // Only warn if low balance within 30 days
       if (daysUntilLow > 30) return [];
 
       final daysUntilClamped = daysUntilLow.clamp(0, 30);
       final projectedBalance = currentBalance - (dailyBurnRate * 30);
-      final projectedDate = DateTime.now().add(Duration(days: daysUntilClamped));
+      final projectedDate =
+          DateTime.now().add(Duration(days: daysUntilClamped));
 
       final recommendation = daysUntilClamped <= 3
           ? 'Your balance will drop critically low in $daysUntilClamped days. Reduce non-essential spending immediately.'
@@ -874,7 +927,8 @@ class InsightsService {
           suggestions: [
             'Review upcoming bills in the Forecast tab',
             'Check your largest spending categories',
-            if (daysUntilClamped <= 7) 'Consider delaying non-essential purchases',
+            if (daysUntilClamped <= 7)
+              'Consider delaying non-essential purchases',
           ],
         ),
       ];
@@ -883,7 +937,8 @@ class InsightsService {
     }
   }
 
-  Future<List<BillCollision>> detectBillCollisions({int daysToLook = 60}) async {
+  Future<List<BillCollision>> detectBillCollisions(
+      {int daysToLook = 60}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return [];
@@ -892,7 +947,8 @@ class InsightsService {
 
       final recurringTxns = await _supabase
           .from('recurring_transactions')
-          .select('id, description, amount, type, frequency, next_occurrence, categories(name)')
+          .select(
+              'id, description, amount, type, frequency, next_occurrence, categories(name)')
           .eq('user_id', userId)
           .eq('is_active', true)
           .eq('type', 'expense')
@@ -902,14 +958,17 @@ class InsightsService {
       final billsByDate = <String, List<BillItem>>{};
 
       for (final rt in recurringTxns as List) {
-        final occurrences = _expandRecurringOccurrences(rt as Map<String, dynamic>, daysToLook);
+        final occurrences =
+            _expandRecurringOccurrences(rt as Map<String, dynamic>, daysToLook);
         for (final occ in occurrences) {
           final dateKey = occ['date'] as String;
           billsByDate[dateKey] ??= [];
           billsByDate[dateKey]!.add(BillItem(
             name: (rt['description'] as String?) ?? 'Unknown',
             amount: (rt['amount'] as num).toDouble(),
-            category: (rt['categories'] as Map<String, dynamic>?)?['name'] as String? ?? 'Uncategorized',
+            category: (rt['categories'] as Map<String, dynamic>?)?['name']
+                    as String? ??
+                'Uncategorized',
             dueDate: DateTime.parse(dateKey),
           ));
         }
@@ -978,33 +1037,40 @@ class InsightsService {
       for (final warning in warnings) {
         alerts.add(ProactiveAlert(
           id: warning.id,
-          type: warning.isCritical ? AlertType.lowBalance : AlertType.cashFlowWarning,
-          severity: warning.isCritical ? AlertSeverity.critical : AlertSeverity.high,
+          type: warning.isCritical
+              ? AlertType.lowBalance
+              : AlertType.cashFlowWarning,
+          severity:
+              warning.isCritical ? AlertSeverity.critical : AlertSeverity.high,
           title: warning.isCritical ? 'Low Balance Alert' : 'Cash Flow Warning',
           message: warning.recommendation,
           createdAt: now,
         ));
       }
     } catch (e) {
-      debugPrint('[InsightsService] Failed to build cash flow warning alerts: $e');
+      debugPrint(
+          '[InsightsService] Failed to build cash flow warning alerts: $e');
     }
 
     try {
       final anomalies = await detectSpendingAnomalies(daysToAnalyze: 14);
       final highAnomalies = anomalies.where((a) =>
-          a.severity == AnomalySeverity.high || a.severity == AnomalySeverity.critical);
+          a.severity == AnomalySeverity.high ||
+          a.severity == AnomalySeverity.critical);
       if (highAnomalies.isNotEmpty) {
         alerts.add(ProactiveAlert(
           id: 'unusual_${now.millisecondsSinceEpoch}',
           type: AlertType.unusualSpending,
           severity: AlertSeverity.medium,
           title: 'Unusual Spending Detected',
-          message: '${highAnomalies.length} unusual transaction${highAnomalies.length == 1 ? '' : 's'} in the past 2 weeks.',
+          message:
+              '${highAnomalies.length} unusual transaction${highAnomalies.length == 1 ? '' : 's'} in the past 2 weeks.',
           createdAt: now,
         ));
       }
     } catch (e) {
-      debugPrint('[InsightsService] Failed to build spending anomaly alerts: $e');
+      debugPrint(
+          '[InsightsService] Failed to build spending anomaly alerts: $e');
     }
 
     // Sort: critical first, then by creation time
@@ -1037,10 +1103,12 @@ class InsightsService {
             nextDate = nextDate.add(const Duration(days: 7));
             break;
           case 'monthly':
-            nextDate = DateTime(nextDate.year, nextDate.month + 1, nextDate.day);
+            nextDate =
+                DateTime(nextDate.year, nextDate.month + 1, nextDate.day);
             break;
           case 'yearly':
-            nextDate = DateTime(nextDate.year + 1, nextDate.month, nextDate.day);
+            nextDate =
+                DateTime(nextDate.year + 1, nextDate.month, nextDate.day);
             break;
           default:
             nextDate = nextDate.add(const Duration(days: 30));

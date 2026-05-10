@@ -38,7 +38,10 @@ class UpcomingBillsCard extends ConsumerWidget {
           // ── Header ──────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.sm,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -52,9 +55,9 @@ class UpcomingBillsCard extends ConsumerWidget {
                   child: Text(
                     'upcomingBills.viewAll'.tr(),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.brandTeal,
-                      fontWeight: FontWeight.w400,
-                    ),
+                          color: AppColors.brandTeal,
+                          fontWeight: FontWeight.w400,
+                        ),
                   ),
                 ),
               ],
@@ -70,7 +73,10 @@ class UpcomingBillsCard extends ConsumerWidget {
           else if (isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.md,
+                AppSizes.md,
+                AppSizes.sm,
+                AppSizes.md,
+                AppSizes.md,
               ),
               child: Center(
                 child: Column(
@@ -208,7 +214,9 @@ class _BillRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (bill.categoryName != null && bill.description != null && bill.description!.isNotEmpty) ...[
+                if (bill.categoryName != null &&
+                    bill.description != null &&
+                    bill.description!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     bill.categoryName!,
@@ -224,7 +232,8 @@ class _BillRow extends StatelessWidget {
                 ],
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: dueColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull),

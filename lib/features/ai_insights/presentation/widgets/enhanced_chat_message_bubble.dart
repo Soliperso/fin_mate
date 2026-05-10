@@ -74,12 +74,14 @@ class EnhancedChatMessageBubble extends StatelessWidget {
         bottom: AppSizes.xs,
       ),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
             Padding(
-              padding: const EdgeInsets.only(left: AppSizes.sm, right: AppSizes.xs),
+              padding:
+                  const EdgeInsets.only(left: AppSizes.sm, right: AppSizes.xs),
               child: _buildAvatar(false),
             ),
           ],
@@ -87,120 +89,139 @@ class EnhancedChatMessageBubble extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(right: isUser ? 0 : AppSizes.sm),
               child: Column(
-                crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
-                Container(
-                  width: isUser ? null : double.infinity,
-                  constraints: BoxConstraints(
-                    maxWidth: isUser
-                        ? MediaQuery.of(context).size.width * 0.75
-                        : double.infinity,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.md,
-                    vertical: AppSizes.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getBackgroundColor(isUser, context),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
-                      topRight: Radius.circular(isUser ? AppSizes.radiusSm : AppSizes.radiusMd),
-                      bottomLeft: const Radius.circular(AppSizes.radiusMd),
-                      bottomRight: const Radius.circular(AppSizes.radiusMd),
+                  Container(
+                    width: isUser ? null : double.infinity,
+                    constraints: BoxConstraints(
+                      maxWidth: isUser
+                          ? MediaQuery.of(context).size.width * 0.75
+                          : double.infinity,
                     ),
-                    border: message.type == MessageType.error
-                        ? Border.all(color: AppColors.error, width: 1)
-                        : null,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Main text content with optional blinking cursor
-                      if (message.status == MessageStatus.streaming && message.content.isEmpty)
-                        const _StreamingCursor()
-                      else if (message.status == MessageStatus.streaming)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                message.content,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: _getTextColor(isUser, context),
-                                      height: 1.45,
-                                      fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
-                                    ),
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            const _StreamingCursor(),
-                          ],
-                        )
-                      else
-                        Text(
-                          message.content,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: _getTextColor(isUser, context),
-                                height: 1.45,
-                                fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
-                              ),
-                        ),
-
-                      // Rich content — only after streaming completes
-                      if (message.status != MessageStatus.streaming) ...[
-                        if (message.type == MessageType.textWithChart && message.metadata != null)
-                          _buildChartContent(message.metadata!),
-
-                        if (message.type == MessageType.textWithActions && message.metadata != null)
-                          _buildActionsContent(message.metadata!),
-                      ],
-                    ],
-                  ),
-                ),
-
-                // Timestamp and status
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSizes.xs),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        timeFormat.format(message.timestamp),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.textTertiary,
-                            ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md,
+                      vertical: AppSizes.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getBackgroundColor(isUser, context),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(
+                            isUser ? AppSizes.radiusMd : AppSizes.radiusSm),
+                        topRight: Radius.circular(
+                            isUser ? AppSizes.radiusSm : AppSizes.radiusMd),
+                        bottomLeft: const Radius.circular(AppSizes.radiusMd),
+                        bottomRight: const Radius.circular(AppSizes.radiusMd),
                       ),
-                      if (isUser && message.status == MessageStatus.sending) ...[
-                        const SizedBox(width: 4),
-                        SizedBox(
-                          width: 10,
-                          height: 10,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.textTertiary),
+                      border: message.type == MessageType.error
+                          ? Border.all(color: AppColors.error, width: 1)
+                          : null,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Main text content with optional blinking cursor
+                        if (message.status == MessageStatus.streaming &&
+                            message.content.isEmpty)
+                          const _StreamingCursor()
+                        else if (message.status == MessageStatus.streaming)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  message.content,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: _getTextColor(isUser, context),
+                                        height: 1.45,
+                                        fontWeight: isUser
+                                            ? FontWeight.w500
+                                            : FontWeight.w400,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              const _StreamingCursor(),
+                            ],
+                          )
+                        else
+                          Text(
+                            message.content,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: _getTextColor(isUser, context),
+                                  height: 1.45,
+                                  fontWeight: isUser
+                                      ? FontWeight.w500
+                                      : FontWeight.w400,
+                                ),
                           ),
-                        ),
-                      ] else if (isUser && message.status == MessageStatus.error) ...[
-                        const SizedBox(width: 4),
-                        Icon(
-                          CupertinoIcons.exclamationmark_circle,
-                          size: 12,
-                          color: AppColors.error,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
 
-                // Follow-up suggestions — shown only after streaming completes
-                if (!isUser &&
-                    message.status == MessageStatus.sent &&
-                    message.followUpSuggestions != null &&
-                    message.followUpSuggestions!.isNotEmpty)
-                  FollowUpSuggestions(
-                    suggestions: message.followUpSuggestions!,
-                    onSuggestionTap: onFollowUpTap ?? (_) {},
+                        // Rich content — only after streaming completes
+                        if (message.status != MessageStatus.streaming) ...[
+                          if (message.type == MessageType.textWithChart &&
+                              message.metadata != null)
+                            _buildChartContent(message.metadata!),
+                          if (message.type == MessageType.textWithActions &&
+                              message.metadata != null)
+                            _buildActionsContent(message.metadata!),
+                        ],
+                      ],
+                    ),
                   ),
+
+                  // Timestamp and status
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSizes.xs),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          timeFormat.format(message.timestamp),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textTertiary,
+                                  ),
+                        ),
+                        if (isUser &&
+                            message.status == MessageStatus.sending) ...[
+                          const SizedBox(width: 4),
+                          SizedBox(
+                            width: 10,
+                            height: 10,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.textTertiary),
+                            ),
+                          ),
+                        ] else if (isUser &&
+                            message.status == MessageStatus.error) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            CupertinoIcons.exclamationmark_circle,
+                            size: 12,
+                            color: AppColors.error,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // Follow-up suggestions — shown only after streaming completes
+                  if (!isUser &&
+                      message.status == MessageStatus.sent &&
+                      message.followUpSuggestions != null &&
+                      message.followUpSuggestions!.isNotEmpty)
+                    FollowUpSuggestions(
+                      suggestions: message.followUpSuggestions!,
+                      onSuggestionTap: onFollowUpTap ?? (_) {},
+                    ),
                 ],
               ),
             ),
@@ -260,7 +281,8 @@ class EnhancedChatMessageBubble extends StatelessWidget {
       return Colors.white;
     }
     // Use theme's text color for proper dark mode support
-    return Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textPrimary;
+    return Theme.of(context).textTheme.bodyMedium?.color ??
+        AppColors.textPrimary;
   }
 
   Widget _buildChartContent(Map<String, dynamic> metadata) {
@@ -271,14 +293,17 @@ class EnhancedChatMessageBubble extends StatelessWidget {
         final rawData = metadata['categoryData'];
         if (rawData is List) {
           // Convert each item to Map<String, dynamic> if needed
-          final categoryData = rawData.map((item) {
-            if (item is Map<String, dynamic>) {
-              return item;
-            } else if (item is Map) {
-              return Map<String, dynamic>.from(item);
-            }
-            return null;
-          }).whereType<Map<String, dynamic>>().toList();
+          final categoryData = rawData
+              .map((item) {
+                if (item is Map<String, dynamic>) {
+                  return item;
+                } else if (item is Map) {
+                  return Map<String, dynamic>.from(item);
+                }
+                return null;
+              })
+              .whereType<Map<String, dynamic>>()
+              .toList();
 
           if (categoryData.isNotEmpty) {
             return CategoryBreakdownChart(

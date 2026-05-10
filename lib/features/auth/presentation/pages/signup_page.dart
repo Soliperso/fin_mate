@@ -34,316 +34,346 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.brandTeal.withValues(alpha: 0.12);
+    final iconBg = isDark
+        ? AppColors.tertiarySystemBackgroundDark
+        : AppColors.brandTeal.withValues(alpha: 0.12);
     final iconColor = isDark ? Colors.white : AppColors.brandTeal;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSizes.xl),
-                Center(
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.brandTeal.withValues(alpha: 0.12),
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.person_crop_circle_badge_plus,
-                      size: 44,
-                      color: AppColors.brandTeal,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.lg),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: AppSizes.xl),
+                  Center(
+                    child: Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.brandTeal.withValues(alpha: 0.12),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.person_crop_circle_badge_plus,
+                        size: 44,
+                        color: AppColors.brandTeal,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSizes.lg),
-                Text(
-                  'auth.signup.title'.tr(),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: AppSizes.lg),
+                  Text(
+                    'auth.signup.title'.tr(),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Text(
+                    'auth.signup.subtitle'.tr(),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSizes.xxl),
+                  if (authState.errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(AppSizes.md),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppSizes.sm),
+                        border: Border.all(color: AppColors.error),
                       ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Text(
-                  'auth.signup.subtitle'.tr(),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
+                      child: Row(
+                        children: [
+                          Icon(CupertinoIcons.exclamationmark_circle,
+                              color: AppColors.error),
+                          const SizedBox(width: AppSizes.sm),
+                          Expanded(
+                            child: Text(
+                              authState.errorMessage!,
+                              style: TextStyle(color: AppColors.error),
+                            ),
+                          ),
+                        ],
                       ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.xxl),
-                if (authState.errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSizes.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSizes.sm),
-                      border: Border.all(color: AppColors.error),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
-                        const SizedBox(width: AppSizes.sm),
-                        Expanded(
-                          child: Text(
-                            authState.errorMessage!,
-                            style: TextStyle(color: AppColors.error),
+                    const SizedBox(height: AppSizes.md),
+                  ],
+                  Semantics(
+                    label: 'Full name field',
+                    child: TextFormField(
+                      controller: _nameController,
+                      focusNode: _nameFocusNode,
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
+                      decoration: InputDecoration(
+                        labelText: 'auth.signup.fullNameLabel'.tr(),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Icon(CupertinoIcons.person,
+                                size: 17, color: iconColor),
                           ),
                         ),
-                      ],
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'auth.signup.nameRequired'.tr();
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(height: AppSizes.md),
-                ],
-                Semantics(
-                  label: 'Full name field',
-                  child: TextFormField(
-                    controller: _nameController,
-                    focusNode: _nameFocusNode,
+                  TextFormField(
+                    controller: _emailController,
+                    focusNode: _emailFocusNode,
+                    keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
+                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     decoration: InputDecoration(
-                      labelText: 'auth.signup.fullNameLabel'.tr(),
+                      labelText: 'auth.signup.emailLabel'.tr(),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Container(
                           decoration: BoxDecoration(
                             color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: Icon(CupertinoIcons.person, size: 17, color: iconColor),
+                          child: Icon(CupertinoIcons.mail,
+                              size: 17, color: iconColor),
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'auth.signup.emailRequired'.tr();
+                      if (!RegExp(
+                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                          .hasMatch(value)) {
+                        return 'auth.signup.emailInvalid'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  TextFormField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) =>
+                        _confirmPasswordFocusNode.requestFocus(),
+                    onChanged: (value) => setState(
+                        () {}), // Trigger rebuild for strength indicator
+                    decoration: InputDecoration(
+                      labelText: 'auth.signup.passwordLabel'.tr(),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: iconBg,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: Icon(CupertinoIcons.lock,
+                              size: 17, color: iconColor),
+                        ),
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: GestureDetector(
+                          onTap: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Icon(
+                              _obscurePassword
+                                  ? CupertinoIcons.eye_slash
+                                  : CupertinoIcons.eye,
+                              size: 17,
+                              color: iconColor,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'auth.signup.nameRequired'.tr();
+                        return 'auth.signup.passwordRequired'.tr();
+                      }
+                      if (value.length < 8) {
+                        return 'auth.signup.passwordTooShort'.tr();
+                      }
+                      if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                        return 'auth.signup.passwordNeedsUppercase'.tr();
+                      }
+                      if (!RegExp(r'[0-9]').hasMatch(value)) {
+                        return 'auth.signup.passwordNeedsNumber'.tr();
+                      }
+                      if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\\/]')
+                          .hasMatch(value)) {
+                        return 'auth.signup.passwordNeedsSpecial'.tr();
                       }
                       return null;
                     },
                   ),
-                ),
-                const SizedBox(height: AppSizes.md),
-                TextFormField(
-                  controller: _emailController,
-                  focusNode: _emailFocusNode,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                  decoration: InputDecoration(
-                    labelText: 'auth.signup.emailLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'auth.signup.emailRequired'.tr();
-                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
-                      return 'auth.signup.emailInvalid'.tr();
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSizes.md),
-                TextFormField(
-                  controller: _passwordController,
-                  focusNode: _passwordFocusNode,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
-                  onChanged: (value) => setState(() {}), // Trigger rebuild for strength indicator
-                  decoration: InputDecoration(
-                    labelText: 'auth.signup.passwordLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
-                      ),
-                    ),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                  PasswordStrengthIndicator(password: _passwordController.text),
+                  const SizedBox(height: AppSizes.md),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocusNode,
+                    obscureText: _obscureConfirmPassword,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) {
+                      if (_acceptedTerms) _handleSignup();
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'auth.signup.confirmPasswordLabel'.tr(),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
                         child: Container(
                           decoration: BoxDecoration(
                             color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: Icon(
-                            _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                            size: 17,
-                            color: iconColor,
+                          child: Icon(CupertinoIcons.lock,
+                              size: 17, color: iconColor),
+                        ),
+                      ),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: GestureDetector(
+                          onTap: () => setState(() => _obscureConfirmPassword =
+                              !_obscureConfirmPassword),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Icon(
+                              _obscureConfirmPassword
+                                  ? CupertinoIcons.eye_slash
+                                  : CupertinoIcons.eye,
+                              size: 17,
+                              color: iconColor,
+                            ),
                           ),
                         ),
                       ),
+                    ),
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'auth.signup.passwordMismatch'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  CheckboxListTile(
+                    value: _acceptedTerms,
+                    onChanged: (value) =>
+                        setState(() => _acceptedTerms = value ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: Wrap(
+                      children: [
+                        Text(
+                          'auth.signup.acceptTerms'.tr(),
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.textTertiary),
+                        ),
+                        GestureDetector(
+                          onTap: () => context.push('/profile/legal'),
+                          child: Text(
+                            'auth.signup.termsOfService'.tr(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.brandTeal,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'auth.signup.and'.tr(),
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.textTertiary),
+                        ),
+                        GestureDetector(
+                          onTap: () => context.push('/profile/legal'),
+                          child: Text(
+                            'auth.signup.privacyPolicy'.tr(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.brandTeal,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'auth.signup.passwordRequired'.tr();
-                    }
-                    if (value.length < 8) {
-                      return 'auth.signup.passwordTooShort'.tr();
-                    }
-                    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                      return 'auth.signup.passwordNeedsUppercase'.tr();
-                    }
-                    if (!RegExp(r'[0-9]').hasMatch(value)) {
-                      return 'auth.signup.passwordNeedsNumber'.tr();
-                    }
-                    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\\/]').hasMatch(value)) {
-                      return 'auth.signup.passwordNeedsSpecial'.tr();
-                    }
-                    return null;
-                  },
-                ),
-                PasswordStrengthIndicator(password: _passwordController.text),
-                const SizedBox(height: AppSizes.md),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  focusNode: _confirmPasswordFocusNode,
-                  obscureText: _obscureConfirmPassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) {
-                    if (_acceptedTerms) _handleSignup();
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'auth.signup.confirmPasswordLabel'.tr(),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
-                      ),
-                    ),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Icon(
-                            _obscureConfirmPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                            size: 17,
-                            color: iconColor,
-                          ),
-                        ),
-                      ),
+                  const SizedBox(height: AppSizes.lg),
+                  Semantics(
+                    label: 'Create account button',
+                    button: true,
+                    child: ElevatedButton(
+                      onPressed: (authState.isLoading || !_acceptedTerms)
+                          ? null
+                          : _handleSignup,
+                      child: authState.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text('auth.signup.createButton'.tr()),
                     ),
                   ),
-                  validator: (value) {
-                    if (value != _passwordController.text) {
-                      return 'auth.signup.passwordMismatch'.tr();
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSizes.md),
-                CheckboxListTile(
-                  value: _acceptedTerms,
-                  onChanged: (value) => setState(() => _acceptedTerms = value ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                  title: Wrap(
+                  const SizedBox(height: AppSizes.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'auth.signup.acceptTerms'.tr(),
-                        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                        'auth.signup.haveAccount'.tr(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
                       ),
-                      GestureDetector(
-                        onTap: () => context.push('/profile/legal'),
+                      TextButton(
+                        onPressed: () => context.go('/login'),
                         child: Text(
-                          'auth.signup.termsOfService'.tr(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.brandTeal,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'auth.signup.and'.tr(),
-                        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.push('/profile/legal'),
-                        child: Text(
-                          'auth.signup.privacyPolicy'.tr(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.brandTeal,
-                            decoration: TextDecoration.none,
-                          ),
+                          'auth.signup.signIn'.tr(),
+                          style: const TextStyle(color: AppColors.brandTeal),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: AppSizes.lg),
-                Semantics(
-                  label: 'Create account button',
-                  button: true,
-                  child: ElevatedButton(
-                    onPressed: (authState.isLoading || !_acceptedTerms) ? null : _handleSignup,
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text('auth.signup.createButton'.tr()),
-                  ),
-                ),
-                const SizedBox(height: AppSizes.md),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'auth.signup.haveAccount'.tr(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        'auth.signup.signIn'.tr(),
-                        style: const TextStyle(color: AppColors.brandTeal),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }

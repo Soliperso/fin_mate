@@ -118,7 +118,8 @@ class SettingsEntity extends Equatable {
       userId: userId ?? this.userId,
       themeMode: themeMode ?? this.themeMode,
       language: language ?? this.language,
-      notificationPreferences: notificationPreferences ?? this.notificationPreferences,
+      notificationPreferences:
+          notificationPreferences ?? this.notificationPreferences,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

@@ -26,7 +26,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsOperationsProvider);
     final settings = settingsAsync.valueOrNull;
-    final schedule = settings?.notificationPreferences.autoBackupSchedule ?? 'off';
+    final schedule =
+        settings?.notificationPreferences.autoBackupSchedule ?? 'off';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -147,8 +148,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -206,8 +207,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -318,17 +319,33 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
   Future<void> _exportAllData() async =>
       _runExport('all', 'Preparing full data export…', () async {
         return ref.read(settingsOperationsProvider.notifier).exportDataAsJson();
-      }, filename: 'finmate_export', ext: 'json', mime: 'application/json', subject: 'Finmate Data Export');
+      },
+          filename: 'finmate_export',
+          ext: 'json',
+          mime: 'application/json',
+          subject: 'Finmate Data Export');
 
   Future<void> _exportTransactions() async =>
       _runExport('transactions', 'Preparing transactions…', () async {
-        return ref.read(settingsOperationsProvider.notifier).exportTransactionsAsCsv();
-      }, filename: 'finmate_transactions', ext: 'csv', mime: 'text/csv', subject: 'Finmate Transactions');
+        return ref
+            .read(settingsOperationsProvider.notifier)
+            .exportTransactionsAsCsv();
+      },
+          filename: 'finmate_transactions',
+          ext: 'csv',
+          mime: 'text/csv',
+          subject: 'Finmate Transactions');
 
   Future<void> _exportBudgets() async =>
       _runExport('budgets', 'Preparing budgets…', () async {
-        return ref.read(settingsOperationsProvider.notifier).exportBudgetsAsCsv();
-      }, filename: 'finmate_budgets', ext: 'csv', mime: 'text/csv', subject: 'Finmate Budgets');
+        return ref
+            .read(settingsOperationsProvider.notifier)
+            .exportBudgetsAsCsv();
+      },
+          filename: 'finmate_budgets',
+          ext: 'csv',
+          mime: 'text/csv',
+          subject: 'Finmate Budgets');
 
   /// Fetches export data, dismisses the loading dialog, THEN opens share sheet.
   /// This way the dialog is never left hanging if Share.shareXFiles doesn't resolve.
@@ -360,7 +377,8 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
     setState(() => _activeExport = null);
 
     // Share (fire-and-forget — share_plus future may not resolve on iOS)
-    await _shareFile(data, filename: filename, ext: ext, mime: mime, subject: subject);
+    await _shareFile(data,
+        filename: filename, ext: ext, mime: mime, subject: subject);
   }
 
   void _showLoadingDialog(String message) {
@@ -426,7 +444,11 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text('dataPrivacy.exportFailed'.tr()),
-        content: Text(e.toString().replaceAll('Exception: ', '').replaceAll('Exception(', '').replaceAll(')', '')),
+        content: Text(e
+            .toString()
+            .replaceAll('Exception: ', '')
+            .replaceAll('Exception(', '')
+            .replaceAll(')', '')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -436,5 +458,4 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
       ),
     );
   }
-
 }

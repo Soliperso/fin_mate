@@ -109,7 +109,8 @@ class DataExportService {
     }
 
     final csvBuffer = StringBuffer();
-    csvBuffer.writeln('Date,Type,Amount,Account,Category,Description,Notes,Tags');
+    csvBuffer
+        .writeln('Date,Type,Amount,Account,Category,Description,Notes,Tags');
 
     final fmt = DateFormat(dateFormat);
 
@@ -164,7 +165,8 @@ class DataExportService {
     final csvBuffer = StringBuffer();
 
     // Custom headers
-    csvBuffer.writeln('Category,Budget Amount,Current Spending,Remaining,Period,Status');
+    csvBuffer.writeln(
+        'Category,Budget Amount,Current Spending,Remaining,Period,Status');
 
     // Add rows with formatted data
     for (final budget in budgets) {

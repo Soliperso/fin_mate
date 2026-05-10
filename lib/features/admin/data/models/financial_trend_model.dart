@@ -17,7 +17,8 @@ class FinancialTrendModel extends FinancialTrendEntity {
       totalExpense: (json['total_expense'] ?? 0).toDouble(),
       netCashflow: (json['net_cashflow'] ?? 0).toDouble(),
       transactionCount: json['transaction_count'] ?? 0,
-      averageTransactionAmount: (json['average_transaction_amount'] ?? 0).toDouble(),
+      averageTransactionAmount:
+          (json['average_transaction_amount'] ?? 0).toDouble(),
     );
   }
 

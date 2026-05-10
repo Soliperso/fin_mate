@@ -36,7 +36,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
   final SettingsRepository _repository;
   final String _userId;
 
-  SettingsNotifier(this._repository, this._userId) : super(const AsyncValue.loading()) {
+  SettingsNotifier(this._repository, this._userId)
+      : super(const AsyncValue.loading()) {
     initialize();
   }
 
@@ -66,7 +67,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
       if (!mounted) return;
       state = AsyncValue.data(settings);
     } catch (e, stack) {
-      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateThemeMode');
+      GlobalErrorHandler.handleError(e, stack,
+          context: 'settings.updateThemeMode');
       if (!mounted) return;
       state = previous;
     }
@@ -80,7 +82,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
       if (!mounted) return;
       state = AsyncValue.data(settings);
     } catch (e, stack) {
-      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateLanguage');
+      GlobalErrorHandler.handleError(e, stack,
+          context: 'settings.updateLanguage');
       if (!mounted) return;
       state = previous;
     }
@@ -107,7 +110,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsEntity?>> {
       state = AsyncValue.data(settings);
       return true;
     } catch (e, stack) {
-      GlobalErrorHandler.handleError(e, stack, context: 'settings.updateNotificationPreferences');
+      GlobalErrorHandler.handleError(e, stack,
+          context: 'settings.updateNotificationPreferences');
       if (!mounted) return false;
       state = previous;
       return false;

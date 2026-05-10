@@ -9,7 +9,8 @@ import '../../domain/repositories/transaction_repository.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
 // Data Source Provider
-final transactionDataSourceProvider = Provider<TransactionRemoteDataSource>((ref) {
+final transactionDataSourceProvider =
+    Provider<TransactionRemoteDataSource>((ref) {
   return TransactionRemoteDataSource();
 });
 
@@ -21,7 +22,8 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
 
 // Transactions Provider (monthly)
 final transactionsProvider =
-    FutureProvider.family<List<TransactionEntity>, DateTime>((ref, month) async {
+    FutureProvider.family<List<TransactionEntity>, DateTime>(
+        (ref, month) async {
   final repository = ref.watch(transactionRepositoryProvider);
   final startDate = DateTime(month.year, month.month, 1);
   final endDate = DateTime(month.year, month.month + 1, 0);
@@ -33,7 +35,8 @@ final transactionsProvider =
 });
 
 // Recent Transactions Provider
-final recentTransactionsProvider = FutureProvider<List<TransactionEntity>>((ref) async {
+final recentTransactionsProvider =
+    FutureProvider<List<TransactionEntity>>((ref) async {
   final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getRecentTransactions(limit: 10);
 });
@@ -45,13 +48,15 @@ final accountsProvider = FutureProvider<List<AccountEntity>>((ref) async {
 });
 
 // Categories Provider
-final categoriesProvider = FutureProvider.family<List<CategoryEntity>, String?>((ref, type) async {
+final categoriesProvider =
+    FutureProvider.family<List<CategoryEntity>, String?>((ref, type) async {
   final repository = ref.watch(transactionRepositoryProvider);
   return await repository.getCategories(type: type);
 });
 
 // Transaction Monthly Stats Provider
-final transactionMonthlyStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final transactionMonthlyStatsProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(transactionRepositoryProvider);
   final now = DateTime.now();
   final startDate = DateTime(now.year, now.month, 1);
@@ -65,7 +70,8 @@ final transactionMonthlyStatsProvider = FutureProvider<Map<String, dynamic>>((re
 
 // Category Breakdown Provider (for charts)
 final categoryBreakdownProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, type) async {
+    FutureProvider.family<List<Map<String, dynamic>>, String>(
+        (ref, type) async {
   final repository = ref.watch(transactionRepositoryProvider);
   final now = DateTime.now();
   final startDate = DateTime(now.year, now.month, 1);
@@ -136,12 +142,14 @@ class TransactionListState {
       error: error,
       selectedFilter: selectedFilter ?? this.selectedFilter,
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedCategory: clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory:
+          clearCategory ? null : (selectedCategory ?? this.selectedCategory),
       dateRange: clearDateRange ? null : (dateRange ?? this.dateRange),
       minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
       maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
       selectedPeriod: selectedPeriod ?? this.selectedPeriod,
-      hideFutureTransactions: hideFutureTransactions ?? this.hideFutureTransactions,
+      hideFutureTransactions:
+          hideFutureTransactions ?? this.hideFutureTransactions,
       showNotes: showNotes ?? this.showNotes,
     );
   }
@@ -169,7 +177,8 @@ class TransactionListState {
 class TransactionListNotifier extends StateNotifier<TransactionListState> {
   final TransactionRepository _repository;
 
-  TransactionListNotifier(this._repository) : super(const TransactionListState()) {
+  TransactionListNotifier(this._repository)
+      : super(const TransactionListState()) {
     loadTransactions();
   }
 
@@ -203,7 +212,8 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
   }
 
   void setCategory(String? category) {
-    state = state.copyWith(selectedCategory: category, clearCategory: category == null);
+    state = state.copyWith(
+        selectedCategory: category, clearCategory: category == null);
     _applyFilters();
   }
 
@@ -237,7 +247,8 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
         );
         break;
       case 'Month':
-        range = DateTimeRange(start: DateTime(now.year, now.month, 1), end: today);
+        range =
+            DateTimeRange(start: DateTime(now.year, now.month, 1), end: today);
         break;
       case 'Year':
         range = DateTimeRange(start: DateTime(now.year, 1, 1), end: today);
@@ -281,7 +292,8 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
   Future<bool> deleteTransaction(String transactionId) async {
     try {
       await _repository.deleteTransaction(transactionId);
-      final updated = state.transactions.where((t) => t.id != transactionId).toList();
+      final updated =
+          state.transactions.where((t) => t.id != transactionId).toList();
       state = state.copyWith(transactions: updated);
       _applyFilters();
       return true;
@@ -295,7 +307,8 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     try {
       await _repository.deleteMultipleTransactions(ids);
       final idSet = ids.toSet();
-      final updated = state.transactions.where((t) => !idSet.contains(t.id)).toList();
+      final updated =
+          state.transactions.where((t) => !idSet.contains(t.id)).toList();
       state = state.copyWith(transactions: updated);
       _applyFilters();
       return true;
@@ -318,9 +331,12 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
 
     if (state.selectedFilter != 'All') {
       filtered = filtered.where((t) {
-        if (state.selectedFilter == 'Income') return t.type == TransactionType.income;
-        if (state.selectedFilter == 'Expense') return t.type == TransactionType.expense;
-        if (state.selectedFilter == 'Transfer') return t.type == TransactionType.transfer;
+        if (state.selectedFilter == 'Income')
+          return t.type == TransactionType.income;
+        if (state.selectedFilter == 'Expense')
+          return t.type == TransactionType.expense;
+        if (state.selectedFilter == 'Transfer')
+          return t.type == TransactionType.transfer;
         return true;
       }).toList();
     }
@@ -335,12 +351,15 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
     }
 
     if (state.selectedCategory != null) {
-      filtered = filtered.where((t) => t.categoryName == state.selectedCategory).toList();
+      filtered = filtered
+          .where((t) => t.categoryName == state.selectedCategory)
+          .toList();
     }
 
     if (state.dateRange != null) {
       filtered = filtered.where((t) {
-        return t.date.isAfter(state.dateRange!.start.subtract(const Duration(days: 1))) &&
+        return t.date.isAfter(
+                state.dateRange!.start.subtract(const Duration(days: 1))) &&
             t.date.isBefore(state.dateRange!.end.add(const Duration(days: 1)));
       }).toList();
     }

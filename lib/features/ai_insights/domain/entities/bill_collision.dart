@@ -41,7 +41,8 @@ class BillCollision extends Equatable {
       'bills': bills.map((b) => b.toJson()).toList(),
       'total_amount': totalAmount,
       'recommendation': recommendation,
-      'alternative_dates': alternativeDates?.map((d) => d.toIso8601String()).toList(),
+      'alternative_dates':
+          alternativeDates?.map((d) => d.toIso8601String()).toList(),
     };
   }
 
@@ -55,7 +56,9 @@ class BillCollision extends Equatable {
       totalAmount: (json['total_amount'] as num).toDouble(),
       recommendation: json['recommendation'] as String,
       alternativeDates: json['alternative_dates'] != null
-          ? (json['alternative_dates'] as List).map((d) => DateTime.parse(d as String)).toList()
+          ? (json['alternative_dates'] as List)
+              .map((d) => DateTime.parse(d as String))
+              .toList()
           : null,
     );
   }

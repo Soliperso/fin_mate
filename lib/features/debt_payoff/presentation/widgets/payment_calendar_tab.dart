@@ -36,12 +36,14 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
   }
 
   bool get _canGoPrev {
-    final limit = DateTime(_currentMonth.year, _currentMonth.month - _maxMonthsBehind);
+    final limit =
+        DateTime(_currentMonth.year, _currentMonth.month - _maxMonthsBehind);
     return _displayMonth.isAfter(limit);
   }
 
   bool get _canGoNext {
-    final limit = DateTime(_currentMonth.year, _currentMonth.month + _maxMonthsAhead);
+    final limit =
+        DateTime(_currentMonth.year, _currentMonth.month + _maxMonthsAhead);
     return _displayMonth.isBefore(limit);
   }
 
@@ -103,7 +105,8 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
     final payments = paymentsAsync.valueOrNull ?? [];
 
     final paymentDates = _paymentDatesInMonth(payments, _displayMonth);
-    final dueDays = debts.where((d) => d.dueDay != null).map((d) => d.dueDay!).toSet();
+    final dueDays =
+        debts.where((d) => d.dueDay != null).map((d) => d.dueDay!).toSet();
     final upcoming = _upcomingPayments(debts);
     final pastDue = _pastDuePayments(debts, payments);
     final isCurrentMonth = _displayMonth == _currentMonth;
@@ -115,7 +118,8 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
       },
       color: AppColors.brandTeal,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, 100),
+        padding: const EdgeInsets.fromLTRB(
+            AppSizes.md, AppSizes.md, AppSizes.md, 100),
         children: [
           _CalendarCard(
             displayMonth: _displayMonth,
@@ -252,12 +256,13 @@ class _CalendarCard extends StatelessWidget {
         : AppColors.secondarySystemBackground;
 
     final firstDay = DateTime(displayMonth.year, displayMonth.month, 1);
-    final daysInMonth = DateTime(displayMonth.year, displayMonth.month + 1, 0).day;
+    final daysInMonth =
+        DateTime(displayMonth.year, displayMonth.month + 1, 0).day;
     // weekday: 1=Mon … 7=Sun; offset to 0=Sun
     final startOffset = (firstDay.weekday % 7);
     final today = DateTime.now();
-    final isViewingCurrentMonth = displayMonth.year == today.year &&
-        displayMonth.month == today.month;
+    final isViewingCurrentMonth =
+        displayMonth.year == today.year && displayMonth.month == today.month;
 
     final monthLabel = DateFormat('MMMM yyyy').format(displayMonth);
     const dayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -281,7 +286,9 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 onPressed: onPrev,
                 icon: const Icon(CupertinoIcons.chevron_left, size: 16),
-                color: onPrev != null ? AppColors.textSecondary : AppColors.textTertiary,
+                color: onPrev != null
+                    ? AppColors.textSecondary
+                    : AppColors.textTertiary,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
@@ -302,10 +309,11 @@ class _CalendarCard extends StatelessWidget {
                         onTap: onGoToToday,
                         child: Text(
                           'track.today'.tr(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.brandTeal,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.brandTeal,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                     ],
@@ -315,7 +323,9 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 onPressed: onNext,
                 icon: const Icon(CupertinoIcons.chevron_right, size: 16),
-                color: onNext != null ? AppColors.textSecondary : AppColors.textTertiary,
+                color: onNext != null
+                    ? AppColors.textSecondary
+                    : AppColors.textTertiary,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
@@ -365,7 +375,8 @@ class _CalendarCard extends StatelessWidget {
                       height: 28,
                       decoration: isToday
                           ? BoxDecoration(
-                              color: AppColors.brandTeal.withValues(alpha: 0.15),
+                              color:
+                                  AppColors.brandTeal.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             )
                           : null,
@@ -373,7 +384,8 @@ class _CalendarCard extends StatelessWidget {
                       child: Text(
                         '$day',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                              fontWeight:
+                                  isToday ? FontWeight.bold : FontWeight.normal,
                               color: isToday ? AppColors.brandTeal : null,
                             ),
                       ),
@@ -488,10 +500,13 @@ class _DayDetailSheet extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.secondarySystemBackgroundDark : AppColors.systemBackground,
+        color: isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.systemBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: const EdgeInsets.fromLTRB(AppSizes.lg, AppSizes.sm, AppSizes.lg, AppSizes.xl),
+      padding: const EdgeInsets.fromLTRB(
+          AppSizes.lg, AppSizes.sm, AppSizes.lg, AppSizes.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,11 +524,17 @@ class _DayDetailSheet extends ConsumerWidget {
           ),
           Text(
             'track.dayDetails'.tr(namedArgs: {'day': '$day'}),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           Text(
             DateFormat('MMMM yyyy').format(displayMonth),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSizes.md),
           if (dueDebts.isEmpty)
@@ -592,10 +613,8 @@ class _DayDebtRow extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   'track.alreadyPaid'.tr(),
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.success, fontWeight: FontWeight.w600),
                 ),
               ],
             )
@@ -604,7 +623,8 @@ class _DayDebtRow extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandTeal,
                 foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.xs),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.md, vertical: AppSizes.xs),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: const StadiumBorder(),
@@ -612,10 +632,8 @@ class _DayDebtRow extends StatelessWidget {
               onPressed: onPay,
               child: Text(
                 'track.markAsPaid'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: AppColors.white, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.white, fontWeight: FontWeight.w600),
               ),
             ),
         ],

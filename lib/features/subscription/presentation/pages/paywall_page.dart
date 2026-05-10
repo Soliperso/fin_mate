@@ -23,8 +23,16 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
 
   static const _benefits = [
     (CupertinoIcons.sparkles, 'Unlimited AI Insights', 'vs. 10/month on free'),
-    (CupertinoIcons.camera, 'Receipt scanning with OCR', 'Auto-fill transaction details'),
-    (CupertinoIcons.doc_on_doc, 'Document storage & tax exports', 'Receipts saved forever'),
+    (
+      CupertinoIcons.camera,
+      'Receipt scanning with OCR',
+      'Auto-fill transaction details'
+    ),
+    (
+      CupertinoIcons.doc_on_doc,
+      'Document storage & tax exports',
+      'Receipts saved forever'
+    ),
   ];
 
   @override
@@ -252,11 +260,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
               onPressed: _isPurchasing ? null : _purchase,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brandTeal,
-                padding:
-                    const EdgeInsets.symmetric(vertical: AppSizes.md + 2),
+                padding: const EdgeInsets.symmetric(vertical: AppSizes.md + 2),
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSizes.radiusMd),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
               ),
               child: _isPurchasing
@@ -289,8 +295,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
             onPressed: _restorePurchases,
             child: Text(
               'Restore Purchase',
-              style: TextStyle(
-                  color: AppColors.systemGray, fontSize: 13),
+              style: TextStyle(color: AppColors.systemGray, fontSize: 13),
             ),
           ),
           const SizedBox(height: AppSizes.lg),
@@ -330,9 +335,8 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
-                      ? AppColors.brandTeal
-                      : AppColors.systemGray3,
+                  color:
+                      isSelected ? AppColors.brandTeal : AppColors.systemGray3,
                   width: 2,
                 ),
                 color: isSelected ? AppColors.brandTeal : Colors.transparent,

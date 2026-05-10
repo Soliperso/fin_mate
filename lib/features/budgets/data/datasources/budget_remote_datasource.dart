@@ -43,15 +43,10 @@ class BudgetRemoteDataSource {
       throw Exception('User not authenticated');
     }
 
-    final response = await _supabase
-        .from('budgets')
-        .select('''
+    final response = await _supabase.from('budgets').select('''
           *,
           categories(name, icon, color)
-        ''')
-        .eq('id', id)
-        .eq('user_id', currentUserId)
-        .single();
+        ''').eq('id', id).eq('user_id', currentUserId).single();
 
     final data = Map<String, dynamic>.from(response);
     data['category_name'] = response['categories']?['name'];
@@ -73,14 +68,11 @@ class BudgetRemoteDataSource {
     final budgetData = budget.toJson();
     budgetData['user_id'] = currentUserId;
 
-    final response = await _supabase
-        .from('budgets')
-        .insert(budgetData)
-        .select('''
+    final response =
+        await _supabase.from('budgets').insert(budgetData).select('''
           *,
           categories(name, icon, color)
-        ''')
-        .single();
+        ''').single();
 
     final data = Map<String, dynamic>.from(response);
     data['category_name'] = response['categories']?['name'];
@@ -105,8 +97,7 @@ class BudgetRemoteDataSource {
         .select('''
           *,
           categories(name, icon, color)
-        ''')
-        .single();
+        ''').single();
 
     final data = Map<String, dynamic>.from(response);
     data['category_name'] = response['categories']?['name'];
@@ -123,7 +114,11 @@ class BudgetRemoteDataSource {
       throw Exception('User not authenticated');
     }
 
-    await _supabase.from('budgets').delete().eq('id', id).eq('user_id', currentUserId);
+    await _supabase
+        .from('budgets')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', currentUserId);
   }
 
   /// Get budgets for a specific category

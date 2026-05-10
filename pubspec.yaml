@@ -45,6 +45,7 @@ dependencies:
 
   # Backend & Auth
   supabase_flutter: ^2.9.1
+  app_links: ^6.4.1
 
   # Local Storage (Encrypted)
   hive: ^2.2.3

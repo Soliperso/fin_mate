@@ -69,7 +69,10 @@ class GoalDetailPage extends ConsumerWidget {
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(
-                AppSizes.md, AppSizes.md, AppSizes.md, 100,
+                AppSizes.md,
+                AppSizes.md,
+                AppSizes.md,
+                100,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +92,9 @@ class GoalDetailPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                       boxShadow: [
                         BoxShadow(
-                          color: (isCompleted ? AppColors.success : AppColors.brandTeal)
+                          color: (isCompleted
+                                  ? AppColors.success
+                                  : AppColors.brandTeal)
                               .withValues(alpha: 0.35),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
@@ -106,10 +111,13 @@ class GoalDetailPage extends ConsumerWidget {
                               height: AppSizes.iconContainer,
                               decoration: BoxDecoration(
                                 color: AppColors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusMd),
                               ),
                               child: Icon(
-                                isCompleted ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.money_dollar,
+                                isCompleted
+                                    ? CupertinoIcons.checkmark_circle_fill
+                                    : CupertinoIcons.money_dollar,
                                 color: AppColors.white,
                                 size: AppSizes.iconMd,
                               ),
@@ -132,7 +140,8 @@ class GoalDetailPage extends ConsumerWidget {
                                     Text(
                                       goal.category!,
                                       style: TextStyle(
-                                        color: AppColors.white.withValues(alpha: 0.8),
+                                        color: AppColors.white
+                                            .withValues(alpha: 0.8),
                                         fontSize: 13,
                                       ),
                                     ),
@@ -150,7 +159,8 @@ class GoalDetailPage extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        if (goal.description != null && goal.description!.isNotEmpty) ...[
+                        if (goal.description != null &&
+                            goal.description!.isNotEmpty) ...[
                           const SizedBox(height: AppSizes.sm),
                           Text(
                             goal.description!,
@@ -164,12 +174,15 @@ class GoalDetailPage extends ConsumerWidget {
 
                         // Progress bar
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
                           child: LinearProgressIndicator(
                             value: progress / 100,
                             minHeight: 8,
-                            backgroundColor: AppColors.white.withValues(alpha: 0.25),
-                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.white),
+                            backgroundColor:
+                                AppColors.white.withValues(alpha: 0.25),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppColors.white),
                           ),
                         ),
                         const SizedBox(height: AppSizes.sm),
@@ -211,7 +224,8 @@ class GoalDetailPage extends ConsumerWidget {
                               icon: CupertinoIcons.arrow_up_right,
                               iconColor: AppColors.brandTeal,
                               label: 'goalDetail.remaining'.tr(),
-                              value: currencyFormat.format(remaining < 0 ? 0 : remaining),
+                              value: currencyFormat
+                                  .format(remaining < 0 ? 0 : remaining),
                             ),
                           ),
                           if (goal.deadline != null)
@@ -226,7 +240,9 @@ class GoalDetailPage extends ConsumerWidget {
                               label: isCompleted
                                   ? 'goalDetail.deadline'.tr()
                                   : _getDaysRemaining(goal.deadline!),
-                              value: DateFormat('MMM dd, yyyy', context.locale.languageCode).format(goal.deadline!),
+                              value: DateFormat('MMM dd, yyyy',
+                                      context.locale.languageCode)
+                                  .format(goal.deadline!),
                             ),
                           ),
                       ],
@@ -238,7 +254,8 @@ class GoalDetailPage extends ConsumerWidget {
                         icon: CupertinoIcons.money_dollar,
                         iconColor: AppColors.warning,
                         label: 'goalDetail.monthlyTarget'.tr(),
-                        value: '${currencyFormat.format(goal.monthlySavingsNeeded!)}/${'debt.moAbbr'.tr()}',
+                        value:
+                            '${currencyFormat.format(goal.monthlySavingsNeeded!)}/${'debt.moAbbr'.tr()}',
                       ),
                     ],
                   ],
@@ -254,7 +271,8 @@ class GoalDetailPage extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.success.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusCard),
                         border: Border.all(
                           color: AppColors.success.withValues(alpha: 0.3),
                         ),
@@ -270,7 +288,10 @@ class GoalDetailPage extends ConsumerWidget {
                           const SizedBox(width: AppSizes.sm),
                           Text(
                             'goalDetail.achieved'.tr(),
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
                                   color: AppColors.success,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -293,14 +314,16 @@ class GoalDetailPage extends ConsumerWidget {
                     data: (contributions) {
                       if (contributions.isEmpty) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AppSizes.xl),
+                          padding:
+                              const EdgeInsets.symmetric(vertical: AppSizes.xl),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               EmptyStateCard(
                                 icon: CupertinoIcons.plus_circle,
                                 title: 'goalDetail.noContributions'.tr(),
-                                message: 'goalDetail.noContributionsMessage'.tr(),
+                                message:
+                                    'goalDetail.noContributionsMessage'.tr(),
                                 backgroundColor: AppColors.brandTeal,
                               ),
                             ],
@@ -310,8 +333,11 @@ class GoalDetailPage extends ConsumerWidget {
 
                       return Container(
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.cardBackgroundDark : AppColors.white,
-                          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                          color: isDark
+                              ? AppColors.cardBackgroundDark
+                              : AppColors.white,
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusCard),
                         ),
                         child: Column(
                           children: [
@@ -324,11 +350,14 @@ class GoalDetailPage extends ConsumerWidget {
                                   await showDialog(
                                     context: context,
                                     builder: (dialogContext) => AlertDialog(
-                                      title: Text('goalDetail.deleteContribution'.tr()),
-                                      content: Text('goalDetail.deleteMessage'.tr()),
+                                      title: Text(
+                                          'goalDetail.deleteContribution'.tr()),
+                                      content:
+                                          Text('goalDetail.deleteMessage'.tr()),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.pop(dialogContext),
+                                          onPressed: () =>
+                                              Navigator.pop(dialogContext),
                                           child: Text('common.cancel'.tr()),
                                         ),
                                         TextButton(
@@ -336,7 +365,9 @@ class GoalDetailPage extends ConsumerWidget {
                                             confirmed = true;
                                             Navigator.pop(dialogContext);
                                           },
-                                          child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
+                                          child: Text('common.delete'.tr(),
+                                              style: const TextStyle(
+                                                  color: AppColors.error)),
                                         ),
                                       ],
                                     ),
@@ -349,29 +380,39 @@ class GoalDetailPage extends ConsumerWidget {
                                       .deleteContribution(contributions[i].id);
                                   if (success) {
                                     ref.invalidate(goalProvider(goalId));
-                                    ref.invalidate(goalContributionsProvider(goalId));
+                                    ref.invalidate(
+                                        goalContributionsProvider(goalId));
                                     ref.invalidate(savingsGoalsProvider);
                                     ref.invalidate(goalsSummaryProvider);
                                     if (context.mounted) {
-                                      SuccessSnackbar.show(context, message: 'goalDetail.contributionDeleted'.tr());
+                                      SuccessSnackbar.show(context,
+                                          message:
+                                              'goalDetail.contributionDeleted'
+                                                  .tr());
                                     }
                                   } else if (context.mounted) {
-                                    ErrorSnackbar.show(context, message: 'goalDetail.failedToDelete'.tr());
+                                    ErrorSnackbar.show(context,
+                                        message:
+                                            'goalDetail.failedToDelete'.tr());
                                   }
                                 },
                                 background: Container(
                                   alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: AppSizes.lg),
+                                  padding:
+                                      const EdgeInsets.only(right: AppSizes.lg),
                                   decoration: BoxDecoration(
                                     color: AppColors.error,
-                                    borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                                    borderRadius: BorderRadius.circular(
+                                        AppSizes.radiusCard),
                                   ),
-                                  child: const Icon(CupertinoIcons.trash, color: AppColors.white),
+                                  child: const Icon(CupertinoIcons.trash,
+                                      color: AppColors.white),
                                 ),
                                 child: _ContributionRow(
                                   contribution: contributions[i],
                                   currencyFormat: currencyFormat,
-                                  onDelete: () => _showDeleteContributionConfirmation(
+                                  onDelete: () =>
+                                      _showDeleteContributionConfirmation(
                                     context,
                                     ref,
                                     contributions[i].id,
@@ -401,8 +442,10 @@ class GoalDetailPage extends ConsumerWidget {
                     ),
                     error: (error, stack) => ErrorRetryWidget(
                       title: 'goalDetail.failedToLoadContributions'.tr(),
-                      message: 'goalDetail.failedToLoadContributionsMessage'.tr(),
-                      onRetry: () => ref.invalidate(goalContributionsProvider(goalId)),
+                      message:
+                          'goalDetail.failedToLoadContributionsMessage'.tr(),
+                      onRetry: () =>
+                          ref.invalidate(goalContributionsProvider(goalId)),
                     ),
                   ),
                 ],
@@ -438,7 +481,8 @@ class GoalDetailPage extends ConsumerWidget {
                   icon: const Icon(CupertinoIcons.add, size: 20),
                   label: Text(
                     'goalDetail.addContribution'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -486,7 +530,8 @@ class GoalDetailPage extends ConsumerWidget {
       final achieved = goalSnapshot != null &&
           contributedAmount != null &&
           !goalSnapshot.isCompleted &&
-          (goalSnapshot.currentAmount + contributedAmount) >= goalSnapshot.targetAmount;
+          (goalSnapshot.currentAmount + contributedAmount) >=
+              goalSnapshot.targetAmount;
 
       if (achieved) {
         ref.read(goalOperationsProvider.notifier).markGoalAsCompleted(goalId);
@@ -497,7 +542,8 @@ class GoalDetailPage extends ConsumerWidget {
           builder: (_) => GoalAchievementDialog(goalName: goalSnapshot.name),
         );
       } else {
-        SuccessSnackbar.show(context, message: 'goalDetail.contributionAdded'.tr());
+        SuccessSnackbar.show(context,
+            message: 'goalDetail.contributionAdded'.tr());
       }
     });
   }
@@ -530,18 +576,22 @@ class GoalDetailPage extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
-              final success =
-                  await ref.read(goalOperationsProvider.notifier).deleteGoal(goalId);
+              final success = await ref
+                  .read(goalOperationsProvider.notifier)
+                  .deleteGoal(goalId);
               if (success && context.mounted) {
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
                 context.pop();
-                SuccessSnackbar.show(context, message: 'goalDetail.goalDeleted'.tr());
+                SuccessSnackbar.show(context,
+                    message: 'goalDetail.goalDeleted'.tr());
               } else if (context.mounted) {
-                ErrorSnackbar.show(context, message: 'goalDetail.failedToDeleteGoal'.tr());
+                ErrorSnackbar.show(context,
+                    message: 'goalDetail.failedToDeleteGoal'.tr());
               }
             },
-            child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
+            child: Text('common.delete'.tr(),
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -574,12 +624,15 @@ class GoalDetailPage extends ConsumerWidget {
                 ref.invalidate(goalContributionsProvider(goalId));
                 ref.invalidate(savingsGoalsProvider);
                 ref.invalidate(goalsSummaryProvider);
-                SuccessSnackbar.show(context, message: 'goalDetail.contributionDeleted'.tr());
+                SuccessSnackbar.show(context,
+                    message: 'goalDetail.contributionDeleted'.tr());
               } else if (context.mounted) {
-                ErrorSnackbar.show(context, message: 'goalDetail.failedToDelete'.tr());
+                ErrorSnackbar.show(context,
+                    message: 'goalDetail.failedToDelete'.tr());
               }
             },
-            child: Text('common.delete'.tr(), style: const TextStyle(color: AppColors.error)),
+            child: Text('common.delete'.tr(),
+                style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -625,17 +678,21 @@ class _InfoChip extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: (Theme.of(context).textTheme.bodySmall ?? const TextStyle()).copyWith(
-                        color: AppColors.textSecondary,
-                        inherit: true,
-                      ),
+                  style: (Theme.of(context).textTheme.bodySmall ??
+                          const TextStyle())
+                      .copyWith(
+                    color: AppColors.textSecondary,
+                    inherit: true,
+                  ),
                 ),
                 Text(
                   value,
-                  style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
-                        fontWeight: FontWeight.w600,
-                        inherit: true,
-                      ),
+                  style: (Theme.of(context).textTheme.bodyMedium ??
+                          const TextStyle())
+                      .copyWith(
+                    fontWeight: FontWeight.w600,
+                    inherit: true,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -692,12 +749,14 @@ class _ContributionRow extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  DateFormat('MMM dd, yyyy', context.locale.languageCode).format(contribution.contributedAt),
+                  DateFormat('MMM dd, yyyy', context.locale.languageCode)
+                      .format(contribution.contributedAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),
                 ),
-                if (contribution.notes != null && contribution.notes!.isNotEmpty)
+                if (contribution.notes != null &&
+                    contribution.notes!.isNotEmpty)
                   Text(
                     contribution.notes!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(

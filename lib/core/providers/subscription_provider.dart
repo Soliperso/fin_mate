@@ -19,7 +19,8 @@ final paymentServiceProvider = Provider<PaymentService>((ref) {
 // ============================================================================
 
 /// FutureProvider that fetches subscription status from database
-final subscriptionStatusProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+final subscriptionStatusProvider =
+    FutureProvider<Map<String, dynamic>?>((ref) async {
   final auth = Supabase.instance.client.auth;
   final userId = auth.currentUser?.id;
 
@@ -41,7 +42,8 @@ final stripePremiumProvider = FutureProvider<bool>((ref) async {
 });
 
 /// Provider for billing history
-final billingHistoryProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final billingHistoryProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final auth = Supabase.instance.client.auth;
   final userId = auth.currentUser?.id;
 
@@ -104,7 +106,8 @@ final isPremiumProvider = FutureProvider<bool>((ref) async {
 // ============================================================================
 
 /// Helper provider to get detailed subscription information
-final userSubscriptionProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+final userSubscriptionProvider =
+    FutureProvider<Map<String, dynamic>?>((ref) async {
   try {
     final auth = Supabase.instance.client.auth;
     final userId = auth.currentUser?.id;

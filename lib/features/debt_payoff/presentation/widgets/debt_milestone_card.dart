@@ -71,7 +71,8 @@ class DebtMilestoneCard extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.brandTeal.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusFull),
                         border: Border.all(
                           color: AppColors.brandTeal.withValues(alpha: 0.3),
                           width: 0.5,
@@ -88,7 +89,10 @@ class DebtMilestoneCard extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(
                             gamification.badgeTitle,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
                                   color: AppColors.brandTeal,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -105,7 +109,10 @@ class DebtMilestoneCard extends ConsumerWidget {
                           children: [
                             Text(
                               '${gamification.monthsToNextBadge} mo to ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                     fontSize: 10,
                                   ),
@@ -121,7 +128,10 @@ class DebtMilestoneCard extends ConsumerWidget {
                               ),
                             Text(
                               gamification.nextBadgeTitle,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                     fontSize: 10,
                                   ),
@@ -151,7 +161,8 @@ class DebtMilestoneCard extends ConsumerWidget {
                   _StatChip(
                     icon: CupertinoIcons.checkmark_circle_fill,
                     iconColor: AppColors.systemGreen,
-                    label: '${currencyFormat.format(gamification.totalPaidAllTime)} paid',
+                    label:
+                        '${currencyFormat.format(gamification.totalPaidAllTime)} paid',
                   ),
                 if (gamification.overallProgressPercent != null)
                   _StatChip(
@@ -276,7 +287,10 @@ class _MilestoneRow extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               'Paid Off!',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
                                     color: color,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -285,10 +299,11 @@ class _MilestoneRow extends StatelessWidget {
                         )
                       : Text(
                           '${pct.toStringAsFixed(0)}% → next: ${milestone.nextMilestone}%',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: color,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: color,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                   if (!milestone.isComplete && milestone.currentBalance > 0)
                     Text(

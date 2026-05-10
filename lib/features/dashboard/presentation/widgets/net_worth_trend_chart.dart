@@ -29,7 +29,10 @@ class NetWorthTrendChart extends ConsumerWidget {
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       border: Border.all(color: Colors.transparent, width: 0),
       padding: const EdgeInsets.fromLTRB(
-        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,10 +74,11 @@ class NetWorthTrendChart extends ConsumerWidget {
                       getTitlesWidget: (value, meta) {
                         return Text(
                           currencyFormat.format(value),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: 10,
+                                    color: AppColors.textSecondary,
+                                  ),
                         );
                       },
                     ),
@@ -84,13 +88,17 @@ class NetWorthTrendChart extends ConsumerWidget {
                       showTitles: true,
                       reservedSize: 24,
                       getTitlesWidget: (value, meta) {
-                        if (value.toInt() >= 0 && value.toInt() < snapshots.length) {
+                        if (value.toInt() >= 0 &&
+                            value.toInt() < snapshots.length) {
                           final snapshot = snapshots[value.toInt()];
                           return Padding(
                             padding: const EdgeInsets.only(top: AppSizes.sm),
                             child: Text(
                               DateFormat('MMM d').format(snapshot.date),
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     fontSize: 9,
                                     color: AppColors.textSecondary,
                                   ),
@@ -195,7 +203,9 @@ class NetWorthTrendChart extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isGrowth ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
+            isGrowth
+                ? CupertinoIcons.arrow_up_right
+                : CupertinoIcons.arrow_down_right,
             color: isGrowth ? AppColors.success : AppColors.error,
             size: AppSizes.iconXs,
           ),

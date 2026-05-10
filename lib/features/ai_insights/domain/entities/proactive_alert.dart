@@ -83,7 +83,9 @@ class ProactiveAlert extends Equatable {
   });
 
   bool get isDismissed => dismissedAt != null;
-  bool get isActive => !isDismissed && createdAt.add(const Duration(days: 7)).isAfter(DateTime.now());
+  bool get isActive =>
+      !isDismissed &&
+      createdAt.add(const Duration(days: 7)).isAfter(DateTime.now());
 
   @override
   List<Object?> get props => [
@@ -150,7 +152,9 @@ class ProactiveAlert extends Equatable {
       title: json['title'] as String,
       message: json['message'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      dismissedAt: json['dismissed_at'] != null ? DateTime.parse(json['dismissed_at'] as String) : null,
+      dismissedAt: json['dismissed_at'] != null
+          ? DateTime.parse(json['dismissed_at'] as String)
+          : null,
       actionData: json['action_data'] as Map<String, dynamic>?,
       isRead: json['is_read'] as bool? ?? false,
     );

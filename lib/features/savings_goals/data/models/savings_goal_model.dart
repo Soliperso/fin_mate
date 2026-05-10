@@ -27,13 +27,17 @@ class SavingsGoalModel extends SavingsGoal {
       description: json['description'] as String?,
       targetAmount: (json['target_amount'] as num).toDouble(),
       currentAmount: (json['current_amount'] as num?)?.toDouble() ?? 0.0,
-      deadline: json['deadline'] != null ? DateTime.parse(json['deadline'] as String) : null,
+      deadline: json['deadline'] != null
+          ? DateTime.parse(json['deadline'] as String)
+          : null,
       category: json['category'] as String?,
       icon: json['icon'] as String?,
       color: json['color'] as String?,
       isShared: json['is_shared'] as bool? ?? false,
       isCompleted: json['is_completed'] as bool? ?? false,
-      completedAt: json['completed_at'] != null ? DateTime.parse(json['completed_at'] as String) : null,
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );

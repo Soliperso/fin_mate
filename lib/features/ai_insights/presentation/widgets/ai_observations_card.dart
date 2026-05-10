@@ -123,10 +123,8 @@ class AiObservationsCard extends StatelessWidget {
     }
 
     // 3. Upcoming bill pressure (next 7 days with scheduled transactions)
-    final billDays = days
-        .take(7)
-        .where((d) => d.scheduledTransactions.isNotEmpty)
-        .length;
+    final billDays =
+        days.take(7).where((d) => d.scheduledTransactions.isNotEmpty).length;
     if (billDays > 0) {
       observations.add(_Observation(
         icon: CupertinoIcons.calendar_badge_plus,

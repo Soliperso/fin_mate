@@ -75,7 +75,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
                         : AppColors.textTertiary,
                   ),
                   filled: true,
-                  fillColor: Theme.of(context).cardTheme.color ?? AppColors.cardBackground,
+                  fillColor: Theme.of(context).cardTheme.color ??
+                      AppColors.cardBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusLg),
                     borderSide: BorderSide.none,
@@ -94,7 +95,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
             Material(
               color: _hasText && !widget.isLoading
                   ? AppColors.primaryTeal
-                  : (Theme.of(context).cardTheme.color ?? AppColors.cardBackground),
+                  : (Theme.of(context).cardTheme.color ??
+                      AppColors.cardBackground),
               borderRadius: BorderRadius.circular(AppSizes.radiusLg),
               child: InkWell(
                 onTap: _handleSend,
@@ -116,7 +118,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
                         )
                       : Icon(
                           CupertinoIcons.arrow_up_circle_fill,
-                          color: _hasText ? Colors.white : AppColors.textTertiary,
+                          color:
+                              _hasText ? Colors.white : AppColors.textTertiary,
                           size: 20,
                         ),
                 ),

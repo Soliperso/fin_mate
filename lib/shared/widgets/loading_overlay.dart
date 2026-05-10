@@ -26,7 +26,8 @@ class LoadingOverlay extends StatelessWidget {
           ClipRect(
             child: BackdropFilter(
               filter: enableGlass
-                  ? ImageFilter.blur(sigmaX: AppEffects.blurSm, sigmaY: AppEffects.blurSm)
+                  ? ImageFilter.blur(
+                      sigmaX: AppEffects.blurSm, sigmaY: AppEffects.blurSm)
                   : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
               child: Container(
                 color: enableGlass

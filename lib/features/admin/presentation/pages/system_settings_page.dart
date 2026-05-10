@@ -164,7 +164,9 @@ class SystemSettingsPage extends ConsumerWidget {
       child: Text(
         text.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel,
+              color: isDark
+                  ? AppColors.secondaryLabelDark
+                  : AppColors.secondaryLabel,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -205,8 +207,7 @@ class SystemSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTile(
-      BuildContext context, bool isDark, _SettingsTileData data) {
+  Widget _buildTile(BuildContext context, bool isDark, _SettingsTileData data) {
     return InkWell(
       onTap: data.onTap,
       child: Padding(
@@ -249,9 +250,8 @@ class SystemSettingsPage extends ConsumerWidget {
             Icon(
               CupertinoIcons.chevron_right,
               size: 16,
-              color: isDark
-                  ? AppColors.tertiaryLabelDark
-                  : AppColors.systemGray3,
+              color:
+                  isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3,
             ),
           ],
         ),
@@ -288,7 +288,9 @@ class SystemSettingsPage extends ConsumerWidget {
         : Rect.fromCenter(center: const Offset(200, 400), width: 1, height: 1);
 
     try {
-      final csv = await ref.read(adminRemoteDataSourceProvider).exportAllTransactionsCsv();
+      final csv = await ref
+          .read(adminRemoteDataSourceProvider)
+          .exportAllTransactionsCsv();
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/finmate_export.csv');
       await file.writeAsString(csv);
@@ -334,7 +336,8 @@ class SystemSettingsPage extends ConsumerWidget {
     try {
       await ref.read(adminRemoteDataSourceProvider).cleanOldData();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Old analytics data removed successfully.')),
+        const SnackBar(
+            content: Text('Old analytics data removed successfully.')),
       );
     } catch (e) {
       messenger.showSnackBar(
@@ -411,163 +414,166 @@ class SystemSettingsPage extends ConsumerWidget {
                 // Content
                 Expanded(
                   child: ref.watch(systemAuditLogProvider).when(
-                    data: (logs) {
-                      if (logs.isEmpty) {
-                        return Center(
+                        data: (logs) {
+                          if (logs.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.doc_text,
+                                    size: 48,
+                                    color: isDark
+                                        ? AppColors.secondaryLabelDark
+                                        : AppColors.secondaryLabel,
+                                  ),
+                                  const SizedBox(height: AppSizes.md),
+                                  Text(
+                                    'No activity recorded yet',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? AppColors.secondaryLabelDark
+                                              : AppColors.secondaryLabel,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return ListView.separated(
+                            controller: scrollController,
+                            padding: const EdgeInsets.all(AppSizes.pagePadding),
+                            itemCount: logs.length,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 1,
+                              color: isDark
+                                  ? AppColors.separatorDark
+                                  : AppColors.separator,
+                            ),
+                            itemBuilder: (context, index) {
+                              final entry = logs[index];
+                              final action =
+                                  entry['action'] ?? 'Unknown Action';
+                              final createdAt = entry['created_at'] ?? 'N/A';
+                              final userId = entry['user_id'] ?? 'N/A';
+
+                              // Format timestamp
+                              String formattedTime = 'N/A';
+                              try {
+                                if (createdAt != 'N/A') {
+                                  final dateTime = DateTime.parse(createdAt);
+                                  formattedTime =
+                                      DateFormat('MMM d, yyyy · h:mm a')
+                                          .format(dateTime);
+                                }
+                              } catch (_) {
+                                formattedTime = createdAt;
+                              }
+
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      action,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: isDark
+                                                ? AppColors.labelDark
+                                                : AppColors.label,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      formattedTime,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: isDark
+                                                ? AppColors.secondaryLabelDark
+                                                : AppColors.secondaryLabel,
+                                            fontSize: 11,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'User: $userId',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: isDark
+                                                ? AppColors.tertiaryLabelDark
+                                                : AppColors.systemGray3,
+                                            fontSize: 10,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        loading: () => ListView.separated(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(AppSizes.pagePadding),
+                          itemCount: 5,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LoadingSkeleton(
+                                width: 150,
+                                height: 12,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              const SizedBox(height: 6),
+                              LoadingSkeleton(
+                                width: 200,
+                                height: 10,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              const SizedBox(height: 4),
+                              LoadingSkeleton(
+                                width: 100,
+                                height: 9,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ],
+                          ),
+                        ),
+                        error: (error, _) => Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                CupertinoIcons.doc_text,
+                                CupertinoIcons.exclamationmark_circle,
                                 size: 48,
-                                color: isDark
-                                    ? AppColors.secondaryLabelDark
-                                    : AppColors.secondaryLabel,
+                                color: AppColors.systemRed,
                               ),
                               const SizedBox(height: AppSizes.md),
                               Text(
-                                'No activity recorded yet',
+                                'Error loading logs',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
-                                    ?.copyWith(
-                                      color: isDark
-                                          ? AppColors.secondaryLabelDark
-                                          : AppColors.secondaryLabel,
-                                    ),
+                                    ?.copyWith(color: AppColors.systemRed),
                               ),
                             ],
                           ),
-                        );
-                      }
-
-                      return ListView.separated(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(AppSizes.pagePadding),
-                        itemCount: logs.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 1,
-                          color: isDark
-                              ? AppColors.separatorDark
-                              : AppColors.separator,
                         ),
-                        itemBuilder: (context, index) {
-                          final entry = logs[index];
-                          final action = entry['action'] ?? 'Unknown Action';
-                          final createdAt = entry['created_at'] ?? 'N/A';
-                          final userId = entry['user_id'] ?? 'N/A';
-
-                          // Format timestamp
-                          String formattedTime = 'N/A';
-                          try {
-                            if (createdAt != 'N/A') {
-                              final dateTime = DateTime.parse(createdAt);
-                              formattedTime =
-                                  DateFormat('MMM d, yyyy · h:mm a')
-                                      .format(dateTime);
-                            }
-                          } catch (_) {
-                            formattedTime = createdAt;
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  action,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? AppColors.labelDark
-                                            : AppColors.label,
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  formattedTime,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: isDark
-                                            ? AppColors.secondaryLabelDark
-                                            : AppColors.secondaryLabel,
-                                        fontSize: 11,
-                                      ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'User: $userId',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: isDark
-                                            ? AppColors.tertiaryLabelDark
-                                            : AppColors.systemGray3,
-                                        fontSize: 10,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    loading: () => ListView.separated(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(AppSizes.pagePadding),
-                      itemCount: 5,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LoadingSkeleton(
-                            width: 150,
-                            height: 12,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          const SizedBox(height: 6),
-                          LoadingSkeleton(
-                            width: 200,
-                            height: 10,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          const SizedBox(height: 4),
-                          LoadingSkeleton(
-                            width: 100,
-                            height: 9,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ],
                       ),
-                    ),
-                    error: (error, _) => Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            CupertinoIcons.exclamationmark_circle,
-                            size: 48,
-                            color: AppColors.systemRed,
-                          ),
-                          const SizedBox(height: AppSizes.md),
-                          Text(
-                            'Error loading logs',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: AppColors.systemRed),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -655,7 +661,8 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
         : AppColors.systemBackground;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         decoration: BoxDecoration(
           color: sheetColor,
@@ -713,8 +720,7 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: 'Title',
-                  counterText:
-                      '${_titleController.text.length}/$_maxTitle',
+                  counterText: '${_titleController.text.length}/$_maxTitle',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
@@ -735,8 +741,7 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
                 decoration: InputDecoration(
                   labelText: 'Message',
                   alignLabelWithHint: true,
-                  counterText:
-                      '${_bodyController.text.length}/$_maxBody',
+                  counterText: '${_bodyController.text.length}/$_maxBody',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),

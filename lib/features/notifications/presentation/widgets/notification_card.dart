@@ -122,7 +122,10 @@ class NotificationCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 notification.title,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       fontWeight: notification.isRead
                                           ? FontWeight.w500
                                           : FontWeight.w600,
@@ -145,12 +148,13 @@ class NotificationCard extends StatelessWidget {
                         // Message
                         Text(
                           notification.message,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: notification.isRead
-                                    ? FontWeight.normal
-                                    : FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontWeight: notification.isRead
+                                        ? FontWeight.normal
+                                        : FontWeight.w500,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -162,14 +166,20 @@ class NotificationCard extends StatelessWidget {
                           children: [
                             Text(
                               _formatTime(notification.createdAt),
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                             if (notification.actionLabel != null)
                               Text(
                                 notification.actionLabel!,
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
                                       color: AppColors.brandTeal,
                                       fontWeight: FontWeight.w600,
                                     ),

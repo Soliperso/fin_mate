@@ -126,8 +126,8 @@ class _SystemAnalyticsPageEnhancedState
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSizes.pagePadding, AppSizes.md, AppSizes.pagePadding, AppSizes.sm),
+              padding: const EdgeInsets.fromLTRB(AppSizes.pagePadding,
+                  AppSizes.md, AppSizes.pagePadding, AppSizes.sm),
               child: Text(
                 'TIME RANGE',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -206,12 +206,9 @@ class _SystemAnalyticsPageEnhancedState
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? AppColors.brandTeal
-                              : null,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected ? AppColors.brandTeal : null,
                         ),
                   ),
                   Text(
@@ -355,12 +352,15 @@ class _SystemAnalyticsPageEnhancedState
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSizes.md, vertical: AppSizes.xs),
               tabs: const [
-                _AdminTab(icon: CupertinoIcons.square_grid_2x2, label: 'Overview'),
+                _AdminTab(
+                    icon: CupertinoIcons.square_grid_2x2, label: 'Overview'),
                 _AdminTab(icon: CupertinoIcons.chart_bar, label: 'Trends'),
                 _AdminTab(icon: CupertinoIcons.person_2, label: 'Engagement'),
-                _AdminTab(icon: CupertinoIcons.checkmark_seal, label: 'Features'),
+                _AdminTab(
+                    icon: CupertinoIcons.checkmark_seal, label: 'Features'),
                 _AdminTab(icon: CupertinoIcons.lightbulb, label: 'Insights'),
-                _AdminTab(icon: CupertinoIcons.creditcard, label: 'Subscription'),
+                _AdminTab(
+                    icon: CupertinoIcons.creditcard, label: 'Subscription'),
               ] as List<Widget>,
             ),
           ),
@@ -445,9 +445,7 @@ class _SystemAnalyticsPageEnhancedState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LoadingSkeleton(
-              width: 160,
-              height: 14,
-              borderRadius: BorderRadius.circular(4)),
+              width: 160, height: 14, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: AppSizes.md),
           LoadingSkeleton(
               height: 160,
@@ -482,7 +480,8 @@ class _SystemAnalyticsPageEnhancedState
                   ? EmptyStateCard(
                       icon: CupertinoIcons.arrow_up_right,
                       title: 'No User Growth Data',
-                      message: 'User growth trends will appear once data is available',
+                      message:
+                          'User growth trends will appear once data is available',
                       backgroundColor: AppColors.brandTeal,
                     )
                   : Row(
@@ -491,7 +490,9 @@ class _SystemAnalyticsPageEnhancedState
                           child: _chartCard(
                             child: AnalyticsLineChart(
                               dates: trends.map((t) => t.periodStart).toList(),
-                              values: trends.map((t) => t.newUsers.toDouble()).toList(),
+                              values: trends
+                                  .map((t) => t.newUsers.toDouble())
+                                  .toList(),
                               title: 'New Users',
                               lineColor: AppColors.brandTeal,
                               compact: true,
@@ -503,7 +504,9 @@ class _SystemAnalyticsPageEnhancedState
                           child: _chartCard(
                             child: AnalyticsLineChart(
                               dates: trends.map((t) => t.periodStart).toList(),
-                              values: trends.map((t) => t.cumulativeUsers.toDouble()).toList(),
+                              values: trends
+                                  .map((t) => t.cumulativeUsers.toDouble())
+                                  .toList(),
                               title: 'Total Users',
                               lineColor: AppColors.systemOrange,
                               compact: true,
@@ -527,7 +530,6 @@ class _SystemAnalyticsPageEnhancedState
               ),
             ),
             const SizedBox(height: AppSizes.lg),
-
             _sectionLabel('Financial Trends'),
             const SizedBox(height: AppSizes.sm),
             financialTrendsAsync.when(
@@ -535,7 +537,8 @@ class _SystemAnalyticsPageEnhancedState
                   ? EmptyStateCard(
                       icon: CupertinoIcons.chart_bar,
                       title: 'No Financial Data',
-                      message: 'Financial trends will appear as users make transactions',
+                      message:
+                          'Financial trends will appear as users make transactions',
                       backgroundColor: AppColors.systemGreen,
                     )
                   : Column(
@@ -545,7 +548,8 @@ class _SystemAnalyticsPageEnhancedState
                           child: AnalyticsLineChart(
                             dates: trends.map((t) => t.periodStart).toList(),
                             values: trends.map((t) => t.totalIncome).toList(),
-                            secondValues: trends.map((t) => t.totalExpense).toList(),
+                            secondValues:
+                                trends.map((t) => t.totalExpense).toList(),
                             title: 'Income vs Expenses',
                             lineColor: AppColors.systemGreen,
                             secondLineColor: AppColors.systemRed,
@@ -560,7 +564,9 @@ class _SystemAnalyticsPageEnhancedState
                         _chartCard(
                           child: AnalyticsLineChart(
                             dates: trends.map((t) => t.periodStart).toList(),
-                            values: trends.map((t) => t.transactionCount.toDouble()).toList(),
+                            values: trends
+                                .map((t) => t.transactionCount.toDouble())
+                                .toList(),
                             title: 'Transaction Volume',
                             lineColor: AppColors.tealBlue,
                           ),
@@ -610,7 +616,8 @@ class _SystemAnalyticsPageEnhancedState
   // ── Engagement Tab ─────────────────────────────────────────────────────────
 
   Widget _buildEngagementTab() {
-    final periodDays = _dateRange.endDate.difference(_dateRange.startDate).inDays;
+    final periodDays =
+        _dateRange.endDate.difference(_dateRange.startDate).inDays;
     final engagementAsync = ref.watch(engagementMetricsProvider(periodDays));
     final categoryBreakdownAsync =
         ref.watch(categoryBreakdownProvider(_dateRange));
@@ -649,12 +656,10 @@ class _SystemAnalyticsPageEnhancedState
                         horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: cardColor,
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusCard),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                       border: isDark
                           ? null
-                          : Border.all(
-                              color: AppColors.separator, width: 0.5),
+                          : Border.all(color: AppColors.separator, width: 0.5),
                       boxShadow: AppColors.cardShadow(isDark),
                     ),
                     child: Row(
@@ -667,8 +672,7 @@ class _SystemAnalyticsPageEnhancedState
                             borderRadius:
                                 BorderRadius.circular(AppSizes.radiusSm),
                           ),
-                          child: Icon(accent.$1,
-                              size: 16, color: accent.$2),
+                          child: Icon(accent.$1, size: 16, color: accent.$2),
                         ),
                         const SizedBox(width: AppSizes.sm),
                         Expanded(
@@ -703,14 +707,12 @@ class _SystemAnalyticsPageEnhancedState
                         const SizedBox(width: AppSizes.sm),
                         Text(
                           formattedValue,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: accent.$2,
-                                letterSpacing: -0.3,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: accent.$2,
+                                    letterSpacing: -0.3,
+                                  ),
                         ),
                       ],
                     ),
@@ -751,7 +753,6 @@ class _SystemAnalyticsPageEnhancedState
               ),
             ),
             const SizedBox(height: AppSizes.lg),
-
             _sectionLabel('Top Spending Categories'),
             const SizedBox(height: AppSizes.sm),
             categoryBreakdownAsync.when(
@@ -759,7 +760,8 @@ class _SystemAnalyticsPageEnhancedState
                   ? EmptyStateCard(
                       icon: CupertinoIcons.square_grid_2x2,
                       title: 'No Category Data',
-                      message: 'Category data will appear once transactions are created',
+                      message:
+                          'Category data will appear once transactions are created',
                       backgroundColor: AppColors.tealBlue,
                     )
                   : Column(
@@ -822,7 +824,8 @@ class _SystemAnalyticsPageEnhancedState
               child: EmptyStateCard(
                 icon: CupertinoIcons.square_grid_2x2,
                 title: 'No Feature Data',
-                message: 'Feature adoption metrics will appear once users start using features',
+                message:
+                    'Feature adoption metrics will appear once users start using features',
                 backgroundColor: AppColors.tealBlue,
               ),
             );
@@ -855,12 +858,10 @@ class _SystemAnalyticsPageEnhancedState
                         horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: cardColor,
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusCard),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusCard),
                       border: isDark
                           ? null
-                          : Border.all(
-                              color: AppColors.separator, width: 0.5),
+                          : Border.all(color: AppColors.separator, width: 0.5),
                       boxShadow: AppColors.cardShadow(isDark),
                     ),
                     child: Column(
@@ -908,22 +909,19 @@ class _SystemAnalyticsPageEnhancedState
                             backgroundColor: isDark
                                 ? AppColors.tertiarySystemBackgroundDark
                                 : AppColors.secondarySystemBackground,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(tier.$1),
+                            valueColor: AlwaysStoppedAnimation<Color>(tier.$1),
                             minHeight: 6,
                           ),
                         ),
                         const SizedBox(height: AppSizes.sm),
                         Text(
                           '${feature.usersUsingFeature} of ${feature.totalUsers} users · ${feature.totalItems} total items',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: isDark
-                                    ? AppColors.secondaryLabelDark
-                                    : AppColors.secondaryLabel,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: isDark
+                                        ? AppColors.secondaryLabelDark
+                                        : AppColors.secondaryLabel,
+                                  ),
                         ),
                       ],
                     ),
@@ -1083,9 +1081,8 @@ class _SystemAnalyticsPageEnhancedState
                     _chartCard(
                       child: AnalyticsLineChart(
                         dates: timeline.map((t) => t.periodDate).toList(),
-                        values: timeline
-                            .map((t) => t.newSubs.toDouble())
-                            .toList(),
+                        values:
+                            timeline.map((t) => t.newSubs.toDouble()).toList(),
                         title: 'New Subscriptions',
                         lineColor: AppColors.systemGreen,
                       ),
@@ -1159,7 +1156,8 @@ class _SystemAnalyticsPageEnhancedState
                                 .toList()
                                 .reversed
                                 .toList(),
-                            title: 'Trial-to-Paid Conversion by Signup Month (%)',
+                            title:
+                                'Trial-to-Paid Conversion by Signup Month (%)',
                             barColor: AppColors.systemPurple,
                           ),
                         ),
@@ -1336,14 +1334,14 @@ class _SystemAnalyticsPageEnhancedState
   }
 
   IconData _churnKpiIcon(String metricKey) => switch (metricKey) {
-        'active_subscribers'   => CupertinoIcons.checkmark_seal_fill,
-        'new_subscriptions'    => CupertinoIcons.plus_circle_fill,
-        'cancellations'        => CupertinoIcons.xmark_circle_fill,
-        'renewals'             => CupertinoIcons.arrow_clockwise,
-        'trial_conversion_rate'=> CupertinoIcons.chart_bar_fill,
-        'churn_rate'           => CupertinoIcons.arrow_down_right_circle,
-        'revenue_churn_rate'   => CupertinoIcons.minus_circle,
-        _                      => CupertinoIcons.creditcard,
+        'active_subscribers' => CupertinoIcons.checkmark_seal_fill,
+        'new_subscriptions' => CupertinoIcons.plus_circle_fill,
+        'cancellations' => CupertinoIcons.xmark_circle_fill,
+        'renewals' => CupertinoIcons.arrow_clockwise,
+        'trial_conversion_rate' => CupertinoIcons.chart_bar_fill,
+        'churn_rate' => CupertinoIcons.arrow_down_right_circle,
+        'revenue_churn_rate' => CupertinoIcons.minus_circle,
+        _ => CupertinoIcons.creditcard,
       };
 
   /// Tile layout (vertical) for 2-column subscription KPI grid.
@@ -1450,11 +1448,12 @@ class _SystemAnalyticsPageEnhancedState
                         const SizedBox(width: 2),
                         Text(
                           change.abs().toStringAsFixed(1),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: changeColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 11.0,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: changeColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11.0,
+                                  ),
                         ),
                       ],
                     ),
@@ -1494,7 +1493,8 @@ class _SystemAnalyticsPageEnhancedState
                   return EmptyStateCard(
                     icon: CupertinoIcons.info_circle,
                     title: 'No Percentile Data',
-                    message: 'Net worth distribution data will appear once users create accounts',
+                    message:
+                        'Net worth distribution data will appear once users create accounts',
                     backgroundColor: AppColors.brandTeal,
                   );
                 }
@@ -1506,12 +1506,9 @@ class _SystemAnalyticsPageEnhancedState
                   children: [
                     _chartCard(
                       child: AnalyticsBarChart(
-                        labels: percentiles
-                            .map((p) => p.percentile)
-                            .toList(),
-                        values: percentiles
-                            .map((p) => p.netWorthValue)
-                            .toList(),
+                        labels: percentiles.map((p) => p.percentile).toList(),
+                        values:
+                            percentiles.map((p) => p.netWorthValue).toList(),
                         title: 'Net Worth by Percentile',
                         barColor: AppColors.brandTeal,
                         valuePrefix: '\$',
@@ -1592,9 +1589,8 @@ class _SystemAnalyticsPageEnhancedState
                                 value: relativeValue.toDouble(),
                                 backgroundColor:
                                     AppColors.brandTeal.withValues(alpha: 0.10),
-                                valueColor:
-                                    const AlwaysStoppedAnimation<Color>(
-                                        AppColors.brandTeal),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    AppColors.brandTeal),
                                 minHeight: 3,
                               ),
                             ),
@@ -1620,15 +1616,12 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
-  Widget _buildCategoryBreakdownChart(
-      List<dynamic> categories, bool isDark) {
+  Widget _buildCategoryBreakdownChart(List<dynamic> categories, bool isDark) {
     final top5 = categories.take(5).toList();
     final hasOthers = categories.length > 5;
 
-    final chartLabels =
-        top5.map((c) => c.categoryName as String).toList();
-    final chartValues =
-        top5.map((c) => c.totalAmount as double).toList();
+    final chartLabels = top5.map((c) => c.categoryName as String).toList();
+    final chartValues = top5.map((c) => c.totalAmount as double).toList();
 
     if (hasOthers) {
       final othersTotal = categories
@@ -1647,8 +1640,7 @@ class _SystemAnalyticsPageEnhancedState
     );
   }
 
-  Widget _buildCategoryDetailsList(
-      List<dynamic> categories, bool isDark) {
+  Widget _buildCategoryDetailsList(List<dynamic> categories, bool isDark) {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
@@ -1702,20 +1694,14 @@ class _SystemAnalyticsPageEnhancedState
                   children: [
                     Text(
                       name,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       formattedAmount,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: isDark
                                 ? AppColors.secondaryLabelDark
                                 : AppColors.secondaryLabel,
@@ -1732,15 +1718,11 @@ class _SystemAnalyticsPageEnhancedState
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.brandTeal.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSizes.radiusSm),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
                 child: Text(
                   '$formattedPercentage%',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.brandTeal,
                         fontSize: 10,

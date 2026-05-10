@@ -69,44 +69,44 @@ class ReceiptOcrService {
       final session = Supabase.instance.client.auth.currentSession;
       if (session == null) return null;
 
-      final proxyUrl =
-          '${EnvConfig.supabaseUrl}/functions/v1/openai-proxy';
-      final response = await http.post(
-        Uri.parse(proxyUrl),
-        headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
-          'Content-Type': 'application/json',
-          'apikey': EnvConfig.supabaseAnonKey,
-        },
-        body: json.encode({
-          'model': 'gpt-4o-mini',
-          'messages': [
-            {
-              'role': 'system',
-              'content':
-                  'You are a receipt parser. Extract structured data from receipt OCR text. '
-                  'Return ONLY valid JSON — no markdown, no explanation — with exactly these fields:\n'
-                  '{\n'
-                  '  "merchant": string,\n'
-                  '  "date": "YYYY-MM-DD",\n'
-                  '  "subtotal": number | null,\n'
-                  '  "tax": number | null,\n'
-                  '  "tip": number | null,\n'
-                  '  "total": number,\n'
-                  '  "items": [{"name": string, "price": number}]\n'
-                  '}\n'
-                  'Use null for fields not found. Items should only include purchasable products/services, '
-                  'not summary rows like tax or total.',
+      final proxyUrl = '${EnvConfig.supabaseUrl}/functions/v1/openai-proxy';
+      final response = await http
+          .post(
+            Uri.parse(proxyUrl),
+            headers: {
+              'Authorization': 'Bearer ${session.accessToken}',
+              'Content-Type': 'application/json',
+              'apikey': EnvConfig.supabaseAnonKey,
             },
-            {
-              'role': 'user',
-              'content': 'Parse this receipt:\n\n$rawText',
-            },
-          ],
-          'max_tokens': 1000,
-          'temperature': 0,
-        }),
-      ).timeout(const Duration(seconds: 20));
+            body: json.encode({
+              'model': 'gpt-4o-mini',
+              'messages': [
+                {
+                  'role': 'system',
+                  'content': 'You are a receipt parser. Extract structured data from receipt OCR text. '
+                      'Return ONLY valid JSON — no markdown, no explanation — with exactly these fields:\n'
+                      '{\n'
+                      '  "merchant": string,\n'
+                      '  "date": "YYYY-MM-DD",\n'
+                      '  "subtotal": number | null,\n'
+                      '  "tax": number | null,\n'
+                      '  "tip": number | null,\n'
+                      '  "total": number,\n'
+                      '  "items": [{"name": string, "price": number}]\n'
+                      '}\n'
+                      'Use null for fields not found. Items should only include purchasable products/services, '
+                      'not summary rows like tax or total.',
+                },
+                {
+                  'role': 'user',
+                  'content': 'Parse this receipt:\n\n$rawText',
+                },
+              ],
+              'max_tokens': 1000,
+              'temperature': 0,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (response.statusCode != 200) return null;
 
@@ -187,8 +187,18 @@ class ReceiptOcrService {
 
   DateTime _extractDate(List<String> lines) {
     const monthNames = {
-      'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-      'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+      'jan': 1,
+      'feb': 2,
+      'mar': 3,
+      'apr': 4,
+      'may': 5,
+      'jun': 6,
+      'jul': 7,
+      'aug': 8,
+      'sep': 9,
+      'oct': 10,
+      'nov': 11,
+      'dec': 12,
     };
 
     for (final line in lines) {

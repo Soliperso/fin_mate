@@ -21,7 +21,9 @@ class DebtRemoteDatasource {
           .eq('is_active', true)
           .order('created_at', ascending: false);
 
-      return (response as List).map((json) => DebtModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => DebtModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch debts: $e');
     }
@@ -106,7 +108,9 @@ class DebtRemoteDatasource {
           .eq('debt_id', debtId)
           .order('payment_date', ascending: false);
 
-      return (response as List).map((json) => DebtPaymentModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => DebtPaymentModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch payments: $e');
     }
@@ -206,7 +210,8 @@ class DebtRemoteDatasource {
     try {
       final debts = await getDebts();
       final totalBalance = debts.fold<double>(0, (sum, d) => sum + d.balance);
-      final totalMinPayment = debts.fold<double>(0, (sum, d) => sum + d.minimumPayment);
+      final totalMinPayment =
+          debts.fold<double>(0, (sum, d) => sum + d.minimumPayment);
       return {
         'total_balance': totalBalance,
         'total_min_payment': totalMinPayment,
@@ -226,7 +231,9 @@ class DebtRemoteDatasource {
           .select()
           .eq('user_id', userId)
           .order('payment_date', ascending: false);
-      return (response as List).map((json) => DebtPaymentModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => DebtPaymentModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch all payments: $e');
     }

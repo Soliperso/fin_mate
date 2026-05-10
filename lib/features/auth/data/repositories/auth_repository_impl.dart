@@ -119,8 +119,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<UserEntity?> get authStateChanges {
-    return _remoteDataSource.authStateChanges
-        .map((user) => user?.toEntity());
+    return _remoteDataSource.authStateChanges.map((user) => user?.toEntity());
   }
 
   @override

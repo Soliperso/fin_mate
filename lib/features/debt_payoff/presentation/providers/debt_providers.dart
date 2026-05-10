@@ -23,13 +23,16 @@ final debtsProvider = FutureProvider<List<DebtEntity>>((ref) async {
 });
 
 final debtByIdProvider = Provider.family<DebtEntity?, String>((ref, id) {
-  return ref.watch(debtsProvider).valueOrNull
+  return ref
+      .watch(debtsProvider)
+      .valueOrNull
       ?.where((d) => d.id == id)
       .cast<DebtEntity?>()
       .firstOrNull;
 });
 
-final debtPaymentsProvider = FutureProvider.family<List<DebtPaymentEntity>, String>((ref, debtId) async {
+final debtPaymentsProvider =
+    FutureProvider.family<List<DebtPaymentEntity>, String>((ref, debtId) async {
   final repository = ref.watch(debtRepositoryProvider);
   return repository.getPayments(debtId);
 });
@@ -41,7 +44,8 @@ final debtSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 
 // ── Strategy & extra payment state ──────────────────────────────────────────
 
-final selectedStrategyProvider = StateProvider<DebtStrategy>((ref) => DebtStrategy.avalanche);
+final selectedStrategyProvider =
+    StateProvider<DebtStrategy>((ref) => DebtStrategy.avalanche);
 
 class ExtraPaymentNotifier extends StateNotifier<double> {
   static const _key = 'extra_payment_slider';
@@ -54,11 +58,13 @@ class ExtraPaymentNotifier extends StateNotifier<double> {
 
   void setValue(double value) {
     state = value;
-    SharedPreferences.getInstance().then((prefs) => prefs.setDouble(_key, value));
+    SharedPreferences.getInstance()
+        .then((prefs) => prefs.setDouble(_key, value));
   }
 }
 
-final extraPaymentProvider = StateNotifierProvider<ExtraPaymentNotifier, double>(
+final extraPaymentProvider =
+    StateNotifierProvider<ExtraPaymentNotifier, double>(
   (ref) => ExtraPaymentNotifier(),
 );
 
@@ -76,14 +82,16 @@ final payoffResultProvider = Provider<PayoffResult?>((ref) {
 final avalancheResultProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
   if (debts == null || debts.isEmpty) return null;
-  return PayoffCalculator.compute(debts: debts, strategy: DebtStrategy.avalanche);
+  return PayoffCalculator.compute(
+      debts: debts, strategy: DebtStrategy.avalanche);
 });
 
 /// Always-computed Snowball result — used by strategy comparison sheet.
 final snowballResultProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
   if (debts == null || debts.isEmpty) return null;
-  return PayoffCalculator.compute(debts: debts, strategy: DebtStrategy.snowball);
+  return PayoffCalculator.compute(
+      debts: debts, strategy: DebtStrategy.snowball);
 });
 
 /// Payoff result with extra monthly payment applied — used by simulator.
@@ -106,7 +114,8 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
   final AnalyticsService _analytics;
   final Ref _ref;
 
-  DebtNotifier(this._repository, this._analytics, this._ref) : super(const AsyncValue.data(null));
+  DebtNotifier(this._repository, this._analytics, this._ref)
+      : super(const AsyncValue.data(null));
 
   void _invalidateDashboard() {
     _ref.invalidate(dashboardNotifierProvider);
@@ -244,7 +253,8 @@ class DebtNotifier extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final debtNotifierProvider = StateNotifierProvider<DebtNotifier, AsyncValue<void>>((ref) {
+final debtNotifierProvider =
+    StateNotifierProvider<DebtNotifier, AsyncValue<void>>((ref) {
   final repository = ref.watch(debtRepositoryProvider);
   final analytics = ref.watch(analyticsServiceProvider);
   return DebtNotifier(repository, analytics, ref);
@@ -253,7 +263,8 @@ final debtNotifierProvider = StateNotifierProvider<DebtNotifier, AsyncValue<void
 // ── Gamification ─────────────────────────────────────────────────────────────
 
 /// All payments across all debts — used for streak calculation.
-final allDebtPaymentsProvider = FutureProvider<List<DebtPaymentEntity>>((ref) async {
+final allDebtPaymentsProvider =
+    FutureProvider<List<DebtPaymentEntity>>((ref) async {
   final repository = ref.watch(debtRepositoryProvider);
   return repository.getAllPayments();
 });
@@ -292,7 +303,8 @@ class DebtMilestone {
   }
 
   double? get amountToNextMilestone {
-    if (isComplete || originalBalance == null || originalBalance! <= 0) return null;
+    if (isComplete || originalBalance == null || originalBalance! <= 0)
+      return null;
     if (progressPercent <= 0) return null;
     final targetBalance = originalBalance! * (1.0 - nextMilestone / 100.0);
     final delta = currentBalance - targetBalance;
@@ -385,7 +397,8 @@ class DebtGamification {
       final original = debt.originalBalance;
       double progress = 0.0;
       if (original != null && original > 0) {
-        progress = ((original - debt.balance) / original * 100).clamp(0.0, 100.0);
+        progress =
+            ((original - debt.balance) / original * 100).clamp(0.0, 100.0);
       }
       return DebtMilestone(
         debtName: debt.name,
@@ -414,10 +427,12 @@ class DebtGamification {
       final totalOriginal =
           debtsWithOriginal.fold<double>(0, (s, d) => s + d.originalBalance!);
       final totalPaidDown = debtsWithOriginal.fold<double>(0, (s, d) {
-        final paid = (d.originalBalance! - d.balance).clamp(0.0, d.originalBalance!);
+        final paid =
+            (d.originalBalance! - d.balance).clamp(0.0, d.originalBalance!);
         return s + paid;
       });
-      overallProgressPercent = (totalPaidDown / totalOriginal * 100).clamp(0.0, 100.0);
+      overallProgressPercent =
+          (totalPaidDown / totalOriginal * 100).clamp(0.0, 100.0);
     }
 
     return DebtGamification(

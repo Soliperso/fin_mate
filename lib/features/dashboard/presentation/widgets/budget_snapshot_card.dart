@@ -78,17 +78,19 @@ class BudgetSnapshotCard extends ConsumerWidget {
                           value: progress,
                           strokeWidth: 7,
                           backgroundColor: ringBg,
-                          valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(statusColor),
                           strokeCap: StrokeCap.round,
                         ),
                       ),
                       Text(
                         '$usedPct%',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: statusColor,
-                              letterSpacing: -0.5,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: statusColor,
+                                  letterSpacing: -0.5,
+                                ),
                       ),
                     ],
                   ),
@@ -109,11 +111,12 @@ class BudgetSnapshotCard extends ConsumerWidget {
                       const SizedBox(height: AppSizes.xs),
                       Text(
                         currencyFmt.format(totalBudgeted - totalSpent),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.secondaryLabel,
-                              letterSpacing: -0.5,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.secondaryLabel,
+                                  letterSpacing: -0.5,
+                                ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -131,14 +134,16 @@ class BudgetSnapshotCard extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
                         ),
                         child: Text(
                           statusLabel,
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: statusColor,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: statusColor,
+                                  ),
                         ),
                       ),
                     ],

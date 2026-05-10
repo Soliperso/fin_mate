@@ -19,7 +19,8 @@ class SecuritySettingsPage extends ConsumerStatefulWidget {
   const SecuritySettingsPage({super.key});
 
   @override
-  ConsumerState<SecuritySettingsPage> createState() => _SecuritySettingsPageState();
+  ConsumerState<SecuritySettingsPage> createState() =>
+      _SecuritySettingsPageState();
 }
 
 class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
@@ -106,9 +107,11 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                               icon: method == 'email'
                                   ? CupertinoIcons.envelope_fill
                                   : CupertinoIcons.qrcode,
-                              iconBg: AppColors.systemPurple.withValues(alpha: 0.14),
+                              iconBg: AppColors.systemPurple
+                                  .withValues(alpha: 0.14),
                               iconColor: AppColors.systemPurple,
-                              title: mfaMethodEnum?.displayName ?? 'Unknown Method',
+                              title: mfaMethodEnum?.displayName ??
+                                  'Unknown Method',
                               subtitle: 'security.mfaChangeSub'.tr(),
                               trailing: TextButton(
                                 onPressed: _showMfaSetupOptions,
@@ -258,8 +261,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -320,7 +323,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             // Email OTP
             Card(
               child: ListTile(
-                leading: const Icon(CupertinoIcons.envelope, color: AppColors.primaryTeal),
+                leading: const Icon(CupertinoIcons.envelope,
+                    color: AppColors.primaryTeal),
                 title: Text(MfaMethod.email.displayName),
                 subtitle: Text(MfaMethod.email.description),
                 trailing: const Icon(CupertinoIcons.chevron_right),
@@ -335,7 +339,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
             // TOTP
             Card(
               child: ListTile(
-                leading: const Icon(CupertinoIcons.qrcode, color: AppColors.slateBlue),
+                leading: const Icon(CupertinoIcons.qrcode,
+                    color: AppColors.slateBlue),
                 title: Text(MfaMethod.totp.displayName),
                 subtitle: Text(MfaMethod.totp.description),
                 trailing: const Icon(CupertinoIcons.chevron_right),
@@ -605,7 +610,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                           ? AppColors.systemBlue
                           : AppColors.success;
 
-          final strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'][strength];
+          final strengthLabel =
+              ['', 'Weak', 'Fair', 'Good', 'Strong'][strength];
 
           Widget reqRow(bool met, String label) => Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -724,7 +730,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                                     ? AppColors.systemGray3
                                         .withValues(alpha: 0.2)
                                     : AppColors.systemGray5),
-                            borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusXs),
                           ),
                         ),
                       );
@@ -756,8 +763,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                   onChanged: (v) => setState(() {}),
                   decoration: InputDecoration(
                     labelText: 'security.confirmNewPassword'.tr(),
-                    errorText:
-                        confirmMismatch ? 'security.passwordMismatch'.tr() : null,
+                    errorText: confirmMismatch
+                        ? 'security.passwordMismatch'.tr()
+                        : null,
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -793,7 +801,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 // ── Actions ───────────────────────────────────────────
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton(
-                  onPressed: isLoading || !hasMin8 || confirmMismatch || !passwordsMatch
+                  onPressed: isLoading ||
+                          !hasMin8 ||
+                          confirmMismatch ||
+                          !passwordsMatch
                       ? null
                       : () async {
                           setState(() => isLoading = true);

@@ -70,8 +70,7 @@ class CsvImportService {
     // Validate headers (case-insensitive)
     final headers =
         rows.first.map((h) => h.toString().trim().toLowerCase()).toList();
-    final expected =
-        _expectedHeaders.map((h) => h.toLowerCase()).toList();
+    final expected = _expectedHeaders.map((h) => h.toLowerCase()).toList();
     if (!_headersMatch(headers, expected)) {
       throw const FormatException(
         'Not a valid Finmate CSV.\n'
@@ -109,8 +108,7 @@ class CsvImportService {
       // ── Type ──────────────────────────────────────────────────────
       final type = _parseType(cells[1]);
       if (type == null) {
-        errors.add(
-            'Row $rowNum: unknown type "${cells[1]}" — skipped.');
+        errors.add('Row $rowNum: unknown type "${cells[1]}" — skipped.');
         continue;
       }
 
@@ -131,8 +129,7 @@ class CsvImportService {
       // ── Account (required) ────────────────────────────────────────
       final account = _matchAccount(cells[3], accounts);
       if (account == null) {
-        errors.add(
-            'Row $rowNum: account "${cells[3]}" not found — skipped.');
+        errors.add('Row $rowNum: account "${cells[3]}" not found — skipped.');
         continue;
       }
 
@@ -142,7 +139,11 @@ class CsvImportService {
       // ── Tags ──────────────────────────────────────────────────────
       final tags = cells[7].isEmpty
           ? null
-          : cells[7].split('|').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+          : cells[7]
+              .split('|')
+              .map((t) => t.trim())
+              .where((t) => t.isNotEmpty)
+              .toList();
 
       transactions.add(TransactionEntity(
         id: _uuid.v4(),
@@ -209,8 +210,7 @@ class CsvImportService {
     }
   }
 
-  CategoryEntity? _matchCategory(
-      String name, List<CategoryEntity> categories) {
+  CategoryEntity? _matchCategory(String name, List<CategoryEntity> categories) {
     if (name.isEmpty) return null;
     final lower = name.toLowerCase();
     try {

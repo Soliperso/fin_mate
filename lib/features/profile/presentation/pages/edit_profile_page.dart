@@ -142,8 +142,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   Widget _buildEmailRow(String email) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md, vertical: 12),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
       child: Row(
         children: [
           _iconBadge(CupertinoIcons.envelope),
@@ -261,8 +261,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               Divider(
                 height: 0,
                 thickness: 0.5,
-                color:
-                    Theme.of(context).dividerColor,
+                color: Theme.of(context).dividerColor,
               ),
               ListTile(
                 leading: const Icon(CupertinoIcons.trash,
@@ -425,142 +424,142 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           onTap: () => FocusScope.of(context).unfocus(),
           behavior: HitTestBehavior.opaque,
           child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.pagePadding,
-            vertical: AppSizes.lg,
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Avatar ────────────────────────────────────────────────
-                Center(
-                  child: GestureDetector(
-                    onTap: profileState.isUploadingAvatar
-                        ? null
-                        : _showAvatarOptions,
-                    child: Stack(
-                      children: [
-                        _buildAvatar(profile),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(AppSizes.sm),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryTeal,
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: AppColors.white, width: 3),
-                            ),
-                            child: profileState.isUploadingAvatar
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor:
-                                          AlwaysStoppedAnimation<Color>(
-                                              AppColors.white),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.pagePadding,
+              vertical: AppSizes.lg,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Avatar ────────────────────────────────────────────────
+                  Center(
+                    child: GestureDetector(
+                      onTap: profileState.isUploadingAvatar
+                          ? null
+                          : _showAvatarOptions,
+                      child: Stack(
+                        children: [
+                          _buildAvatar(profile),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(AppSizes.sm),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryTeal,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: AppColors.white, width: 3),
+                              ),
+                              child: profileState.isUploadingAvatar
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                AppColors.white),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      CupertinoIcons.camera,
+                                      size: 20,
+                                      color: AppColors.white,
                                     ),
-                                  )
-                                : const Icon(
-                                    CupertinoIcons.camera,
-                                    size: 20,
-                                    color: AppColors.white,
-                                  ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Center(
-                  child: Text(
-                    'profile.tapToChangePhoto'.tr(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? AppColors.secondaryLabelDark
-                              : AppColors.textSecondary,
-                        ),
+                  const SizedBox(height: AppSizes.sm),
+                  Center(
+                    child: Text(
+                      'profile.tapToChangePhoto'.tr(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppColors.secondaryLabelDark
+                                : AppColors.textSecondary,
+                          ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSizes.xl),
+                  const SizedBox(height: AppSizes.xl),
 
-                // ── Personal Information ──────────────────────────────────
-                _sectionLabel('profile.personalInformation'.tr()),
-                const SizedBox(height: AppSizes.sm),
-                _buildSectionCard(
-                  children: [
-                    TextFormField(
-                      controller: _fullNameController,
-                      decoration: _fieldDecoration(
-                        labelText: 'profile.fullName'.tr(),
-                        prefixIcon: _iconBadge(CupertinoIcons.person),
+                  // ── Personal Information ──────────────────────────────────
+                  _sectionLabel('profile.personalInformation'.tr()),
+                  const SizedBox(height: AppSizes.sm),
+                  _buildSectionCard(
+                    children: [
+                      TextFormField(
+                        controller: _fullNameController,
+                        decoration: _fieldDecoration(
+                          labelText: 'profile.fullName'.tr(),
+                          prefixIcon: _iconBadge(CupertinoIcons.person),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'profile.fullNameRequired'.tr();
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'profile.fullNameRequired'.tr();
-                        }
-                        return null;
-                      },
-                    ),
-                    _buildDivider(),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: _fieldDecoration(
-                        labelText: 'profile.phoneNumber'.tr(),
-                        prefixIcon: _iconBadge(CupertinoIcons.phone),
+                      _buildDivider(),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: _fieldDecoration(
+                          labelText: 'profile.phoneNumber'.tr(),
+                          prefixIcon: _iconBadge(CupertinoIcons.phone),
+                        ),
+                        keyboardType: TextInputType.phone,
                       ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.lg),
 
-                // ── Account ───────────────────────────────────────────────
-                _sectionLabel('profile.account'.tr()),
-                const SizedBox(height: AppSizes.sm),
-                _buildSectionCard(
-                  children: [
-                    _buildEmailRow(profile?.email ?? ''),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
+                  // ── Account ───────────────────────────────────────────────
+                  _sectionLabel('profile.account'.tr()),
+                  const SizedBox(height: AppSizes.sm),
+                  _buildSectionCard(
+                    children: [
+                      _buildEmailRow(profile?.email ?? ''),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.lg),
 
-                // ── Preferences ───────────────────────────────────────────
-                _sectionLabel('profile.preferences'.tr()),
-                const SizedBox(height: AppSizes.sm),
-                _buildSectionCard(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedCurrency,
-                      decoration: _fieldDecoration(
-                        labelText: 'profile.preferredCurrency'.tr(),
-                        prefixIcon: _iconBadge(CupertinoIcons.money_dollar),
+                  // ── Preferences ───────────────────────────────────────────
+                  _sectionLabel('profile.preferences'.tr()),
+                  const SizedBox(height: AppSizes.sm),
+                  _buildSectionCard(
+                    children: [
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedCurrency,
+                        decoration: _fieldDecoration(
+                          labelText: 'profile.preferredCurrency'.tr(),
+                          prefixIcon: _iconBadge(CupertinoIcons.money_dollar),
+                        ),
+                        dropdownColor: isDark
+                            ? AppColors.secondarySystemBackgroundDark
+                            : AppColors.systemBackground,
+                        items: _currencies.map((currency) {
+                          return DropdownMenuItem(
+                            value: currency,
+                            child: Text(currency),
+                          );
+                        }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setState(() => _selectedCurrency = v);
+                        },
                       ),
-                      dropdownColor: isDark
-                          ? AppColors.secondarySystemBackgroundDark
-                          : AppColors.systemBackground,
-                      items: _currencies.map((currency) {
-                        return DropdownMenuItem(
-                          value: currency,
-                          child: Text(currency),
-                        );
-                      }).toList(),
-                      onChanged: (v) {
-                        if (v != null) setState(() => _selectedCurrency = v);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.xl),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.xl),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );

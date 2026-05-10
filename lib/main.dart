@@ -140,7 +140,8 @@ void main() async {
           child: ProviderScope(
             overrides: [
               initialThemeModeProvider.overrideWithValue(initialThemeMode),
-              initialDisplayFormatProvider.overrideWithValue(initialDisplayFormat),
+              initialDisplayFormatProvider
+                  .overrideWithValue(initialDisplayFormat),
             ],
             child: const FinmateApp(),
           ),
@@ -194,10 +195,14 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
       // Fire due reminders, apply budget carry-overs, check alerts, and run auto backup on app open
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
-        unawaited(ReminderRemoteDatasource().processReminders().catchError((_) {}));
-        unawaited(BudgetRemoteDataSource().applyCarryOvers().catchError((_) {}));
+        unawaited(
+            ReminderRemoteDatasource().processReminders().catchError((_) {}));
+        unawaited(
+            BudgetRemoteDataSource().applyCarryOvers().catchError((_) {}));
         unawaited(AutoBackupService().runIfDue().catchError((_) {}));
-        unawaited(RecurringTransactionProcessor().processOverdue().catchError((_) {}));
+        unawaited(RecurringTransactionProcessor()
+            .processOverdue()
+            .catchError((_) {}));
         // Create notifications for bill reminders and budget alerts
         final notifier = ref.read(notificationsProvider.notifier);
         unawaited(notifier.createBillReminders().catchError((_) {}));
@@ -222,7 +227,8 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
         locale: context.locale,
         supportedLocales: context.supportedLocales,
         localizationsDelegates: context.localizationDelegates,
-        builder: (context, child) => LocaleBridge(child: child ?? const SizedBox()),
+        builder: (context, child) =>
+            LocaleBridge(child: child ?? const SizedBox()),
       ),
     );
   }

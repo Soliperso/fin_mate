@@ -94,7 +94,8 @@ class SpendingAlert extends Equatable {
     return SpendingAlert(
       id: json['id'] as String,
       type: AlertType.values.firstWhere((e) => e.name == json['type']),
-      severity: AlertSeverity.values.firstWhere((e) => e.name == json['severity']),
+      severity:
+          AlertSeverity.values.firstWhere((e) => e.name == json['severity']),
       title: json['title'] as String,
       message: json['message'] as String,
       actionText: json['actionText'] as String?,

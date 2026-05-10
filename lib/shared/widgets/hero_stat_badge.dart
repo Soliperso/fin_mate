@@ -36,17 +36,17 @@ class HeroStatBadge extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontWeight: FontWeight.w500,
-              ),
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
             const SizedBox(height: 2),
             Text(
               value,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

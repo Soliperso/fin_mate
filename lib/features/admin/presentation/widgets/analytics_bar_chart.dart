@@ -103,17 +103,18 @@ class AnalyticsBarChart extends StatelessWidget {
                 ),
               ),
               titlesData: FlTitlesData(
-                rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 32,
                     getTitlesWidget: (v, _) {
                       final i = v.toInt();
-                      if (i < 0 || i >= labels.length) return const SizedBox.shrink();
+                      if (i < 0 || i >= labels.length)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
@@ -195,7 +196,9 @@ class AnalyticsBarChart extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            up ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
+            up
+                ? CupertinoIcons.arrow_up_right
+                : CupertinoIcons.arrow_down_right,
             size: 11,
             color: color,
           ),

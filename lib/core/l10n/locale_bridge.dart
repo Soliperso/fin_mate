@@ -35,7 +35,9 @@ class LocaleBridge extends ConsumerWidget {
 
     final isRtl = context.locale.languageCode == 'ar';
     return Directionality(
-      textDirection: isRtl ? flutter_widgets.TextDirection.rtl : flutter_widgets.TextDirection.ltr,
+      textDirection: isRtl
+          ? flutter_widgets.TextDirection.rtl
+          : flutter_widgets.TextDirection.ltr,
       child: child,
     );
   }

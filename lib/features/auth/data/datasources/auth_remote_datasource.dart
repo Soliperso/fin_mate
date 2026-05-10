@@ -98,7 +98,8 @@ class AuthRemoteDataSource {
     } on AuthException catch (e) {
       // Handle specific Supabase auth errors
       if (e.message.contains('User already registered')) {
-        throw Exception('An account with this email already exists. Please log in.');
+        throw Exception(
+            'An account with this email already exists. Please log in.');
       } else if (e.message.contains('Email rate limit exceeded')) {
         throw Exception('Too many signup attempts. Please try again later.');
       } else {
@@ -241,10 +242,14 @@ class AuthRemoteDataSource {
     } on AuthException catch (e) {
       final msg = e.message.toLowerCase();
       if (msg.contains('user not found') || msg.contains('not found')) {
-        throw Exception('No account found with this email. Please sign up first.');
-      } else if (msg.contains('already confirmed') || msg.contains('already verified')) {
+        throw Exception(
+            'No account found with this email. Please sign up first.');
+      } else if (msg.contains('already confirmed') ||
+          msg.contains('already verified')) {
         throw Exception('Your email is already confirmed. Please log in.');
-      } else if (msg.contains('for security purposes') || msg.contains('rate limit') || msg.contains('too many')) {
+      } else if (msg.contains('for security purposes') ||
+          msg.contains('rate limit') ||
+          msg.contains('too many')) {
         throw Exception('Please wait a moment before requesting a new code.');
       } else {
         // Surface the real Supabase message so it's actionable
@@ -308,7 +313,8 @@ class AuthRemoteDataSource {
     }
 
     // Encrypt and store the TOTP secret server-side via RPC (never plain-text in DB)
-    await _supabase.rpc('set_totp_secret_for_user', params: {'p_secret': secret});
+    await _supabase
+        .rpc('set_totp_secret_for_user', params: {'p_secret': secret});
 
     // Update MFA flags (without touching the secret column)
     await _supabase.from('user_profiles').update({

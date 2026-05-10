@@ -42,7 +42,16 @@ class ChatMessage extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, sender, content, timestamp, metadata, type, status, followUpSuggestions];
+  List<Object?> get props => [
+        id,
+        sender,
+        content,
+        timestamp,
+        metadata,
+        type,
+        status,
+        followUpSuggestions
+      ];
 
   ChatMessage copyWith({
     String? id,

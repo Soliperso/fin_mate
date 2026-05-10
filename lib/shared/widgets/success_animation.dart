@@ -107,8 +107,8 @@ class _TopSnackBarState extends State<_TopSnackBar>
                     child: Text(
                       widget.message,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Colors.white,
-                      ),
+                            color: Colors.white,
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -231,13 +231,14 @@ class _TopErrorSnackBarState extends State<_TopErrorSnackBar>
                     child: Text(
                       widget.message,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Colors.white,
-                      ),
+                            color: Colors.white,
+                          ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (widget.actionLabel != null && widget.onAction != null) ...[
+                  if (widget.actionLabel != null &&
+                      widget.onAction != null) ...[
                     const SizedBox(width: AppSizes.sm),
                     GestureDetector(
                       onTap: () {
@@ -503,19 +504,20 @@ class SuccessDialog extends StatelessWidget {
 }
 
 /// Reusable error dialog helper — replaces all ErrorSnackbar usage
-Future<void> showErrorDialog(BuildContext context, String message) => showDialog(
-  context: context,
-  builder: (dialogContext) => AlertDialog(
-    title: const Text('Something went wrong'),
-    content: Text(message),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(dialogContext),
-        child: const Text('OK'),
+Future<void> showErrorDialog(BuildContext context, String message) =>
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Something went wrong'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('OK'),
+          ),
+        ],
       ),
-    ],
-  ),
-);
+    );
 
 /// Simple success snackbar with top positioning
 class SuccessSnackbar {

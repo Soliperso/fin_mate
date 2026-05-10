@@ -19,7 +19,8 @@ class FollowUpSuggestions extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: AppSizes.md),
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm + 2, vertical: AppSizes.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.sm + 2, vertical: AppSizes.sm),
       decoration: BoxDecoration(
         color: AppColors.primaryTeal.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),

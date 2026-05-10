@@ -38,7 +38,10 @@ class GoalsSnapshotCard extends ConsumerWidget {
               // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppSizes.md, AppSizes.md, AppSizes.sm, AppSizes.xs,
+                  AppSizes.md,
+                  AppSizes.md,
+                  AppSizes.sm,
+                  AppSizes.xs,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -53,20 +56,26 @@ class GoalsSnapshotCard extends ConsumerWidget {
                         const SizedBox(width: AppSizes.xs),
                         Text(
                           'goalsSnapshot.title'.tr(),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         if (activeGoals.length > 3) ...[
                           const SizedBox(width: AppSizes.xs),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
-                              color: AppColors.brandTeal.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                              color:
+                                  AppColors.brandTeal.withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
                             ),
                             child: Text(
-                              'goalsSnapshot.moreBadge'.tr(namedArgs: {'count': '${activeGoals.length - 3}'}),
+                              'goalsSnapshot.moreBadge'.tr(namedArgs: {
+                                'count': '${activeGoals.length - 3}'
+                              }),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.brandTeal,
@@ -171,7 +180,8 @@ class _GoalRow extends ConsumerWidget {
                 value: progress,
                 minHeight: 5,
                 backgroundColor: AppColors.brandTeal.withValues(alpha: 0.12),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.brandTeal),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.brandTeal),
               ),
             ),
             const SizedBox(height: 4),
@@ -185,7 +195,9 @@ class _GoalRow extends ConsumerWidget {
                       ),
                 ),
                 Text(
-                  'goalsSnapshot.ofAmount'.tr(namedArgs: {'amount': currencyFormat.format(goal.targetAmount)}),
+                  'goalsSnapshot.ofAmount'.tr(namedArgs: {
+                    'amount': currencyFormat.format(goal.targetAmount)
+                  }),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),

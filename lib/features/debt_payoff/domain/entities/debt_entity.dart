@@ -43,7 +43,8 @@ class DebtEntity extends Equatable {
       return (balance / minimumPayment).ceil();
     }
     if (minimumPayment <= monthlyInterest) return null; // Never pays off
-    final months = (-log(1 - rate * balance / minimumPayment) / log(1 + rate)).ceil();
+    final months =
+        (-log(1 - rate * balance / minimumPayment) / log(1 + rate)).ceil();
     return months > 0 ? months : null;
   }
 
@@ -62,7 +63,12 @@ class DebtEntity extends Equatable {
       case 'personal_loan':
         return 'Personal Loan';
       default:
-        return debtType.replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
+        return debtType
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((w) =>
+                w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '')
+            .join(' ');
     }
   }
 

@@ -21,10 +21,12 @@ class CreateBudgetBottomSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CreateBudgetBottomSheet> createState() => _CreateBudgetBottomSheetState();
+  ConsumerState<CreateBudgetBottomSheet> createState() =>
+      _CreateBudgetBottomSheetState();
 }
 
-class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomSheet> {
+class _CreateBudgetBottomSheetState
+    extends ConsumerState<CreateBudgetBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
 
@@ -36,7 +38,9 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
   CategoryEntity? get _effectiveCategory =>
       _selectedCategory ??
       (_initialCategoryId != null
-          ? _loadedCategories.where((c) => c.id == _initialCategoryId).firstOrNull
+          ? _loadedCategories
+              .where((c) => c.id == _initialCategoryId)
+              .firstOrNull
           : null);
 
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
@@ -69,7 +73,8 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
     final categoriesState = ref.watch(categoriesProvider('expense'));
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -97,7 +102,9 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.budget == null ? 'createBudget.createTitle'.tr() : 'createBudget.editTitle'.tr(),
+                      widget.budget == null
+                          ? 'createBudget.createTitle'.tr()
+                          : 'createBudget.editTitle'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -110,270 +117,301 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
                 ),
                 const SizedBox(height: AppSizes.md),
 
-                  // Category Selection
-                  Text(
-                    'createBudget.category'.tr(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  categoriesState.when(
-                    data: (categories) {
-                      _loadedCategories = categories;
-                      return DropdownButtonFormField<CategoryEntity>(
-                        initialValue: _effectiveCategory,
-                        decoration: InputDecoration(
-                          hintText: 'createBudget.selectCategory'.tr(),
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
-                        items: categories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.name),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return 'createBudget.categoryRequired'.tr();
-                          }
-                          return null;
-                        },
-                      );
-                    },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => Text('createBudget.failedCategories'.tr()),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-
-                  // Amount
-                  Text(
-                    'createBudget.amount'.tr(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  TextFormField(
-                    controller: _amountController,
-                    decoration: InputDecoration(
-                      hintText: 'createBudget.amountHint'.tr(),
-                      prefixText: '\$ ',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'createBudget.amountRequired'.tr();
-                      }
-                      final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
-                        return 'createBudget.invalidAmount'.tr();
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.md),
-
-                  // Period
-                  Text(
-                    'createBudget.period'.tr(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  SizedBox(
-                    width: double.infinity,
-                    child: SegmentedButton<BudgetPeriod>(
-                      segments: [
-                        ButtonSegment(
-                          value: BudgetPeriod.weekly,
-                          label: Text('createBudget.weekly'.tr(), style: const TextStyle(fontSize: 13)),
-                        ),
-                        ButtonSegment(
-                          value: BudgetPeriod.monthly,
-                          label: Text('createBudget.monthly'.tr(), style: const TextStyle(fontSize: 13)),
-                        ),
-                        ButtonSegment(
-                          value: BudgetPeriod.yearly,
-                          label: Text('createBudget.yearly'.tr(), style: const TextStyle(fontSize: 13)),
-                        ),
-                      ],
-                      selected: {_selectedPeriod},
-                      onSelectionChanged: (Set<BudgetPeriod> selection) {
+                // Category Selection
+                Text(
+                  'createBudget.category'.tr(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                categoriesState.when(
+                  data: (categories) {
+                    _loadedCategories = categories;
+                    return DropdownButtonFormField<CategoryEntity>(
+                      initialValue: _effectiveCategory,
+                      decoration: InputDecoration(
+                        hintText: 'createBudget.selectCategory'.tr(),
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      items: categories.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(category.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
                         setState(() {
-                          _selectedPeriod = selection.first;
+                          _selectedCategory = value;
                         });
                       },
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
+                      validator: (value) {
+                        if (value == null) {
+                          return 'createBudget.categoryRequired'.tr();
+                        }
+                        return null;
+                      },
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) =>
+                      Text('createBudget.failedCategories'.tr()),
+                ),
+                const SizedBox(height: AppSizes.md),
 
-                  // Start Date
-                  Text(
-                    'createBudget.startDate'.tr(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                // Amount
+                Text(
+                  'createBudget.amount'.tr(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                TextFormField(
+                  controller: _amountController,
+                  decoration: InputDecoration(
+                    hintText: 'createBudget.amountHint'.tr(),
+                    prefixText: '\$ ',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                  const SizedBox(height: AppSizes.sm),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2100),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          _startDate = date;
-                        });
-                      }
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
-                      child: Text(
-                        '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'createBudget.amountRequired'.tr();
+                    }
+                    final amount = double.tryParse(value);
+                    if (amount == null || amount <= 0) {
+                      return 'createBudget.invalidAmount'.tr();
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSizes.md),
 
-                  // End Date (Optional)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'createBudget.endDate'.tr(),
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
-                        ),
+                // Period
+                Text(
+                  'createBudget.period'.tr(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<BudgetPeriod>(
+                    segments: [
+                      ButtonSegment(
+                        value: BudgetPeriod.weekly,
+                        label: Text('createBudget.weekly'.tr(),
+                            style: const TextStyle(fontSize: 13)),
                       ),
-                      if (_endDate != null)
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _endDate = null;
-                            });
-                          },
-                          child: Text('createBudget.clear'.tr()),
-                        ),
+                      ButtonSegment(
+                        value: BudgetPeriod.monthly,
+                        label: Text('createBudget.monthly'.tr(),
+                            style: const TextStyle(fontSize: 13)),
+                      ),
+                      ButtonSegment(
+                        value: BudgetPeriod.yearly,
+                        label: Text('createBudget.yearly'.tr(),
+                            style: const TextStyle(fontSize: 13)),
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? _startDate.add(const Duration(days: 30)),
-                        firstDate: _startDate,
-                        lastDate: DateTime(2100),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          _endDate = date;
-                        });
-                      }
+                    selected: {_selectedPeriod},
+                    onSelectionChanged: (Set<BudgetPeriod> selection) {
+                      setState(() {
+                        _selectedPeriod = selection.first;
+                      });
                     },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // Start Date
+                Text(
+                  'createBudget.startDate'.tr(),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                InkWell(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _startDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _startDate = date;
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    child: Text(
+                      '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // End Date (Optional)
+                Row(
+                  children: [
+                    Expanded(
                       child: Text(
-                        _endDate != null
-                            ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
-                            : 'createBudget.selectEndDate'.tr(),
-                        style: const TextStyle(color: AppColors.textSecondary),
+                        'createBudget.endDate'.tr(),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(color: AppColors.textSecondary),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-
-                  // Carry-Over Toggle
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text('createBudget.carryOver'.tr()),
-                    subtitle: Text(
-                      'createBudget.carryOverSub'.tr(),
-                      style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                    trailing: Transform.scale(
-                      scale: 0.75,
-                      child: CupertinoSwitch(
-                        value: _carryOverEnabled,
-                        activeTrackColor: AppColors.brandTeal,
-                        thumbColor: AppColors.white,
-                        onChanged: (val) =>
-                            setState(() => _carryOverEnabled = val),
+                    if (_endDate != null)
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _endDate = null;
+                          });
+                        },
+                        child: Text('createBudget.clear'.tr()),
                       ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.sm),
+                InkWell(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          _endDate ?? _startDate.add(const Duration(days: 30)),
+                      firstDate: _startDate,
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _endDate = date;
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(CupertinoIcons.calendar, size: 16),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    child: Text(
+                      _endDate != null
+                          ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
+                          : 'createBudget.selectEndDate'.tr(),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
-                  const SizedBox(height: AppSizes.md),
+                ),
+                const SizedBox(height: AppSizes.md),
 
-                  // Actions
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            shape: const StadiumBorder(),
-                          ),
-                          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                          child: Text('common.cancel'.tr()),
+                // Carry-Over Toggle
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('createBudget.carryOver'.tr()),
+                  subtitle: Text(
+                    'createBudget.carryOverSub'.tr(),
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                  trailing: Transform.scale(
+                    scale: 0.75,
+                    child: CupertinoSwitch(
+                      value: _carryOverEnabled,
+                      activeTrackColor: AppColors.brandTeal,
+                      thumbColor: AppColors.white,
+                      onChanged: (val) =>
+                          setState(() => _carryOverEnabled = val),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          shape: const StadiumBorder(),
                         ),
+                        onPressed: _isLoading
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        child: Text('common.cancel'.tr()),
                       ),
-                      const SizedBox(width: AppSizes.md),
-                      Expanded(
-                        child: widget.budget == null
-                            ? FilledButton(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(48),
-                                  backgroundColor: AppColors.brandTeal,
-                                  foregroundColor: AppColors.white,
-                                  shape: const StadiumBorder(),
-                                ),
-                                onPressed: _isLoading ? null : _saveBudget,
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : Text('createBudget.create'.tr()),
-                              )
-                            : FilledButton(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(48),
-                                  shape: const StadiumBorder(),
-                                ),
-                                onPressed: _isLoading ? null : _saveBudget,
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : Text('createBudget.update'.tr()),
+                    ),
+                    const SizedBox(width: AppSizes.md),
+                    Expanded(
+                      child: widget.budget == null
+                          ? FilledButton(
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(48),
+                                backgroundColor: AppColors.brandTeal,
+                                foregroundColor: AppColors.white,
+                                shape: const StadiumBorder(),
                               ),
-                      ),
-                    ],
-                  ),
+                              onPressed: _isLoading ? null : _saveBudget,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text('createBudget.create'.tr()),
+                            )
+                          : FilledButton(
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(48),
+                                shape: const StadiumBorder(),
+                              ),
+                              onPressed: _isLoading ? null : _saveBudget,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Text('createBudget.update'.tr()),
+                            ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -415,14 +453,18 @@ class _CreateBudgetBottomSheetState extends ConsumerState<CreateBudgetBottomShee
       if (widget.budget == null) {
         await ref.read(budgetNotifierProvider.notifier).createBudget(budget);
       } else {
-        await ref.read(budgetNotifierProvider.notifier).updateBudget(widget.budget!.id, budget);
+        await ref
+            .read(budgetNotifierProvider.notifier)
+            .updateBudget(widget.budget!.id, budget);
       }
 
       if (mounted) {
         Navigator.of(context).pop(true);
         SuccessSnackbar.show(
           context,
-          message: widget.budget == null ? 'createBudget.created'.tr() : 'createBudget.updated'.tr(),
+          message: widget.budget == null
+              ? 'createBudget.created'.tr()
+              : 'createBudget.updated'.tr(),
         );
       }
     } catch (e) {

@@ -139,7 +139,8 @@ void main() {
       );
     });
 
-    test('visiting /verify-email is NOT redirected (email verify stays open)', () {
+    test('visiting /verify-email is NOT redirected (email verify stays open)',
+        () {
       expect(
         computeRedirect(isAuthenticated: true, location: '/verify-email'),
         isNull,

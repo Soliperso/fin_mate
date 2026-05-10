@@ -50,7 +50,8 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                       iconColor: AppColors.systemGreen,
                       label: 'Active',
                       value: stats.activeUsers.toString(),
-                      subtitle: '${stats.activeUserPercentage.toStringAsFixed(0)}% of total',
+                      subtitle:
+                          '${stats.activeUserPercentage.toStringAsFixed(0)}% of total',
                     ),
                   ),
                   const SizedBox(width: AppSizes.sm),
@@ -448,7 +449,8 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),

@@ -45,95 +45,79 @@ class EnvConfig {
 
   // Supabase Configuration
   static String get supabaseUrl =>
-      _supabaseUrl.isNotEmpty
-          ? _supabaseUrl
-          : dotenv.env['SUPABASE_URL'] ?? '';
+      _supabaseUrl.isNotEmpty ? _supabaseUrl : dotenv.env['SUPABASE_URL'] ?? '';
 
-  static String get supabaseAnonKey =>
-      _supabaseAnonKey.isNotEmpty
-          ? _supabaseAnonKey
-          : dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  static String get supabaseAnonKey => _supabaseAnonKey.isNotEmpty
+      ? _supabaseAnonKey
+      : dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
   // Sentry
   static String get sentryDsn =>
       _sentryDsn.isNotEmpty ? _sentryDsn : dotenv.env['SENTRY_DSN'] ?? '';
 
   // Stripe
-  static String get stripePublishableKey =>
-      _stripePublishableKey.isNotEmpty
-          ? _stripePublishableKey
-          : dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  static String get stripePublishableKey => _stripePublishableKey.isNotEmpty
+      ? _stripePublishableKey
+      : dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
 
-  static String get stripeMonthlyPriceId =>
-      _stripeMonthlyPriceId.isNotEmpty
-          ? _stripeMonthlyPriceId
-          : dotenv.env['STRIPE_MONTHLY_PRICE_ID'] ?? '';
+  static String get stripeMonthlyPriceId => _stripeMonthlyPriceId.isNotEmpty
+      ? _stripeMonthlyPriceId
+      : dotenv.env['STRIPE_MONTHLY_PRICE_ID'] ?? '';
 
-  static String get stripeAnnualPriceId =>
-      _stripeAnnualPriceId.isNotEmpty
-          ? _stripeAnnualPriceId
-          : dotenv.env['STRIPE_ANNUAL_PRICE_ID'] ?? '';
+  static String get stripeAnnualPriceId => _stripeAnnualPriceId.isNotEmpty
+      ? _stripeAnnualPriceId
+      : dotenv.env['STRIPE_ANNUAL_PRICE_ID'] ?? '';
 
   // AI
-  static String get openAiApiKey =>
-      _openAiApiKey.isNotEmpty
-          ? _openAiApiKey
-          : dotenv.env['OPENAI_API_KEY'] ?? '';
+  static String get openAiApiKey => _openAiApiKey.isNotEmpty
+      ? _openAiApiKey
+      : dotenv.env['OPENAI_API_KEY'] ?? '';
 
   // RevenueCat
-  static String get revenueCatApiKey =>
-      _revenueCatApiKey.isNotEmpty
-          ? _revenueCatApiKey
-          : dotenv.env['REVENUECAT_API_KEY'] ?? '';
+  static String get revenueCatApiKey => _revenueCatApiKey.isNotEmpty
+      ? _revenueCatApiKey
+      : dotenv.env['REVENUECAT_API_KEY'] ?? '';
 
   // AdMob
   // PRODUCTION: set all ADMOB_* values via --dart-define or .env (local dev only).
   // No test IDs are kept as fallbacks — missing IDs will simply show no ad.
-  static String get admobAppIdAndroid =>
-      _admobAppIdAndroid.isNotEmpty
-          ? _admobAppIdAndroid
-          : dotenv.env['ADMOB_APP_ID_ANDROID'] ?? '';
+  static String get admobAppIdAndroid => _admobAppIdAndroid.isNotEmpty
+      ? _admobAppIdAndroid
+      : dotenv.env['ADMOB_APP_ID_ANDROID'] ?? '';
 
-  static String get admobAppIdIos =>
-      _admobAppIdIos.isNotEmpty
-          ? _admobAppIdIos
-          : dotenv.env['ADMOB_APP_ID_IOS'] ?? '';
+  static String get admobAppIdIos => _admobAppIdIos.isNotEmpty
+      ? _admobAppIdIos
+      : dotenv.env['ADMOB_APP_ID_IOS'] ?? '';
 
-  static String get admobBannerAndroid =>
-      _admobBannerAndroid.isNotEmpty
-          ? _admobBannerAndroid
-          : dotenv.env['ADMOB_BANNER_ANDROID'] ?? '';
+  static String get admobBannerAndroid => _admobBannerAndroid.isNotEmpty
+      ? _admobBannerAndroid
+      : dotenv.env['ADMOB_BANNER_ANDROID'] ?? '';
 
-  static String get admobBannerIos =>
-      _admobBannerIos.isNotEmpty
-          ? _admobBannerIos
-          : dotenv.env['ADMOB_BANNER_IOS'] ?? '';
+  static String get admobBannerIos => _admobBannerIos.isNotEmpty
+      ? _admobBannerIos
+      : dotenv.env['ADMOB_BANNER_IOS'] ?? '';
 
   static String get admobInterstitialAndroid =>
       _admobInterstitialAndroid.isNotEmpty
           ? _admobInterstitialAndroid
           : dotenv.env['ADMOB_INTERSTITIAL_ANDROID'] ?? '';
 
-  static String get admobInterstitialIos =>
-      _admobInterstitialIos.isNotEmpty
-          ? _admobInterstitialIos
-          : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ?? '';
+  static String get admobInterstitialIos => _admobInterstitialIos.isNotEmpty
+      ? _admobInterstitialIos
+      : dotenv.env['ADMOB_INTERSTITIAL_IOS'] ?? '';
 
-  static String get admobNativeAndroid =>
-      _admobNativeAndroid.isNotEmpty
-          ? _admobNativeAndroid
-          : dotenv.env['ADMOB_NATIVE_ANDROID'] ?? '';
+  static String get admobNativeAndroid => _admobNativeAndroid.isNotEmpty
+      ? _admobNativeAndroid
+      : dotenv.env['ADMOB_NATIVE_ANDROID'] ?? '';
 
-  static String get admobNativeIos =>
-      _admobNativeIos.isNotEmpty
-          ? _admobNativeIos
-          : dotenv.env['ADMOB_NATIVE_IOS'] ?? '';
+  static String get admobNativeIos => _admobNativeIos.isNotEmpty
+      ? _admobNativeIos
+      : dotenv.env['ADMOB_NATIVE_IOS'] ?? '';
 
   // Environment
-  static String get environment =>
-      _environment.isNotEmpty
-          ? _environment
-          : dotenv.env['ENVIRONMENT'] ?? 'development';
+  static String get environment => _environment.isNotEmpty
+      ? _environment
+      : dotenv.env['ENVIRONMENT'] ?? 'development';
 
   static bool get isDevelopment => environment == 'development';
   static bool get isProduction => environment == 'production';

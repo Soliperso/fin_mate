@@ -25,7 +25,8 @@ final dashboardStatsProvider = FutureProvider<DashboardStats>((ref) async {
 ///
 /// Use this provider when you need to manually refresh the dashboard,
 /// such as in pull-to-refresh scenarios.
-final refreshDashboardProvider = FutureProvider.autoDispose<DashboardStats>((ref) async {
+final refreshDashboardProvider =
+    FutureProvider.autoDispose<DashboardStats>((ref) async {
   final repository = ref.watch(dashboardRepositoryProvider);
   return repository.refreshDashboardStats();
 });
@@ -61,13 +62,15 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardStats>> {
 }
 
 /// Provider for dashboard notifier
-final dashboardNotifierProvider = StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardStats>>((ref) {
+final dashboardNotifierProvider =
+    StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardStats>>((ref) {
   final repository = ref.watch(dashboardRepositoryProvider);
   return DashboardNotifier(repository);
 });
 
 /// Provider for monthly cash flow data
-final monthlyFlowDataProvider = FutureProvider.autoDispose<List<MonthlyFlowData>>((ref) async {
+final monthlyFlowDataProvider =
+    FutureProvider.autoDispose<List<MonthlyFlowData>>((ref) async {
   // Watch the dashboard state to trigger refresh when dashboard updates
   ref.watch(dashboardNotifierProvider);
   final repository = ref.watch(dashboardRepositoryProvider);
@@ -75,7 +78,8 @@ final monthlyFlowDataProvider = FutureProvider.autoDispose<List<MonthlyFlowData>
 });
 
 /// Provider for net worth snapshots
-final netWorthSnapshotsProvider = FutureProvider.autoDispose<List<NetWorthSnapshot>>((ref) async {
+final netWorthSnapshotsProvider =
+    FutureProvider.autoDispose<List<NetWorthSnapshot>>((ref) async {
   // Watch the dashboard state to trigger refresh when dashboard updates
   ref.watch(dashboardNotifierProvider);
   final repository = ref.watch(dashboardRepositoryProvider);

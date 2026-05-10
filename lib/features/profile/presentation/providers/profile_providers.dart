@@ -9,7 +9,8 @@ import '../../domain/repositories/profile_repository.dart';
 // Data Source Provider
 // ============================================================================
 
-final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((ref) {
+final profileRemoteDataSourceProvider =
+    Provider<ProfileRemoteDataSource>((ref) {
   return ProfileRemoteDataSource();
 });
 

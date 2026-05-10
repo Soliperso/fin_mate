@@ -32,7 +32,8 @@ class SentryService {
           options.release = dotenv.get('SENTRY_RELEASE', fallback: '1.0.0+1');
 
           // Performance monitoring
-          options.tracesSampleRate = kDebugMode ? 1.0 : 0.2; // 100% in dev, 20% in prod
+          options.tracesSampleRate =
+              kDebugMode ? 1.0 : 0.2; // 100% in dev, 20% in prod
 
           // Only enable Sentry's internal debug logging in debug mode,
           // but raise the diagnostic level to suppress noisy network tracker messages.

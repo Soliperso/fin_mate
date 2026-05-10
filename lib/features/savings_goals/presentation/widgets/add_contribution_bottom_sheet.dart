@@ -72,7 +72,8 @@ class _AddContributionBottomSheetState
       );
 
       if (contribution != null && mounted) {
-        Navigator.pop(context, amount); // pass back the amount so caller can detect achievement
+        Navigator.pop(context,
+            amount); // pass back the amount so caller can detect achievement
       } else if (mounted) {
         ErrorSnackbar.show(context, message: 'Failed to add contribution');
       }
@@ -139,7 +140,8 @@ class _AddContributionBottomSheetState
                   border: OutlineInputBorder(),
                   hintText: '0.00',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -195,8 +197,7 @@ class _AddContributionBottomSheetState
                 onSelected: (tx) => setState(() {
                   _linkedTransaction = tx;
                   if (tx != null) {
-                    _amountController.text =
-                        tx.amount.toStringAsFixed(2);
+                    _amountController.text = tx.amount.toStringAsFixed(2);
                   }
                 }),
               ),

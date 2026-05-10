@@ -15,7 +15,8 @@ final initialThemeModeProvider = Provider<ThemeMode>((_) => ThemeMode.system);
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   final ThemeService _themeService;
 
-  ThemeModeNotifier(this._themeService, ThemeMode initialMode) : super(initialMode);
+  ThemeModeNotifier(this._themeService, ThemeMode initialMode)
+      : super(initialMode);
 
   /// Refresh theme from storage (called after ThemeService.initialize())
   Future<void> initialize() async {
@@ -30,7 +31,8 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 }
 
 /// Riverpod provider for theme mode state
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider =
+    StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
   final themeService = ref.watch(themeServiceProvider);
   final initialMode = ref.watch(initialThemeModeProvider);
   return ThemeModeNotifier(themeService, initialMode);

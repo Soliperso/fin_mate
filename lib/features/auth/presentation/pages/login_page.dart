@@ -76,7 +76,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.brandTeal.withValues(alpha: 0.12);
+    final iconBg = isDark
+        ? AppColors.tertiarySystemBackgroundDark
+        : AppColors.brandTeal.withValues(alpha: 0.12);
     final iconColor = isDark ? Colors.white : AppColors.brandTeal;
 
     return GestureDetector(
@@ -85,256 +87,271 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSizes.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSizes.xl),
-                Center(
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.brandTeal.withValues(alpha: 0.12),
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.lock_shield_fill,
-                      size: 44,
-                      color: AppColors.brandTeal,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: AppSizes.xl),
+                  Center(
+                    child: Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.brandTeal.withValues(alpha: 0.12),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.lock_shield_fill,
+                        size: 44,
+                        color: AppColors.brandTeal,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSizes.lg),
-                Text(
-                  'auth.login.title'.tr(),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Text(
-                  'auth.login.subtitle'.tr(),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSizes.xxl),
-                if (_showDeletionBanner) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.md, vertical: AppSizes.sm + 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryTeal.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSizes.sm),
-                      border: Border.all(
-                          color: AppColors.primaryTeal.withValues(alpha: 0.4)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Icon(CupertinoIcons.checkmark_seal_fill,
-                              color: AppColors.primaryTeal, size: 16),
+                  const SizedBox(height: AppSizes.lg),
+                  Text(
+                    'auth.login.title'.tr(),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: AppSizes.sm),
-                        Expanded(
-                          child: Text(
-                            'security.accountDeletedBanner'.tr(),
-                            style: TextStyle(
-                              color: AppColors.primaryTeal,
-                              fontSize: 13,
-                              height: 1.4,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Text(
+                    'auth.login.subtitle'.tr(),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSizes.xxl),
+                  if (_showDeletionBanner) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.md, vertical: AppSizes.sm + 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppSizes.sm),
+                        border: Border.all(
+                            color:
+                                AppColors.primaryTeal.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Icon(CupertinoIcons.checkmark_seal_fill,
+                                color: AppColors.primaryTeal, size: 16),
+                          ),
+                          const SizedBox(width: AppSizes.sm),
+                          Expanded(
+                            child: Text(
+                              'security.accountDeletedBanner'.tr(),
+                              style: TextStyle(
+                                color: AppColors.primaryTeal,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
                             ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () =>
-                              setState(() => _showDeletionBanner = false),
-                          child: Icon(CupertinoIcons.xmark,
-                              size: 14,
-                              color: AppColors.primaryTeal.withValues(alpha: 0.7)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                ],
-                if (authState.errorMessage != null) ...[
-                  if (authState.errorMessage!.contains('disabled'))
-                    _buildDisabledAccountBanner()
-                  else
-                    _buildGenericErrorBanner(authState.errorMessage!),
-                  const SizedBox(height: AppSizes.md),
-                ],
-                Semantics(
-                  label: 'Email address field',
-                  child: TextFormField(
-                    controller: _emailController,
-                    focusNode: _emailFocusNode,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    onChanged: (_) {
-                      _clearError();
-                      if (_showDeletionBanner) {
-                        setState(() => _showDeletionBanner = false);
-                      }
-                    },
-                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                    decoration: InputDecoration(
-                      labelText: 'auth.login.emailLabel'.tr(),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                          GestureDetector(
+                            onTap: () =>
+                                setState(() => _showDeletionBanner = false),
+                            child: Icon(CupertinoIcons.xmark,
+                                size: 14,
+                                color: AppColors.primaryTeal
+                                    .withValues(alpha: 0.7)),
                           ),
-                          child: Icon(CupertinoIcons.mail, size: 17, color: iconColor),
-                        ),
+                        ],
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'auth.login.emailRequired'.tr();
-                      if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
-                        return 'auth.login.emailInvalid'.tr();
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppSizes.md),
-                Semantics(
-                  label: 'Password field',
-                  child: TextFormField(
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    obscureText: _obscurePassword,
-                    textInputAction: TextInputAction.done,
-                    onChanged: (_) => _clearError(),
-                    onFieldSubmitted: (_) => _handleLogin(),
-                    decoration: InputDecoration(
-                      labelText: 'auth.login.passwordLabel'.tr(),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: iconBg,
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: Icon(CupertinoIcons.lock, size: 17, color: iconColor),
-                        ),
-                      ),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: GestureDetector(
-                          onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                    const SizedBox(height: AppSizes.md),
+                  ],
+                  if (authState.errorMessage != null) ...[
+                    if (authState.errorMessage!.contains('disabled'))
+                      _buildDisabledAccountBanner()
+                    else
+                      _buildGenericErrorBanner(authState.errorMessage!),
+                    const SizedBox(height: AppSizes.md),
+                  ],
+                  Semantics(
+                    label: 'Email address field',
+                    child: TextFormField(
+                      controller: _emailController,
+                      focusNode: _emailFocusNode,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (_) {
+                        _clearError();
+                        if (_showDeletionBanner) {
+                          setState(() => _showDeletionBanner = false);
+                        }
+                      },
+                      onFieldSubmitted: (_) =>
+                          _passwordFocusNode.requestFocus(),
+                      decoration: InputDecoration(
+                        labelText: 'auth.login.emailLabel'.tr(),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(8),
                           child: Container(
                             decoration: BoxDecoration(
                               color: iconBg,
-                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
                             ),
-                            child: Icon(
-                              _obscurePassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                              size: 17,
-                              color: iconColor,
+                            child: Icon(CupertinoIcons.mail,
+                                size: 17, color: iconColor),
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'auth.login.emailRequired'.tr();
+                        if (!RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                            .hasMatch(value)) {
+                          return 'auth.login.emailInvalid'.tr();
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  Semantics(
+                    label: 'Password field',
+                    child: TextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocusNode,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (_) => _clearError(),
+                      onFieldSubmitted: (_) => _handleLogin(),
+                      decoration: InputDecoration(
+                        labelText: 'auth.login.passwordLabel'.tr(),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: Icon(CupertinoIcons.lock,
+                                size: 17, color: iconColor),
+                          ),
+                        ),
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: GestureDetector(
+                            onTap: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: iconBg,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
+                              ),
+                              child: Icon(
+                                _obscurePassword
+                                    ? CupertinoIcons.eye_slash
+                                    : CupertinoIcons.eye,
+                                size: 17,
+                                color: iconColor,
+                              ),
                             ),
                           ),
                         ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'auth.login.passwordRequired'.tr();
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'auth.login.passwordRequired'.tr();
-                      }
-                      return null;
-                    },
                   ),
-                ),
-                const SizedBox(height: AppSizes.sm),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: authState.isLoading
-                          ? null
-                          : (value) {
-                              setState(() => _rememberMe = value ?? false);
-                            },
-                    ),
-                    Text(
-                      'auth.login.rememberMe'.tr(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: authState.isLoading ? null : _handleForgotPassword,
-                      child: Text(
-                        'auth.login.forgotPassword'.tr(),
-                        style: const TextStyle(color: AppColors.brandTeal),
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: authState.isLoading
+                            ? null
+                            : (value) {
+                                setState(() => _rememberMe = value ?? false);
+                              },
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
-                // [Biometric: commented out — login button with biometric icon]
-                // Consumer(
-                //   builder: (context, ref, child) {
-                //     final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
-                //     final showBiometric = isBiometricAvailable.maybeWhen(
-                //       data: (v) => v,
-                //       orElse: () => false,
-                //     );
-                //     if (!showBiometric) { return ElevatedButton(...); }
-                //     return FutureBuilder<String?>( // token check + biometric button
-                //       ...
-                //     );
-                //   },
-                // ),
-                Semantics(
-                  label: 'Log in button',
-                  button: true,
-                  child: ElevatedButton(
-                    onPressed: authState.isLoading ? null : _handleLogin,
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text('auth.login.loginButton'.tr()),
+                      Text(
+                        'auth.login.rememberMe'.tr(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed:
+                            authState.isLoading ? null : _handleForgotPassword,
+                        child: Text(
+                          'auth.login.forgotPassword'.tr(),
+                          style: const TextStyle(color: AppColors.brandTeal),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: AppSizes.md),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'auth.login.noAccount'.tr(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
+                  const SizedBox(height: AppSizes.lg),
+                  // [Biometric: commented out — login button with biometric icon]
+                  // Consumer(
+                  //   builder: (context, ref, child) {
+                  //     final isBiometricAvailable = ref.watch(isBiometricAvailableProvider);
+                  //     final showBiometric = isBiometricAvailable.maybeWhen(
+                  //       data: (v) => v,
+                  //       orElse: () => false,
+                  //     );
+                  //     if (!showBiometric) { return ElevatedButton(...); }
+                  //     return FutureBuilder<String?>( // token check + biometric button
+                  //       ...
+                  //     );
+                  //   },
+                  // ),
+                  Semantics(
+                    label: 'Log in button',
+                    button: true,
+                    child: ElevatedButton(
+                      onPressed: authState.isLoading ? null : _handleLogin,
+                      child: authState.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text('auth.login.loginButton'.tr()),
                     ),
-                    TextButton(
-                      onPressed: () => context.go('/signup'),
-                      child: Text(
-                        'auth.login.signUp'.tr(),
-                        style: const TextStyle(color: AppColors.brandTeal),
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'auth.login.noAccount'.tr(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      TextButton(
+                        onPressed: () => context.go('/signup'),
+                        child: Text(
+                          'auth.login.signUp'.tr(),
+                          style: const TextStyle(color: AppColors.brandTeal),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -446,11 +463,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildDisabledAccountBanner() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.systemOrange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        border: Border.all(color: AppColors.systemOrange.withValues(alpha: 0.6)),
+        border:
+            Border.all(color: AppColors.systemOrange.withValues(alpha: 0.6)),
       ),
       child: Row(
         children: [
@@ -500,7 +519,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error),
           const SizedBox(width: AppSizes.sm),
           Expanded(
-            child: Text(message, style: const TextStyle(color: AppColors.error)),
+            child:
+                Text(message, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),

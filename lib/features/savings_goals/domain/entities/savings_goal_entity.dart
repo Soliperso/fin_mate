@@ -35,9 +35,11 @@ class SavingsGoal extends Equatable {
     required this.updatedAt,
   });
 
-  double get progress => targetAmount > 0 ? (currentAmount / targetAmount * 100).clamp(0, 100) : 0;
+  double get progress =>
+      targetAmount > 0 ? (currentAmount / targetAmount * 100).clamp(0, 100) : 0;
 
-  double get remainingAmount => (targetAmount - currentAmount).clamp(0, double.infinity);
+  double get remainingAmount =>
+      (targetAmount - currentAmount).clamp(0, double.infinity);
 
   int? get daysRemaining {
     if (deadline == null) return null;

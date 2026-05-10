@@ -77,7 +77,8 @@ class DashboardStats extends Equatable {
   }) {
     return DashboardStats(
       netWorth: netWorth ?? this.netWorth,
-      netWorthChangePercentage: netWorthChangePercentage ?? this.netWorthChangePercentage,
+      netWorthChangePercentage:
+          netWorthChangePercentage ?? this.netWorthChangePercentage,
       isNetWorthPositive: isNetWorthPositive ?? this.isNetWorthPositive,
       monthlyIncome: monthlyIncome ?? this.monthlyIncome,
       monthlyExpenses: monthlyExpenses ?? this.monthlyExpenses,
@@ -110,5 +111,6 @@ class UpcomingBill extends Equatable {
   int get daysUntilDue => dueDate.difference(DateTime.now()).inDays;
 
   @override
-  List<Object?> get props => [id, name, amount, dueDate, categoryId, categoryName];
+  List<Object?> get props =>
+      [id, name, amount, dueDate, categoryId, categoryName];
 }

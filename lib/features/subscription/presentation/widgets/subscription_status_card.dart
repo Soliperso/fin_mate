@@ -41,8 +41,11 @@ class SubscriptionStatusCard extends ConsumerWidget {
               Row(
                 children: [
                   Icon(
-                    isPremium ? CupertinoIcons.star_fill : CupertinoIcons.person_crop_circle,
-                    color: isPremium ? AppColors.warning : AppColors.textSecondary,
+                    isPremium
+                        ? CupertinoIcons.star_fill
+                        : CupertinoIcons.person_crop_circle,
+                    color:
+                        isPremium ? AppColors.warning : AppColors.textSecondary,
                     size: 32,
                   ),
                   const SizedBox(width: 12),
@@ -87,7 +90,8 @@ class SubscriptionStatusCard extends ConsumerWidget {
                   // Status badge
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
 
                       return Container(
                         padding: const EdgeInsets.symmetric(
@@ -96,16 +100,22 @@ class SubscriptionStatusCard extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isPremium
-                              ? AppColors.warning.withValues(alpha: isDark ? 0.2 : 0.1)
-                              : (isDark ? AppColors.cardBackgroundDark : AppColors.lightGray),
-                          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+                              ? AppColors.warning
+                                  .withValues(alpha: isDark ? 0.2 : 0.1)
+                              : (isDark
+                                  ? AppColors.cardBackgroundDark
+                                  : AppColors.lightGray),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusCard),
                         ),
                         child: Text(
                           tier.toUpperCase(),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isPremium ? AppColors.warning : AppColors.textSecondary,
+                            color: isPremium
+                                ? AppColors.warning
+                                : AppColors.textSecondary,
                           ),
                         ),
                       );
@@ -184,7 +194,8 @@ class SubscriptionStatusCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         child: Column(
           children: [
-            const Icon(CupertinoIcons.exclamationmark_circle, color: AppColors.error, size: 48),
+            const Icon(CupertinoIcons.exclamationmark_circle,
+                color: AppColors.error, size: 48),
             const SizedBox(height: 12),
             Text(
               'Failed to load subscription status',

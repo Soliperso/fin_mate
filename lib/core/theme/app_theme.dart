@@ -312,7 +312,8 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shadowColor: AppColors.separatorDark,
         iconTheme: IconThemeData(color: AppColors.brandTealLight, size: 24),
-        actionsIconTheme: IconThemeData(color: AppColors.brandTealLight, size: 24),
+        actionsIconTheme:
+            IconThemeData(color: AppColors.brandTealLight, size: 24),
         titleTextStyle: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w600,
@@ -448,15 +449,18 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.separatorDark, width: 0.5),
+          borderSide:
+              const BorderSide(color: AppColors.separatorDark, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.separatorDark, width: 0.5),
+          borderSide:
+              const BorderSide(color: AppColors.separatorDark, width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.brandTealLight, width: 1.5),
+          borderSide:
+              const BorderSide(color: AppColors.brandTealLight, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -557,7 +561,8 @@ class AppTheme {
   // iOS HIG typography scale
   static TextTheme _buildTextTheme({bool isDark = false}) {
     final baseColor = isDark ? AppColors.labelDark : AppColors.label;
-    final secondaryColor = isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel;
+    final secondaryColor =
+        isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel;
 
     return TextTheme(
       // Large Title — 34pt Regular

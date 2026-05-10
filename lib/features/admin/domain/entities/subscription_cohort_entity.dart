@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 
 /// One row in the signup-month cohort table
 class SubscriptionCohortEntity extends Equatable {
-  final String cohortMonth;      // e.g. 'Jan 2025'
+  final String cohortMonth; // e.g. 'Jan 2025'
   final DateTime cohortMonthDate; // for sorting / charting
   final int totalSignups;
   final int premiumCount;
-  final double conversionRate;   // percent
+  final double conversionRate; // percent
 
   const SubscriptionCohortEntity({
     required this.cohortMonth,

@@ -39,24 +39,22 @@ CategoryEntity _category({
 String _csv(List<Map<String, String>> rows) {
   const header = 'Date,Type,Amount,Account,Category,Description,Notes,Tags\n';
   return header +
-      rows
-          .map((r) {
-            final cells = [
-              r['date'] ?? '2025-01-15',
-              r['type'] ?? 'expense',
-              r['amount'] ?? '50.00',
-              r['account'] ?? 'Checking',
-              r['category'] ?? 'Food',
-              r['description'] ?? '',
-              r['notes'] ?? '',
-              r['tags'] ?? '',
-            ];
-            // Quote cells that contain commas
-            return cells
-                .map((cell) => cell.contains(',') ? '"$cell"' : cell)
-                .join(',');
-          })
-          .join('\n');
+      rows.map((r) {
+        final cells = [
+          r['date'] ?? '2025-01-15',
+          r['type'] ?? 'expense',
+          r['amount'] ?? '50.00',
+          r['account'] ?? 'Checking',
+          r['category'] ?? 'Food',
+          r['description'] ?? '',
+          r['notes'] ?? '',
+          r['tags'] ?? '',
+        ];
+        // Quote cells that contain commas
+        return cells
+            .map((cell) => cell.contains(',') ? '"$cell"' : cell)
+            .join(',');
+      }).join('\n');
 }
 
 String _stringOfBytes(int byteCount) => 'A' * byteCount;
@@ -83,7 +81,8 @@ void main() {
     test('accepts content at exactly 5 MB (5*1024*1024 bytes)', () {
       // Build a string exactly 5 MB, with valid header
       const contentSize = 5 * 1024 * 1024;
-      final headerAndNewline = 'Date,Type,Amount,Account,Category,Description,Notes,Tags\nA';
+      final headerAndNewline =
+          'Date,Type,Amount,Account,Category,Description,Notes,Tags\nA';
       final padding = _stringOfBytes(contentSize - headerAndNewline.length);
       final content = headerAndNewline + padding;
 
@@ -135,7 +134,8 @@ void main() {
     });
 
     test('rejects mismatched headers', () {
-      const content = 'Foo,Bar,Baz,Qux,Quux,Corge,Grault,Garply\n1,2,3,4,5,6,7,8\n';
+      const content =
+          'Foo,Bar,Baz,Qux,Quux,Corge,Grault,Garply\n1,2,3,4,5,6,7,8\n';
       expect(
         () => svc.parse(content, accounts, categories, userId),
         throwsA(
@@ -160,7 +160,9 @@ void main() {
   group('CsvImportService — date parsing', () {
     test('parses ISO date yyyy-MM-dd', () {
       final result = svc.parse(
-        _csv([{'date': '2025-01-15'}]),
+        _csv([
+          {'date': '2025-01-15'}
+        ]),
         accounts,
         categories,
         userId,
@@ -170,7 +172,9 @@ void main() {
 
     test('parses MM/dd/yyyy', () {
       final result = svc.parse(
-        _csv([{'date': '01/15/2025'}]),
+        _csv([
+          {'date': '01/15/2025'}
+        ]),
         accounts,
         categories,
         userId,
@@ -180,7 +184,9 @@ void main() {
 
     test('parses dd/MM/yyyy', () {
       final result = svc.parse(
-        _csv([{'date': '15/01/2025'}]),
+        _csv([
+          {'date': '15/01/2025'}
+        ]),
         accounts,
         categories,
         userId,
@@ -192,7 +198,9 @@ void main() {
         'MM/dd is tried before dd/MM for ambiguous dates (06/07/2025 → June 7, not July 6)',
         () {
       final result = svc.parse(
-        _csv([{'date': '06/07/2025'}]),
+        _csv([
+          {'date': '06/07/2025'}
+        ]),
         accounts,
         categories,
         userId,
@@ -202,7 +210,9 @@ void main() {
 
     test('skips row with unrecognised date format', () {
       final result = svc.parse(
-        _csv([{'date': '2025.01.15'}]),
+        _csv([
+          {'date': '2025.01.15'}
+        ]),
         accounts,
         categories,
         userId,
@@ -214,7 +224,9 @@ void main() {
   group('CsvImportService — amount parsing', () {
     test('strips commas from amounts (1,234.56 → 1234.56)', () {
       final result = svc.parse(
-        _csv([{'amount': '1,234.56'}]),
+        _csv([
+          {'amount': '1,234.56'}
+        ]),
         accounts,
         categories,
         userId,
@@ -224,7 +236,9 @@ void main() {
 
     test('rejects amount of zero', () {
       final result = svc.parse(
-        _csv([{'amount': '0'}]),
+        _csv([
+          {'amount': '0'}
+        ]),
         accounts,
         categories,
         userId,
@@ -234,7 +248,9 @@ void main() {
 
     test('rejects negative amount', () {
       final result = svc.parse(
-        _csv([{'amount': '-50.00'}]),
+        _csv([
+          {'amount': '-50.00'}
+        ]),
         accounts,
         categories,
         userId,
@@ -244,7 +260,9 @@ void main() {
 
     test('rejects non-numeric amount', () {
       final result = svc.parse(
-        _csv([{'amount': 'abc'}]),
+        _csv([
+          {'amount': 'abc'}
+        ]),
         accounts,
         categories,
         userId,
@@ -254,7 +272,9 @@ void main() {
 
     test('accepts positive decimal amount', () {
       final result = svc.parse(
-        _csv([{'amount': '99.99'}]),
+        _csv([
+          {'amount': '99.99'}
+        ]),
         accounts,
         categories,
         userId,
@@ -266,7 +286,9 @@ void main() {
   group('CsvImportService — type parsing', () {
     test('parses income (case-insensitive INCOME)', () {
       final result = svc.parse(
-        _csv([{'type': 'INCOME'}]),
+        _csv([
+          {'type': 'INCOME'}
+        ]),
         accounts,
         categories,
         userId,
@@ -276,7 +298,9 @@ void main() {
 
     test('parses expense', () {
       final result = svc.parse(
-        _csv([{'type': 'expense'}]),
+        _csv([
+          {'type': 'expense'}
+        ]),
         accounts,
         categories,
         userId,
@@ -286,7 +310,9 @@ void main() {
 
     test('parses transfer', () {
       final result = svc.parse(
-        _csv([{'type': 'transfer'}]),
+        _csv([
+          {'type': 'transfer'}
+        ]),
         accounts,
         categories,
         userId,
@@ -296,7 +322,9 @@ void main() {
 
     test('skips unknown type', () {
       final result = svc.parse(
-        _csv([{'type': 'donation'}]),
+        _csv([
+          {'type': 'donation'}
+        ]),
         accounts,
         categories,
         userId,
@@ -308,7 +336,9 @@ void main() {
   group('CsvImportService — account matching', () {
     test('matches account case-insensitively', () {
       final result = svc.parse(
-        _csv([{'account': 'CHECKING'}]),
+        _csv([
+          {'account': 'CHECKING'}
+        ]),
         accounts,
         categories,
         userId,
@@ -318,7 +348,9 @@ void main() {
 
     test('skips row when account not found', () {
       final result = svc.parse(
-        _csv([{'account': 'NonExistent'}]),
+        _csv([
+          {'account': 'NonExistent'}
+        ]),
         accounts,
         categories,
         userId,
@@ -328,7 +360,9 @@ void main() {
 
     test('skips row when account field is empty', () {
       final result = svc.parse(
-        _csv([{'account': ''}]),
+        _csv([
+          {'account': ''}
+        ]),
         accounts,
         categories,
         userId,
@@ -340,7 +374,9 @@ void main() {
   group('CsvImportService — category matching', () {
     test('matches category case-insensitively', () {
       final result = svc.parse(
-        _csv([{'category': 'FOOD'}]),
+        _csv([
+          {'category': 'FOOD'}
+        ]),
         accounts,
         categories,
         userId,
@@ -350,7 +386,9 @@ void main() {
 
     test('leaves categoryId null when category field is empty', () {
       final result = svc.parse(
-        _csv([{'category': ''}]),
+        _csv([
+          {'category': ''}
+        ]),
         accounts,
         categories,
         userId,
@@ -360,7 +398,9 @@ void main() {
 
     test('leaves categoryId null when category name not found', () {
       final result = svc.parse(
-        _csv([{'category': 'NonExistent'}]),
+        _csv([
+          {'category': 'NonExistent'}
+        ]),
         accounts,
         categories,
         userId,
@@ -372,7 +412,9 @@ void main() {
   group('CsvImportService — tags parsing', () {
     test('splits tags on pipe character', () {
       final result = svc.parse(
-        _csv([{'tags': 'food|dining'}]),
+        _csv([
+          {'tags': 'food|dining'}
+        ]),
         accounts,
         categories,
         userId,
@@ -380,10 +422,13 @@ void main() {
       expect(result.transactions.first.tags, ['food', 'dining']);
     });
 
-    test('filters trailing/empty segments from pipe split ("food|dining|" → [food, dining])',
+    test(
+        'filters trailing/empty segments from pipe split ("food|dining|" → [food, dining])',
         () {
       final result = svc.parse(
-        _csv([{'tags': 'food|dining|'}]),
+        _csv([
+          {'tags': 'food|dining|'}
+        ]),
         accounts,
         categories,
         userId,
@@ -394,7 +439,9 @@ void main() {
 
     test('returns null tags when tags field is empty', () {
       final result = svc.parse(
-        _csv([{'tags': ''}]),
+        _csv([
+          {'tags': ''}
+        ]),
         accounts,
         categories,
         userId,
@@ -404,7 +451,9 @@ void main() {
 
     test('trims whitespace from individual tags', () {
       final result = svc.parse(
-        _csv([{'tags': ' food | dining '}]),
+        _csv([
+          {'tags': ' food | dining '}
+        ]),
         accounts,
         categories,
         userId,
@@ -415,7 +464,8 @@ void main() {
 
   group('CsvImportService — blank row handling', () {
     test('skips completely blank data rows', () {
-      const content = '''Date,Type,Amount,Account,Category,Description,Notes,Tags
+      const content =
+          '''Date,Type,Amount,Account,Category,Description,Notes,Tags
 2025-01-15,expense,50.00,Checking,Food,lunch,,
 ,,,,,,
 2025-01-16,expense,75.00,Checking,Transport,bus,,''';
@@ -448,9 +498,12 @@ void main() {
       expect(id, matches(RegExp(r'^[0-9a-f\-]{36}$')));
     });
 
-    test('returned transaction.accountId matches the matched account entity id', () {
+    test('returned transaction.accountId matches the matched account entity id',
+        () {
       final result = svc.parse(
-        _csv([{'account': 'Checking'}]),
+        _csv([
+          {'account': 'Checking'}
+        ]),
         accounts,
         categories,
         userId,

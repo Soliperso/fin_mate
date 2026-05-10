@@ -22,10 +22,12 @@ class DtiWidget extends ConsumerWidget {
 
     if (summary == null || dashboard == null) return const SizedBox.shrink();
 
-    final totalMinPayment = (summary['total_min_payment'] as num?)?.toDouble() ?? 0.0;
+    final totalMinPayment =
+        (summary['total_min_payment'] as num?)?.toDouble() ?? 0.0;
     final monthlyIncome = dashboard.monthlyIncome;
 
-    if (totalMinPayment <= 0 || monthlyIncome <= 0) return const SizedBox.shrink();
+    if (totalMinPayment <= 0 || monthlyIncome <= 0)
+      return const SizedBox.shrink();
 
     final dti = totalMinPayment / monthlyIncome * 100;
 
@@ -63,7 +65,8 @@ class DtiWidget extends ConsumerWidget {
                 color: dtiColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
-              child: Icon(CupertinoIcons.creditcard, color: dtiColor, size: AppSizes.iconSm),
+              child: Icon(CupertinoIcons.creditcard,
+                  color: dtiColor, size: AppSizes.iconSm),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(

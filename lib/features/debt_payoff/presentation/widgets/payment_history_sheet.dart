@@ -33,7 +33,10 @@ class PaymentHistorySheet extends ConsumerWidget {
           // ── Header ────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.lg, AppSizes.xs, AppSizes.sm, AppSizes.sm,
+              AppSizes.lg,
+              AppSizes.xs,
+              AppSizes.sm,
+              AppSizes.sm,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,10 +55,9 @@ class PaymentHistorySheet extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         debt.name,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -101,8 +103,7 @@ class PaymentHistorySheet extends ConsumerWidget {
               data: (payments) {
                 if (payments.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: AppSizes.xl),
+                    padding: const EdgeInsets.symmetric(vertical: AppSizes.xl),
                     child: EmptyStateCard(
                       icon: CupertinoIcons.creditcard,
                       title: 'paymentHistory.noPayments'.tr(),
@@ -117,7 +118,10 @@ class PaymentHistorySheet extends ConsumerWidget {
 
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.lg,
+                    AppSizes.md,
+                    AppSizes.sm,
+                    AppSizes.md,
+                    AppSizes.lg,
                   ),
                   shrinkWrap: true,
                   children: [
@@ -130,8 +134,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.success.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusSm),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                       ),
                       child: Row(
                         children: [
@@ -144,8 +147,14 @@ class PaymentHistorySheet extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               payments.length == 1
-                                  ? 'paymentHistory.paymentsLogged'.tr(namedArgs: {'count': '${payments.length}'})
-                                  : 'paymentHistory.paymentsLoggedPlural'.tr(namedArgs: {'count': '${payments.length}'}),
+                                  ? 'paymentHistory.paymentsLogged'.tr(
+                                      namedArgs: {
+                                          'count': '${payments.length}'
+                                        })
+                                  : 'paymentHistory.paymentsLoggedPlural'.tr(
+                                      namedArgs: {
+                                          'count': '${payments.length}'
+                                        }),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -154,14 +163,14 @@ class PaymentHistorySheet extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            'paymentHistory.totalPaid'.tr(namedArgs: {'amount': currencyFormat.format(totalPaid)}),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.success,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            'paymentHistory.totalPaid'.tr(namedArgs: {
+                              'amount': currencyFormat.format(totalPaid)
+                            }),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.success,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                         ],
                       ),
@@ -218,8 +227,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                                               .textTheme
                                               .bodySmall
                                               ?.copyWith(
-                                                color:
-                                                    AppColors.textSecondary,
+                                                color: AppColors.textSecondary,
                                               ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -246,8 +254,7 @@ class PaymentHistorySheet extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          if (!isLast)
-                            const Divider(height: 1, indent: 44),
+                          if (!isLast) const Divider(height: 1, indent: 44),
                         ],
                       );
                     }),
@@ -279,7 +286,8 @@ class _UndoPaymentButton extends ConsumerWidget {
         content: Text(
           'paymentHistory.undoConfirmation'.tr(
             namedArgs: {
-              'amount': NumberFormat.currency(symbol: '\$').format(payment.amount)
+              'amount':
+                  NumberFormat.currency(symbol: '\$').format(payment.amount)
             },
           ),
         ),

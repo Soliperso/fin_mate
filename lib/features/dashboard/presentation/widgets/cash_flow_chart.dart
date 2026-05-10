@@ -37,7 +37,10 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       border: Border.all(color: Colors.transparent, width: 0),
       padding: const EdgeInsets.fromLTRB(
-        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +177,8 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
               showTitles: true,
               reservedSize: 24,
               getTitlesWidget: (value, meta) {
-                if (value.toInt() >= 0 && value.toInt() < widget.flowData.length) {
+                if (value.toInt() >= 0 &&
+                    value.toInt() < widget.flowData.length) {
                   final data = widget.flowData[value.toInt()];
                   return Padding(
                     padding: const EdgeInsets.only(top: 6.0),
@@ -313,7 +317,8 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
               showTitles: true,
               reservedSize: 24,
               getTitlesWidget: (value, meta) {
-                if (value.toInt() >= 0 && value.toInt() < widget.flowData.length) {
+                if (value.toInt() >= 0 &&
+                    value.toInt() < widget.flowData.length) {
                   final data = widget.flowData[value.toInt()];
                   return Padding(
                     padding: const EdgeInsets.only(top: 6.0),
@@ -396,7 +401,8 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, {required Color color, required String label}) {
+  Widget _buildLegendItem(BuildContext context,
+      {required Color color, required String label}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

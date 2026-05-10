@@ -11,7 +11,8 @@ class CreateGoalBottomSheet extends ConsumerStatefulWidget {
   const CreateGoalBottomSheet({super.key});
 
   @override
-  ConsumerState<CreateGoalBottomSheet> createState() => _CreateGoalBottomSheetState();
+  ConsumerState<CreateGoalBottomSheet> createState() =>
+      _CreateGoalBottomSheetState();
 }
 
 class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
@@ -53,7 +54,8 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
       ),
       decoration: const BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
       ),
       child: DraggableScrollableSheet(
         initialChildSize: 0.9,
@@ -66,7 +68,8 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
               color: isDark
                   ? AppColors.cardBackgroundDark.withValues(alpha: 0.95)
                   : AppColors.white.withValues(alpha: 0.95),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppSizes.radiusLg)),
               border: Border.all(
                 color: isDark
                     ? AppColors.white.withValues(alpha: 0.1)
@@ -105,7 +108,10 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     // Goal Name
                     Text(
                       'Goal Name',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSizes.sm),
                     TextFormField(
@@ -126,7 +132,10 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     // Description
                     Text(
                       'Description (Optional)',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSizes.sm),
                     TextFormField(
@@ -142,7 +151,10 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     // Target Amount
                     Text(
                       'Target Amount',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSizes.sm),
                     TextFormField(
@@ -152,9 +164,11 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                         prefixText: '\$ ',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -174,7 +188,10 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     // Category
                     Text(
                       'Category (Optional)',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSizes.sm),
                     DropdownButtonFormField<String>(
@@ -200,16 +217,21 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     // Deadline
                     Text(
                       'Deadline (Optional)',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: AppSizes.sm),
                     InkWell(
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now().add(const Duration(days: 30)),
+                          initialDate:
+                              DateTime.now().add(const Duration(days: 30)),
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 3650)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 3650)),
                         );
                         if (date != null) {
                           setState(() {
@@ -237,7 +259,9 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                            onPressed: _isLoading
+                                ? null
+                                : () => Navigator.of(context).pop(),
                             child: const Text('Cancel'),
                           ),
                         ),

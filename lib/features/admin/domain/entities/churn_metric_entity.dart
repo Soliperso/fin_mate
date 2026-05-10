@@ -6,7 +6,7 @@ class ChurnMetricEntity extends Equatable {
   final String metricLabel;
   final double metricValue;
   final double metricChange; // absolute change vs previous period
-  final String metricUnit;   // 'count', 'percent', 'currency'
+  final String metricUnit; // 'count', 'percent', 'currency'
 
   const ChurnMetricEntity({
     required this.metricKey,

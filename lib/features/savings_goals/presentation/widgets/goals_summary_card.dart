@@ -18,7 +18,8 @@ class GoalsSummaryCard extends ConsumerWidget {
     final activeGoals = summary['active_goals'] as int? ?? 0;
     final totalTarget = (summary['total_target'] as num?)?.toDouble() ?? 0.0;
     final totalSaved = (summary['total_saved'] as num?)?.toDouble() ?? 0.0;
-    final overallProgress = (summary['overall_progress'] as num?)?.toDouble() ?? 0.0;
+    final overallProgress =
+        (summary['overall_progress'] as num?)?.toDouble() ?? 0.0;
 
     final currencyFormat = ref.watch(currencyFormat2Provider);
 

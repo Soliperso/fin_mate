@@ -70,9 +70,9 @@ class SavingsGoalsPage extends ConsumerWidget {
                   label: Text(
                     'savings.newGoal'.tr(),
                     style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                   ),
                 ),
               ),
@@ -107,18 +107,21 @@ class SavingsGoalsPage extends ConsumerWidget {
                           backgroundColor: AppColors.brandTeal,
                           foregroundColor: Colors.white,
                           elevation: 4,
-                          shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                          shadowColor:
+                              AppColors.brandTeal.withValues(alpha: 0.4),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusFull),
                           ),
                         ),
                         icon: const Icon(CupertinoIcons.add, size: 20),
                         label: Text(
                           'savings.newGoal'.tr(),
-                          style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                         ),
                       ),
                     ),
@@ -129,7 +132,8 @@ class SavingsGoalsPage extends ConsumerWidget {
 
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, 100),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSizes.md, AppSizes.md, AppSizes.md, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -148,9 +152,10 @@ class SavingsGoalsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSizes.md),
                   ...goals.where((g) => !g.isCompleted).map((goal) => GoalCard(
-                    goal: goal,
-                    onContribute: () => _showContributeSheet(context, ref, goal),
-                  )),
+                        goal: goal,
+                        onContribute: () =>
+                            _showContributeSheet(context, ref, goal),
+                      )),
 
                   // Completed Goals
                   if (goals.any((g) => g.isCompleted)) ...[
@@ -160,7 +165,9 @@ class SavingsGoalsPage extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppSizes.md),
-                    ...goals.where((g) => g.isCompleted).map((goal) => GoalCard(goal: goal)),
+                    ...goals
+                        .where((g) => g.isCompleted)
+                        .map((goal) => GoalCard(goal: goal)),
                   ],
                 ],
               ),
@@ -199,7 +206,8 @@ class SavingsGoalsPage extends ConsumerWidget {
     );
   }
 
-  void _showContributeSheet(BuildContext context, WidgetRef ref, SavingsGoal goal) {
+  void _showContributeSheet(
+      BuildContext context, WidgetRef ref, SavingsGoal goal) {
     GlassBottomSheet.show(
       context: context,
       child: AddContributionBottomSheet(goalId: goal.id),
@@ -312,7 +320,10 @@ class SavingsGoalsPage extends ConsumerWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.lg, AppSizes.xl, AppSizes.lg, AppSizes.lg,
+                    AppSizes.lg,
+                    AppSizes.xl,
+                    AppSizes.lg,
+                    AppSizes.lg,
                   ),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
@@ -363,7 +374,10 @@ class SavingsGoalsPage extends ConsumerWidget {
                 // ── Feature steps ──────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.xs,
+                    AppSizes.md,
+                    AppSizes.md,
+                    AppSizes.md,
+                    AppSizes.xs,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,7 +430,8 @@ class SavingsGoalsPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
                             ),
                           ),
                           child: Text(

@@ -53,8 +53,8 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
         text: widget.debt.interestRate.toStringAsFixed(2));
     _minimumPaymentController = TextEditingController(
         text: widget.debt.minimumPayment.toStringAsFixed(2));
-    _dueDayController = TextEditingController(
-        text: widget.debt.dueDay?.toString() ?? '');
+    _dueDayController =
+        TextEditingController(text: widget.debt.dueDay?.toString() ?? '');
     _notesController = TextEditingController(text: widget.debt.notes ?? '');
     _selectedDebtType = widget.debt.debtType;
   }
@@ -92,8 +92,9 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
           : _notesController.text.trim(),
     };
 
-    final success =
-        await ref.read(debtNotifierProvider.notifier).updateDebt(widget.debt.id, fields);
+    final success = await ref
+        .read(debtNotifierProvider.notifier)
+        .updateDebt(widget.debt.id, fields);
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -157,8 +158,9 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                     border: const OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'common.required'.tr() : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'common.required'.tr()
+                      : null,
                 ),
                 const SizedBox(height: AppSizes.md),
                 DropdownButtonFormField<String>(
@@ -185,8 +187,10 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                       const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'common.required'.tr();
-                    if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
-                    if (double.parse(v) < 0) return 'editDebt.mustBeZeroOrMore'.tr();
+                    if (double.tryParse(v) == null)
+                      return 'editDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0)
+                      return 'editDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -207,8 +211,10 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                       const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
-                    if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
-                    if (double.parse(v) < 0) return 'editDebt.mustBeZeroOrMore'.tr();
+                    if (double.tryParse(v) == null)
+                      return 'editDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0)
+                      return 'editDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -223,11 +229,13 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                           suffixText: '%',
                           border: const OutlineInputBorder(),
                         ),
-                        keyboardType:
-                            const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'common.required'.tr();
-                          if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
+                          if (v == null || v.isEmpty)
+                            return 'common.required'.tr();
+                          if (double.tryParse(v) == null)
+                            return 'editDebt.invalidNumber'.tr();
                           return null;
                         },
                       ),
@@ -241,12 +249,15 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                           prefixText: '\$ ',
                           border: const OutlineInputBorder(),
                         ),
-                        keyboardType:
-                            const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'common.required'.tr();
-                          if (double.tryParse(v) == null) return 'editDebt.invalidNumber'.tr();
-                          if (double.parse(v) <= 0) return 'editDebt.mustBeGreaterThanZero'.tr();
+                          if (v == null || v.isEmpty)
+                            return 'common.required'.tr();
+                          if (double.tryParse(v) == null)
+                            return 'editDebt.invalidNumber'.tr();
+                          if (double.parse(v) <= 0)
+                            return 'editDebt.mustBeGreaterThanZero'.tr();
                           return null;
                         },
                       ),
@@ -265,7 +276,8 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final day = int.tryParse(v);
-                    if (day == null || day < 1 || day > 31) return 'editDebt.mustBe1to31'.tr();
+                    if (day == null || day < 1 || day > 31)
+                      return 'editDebt.mustBe1to31'.tr();
                     return null;
                   },
                 ),
@@ -288,7 +300,9 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                           minimumSize: const Size.fromHeight(48),
                           shape: const StadiumBorder(),
                         ),
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: Text('common.cancel'.tr()),
                       ),
                     ),

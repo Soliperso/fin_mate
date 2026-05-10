@@ -18,7 +18,8 @@ class DisplaySettingsPage extends ConsumerStatefulWidget {
   const DisplaySettingsPage({super.key, this.section});
 
   @override
-  ConsumerState<DisplaySettingsPage> createState() => _DisplaySettingsPageState();
+  ConsumerState<DisplaySettingsPage> createState() =>
+      _DisplaySettingsPageState();
 }
 
 class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
@@ -30,10 +31,14 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
 
   String _langCodeToLabel(String code) {
     switch (code) {
-      case 'es': return 'display.langEs'.tr();
-      case 'fr': return 'display.langFr'.tr();
-      case 'ar': return 'display.langAr'.tr();
-      default:   return 'display.langEn'.tr();
+      case 'es':
+        return 'display.langEs'.tr();
+      case 'fr':
+        return 'display.langFr'.tr();
+      case 'ar':
+        return 'display.langAr'.tr();
+      default:
+        return 'display.langEn'.tr();
     }
   }
 
@@ -100,7 +105,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Theme ────────────────────────────────────────────────
-              _sectionLabel(context, 'display.themeSection'.tr(), key: _themeKey),
+              _sectionLabel(context, 'display.themeSection'.tr(),
+                  key: _themeKey),
               const SizedBox(height: AppSizes.sm),
               _buildCard(context, isDark, children: [
                 _buildThemeTile(
@@ -111,8 +117,12 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   subtitle: 'display.lightSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.light,
                   onTap: () {
-                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
-                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('light');
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(ThemeMode.light);
+                    ref
+                        .read(settingsOperationsProvider.notifier)
+                        .updateThemeMode('light');
                   },
                 ),
                 _buildDivider(isDark),
@@ -124,8 +134,12 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   subtitle: 'display.darkSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.dark,
                   onTap: () {
-                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
-                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('dark');
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(ThemeMode.dark);
+                    ref
+                        .read(settingsOperationsProvider.notifier)
+                        .updateThemeMode('dark');
                   },
                 ),
                 _buildDivider(isDark),
@@ -137,15 +151,20 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   subtitle: 'display.systemSub'.tr(),
                   isSelected: currentThemeMode == ThemeMode.system,
                   onTap: () {
-                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
-                    ref.read(settingsOperationsProvider.notifier).updateThemeMode('system');
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(ThemeMode.system);
+                    ref
+                        .read(settingsOperationsProvider.notifier)
+                        .updateThemeMode('system');
                   },
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),
 
               // ── Currency & Format ─────────────────────────────────────
-              _sectionLabel(context, 'display.currencyFormat'.tr(), key: _currencyKey),
+              _sectionLabel(context, 'display.currencyFormat'.tr(),
+                  key: _currencyKey),
               const SizedBox(height: AppSizes.sm),
               _buildCard(context, isDark, children: [
                 _buildOptionTile(
@@ -180,8 +199,9 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   subtitle: 'display.numberFormatSub'.tr(),
                   value: displayFmt.numberFormat,
                   options: const ['1,234.56', '1.234,56', '1 234.56'],
-                  onSelected: (v) =>
-                      ref.read(displayFormatProvider.notifier).setNumberFormat(v),
+                  onSelected: (v) => ref
+                      .read(displayFormatProvider.notifier)
+                      .setNumberFormat(v),
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),
@@ -201,17 +221,21 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
                   ),
                   options: _langCodes.map(_langCodeToLabel).toList(),
                   onSelected: (v) async {
-                    final idx = _langCodes.map(_langCodeToLabel).toList().indexOf(v);
+                    final idx =
+                        _langCodes.map(_langCodeToLabel).toList().indexOf(v);
                     if (idx < 0) return;
                     final code = _langCodes[idx];
                     await context.setLocale(Locale(code));
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString('saved_locale', code);
-                    ref.read(settingsOperationsProvider.notifier).updateLanguage(code);
+                    ref
+                        .read(settingsOperationsProvider.notifier)
+                        .updateLanguage(code);
                     if (context.mounted) {
                       SuccessSnackbar.show(
                         context,
-                        message: 'display.languageChanged'.tr(namedArgs: {'lang': v}),
+                        message: 'display.languageChanged'
+                            .tr(namedArgs: {'lang': v}),
                       );
                     }
                   },
@@ -266,7 +290,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -325,9 +350,11 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
     required ValueChanged<String> onSelected,
   }) {
     return InkWell(
-      onTap: () => _showPickerDialog(context, title, value, options, onSelected),
+      onTap: () =>
+          _showPickerDialog(context, title, value, options, onSelected),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(

@@ -9,13 +9,10 @@ class RecurringTransactionsRemoteDatasource {
       : _supabase = supabaseClient ?? supabase;
 
   Future<List<RecurringTransactionModel>> getAllRecurringTransactions() async {
-    final response = await _supabase
-        .from('recurring_transactions')
-        .select('''
+    final response = await _supabase.from('recurring_transactions').select('''
           *,
           categories(name)
-        ''')
-        .order('next_occurrence', ascending: true);
+        ''').order('next_occurrence', ascending: true);
 
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
@@ -24,15 +21,12 @@ class RecurringTransactionsRemoteDatasource {
     }).toList();
   }
 
-  Future<List<RecurringTransactionModel>> getActiveRecurringTransactions() async {
-    final response = await _supabase
-        .from('recurring_transactions')
-        .select('''
+  Future<List<RecurringTransactionModel>>
+      getActiveRecurringTransactions() async {
+    final response = await _supabase.from('recurring_transactions').select('''
           *,
           categories(name)
-        ''')
-        .eq('is_active', true)
-        .order('next_occurrence', ascending: true);
+        ''').eq('is_active', true).order('next_occurrence', ascending: true);
 
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
@@ -65,15 +59,12 @@ class RecurringTransactionsRemoteDatasource {
     }).toList();
   }
 
-  Future<RecurringTransactionModel> getRecurringTransactionById(String id) async {
-    final response = await _supabase
-        .from('recurring_transactions')
-        .select('''
+  Future<RecurringTransactionModel> getRecurringTransactionById(
+      String id) async {
+    final response = await _supabase.from('recurring_transactions').select('''
           *,
           categories(name)
-        ''')
-        .eq('id', id)
-        .single();
+        ''').eq('id', id).single();
 
     final data = Map<String, dynamic>.from(response);
     data['category_name'] = response['categories']?['name'];
@@ -88,14 +79,11 @@ class RecurringTransactionsRemoteDatasource {
 
     data['user_id'] = userId;
 
-    final response = await _supabase
-        .from('recurring_transactions')
-        .insert(data)
-        .select('''
+    final response =
+        await _supabase.from('recurring_transactions').insert(data).select('''
           *,
           categories(name)
-        ''')
-        .single();
+        ''').single();
 
     final responseData = Map<String, dynamic>.from(response);
     responseData['category_name'] = response['categories']?['name'];
@@ -113,8 +101,7 @@ class RecurringTransactionsRemoteDatasource {
         .select('''
           *,
           categories(name)
-        ''')
-        .single();
+        ''').single();
 
     final responseData = Map<String, dynamic>.from(response);
     responseData['category_name'] = response['categories']?['name'];
@@ -122,9 +109,6 @@ class RecurringTransactionsRemoteDatasource {
   }
 
   Future<void> deleteRecurringTransaction(String id) async {
-    await _supabase
-        .from('recurring_transactions')
-        .delete()
-        .eq('id', id);
+    await _supabase.from('recurring_transactions').delete().eq('id', id);
   }
 }

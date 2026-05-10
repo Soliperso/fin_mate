@@ -60,8 +60,10 @@ class GlassBottomSheet {
                 ),
                 border: Border.all(
                   color: isDark
-                      ? AppColors.white.withValues(alpha: AppEffects.borderOpacityDark / 2)
-                      : AppColors.white.withValues(alpha: AppEffects.borderOpacityLight * 0.75),
+                      ? AppColors.white
+                          .withValues(alpha: AppEffects.borderOpacityDark / 2)
+                      : AppColors.white.withValues(
+                          alpha: AppEffects.borderOpacityLight * 0.75),
                   width: 1,
                 ),
               ),
@@ -136,8 +138,10 @@ class GlassBottomSheet {
                 ),
                 border: Border.all(
                   color: isDark
-                      ? AppColors.white.withValues(alpha: AppEffects.borderOpacityDark / 2)
-                      : AppColors.white.withValues(alpha: AppEffects.borderOpacityLight * 0.75),
+                      ? AppColors.white
+                          .withValues(alpha: AppEffects.borderOpacityDark / 2)
+                      : AppColors.white.withValues(
+                          alpha: AppEffects.borderOpacityLight * 0.75),
                   width: 1,
                 ),
               ),

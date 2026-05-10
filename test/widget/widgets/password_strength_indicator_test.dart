@@ -4,7 +4,8 @@ import 'package:finmate/shared/widgets/password_strength_indicator.dart';
 
 void main() {
   group('PasswordStrengthIndicator Widget', () {
-    testWidgets('should not display anything for empty password', (WidgetTester tester) async {
+    testWidgets('should not display anything for empty password',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -18,7 +19,8 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsNothing);
     });
 
-    testWidgets('should display strength indicator for weak password', (WidgetTester tester) async {
+    testWidgets('should display strength indicator for weak password',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -31,7 +33,8 @@ void main() {
       expect(find.byType(Text), findsWidgets);
     });
 
-    testWidgets('should display strength indicator for strong password', (WidgetTester tester) async {
+    testWidgets('should display strength indicator for strong password',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -57,7 +60,8 @@ void main() {
       expect(find.byType(Wrap), findsOneWidget);
     });
 
-    testWidgets('should validate password requirements', (WidgetTester tester) async {
+    testWidgets('should validate password requirements',
+        (WidgetTester tester) async {
       // Test with password containing all requirements
       await tester.pumpWidget(
         MaterialApp(
@@ -73,7 +77,8 @@ void main() {
       expect(find.byType(AnimatedContainer), findsWidgets);
     });
 
-    testWidgets('should update when password changes', (WidgetTester tester) async {
+    testWidgets('should update when password changes',
+        (WidgetTester tester) async {
       String password = '';
 
       await tester.pumpWidget(

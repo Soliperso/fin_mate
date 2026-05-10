@@ -17,13 +17,14 @@ class BudgetHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currency = ref.watch(currencyFormat0Provider);
 
-    final totalBudgeted = budgets.fold<double>(0, (sum, b) => sum + b.effectiveAmount);
-    final totalSpent = budgets.fold<double>(0, (sum, b) => sum + (b.spent ?? 0));
+    final totalBudgeted =
+        budgets.fold<double>(0, (sum, b) => sum + b.effectiveAmount);
+    final totalSpent =
+        budgets.fold<double>(0, (sum, b) => sum + (b.spent ?? 0));
     final totalRemaining = totalBudgeted - totalSpent;
     final atRisk = budgets.where((b) => b.isExceeded || b.isNearLimit).length;
-    final overallProgress = totalBudgeted > 0
-        ? (totalSpent / totalBudgeted).clamp(0.0, 1.0)
-        : 0.0;
+    final overallProgress =
+        totalBudgeted > 0 ? (totalSpent / totalBudgeted).clamp(0.0, 1.0) : 0.0;
 
     return GradientHeroCard(
       gradientColors: const [AppColors.brandTeal, AppColors.brandTealDark],
@@ -50,9 +51,13 @@ class BudgetHeroCard extends ConsumerWidget {
           const SizedBox(height: AppSizes.md),
           Row(
             children: [
-              HeroStatBadge(label: 'budgetHero.spent'.tr(), value: currency.format(totalSpent)),
+              HeroStatBadge(
+                  label: 'budgetHero.spent'.tr(),
+                  value: currency.format(totalSpent)),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'budgetHero.remaining'.tr(), value: currency.format(totalRemaining.abs())),
+              HeroStatBadge(
+                  label: 'budgetHero.remaining'.tr(),
+                  value: currency.format(totalRemaining.abs())),
               const SizedBox(width: AppSizes.sm),
               HeroStatBadge(
                 label: 'budgetHero.atRisk'.tr(),
@@ -60,7 +65,8 @@ class BudgetHeroCard extends ConsumerWidget {
                     ? 'budgetHero.none'.tr()
                     : atRisk == 1
                         ? 'budgetHero.oneBudget'.tr()
-                        : 'budgetHero.budgetsAtRisk'.tr(namedArgs: {'count': '$atRisk'}),
+                        : 'budgetHero.budgetsAtRisk'
+                            .tr(namedArgs: {'count': '$atRisk'}),
                 highlight: atRisk > 0,
               ),
             ],
@@ -75,7 +81,8 @@ class BudgetHeroCard extends ConsumerWidget {
                     value: overallProgress,
                     minHeight: 5,
                     backgroundColor: Colors.white.withValues(alpha: 0.20),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
               ),
@@ -83,9 +90,9 @@ class BudgetHeroCard extends ConsumerWidget {
               Text(
                 '${(overallProgress * 100).toStringAsFixed(0)}${'budgets.percentUsed'.tr()}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),

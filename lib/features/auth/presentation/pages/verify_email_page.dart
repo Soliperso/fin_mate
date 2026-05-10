@@ -125,7 +125,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
       if (mounted) {
         SuccessSnackbar.show(
           context,
-          message: 'auth.verify.codeSentTo'.tr(namedArgs: {'email': widget.email}),
+          message:
+              'auth.verify.codeSentTo'.tr(namedArgs: {'email': widget.email}),
           duration: const Duration(seconds: 4),
         );
         for (final c in _controllers) {
@@ -211,13 +212,15 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 // OTP boxes
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (i) => _OtpBox(
-                    controller: _controllers[i],
-                    focusNode: _focusNodes[i],
-                    isDark: isDark,
-                    onChanged: (v) => _onDigitChanged(i, v),
-                    onKey: (e) => _onKeyDown(i, e),
-                  )),
+                  children: List.generate(
+                      6,
+                      (i) => _OtpBox(
+                            controller: _controllers[i],
+                            focusNode: _focusNodes[i],
+                            isDark: isDark,
+                            onChanged: (v) => _onDigitChanged(i, v),
+                            onKey: (e) => _onKeyDown(i, e),
+                          )),
                 ),
 
                 const SizedBox(height: AppSizes.md),
@@ -250,7 +253,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 const SizedBox(height: AppSizes.xl),
 
                 ElevatedButton(
-                  onPressed: (_isComplete && !_isVerifying) ? _handleVerify : null,
+                  onPressed:
+                      (_isComplete && !_isVerifying) ? _handleVerify : null,
                   child: _isVerifying
                       ? const SizedBox(
                           height: 20,

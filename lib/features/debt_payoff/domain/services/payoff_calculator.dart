@@ -9,6 +9,7 @@ class PayoffResult {
   final double totalInterestPaid;
   final double totalPaid;
   final List<MonthlySnapshot> schedule;
+
   /// True when the simulation hit the 50-year safety cap without fully paying
   /// off the debt. This usually means minimum payments are ≤ monthly interest.
   final bool hitMaxMonths;
@@ -32,8 +33,10 @@ class MonthlySnapshot {
   final double interestThisMonth;
   final double totalPaymentThisMonth;
   final String focusDebtName;
+
   /// Remaining balance per debt after this month's payments (id → balance).
   final Map<String, double> debtBalancesAfter;
+
   /// Payment applied to each debt this month (id → amount paid).
   final Map<String, double> debtPayments;
 
@@ -97,10 +100,8 @@ class PayoffCalculator {
     );
 
     for (int month = 1; month <= _maxMonths; month++) {
-      final activeIds = debts
-          .map((d) => d.id)
-          .where((id) => balances[id]! > 0.001)
-          .toList();
+      final activeIds =
+          debts.map((d) => d.id).where((id) => balances[id]! > 0.001).toList();
 
       if (activeIds.isEmpty) break;
 

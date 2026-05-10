@@ -15,7 +15,8 @@ class RecurringTransactionsRepositoryImpl
   }
 
   @override
-  Future<List<RecurringTransactionEntity>> getActiveRecurringTransactions() async {
+  Future<List<RecurringTransactionEntity>>
+      getActiveRecurringTransactions() async {
     final models = await _remoteDatasource.getActiveRecurringTransactions();
     return models.map((model) => model.toEntity()).toList();
   }
@@ -31,7 +32,8 @@ class RecurringTransactionsRepositoryImpl
   }
 
   @override
-  Future<RecurringTransactionEntity> getRecurringTransactionById(String id) async {
+  Future<RecurringTransactionEntity> getRecurringTransactionById(
+      String id) async {
     final model = await _remoteDatasource.getRecurringTransactionById(id);
     return model.toEntity();
   }

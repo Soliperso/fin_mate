@@ -37,7 +37,10 @@ class CashFlowCard extends ConsumerWidget {
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.sm,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,7 +101,10 @@ class CashFlowCard extends ConsumerWidget {
           // Net balance row
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.md, 0, AppSizes.md, AppSizes.md,
+              AppSizes.md,
+              0,
+              AppSizes.md,
+              AppSizes.md,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

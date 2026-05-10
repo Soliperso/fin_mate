@@ -94,7 +94,9 @@ class _AuthCallbackPageState extends ConsumerState<AuthCallbackPage> {
                   const CircularProgressIndicator()
                 else
                   Icon(
-                    _isSuccess ? CupertinoIcons.checkmark_circle : CupertinoIcons.info_circle,
+                    _isSuccess
+                        ? CupertinoIcons.checkmark_circle
+                        : CupertinoIcons.info_circle,
                     size: 80,
                     color: _isSuccess ? AppColors.success : AppColors.warning,
                   ),

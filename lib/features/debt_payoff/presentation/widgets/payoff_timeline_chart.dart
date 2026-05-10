@@ -50,13 +50,17 @@ class PayoffTimelineChart extends StatelessWidget {
     final lines = _buildStackedAreas();
     if (lines.isEmpty) return const SizedBox.shrink();
 
-    final pointCount = lines.last.spots.length; // last = smallest cumulative (debt0)
+    final pointCount =
+        lines.last.spots.length; // last = smallest cumulative (debt0)
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       border: const Border(),
       padding: const EdgeInsets.fromLTRB(
-        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,13 +122,11 @@ class PayoffTimelineChart extends StatelessWidget {
                           child: Text(
                             dateFormatShort
                                 .format(result.schedule[snapIdx].date),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                         );
                       },
@@ -209,9 +211,8 @@ class PayoffTimelineChart extends StatelessWidget {
                         return LineTooltipItem(
                           '$datePrefix$name:  \$${NumberFormat('#,##0').format(balance)}',
                           TextStyle(
-                            color: isDark
-                                ? AppColors.labelDark
-                                : AppColors.label,
+                            color:
+                                isDark ? AppColors.labelDark : AppColors.label,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
@@ -269,7 +270,8 @@ class PayoffTimelineChart extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'payoffChart.debtFreeLabel'.tr(namedArgs: {'date': debtFreeLabel}),
+                  'payoffChart.debtFreeLabel'
+                      .tr(namedArgs: {'date': debtFreeLabel}),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.success,
                         fontWeight: FontWeight.w600,

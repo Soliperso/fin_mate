@@ -107,7 +107,8 @@ class SettingsModel extends SettingsEntity {
       'id': userId,
       'theme_mode': themeMode,
       'language': language,
-      'notification_preferences': (notificationPreferences as NotificationPreferencesModel).toJson(),
+      'notification_preferences':
+          (notificationPreferences as NotificationPreferencesModel).toJson(),
       'updated_at': updatedAt.toIso8601String(),
     };
   }

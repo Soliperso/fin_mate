@@ -115,13 +115,11 @@ class SettingsRemoteDataSource {
 
       final accountMap = <String, String>{
         for (final a in accountsResponse as List)
-          (a as Map<String, dynamic>)['id'] as String:
-              a['name'] as String,
+          (a as Map<String, dynamic>)['id'] as String: a['name'] as String,
       };
       final categoryMap = <String, String>{
         for (final c in categoriesResponse as List)
-          (c as Map<String, dynamic>)['id'] as String:
-              c['name'] as String,
+          (c as Map<String, dynamic>)['id'] as String: c['name'] as String,
       };
 
       return (txResponse as List).map((row) {

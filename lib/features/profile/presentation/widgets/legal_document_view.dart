@@ -39,7 +39,8 @@ class LegalDocumentView extends StatelessWidget {
           horizontal: AppSizes.pagePadding,
           vertical: AppSizes.sm,
         ),
-        child: _buildFormattedContent(context, content, primaryText, secondaryText),
+        child: _buildFormattedContent(
+            context, content, primaryText, secondaryText),
       ),
     );
   }
@@ -59,7 +60,8 @@ class LegalDocumentView extends StatelessWidget {
       } else if (line.startsWith('# ')) {
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(top: AppSizes.md, bottom: AppSizes.xs),
+            padding:
+                const EdgeInsets.only(top: AppSizes.md, bottom: AppSizes.xs),
             child: Text(
               line.replaceFirst('# ', ''),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -73,7 +75,8 @@ class LegalDocumentView extends StatelessWidget {
       } else if (line.startsWith('## ')) {
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
+            padding:
+                const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.xs),
             child: Text(
               line.replaceFirst('## ', ''),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -100,7 +103,8 @@ class LegalDocumentView extends StatelessWidget {
       } else if (line.startsWith('- ')) {
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(left: AppSizes.md, bottom: AppSizes.xs),
+            padding:
+                const EdgeInsets.only(left: AppSizes.md, bottom: AppSizes.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -47,7 +47,8 @@ class BudgetModel {
       amount: (json['amount'] as num).toDouble(),
       period: json['period'],
       startDate: DateTime.parse(json['start_date']),
-      endDate: json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
+      endDate:
+          json['end_date'] != null ? DateTime.parse(json['end_date']) : null,
       isActive: json['is_active'] ?? true,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -55,9 +56,12 @@ class BudgetModel {
       categoryIcon: json['category_icon'],
       categoryColor: json['category_color'],
       carryOverEnabled: json['carry_over_enabled'] ?? false,
-      lastCarryOverAmount: (json['last_carry_over_amount'] as num?)?.toDouble() ?? 0,
+      lastCarryOverAmount:
+          (json['last_carry_over_amount'] as num?)?.toDouble() ?? 0,
       spent: json['spent'] != null ? (json['spent'] as num).toDouble() : null,
-      remaining: json['remaining'] != null ? (json['remaining'] as num).toDouble() : null,
+      remaining: json['remaining'] != null
+          ? (json['remaining'] as num).toDouble()
+          : null,
     );
   }
 

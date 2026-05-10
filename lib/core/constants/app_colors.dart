@@ -48,7 +48,8 @@ class AppColors {
 
   // ── System Backgrounds — Dark ──────────────────────────────────────────────
   static const systemBackgroundDark = Color(0xFF000000);
-  static const inputFillDark = Color(0xFF141414); // slightly elevated input surface in dark mode
+  static const inputFillDark =
+      Color(0xFF141414); // slightly elevated input surface in dark mode
   static const secondarySystemBackgroundDark = Color(0xFF1C1C1E);
   static const tertiarySystemBackgroundDark = Color(0xFF2C2C2E);
   static const systemGroupedBackgroundDark = Color(0xFF000000);
@@ -58,8 +59,9 @@ class AppColors {
   // ── Labels — Light ─────────────────────────────────────────────────────────
   // Using opaque equivalents so they render correctly on any Flutter background
   static const label = Color(0xFF000000);
-  static const secondaryLabel = Color(0xFF6C6C72); // iOS secondary label (opaque)
-  static const tertiaryLabel = Color(0xFFAEAEB2);  // iOS tertiary label (opaque)
+  static const secondaryLabel =
+      Color(0xFF6C6C72); // iOS secondary label (opaque)
+  static const tertiaryLabel = Color(0xFFAEAEB2); // iOS tertiary label (opaque)
   static const quaternaryLabel = Color(0xFFC7C7CC);
 
   // ── Labels — Dark ──────────────────────────────────────────────────────────
@@ -108,10 +110,12 @@ class AppColors {
   // Gradients for hero cards
   static const gradientStart = brandTeal;
   static const gradientEnd = brandTealLight;
-  static const brandTealDark = Color(0xFF1A6B76);   // net worth positive gradient end
-  static const systemRedDeep = Color(0xFFB52D23);   // net worth negative gradient end
-  static const debtRedStart = Color(0xFFCC2B2B);    // debt hero gradient start
-  static const debtRedEnd = Color(0xFF8B1A1A);      // debt hero gradient end
+  static const brandTealDark =
+      Color(0xFF1A6B76); // net worth positive gradient end
+  static const systemRedDeep =
+      Color(0xFFB52D23); // net worth negative gradient end
+  static const debtRedStart = Color(0xFFCC2B2B); // debt hero gradient start
+  static const debtRedEnd = Color(0xFF8B1A1A); // debt hero gradient end
 
   // Shadow helper — avoids duplicating the isDark check in every card widget
   static List<BoxShadow> cardShadow(bool isDark) => isDark

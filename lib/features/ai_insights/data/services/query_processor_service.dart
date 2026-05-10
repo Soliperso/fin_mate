@@ -44,7 +44,8 @@ class QueryProcessorService {
 
     try {
       final now = DateTime.now();
-      final monthStart = DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+      final monthStart =
+          DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
 
       // Check for budgets near limit (>80%)
       final budgets = await _supabase
@@ -65,7 +66,8 @@ class QueryProcessorService {
         final spentByCategory = <dynamic, double>{};
         for (final tx in spent as List) {
           final catId = tx['category_id'];
-          spentByCategory[catId] = (spentByCategory[catId] ?? 0) + (tx['amount'] as num).toDouble();
+          spentByCategory[catId] =
+              (spentByCategory[catId] ?? 0) + (tx['amount'] as num).toDouble();
         }
 
         for (final budget in budgets) {
@@ -73,8 +75,11 @@ class QueryProcessorService {
           final budgetAmount = (budget['amount'] as num).toDouble();
           final spentAmount = spentByCategory[catId] ?? 0;
           if (spentAmount > budgetAmount * 0.8) {
-            final catName = (budget['categories'] as Map<String, dynamic>?)?['name'] as String? ?? 'this category';
-            prompts.add("I'm close to my $catName budget — how can I cut back?");
+            final catName = (budget['categories']
+                    as Map<String, dynamic>?)?['name'] as String? ??
+                'this category';
+            prompts
+                .add("I'm close to my $catName budget — how can I cut back?");
             break;
           }
         }
@@ -85,7 +90,10 @@ class QueryProcessorService {
 
     try {
       // Upcoming bills in next 7 days
-      final endDate = DateTime.now().add(const Duration(days: 7)).toIso8601String().split('T')[0];
+      final endDate = DateTime.now()
+          .add(const Duration(days: 7))
+          .toIso8601String()
+          .split('T')[0];
       final bills = await _supabase
           .from('recurring_transactions')
           .select('amount')
@@ -95,16 +103,22 @@ class QueryProcessorService {
           .lte('next_occurrence', endDate);
 
       if ((bills as List).isNotEmpty) {
-        final total = bills.fold(0.0, (sum, b) => sum + (b['amount'] as num).toDouble());
-        prompts.add('I have \$${total.toStringAsFixed(0)} in bills due this week — can I afford them?');
+        final total =
+            bills.fold(0.0, (sum, b) => sum + (b['amount'] as num).toDouble());
+        prompts.add(
+            'I have \$${total.toStringAsFixed(0)} in bills due this week — can I afford them?');
       }
     } catch (e) {
-      debugPrint('[QueryProcessorService] Failed to fetch upcoming bills prompt: $e');
+      debugPrint(
+          '[QueryProcessorService] Failed to fetch upcoming bills prompt: $e');
     }
 
     try {
       // Largest recent transaction (last 7 days)
-      final since = DateTime.now().subtract(const Duration(days: 7)).toIso8601String().split('T')[0];
+      final since = DateTime.now()
+          .subtract(const Duration(days: 7))
+          .toIso8601String()
+          .split('T')[0];
       final recent = await _supabase
           .from('transactions')
           .select('amount, categories(name)')
@@ -115,13 +129,16 @@ class QueryProcessorService {
           .limit(1);
 
       if ((recent as List).isNotEmpty) {
-        final catName = (recent.first['categories'] as Map<String, dynamic>?)?['name'] as String?;
+        final catName = (recent.first['categories']
+            as Map<String, dynamic>?)?['name'] as String?;
         if (catName != null) {
-          prompts.add('I had a large $catName expense recently — is my budget on track?');
+          prompts.add(
+              'I had a large $catName expense recently — is my budget on track?');
         }
       }
     } catch (e) {
-      debugPrint('[QueryProcessorService] Failed to fetch largest expense prompt: $e');
+      debugPrint(
+          '[QueryProcessorService] Failed to fetch largest expense prompt: $e');
     }
 
     // Fill remaining slots with static prompts
@@ -151,7 +168,8 @@ class QueryProcessorService {
           final aiResponse = await _openAiService
               .sendMessage(query)
               .timeout(const Duration(seconds: 30));
-          return aiResponse.copyWith(followUpSuggestions: getSuggestedPrompts());
+          return aiResponse.copyWith(
+              followUpSuggestions: getSuggestedPrompts());
         } catch (_) {
           // Fall through to keyword matching
         }
@@ -161,23 +179,36 @@ class QueryProcessorService {
 
       // Intent detection based on keywords
       // Comparison queries (highest priority)
-      if (_containsAny(lowerQuery, ['compare', 'vs', 'versus', 'last month', 'last year', 'compared to'])) {
+      if (_containsAny(lowerQuery, [
+        'compare',
+        'vs',
+        'versus',
+        'last month',
+        'last year',
+        'compared to'
+      ])) {
         return await _handleComparisonQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['trend', 'trending', 'increased', 'decreased', 'pattern'])) {
+      } else if (_containsAny(lowerQuery,
+          ['trend', 'trending', 'increased', 'decreased', 'pattern'])) {
         return await _handleTrendQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['average', 'typical', 'usual', 'normal'])) {
+      } else if (_containsAny(
+          lowerQuery, ['average', 'typical', 'usual', 'normal'])) {
         return await _handleAverageQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['income', 'earn', 'earned', 'paycheck'])) {
+      } else if (_containsAny(
+          lowerQuery, ['income', 'earn', 'earned', 'paycheck'])) {
         return await _handleIncomeQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['save', 'savings', 'could i save'])) {
+      } else if (_containsAny(
+          lowerQuery, ['save', 'savings', 'could i save'])) {
         return await _handleSavingsQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['category', 'categories', 'breakdown'])) {
+      } else if (_containsAny(
+          lowerQuery, ['category', 'categories', 'breakdown'])) {
         return await _handleCategoryQueryRich(userId, lowerQuery);
       } else if (_containsAny(lowerQuery, ['balance', 'how much', 'account'])) {
         return await _handleBalanceQueryRich(userId, lowerQuery);
       } else if (_containsAny(lowerQuery, ['spend', 'spent', 'spending'])) {
         return await _handleSpendingQueryRich(userId, lowerQuery);
-      } else if (_containsAny(lowerQuery, ['afford', 'can i buy', 'purchase'])) {
+      } else if (_containsAny(
+          lowerQuery, ['afford', 'can i buy', 'purchase'])) {
         return await _handleAffordabilityQueryRich(userId, lowerQuery);
       } else if (_containsAny(lowerQuery, ['bill', 'due', 'payment', 'pay'])) {
         return await _handleBillsQueryRich(userId, lowerQuery);
@@ -191,7 +222,8 @@ class QueryProcessorService {
       }
     } catch (e) {
       return const QueryResponse(
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        content:
+            'Sorry, I encountered an error processing your request. Please try again.',
         type: MessageType.error,
       );
     }
@@ -236,13 +268,28 @@ class QueryProcessorService {
 
   String? _extractCategory(String query) {
     const categories = [
-      'groceries', 'grocery', 'food',
-      'dining', 'restaurant', 'eating',
-      'shopping', 'clothes', 'clothing',
-      'entertainment', 'movies', 'fun',
-      'transport', 'uber', 'lyft', 'gas',
-      'utilities', 'bills', 'electric',
-      'health', 'medical', 'doctor',
+      'groceries',
+      'grocery',
+      'food',
+      'dining',
+      'restaurant',
+      'eating',
+      'shopping',
+      'clothes',
+      'clothing',
+      'entertainment',
+      'movies',
+      'fun',
+      'transport',
+      'uber',
+      'lyft',
+      'gas',
+      'utilities',
+      'bills',
+      'electric',
+      'health',
+      'medical',
+      'doctor',
     ];
 
     for (final cat in categories) {
@@ -270,13 +317,16 @@ class QueryProcessorService {
       final yesterday = now.subtract(const Duration(days: 1));
       return {
         'start': DateTime(yesterday.year, yesterday.month, yesterday.day),
-        'end': DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59),
+        'end': DateTime(
+            yesterday.year, yesterday.month, yesterday.day, 23, 59, 59),
         'label': 'yesterday',
       };
     }
 
     // Last 7 days / this week
-    if (lower.contains('week') || lower.contains('7 days') || lower.contains('seven days')) {
+    if (lower.contains('week') ||
+        lower.contains('7 days') ||
+        lower.contains('seven days')) {
       final weekAgo = now.subtract(const Duration(days: 7));
       return {
         'start': weekAgo,
@@ -307,7 +357,9 @@ class QueryProcessorService {
     }
 
     // Last quarter (90 days)
-    if (lower.contains('quarter') || lower.contains('3 months') || lower.contains('90 days')) {
+    if (lower.contains('quarter') ||
+        lower.contains('3 months') ||
+        lower.contains('90 days')) {
       final threeMonthsAgo = now.subtract(const Duration(days: 90));
       return {
         'start': threeMonthsAgo,
@@ -317,7 +369,9 @@ class QueryProcessorService {
     }
 
     // Last year / this year / year to date
-    if (lower.contains('year') || lower.contains('ytd') || lower.contains('12 months')) {
+    if (lower.contains('year') ||
+        lower.contains('ytd') ||
+        lower.contains('12 months')) {
       if (lower.contains('last year')) {
         return {
           'start': DateTime(now.year - 1, 1, 1),
@@ -357,7 +411,8 @@ class QueryProcessorService {
 
   // Rich query handlers with metadata and follow-up suggestions
 
-  Future<QueryResponse> _handleCategoryQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleCategoryQueryRich(
+      String userId, String query) async {
     final period = _extractTimePeriod(query);
     final startDate = period['start'] as DateTime;
     final endDate = period['end'] as DateTime;
@@ -399,10 +454,13 @@ class QueryProcessorService {
     buffer.writeln('Total: ${currencyFormat.format(total)}\n');
 
     // Prepare chart data
-    final chartData = sorted.take(5).map((entry) => {
-      'category': entry.key,
-      'amount': entry.value,
-    }).toList();
+    final chartData = sorted
+        .take(5)
+        .map((entry) => {
+              'category': entry.key,
+              'amount': entry.value,
+            })
+        .toList();
 
     return QueryResponse(
       content: buffer.toString().trim(),
@@ -419,8 +477,11 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleBalanceQueryRich(String userId, String query) async {
-    if (query.contains('next') || query.contains('will') || query.contains('future')) {
+  Future<QueryResponse> _handleBalanceQueryRich(
+      String userId, String query) async {
+    if (query.contains('next') ||
+        query.contains('will') ||
+        query.contains('future')) {
       return await _handleForecastQueryRich(userId, query);
     }
 
@@ -469,7 +530,8 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleSpendingQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleSpendingQueryRich(
+      String userId, String query) async {
     final category = _extractCategory(query);
     final period = _extractTimePeriod(query);
     final startDate = period['start'] as DateTime;
@@ -505,7 +567,8 @@ class QueryProcessorService {
 
     if (filteredTxs.isEmpty) {
       return QueryResponse(
-        content: 'No spending found${category != null ? ' in $category' : ''} for the specified period.',
+        content:
+            'No spending found${category != null ? ' in $category' : ''} for the specified period.',
         followUpSuggestions: [
           'Show spending by category',
           'What\'s my total spending this month?',
@@ -535,7 +598,8 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleAffordabilityQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleAffordabilityQueryRich(
+      String userId, String query) async {
     final amount = _extractAmount(query);
     if (amount == null) {
       return QueryResponse(
@@ -565,7 +629,8 @@ class QueryProcessorService {
       ];
     } else {
       final shortage = amount - forecast.safeToSpend;
-      content = 'It might be tight. This purchase would exceed your safe spending amount by ${currencyFormat.format(shortage)}. '
+      content =
+          'It might be tight. This purchase would exceed your safe spending amount by ${currencyFormat.format(shortage)}. '
           'Consider waiting for your next paycheck or adjusting other expenses.';
       suggestions = [
         'How can I save more money?',
@@ -580,7 +645,8 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleBillsQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleBillsQueryRich(
+      String userId, String query) async {
     final transactions = await _supabase
         .from('transactions')
         .select('description, amount, date')
@@ -628,7 +694,8 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleForecastQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleForecastQueryRich(
+      String userId, String query) async {
     final forecast = await _forecastService.generate30DayForecast();
     final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
 
@@ -649,15 +716,20 @@ class QueryProcessorService {
     final buffer = StringBuffer();
 
     if (days == 1) {
-      buffer.writeln('Tomorrow\'s projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
+      buffer.writeln(
+          'Tomorrow\'s projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
     } else if (days == 7) {
-      buffer.writeln('Next week\'s projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
+      buffer.writeln(
+          'Next week\'s projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
     } else {
-      buffer.writeln('In $days days, your projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
+      buffer.writeln(
+          'In $days days, your projected balance: ${currencyFormat.format(targetForecast.projectedBalance)}');
     }
 
-    buffer.writeln('\nCurrent balance: ${currencyFormat.format(forecast.currentBalance)}');
-    buffer.writeln('Safe to spend: ${currencyFormat.format(forecast.safeToSpend)}');
+    buffer.writeln(
+        '\nCurrent balance: ${currencyFormat.format(forecast.currentBalance)}');
+    buffer.writeln(
+        'Safe to spend: ${currencyFormat.format(forecast.safeToSpend)}');
 
     if (forecast.warnings.isNotEmpty) {
       buffer.writeln('\n⚠️ ${forecast.warnings.first}');
@@ -673,7 +745,8 @@ class QueryProcessorService {
     );
   }
 
-  Future<QueryResponse> _handleGeneralQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleGeneralQueryRich(
+      String userId, String query) async {
     if (query.contains('transaction') || query.contains('recent')) {
       final transactions = await _supabase
           .from('transactions')
@@ -699,7 +772,8 @@ class QueryProcessorService {
         final date = DateTime.parse(tx['date'] as String);
         final dateStr = DateFormat('MMM d').format(date);
         final type = tx['type'] == 'income' ? '+' : '-';
-        buffer.writeln('$type${currencyFormat.format(tx['amount'])} - ${tx['description']} ($dateStr)');
+        buffer.writeln(
+            '$type${currencyFormat.format(tx['amount'])} - ${tx['description']} ($dateStr)');
       }
 
       return QueryResponse(
@@ -713,7 +787,8 @@ class QueryProcessorService {
     }
 
     return QueryResponse(
-      content: 'I\'m not sure how to help with that. Try asking about your balance, spending, bills, or forecast.',
+      content:
+          'I\'m not sure how to help with that. Try asking about your balance, spending, bills, or forecast.',
       followUpSuggestions: getSuggestedPrompts(),
     );
   }
@@ -721,7 +796,8 @@ class QueryProcessorService {
   // Phase 2: Enhanced Query Handlers
 
   /// Handle comparison queries (month-to-month, year-to-year, etc.)
-  Future<QueryResponse> _handleComparisonQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleComparisonQueryRich(
+      String userId, String query) async {
     try {
       final category = _extractCategory(query);
       final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
@@ -748,7 +824,9 @@ class QueryProcessorService {
         currentStart = DateTime(now.year, (currentQuarter - 1) * 3 + 1, 1);
         currentEnd = now;
         previousStart = currentStart.subtract(const Duration(days: 90));
-        previousEnd = DateTime(previousStart.year, previousStart.month, previousStart.day).add(const Duration(days: 89));
+        previousEnd =
+            DateTime(previousStart.year, previousStart.month, previousStart.day)
+                .add(const Duration(days: 89));
         comparisonLabel = 'This quarter vs last quarter';
       } else {
         // Current month vs last month (default)
@@ -790,19 +868,28 @@ class QueryProcessorService {
       double previousTotal = 0;
 
       for (final tx in currentTxs as List) {
-        if (category == null || (tx['categories']?['name'] as String?)?.toLowerCase().contains(category.toLowerCase()) == true) {
+        if (category == null ||
+            (tx['categories']?['name'] as String?)
+                    ?.toLowerCase()
+                    .contains(category.toLowerCase()) ==
+                true) {
           currentTotal += (tx['amount'] as num).toDouble();
         }
       }
 
       for (final tx in previousTxs as List) {
-        if (category == null || (tx['categories']?['name'] as String?)?.toLowerCase().contains(category.toLowerCase()) == true) {
+        if (category == null ||
+            (tx['categories']?['name'] as String?)
+                    ?.toLowerCase()
+                    .contains(category.toLowerCase()) ==
+                true) {
           previousTotal += (tx['amount'] as num).toDouble();
         }
       }
 
       final difference = currentTotal - previousTotal;
-      final percentChange = previousTotal > 0 ? ((difference / previousTotal) * 100) : 0.0;
+      final percentChange =
+          previousTotal > 0 ? ((difference / previousTotal) * 100) : 0.0;
       final isIncrease = difference > 0;
 
       final categoryText = category != null ? ' on $category' : '';
@@ -810,12 +897,15 @@ class QueryProcessorService {
       buffer.writeln('$comparisonLabel$categoryText:\n');
       buffer.writeln('Current: ${currencyFormat.format(currentTotal)}');
       buffer.writeln('Previous: ${currencyFormat.format(previousTotal)}');
-      buffer.writeln('Change: ${isIncrease ? '+' : ''}${currencyFormat.format(difference)} (${percentChange > 0 ? '+' : ''}${percentChange.toStringAsFixed(1)}%)');
+      buffer.writeln(
+          'Change: ${isIncrease ? '+' : ''}${currencyFormat.format(difference)} (${percentChange > 0 ? '+' : ''}${percentChange.toStringAsFixed(1)}%)');
 
       if (isIncrease) {
-        buffer.writeln('\n📈 Your spending increased by ${percentChange.toStringAsFixed(1)}%');
+        buffer.writeln(
+            '\n📈 Your spending increased by ${percentChange.toStringAsFixed(1)}%');
       } else {
-        buffer.writeln('\n📉 Great! Your spending decreased by ${percentChange.abs().toStringAsFixed(1)}%');
+        buffer.writeln(
+            '\n📉 Great! Your spending decreased by ${percentChange.abs().toStringAsFixed(1)}%');
       }
 
       return QueryResponse(
@@ -835,7 +925,8 @@ class QueryProcessorService {
   }
 
   /// Handle trend analysis queries
-  Future<QueryResponse> _handleTrendQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleTrendQueryRich(
+      String userId, String query) async {
     try {
       final category = _extractCategory(query);
       final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
@@ -861,9 +952,14 @@ class QueryProcessorService {
       final monthlyData = <String, double>{};
       for (final tx in transactions) {
         final date = DateTime.parse(tx['date'] as String);
-        final monthKey = '${date.year}-${date.month.toString().padLeft(2, '0')}';
+        final monthKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}';
 
-        if (category == null || (tx['categories']?['name'] as String?)?.toLowerCase().contains(category.toLowerCase()) == true) {
+        if (category == null ||
+            (tx['categories']?['name'] as String?)
+                    ?.toLowerCase()
+                    .contains(category.toLowerCase()) ==
+                true) {
           final amount = (tx['amount'] as num).toDouble();
           monthlyData[monthKey] = (monthlyData[monthKey] ?? 0) + amount;
         }
@@ -883,16 +979,19 @@ class QueryProcessorService {
       final percentChange = ((lastMonth - firstMonth) / firstMonth * 100).abs();
 
       final categoryText = category != null ? ' on $category' : '';
-      final buffer = StringBuffer('Your spending trend is trending $trendDirection$categoryText:\n\n');
+      final buffer = StringBuffer(
+          'Your spending trend is trending $trendDirection$categoryText:\n\n');
 
       for (final entry in months) {
         buffer.writeln('${entry.key}: ${currencyFormat.format(entry.value)}');
       }
 
-      buffer.writeln('\nTrend: ${trendDirection.toUpperCase()} by ${percentChange.toStringAsFixed(1)}%');
+      buffer.writeln(
+          '\nTrend: ${trendDirection.toUpperCase()} by ${percentChange.toStringAsFixed(1)}%');
 
       if (trendDirection == 'up') {
-        buffer.writeln('\n📈 Consider reviewing your expenses to control the increase.');
+        buffer.writeln(
+            '\n📈 Consider reviewing your expenses to control the increase.');
       } else {
         buffer.writeln('\n📉 Great job! Your spending is decreasing.');
       }
@@ -914,7 +1013,8 @@ class QueryProcessorService {
   }
 
   /// Handle average spending queries
-  Future<QueryResponse> _handleAverageQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleAverageQueryRich(
+      String userId, String query) async {
     try {
       final category = _extractCategory(query);
       final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
@@ -939,7 +1039,11 @@ class QueryProcessorService {
       int count = 0;
 
       for (final tx in transactions) {
-        if (category == null || (tx['categories']?['name'] as String?)?.toLowerCase().contains(category.toLowerCase()) == true) {
+        if (category == null ||
+            (tx['categories']?['name'] as String?)
+                    ?.toLowerCase()
+                    .contains(category.toLowerCase()) ==
+                true) {
           total += (tx['amount'] as num).toDouble();
           count++;
         }
@@ -957,11 +1061,13 @@ class QueryProcessorService {
       final monthly = daily * 30;
 
       final categoryText = category != null ? ' on $category' : '';
-      final buffer = StringBuffer('Your average spending$categoryText (last 90 days):\n\n');
+      final buffer = StringBuffer(
+          'Your average spending$categoryText (last 90 days):\n\n');
       buffer.writeln('Per transaction: ${currencyFormat.format(average)}');
       buffer.writeln('Daily average: ${currencyFormat.format(daily)}');
       buffer.writeln('Monthly average: ${currencyFormat.format(monthly)}');
-      buffer.writeln('Total: ${currencyFormat.format(total)} ($count transactions)');
+      buffer.writeln(
+          'Total: ${currencyFormat.format(total)} ($count transactions)');
 
       return QueryResponse(
         content: buffer.toString().trim(),
@@ -980,7 +1086,8 @@ class QueryProcessorService {
   }
 
   /// Handle income-related queries
-  Future<QueryResponse> _handleIncomeQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleIncomeQueryRich(
+      String userId, String query) async {
     try {
       final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
       final period = _extractTimePeriod(query);
@@ -1013,7 +1120,8 @@ class QueryProcessorService {
       final buffer = StringBuffer('Your income $periodLabel:\n\n');
       buffer.writeln('Total: ${currencyFormat.format(total)}');
       buffer.writeln('Transactions: ${transactions.length}');
-      buffer.writeln('Average per transaction: ${currencyFormat.format(average)}');
+      buffer.writeln(
+          'Average per transaction: ${currencyFormat.format(average)}');
 
       return QueryResponse(
         content: buffer.toString().trim(),
@@ -1032,7 +1140,8 @@ class QueryProcessorService {
   }
 
   /// Handle savings potential queries
-  Future<QueryResponse> _handleSavingsQueryRich(String userId, String query) async {
+  Future<QueryResponse> _handleSavingsQueryRich(
+      String userId, String query) async {
     try {
       final category = _extractCategory(query);
       final currencyFormat = _getCurrencyFormat(decimalDigits: 2);
@@ -1057,8 +1166,10 @@ class QueryProcessorService {
       int count = 0;
 
       for (final tx in transactions) {
-        final txCategory = tx['categories']?['name'] as String? ?? 'Uncategorized';
-        if (category == null || txCategory.toLowerCase().contains(category.toLowerCase())) {
+        final txCategory =
+            tx['categories']?['name'] as String? ?? 'Uncategorized';
+        if (category == null ||
+            txCategory.toLowerCase().contains(category.toLowerCase())) {
           total += (tx['amount'] as num).toDouble();
           count++;
         }
@@ -1077,9 +1188,12 @@ class QueryProcessorService {
 
       final categoryText = category != null ? ' on $category' : '';
       final buffer = StringBuffer('Savings potential$categoryText:\n\n');
-      buffer.writeln('Current monthly spending: ${currencyFormat.format(total)}');
-      buffer.writeln('Potential monthly savings (20% reduction): ${currencyFormat.format(savingsPotential)}');
-      buffer.writeln('Potential annual savings: ${currencyFormat.format(annualSavings)}');
+      buffer
+          .writeln('Current monthly spending: ${currencyFormat.format(total)}');
+      buffer.writeln(
+          'Potential monthly savings (20% reduction): ${currencyFormat.format(savingsPotential)}');
+      buffer.writeln(
+          'Potential annual savings: ${currencyFormat.format(annualSavings)}');
 
       return QueryResponse(
         content: buffer.toString().trim(),

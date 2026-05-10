@@ -28,12 +28,16 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       () => ref.read(notificationsProvider.notifier).loadNotifications(),
     );
   }
+
   /// Groups notifications into Today / Yesterday / Earlier buckets.
   String _translateGroup(String key) {
     switch (key) {
-      case 'Today': return 'common.today'.tr();
-      case 'Yesterday': return 'common.yesterday'.tr();
-      default: return 'common.earlier'.tr();
+      case 'Today':
+        return 'common.today'.tr();
+      case 'Yesterday':
+        return 'common.yesterday'.tr();
+      default:
+        return 'common.earlier'.tr();
     }
   }
 
@@ -65,8 +69,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final notificationsState = ref.watch(notificationsProvider);
     final notifications = notificationsState.notifications;
     final isLoading = notificationsState.isLoading;
-    final unreadCount =
-        notifications.where((n) => !n.isRead).length;
+    final unreadCount = notifications.where((n) => !n.isRead).length;
 
     final grouped = _groupByDate(notifications);
     // Preserve display order
@@ -88,9 +91,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           if (unreadCount > 0)
             TextButton(
               onPressed: () async {
-                await ref
-                    .read(notificationsProvider.notifier)
-                    .markAllAsRead();
+                await ref.read(notificationsProvider.notifier).markAllAsRead();
               },
               child: Text(
                 'notifPage.markAllRead'.tr(),
@@ -134,8 +135,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                         ...(grouped[group] ?? []).map(
                           (notification) => NotificationCard(
                             notification: notification,
-                            onTap: () =>
-                                _handleNotificationTap(notification),
+                            onTap: () => _handleNotificationTap(notification),
                             onDismiss: () =>
                                 _handleNotificationDismiss(notification.id),
                             onMarkAsRead: () =>
@@ -160,7 +160,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: Row(
         children: [
-          Text(_translateGroup(label), style: Theme.of(context).textTheme.titleLarge),
+          Text(_translateGroup(label),
+              style: Theme.of(context).textTheme.titleLarge),
           if (unread > 0) ...[
             const SizedBox(width: AppSizes.sm),
             Container(
@@ -197,9 +198,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }
 
   Future<void> _handleMarkAsRead(String notificationId) async {
-    await ref
-        .read(notificationsProvider.notifier)
-        .markAsRead(notificationId);
+    await ref.read(notificationsProvider.notifier).markAsRead(notificationId);
   }
 
   Future<void> _handleNotificationDismiss(String notificationId) async {

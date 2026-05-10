@@ -7,7 +7,8 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_container.dart';
-import '../../domain/services/payoff_calculator.dart' show DebtStrategy, PayoffResult;
+import '../../domain/services/payoff_calculator.dart'
+    show DebtStrategy, PayoffResult;
 import '../providers/debt_providers.dart';
 
 class StrategyComparisonSheet extends ConsumerWidget {
@@ -112,14 +113,16 @@ class StrategyComparisonSheet extends ConsumerWidget {
                           color: bothHitCap
                               ? AppColors.error.withValues(alpha: 0.15)
                               : AppColors.success.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusSm),
                         ),
                         child: Icon(
                           bothHitCap
                               ? CupertinoIcons.exclamationmark_triangle
                               : CupertinoIcons.lightbulb,
                           size: 14,
-                          color: bothHitCap ? AppColors.error : AppColors.success,
+                          color:
+                              bothHitCap ? AppColors.error : AppColors.success,
                         ),
                       ),
                       const SizedBox(width: AppSizes.xs),
@@ -144,7 +147,8 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       icon: CupertinoIcons.exclamationmark_circle,
                       iconColor: AppColors.error,
                       label: 'strategyComparison.payoffTimeline'.tr(),
-                      value: 'Neither strategy pays off at current minimums. Increase payments.',
+                      value:
+                          'Neither strategy pays off at current minimums. Increase payments.',
                       valueBadgeColor: AppColors.error,
                     ),
                     const SizedBox(height: AppSizes.sm),
@@ -162,9 +166,15 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       iconColor: AppColors.warning,
                       label: 'strategyComparison.interestSavings'.tr(),
                       value: interestDiff > 0
-                          ? 'strategyComparison.avalancheSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff)})
+                          ? 'strategyComparison.avalancheSaves'.tr(namedArgs: {
+                              'amount': currencyFormat.format(interestDiff)
+                            })
                           : interestDiff < 0
-                              ? 'strategyComparison.snowballSaves'.tr(namedArgs: {'amount': currencyFormat.format(interestDiff.abs())})
+                              ? 'strategyComparison.snowballSaves'
+                                  .tr(namedArgs: {
+                                  'amount':
+                                      currencyFormat.format(interestDiff.abs())
+                                })
                               : 'strategyComparison.sameTotalInterest'.tr(),
                       valueBadgeColor: interestDiff.abs() > 0
                           ? AppColors.warning
@@ -180,8 +190,10 @@ class StrategyComparisonSheet extends ConsumerWidget {
                       value: monthDiff == 0
                           ? 'strategyComparison.bothFinish'.tr()
                           : monthDiff > 0
-                              ? 'strategyComparison.avalancheFinishes'.tr(namedArgs: {'months': '$monthDiff'})
-                              : 'strategyComparison.snowballFinishes'.tr(namedArgs: {'months': '${monthDiff.abs()}'}),
+                              ? 'strategyComparison.avalancheFinishes'
+                                  .tr(namedArgs: {'months': '$monthDiff'})
+                              : 'strategyComparison.snowballFinishes'.tr(
+                                  namedArgs: {'months': '${monthDiff.abs()}'}),
                       valueBadgeColor: monthDiff.abs() > 0
                           ? AppColors.info
                           : AppColors.textSecondary,
@@ -249,12 +261,12 @@ class _StrategyCard extends ConsumerWidget {
               ),
               const SizedBox(width: AppSizes.xs),
               Text(
-                isAvalanche ? 'strategyComparison.avalanche'.tr() : 'strategyComparison.snowball'.tr(),
+                isAvalanche
+                    ? 'strategyComparison.avalanche'.tr()
+                    : 'strategyComparison.snowball'.tr(),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? AppColors.primaryTeal
-                          : null,
+                      color: isSelected ? AppColors.primaryTeal : null,
                     ),
               ),
               const Spacer(),
@@ -266,8 +278,7 @@ class _StrategyCard extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryTeal.withValues(alpha: 0.12),
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusFull),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                   ),
                   child: Text(
                     'strategyComparison.active'.tr(),

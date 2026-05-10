@@ -70,12 +70,15 @@ class GlassContainer extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: borderRadius,
-              border: border ?? Border.all(
-                color: isDark
-                    ? AppColors.white.withValues(alpha: AppEffects.borderOpacityDark)
-                    : AppColors.white.withValues(alpha: AppEffects.borderOpacityLight),
-                width: 1,
-              ),
+              border: border ??
+                  Border.all(
+                    color: isDark
+                        ? AppColors.white
+                            .withValues(alpha: AppEffects.borderOpacityDark)
+                        : AppColors.white
+                            .withValues(alpha: AppEffects.borderOpacityLight),
+                    width: 1,
+                  ),
             ),
             child: child,
           ),

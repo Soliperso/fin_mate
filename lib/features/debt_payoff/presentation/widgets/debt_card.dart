@@ -102,7 +102,8 @@ class DebtCard extends ConsumerWidget {
         dueDateColor = AppColors.warning;
       } else {
         final suffix = _daySuffix(clampedDay);
-        dueDateLabel = 'debtCard.dueOnThe'.tr(namedArgs: {'day': '$clampedDay$suffix'});
+        dueDateLabel =
+            'debtCard.dueOnThe'.tr(namedArgs: {'day': '$clampedDay$suffix'});
         dueDateColor = AppColors.textSecondary;
       }
     }
@@ -133,295 +134,299 @@ class DebtCard extends ConsumerWidget {
       child: InkWell(
         onTap: () => context.push('/debt/${debt.id}'),
         child: Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Header row ────────────────────────────────────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Icon
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Icon(
-                    _iconForType(debt.debtType),
-                    color: AppColors.error,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.sm),
-                // Name + type + optional focus chip
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        debt.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        debt.debtTypeDisplay,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.textSecondary),
-                      ),
-                      if (isFocusDebt && focusReason.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.sm,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.brandTeal,
-                            borderRadius:
-                                BorderRadius.circular(AppSizes.radiusFull),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                CupertinoIcons.arrow_up_circle_fill,
-                                color: Colors.white,
-                                size: 10,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                'debtCard.nextUp'.tr(namedArgs: {'reason': focusReason}),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // Progress ring + balance
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    DebtProgressRing(
-                      progressPercent: progressValue != null ? progressValue * 100 : null,
-                      size: 54,
+          padding: const EdgeInsets.all(AppSizes.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header row ────────────────────────────────────────────────
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      currencyFormat.format(debt.balance),
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.error),
-                    ),
-                    if (debt.originalBalance != null && debt.originalBalance! > 0) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '${debt.debtType == 'credit_card' ? 'Limit' : 'Original'}: ${currencyFormat.format(debt.originalBalance!)}',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontSize: 10,
-                            ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(width: AppSizes.xs),
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    CupertinoIcons.ellipsis_vertical,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                    side: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                      width: 0.5,
+                    child: Icon(
+                      _iconForType(debt.debtType),
+                      color: AppColors.error,
+                      size: 22,
                     ),
                   ),
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: 'log_payment',
-                      child: _MenuRow(
-                        icon: CupertinoIcons.add_circled,
-                        label: 'debtCard.logPayment'.tr(),
-                        color: AppColors.success,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: _MenuRow(
-                        icon: CupertinoIcons.pencil,
-                        label: 'debtCard.editDebt'.tr(),
-                        color: AppColors.systemBlue,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'history',
-                      child: _MenuRow(
-                        icon: CupertinoIcons.clock,
-                        label: 'debtCard.paymentHistory'.tr(),
-                        color: AppColors.brandTeal,
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: _MenuRow(
-                        icon: CupertinoIcons.trash,
-                        label: 'debtCard.deleteDebt'.tr(),
-                        isDestructive: true,
-                      ),
-                    ),
-                  ],
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'log_payment':
-                        onLogPayment();
-                      case 'edit':
-                        onEdit();
-                      case 'history':
-                        onHistory();
-                      case 'delete':
-                        _confirmDelete(context);
-                    }
-                  },
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppSizes.sm),
-
-            // ── Footer: min payment + months remaining ────────────────────
-            Row(
-              children: [
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
+                  const SizedBox(width: AppSizes.sm),
+                  // Name + type + optional focus chip
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextSpan(
-                          text: 'debtCard.minPayment'.tr(namedArgs: {'amount': currencyFormat.format(debt.minimumPayment)}),
+                        Text(
+                          debt.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (monthsLeft != null) ...[
-                          const TextSpan(text: '  ·  '),
-                          TextSpan(
-                            text: 'debtCard.monthsLeft'.tr(namedArgs: {'months': '$monthsLeft'}),
-                            style: const TextStyle(
-                              fontStyle: FontStyle.italic,
+                        Text(
+                          debt.debtTypeDisplay,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                        if (isFocusDebt && focusReason.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSizes.sm,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.brandTeal,
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusFull),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  CupertinoIcons.arrow_up_circle_fill,
+                                  color: Colors.white,
+                                  size: 10,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  'debtCard.nextUp'
+                                      .tr(namedArgs: {'reason': focusReason}),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ],
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.sm),
-                OutlinedButton(
-                  onPressed: onLogPayment,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.success,
-                    side: BorderSide(
-                        color: AppColors.success.withValues(alpha: 0.6)),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.md,
-                      vertical: AppSizes.xs,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
-                  child: Text(
-                    'debtCard.logPayment'.tr(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-
-            // ── Due date chip ─────────────────────────────────────────────
-            if (dueDateLabel != null) ...[
-              const SizedBox(height: AppSizes.xs),
-              Row(
-                children: [
-                  Icon(CupertinoIcons.calendar,
-                      size: 11, color: dueDateColor),
-                  const SizedBox(width: AppSizes.xs),
-                  Text(
-                    dueDateLabel,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: dueDateColor,
-                          fontWeight: daysUntil <= 5
-                              ? FontWeight.w600
-                              : FontWeight.normal,
+                  // Progress ring + balance
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      DebtProgressRing(
+                        progressPercent:
+                            progressValue != null ? progressValue * 100 : null,
+                        size: 54,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        currencyFormat.format(debt.balance),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error),
+                      ),
+                      if (debt.originalBalance != null &&
+                          debt.originalBalance! > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '${debt.debtType == 'credit_card' ? 'Limit' : 'Original'}: ${currencyFormat.format(debt.originalBalance!)}',
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10,
+                                  ),
                         ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(width: AppSizes.xs),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      CupertinoIcons.ellipsis_vertical,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                      side: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                        width: 0.5,
+                      ),
+                    ),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'log_payment',
+                        child: _MenuRow(
+                          icon: CupertinoIcons.add_circled,
+                          label: 'debtCard.logPayment'.tr(),
+                          color: AppColors.success,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: _MenuRow(
+                          icon: CupertinoIcons.pencil,
+                          label: 'debtCard.editDebt'.tr(),
+                          color: AppColors.systemBlue,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'history',
+                        child: _MenuRow(
+                          icon: CupertinoIcons.clock,
+                          label: 'debtCard.paymentHistory'.tr(),
+                          color: AppColors.brandTeal,
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: _MenuRow(
+                          icon: CupertinoIcons.trash,
+                          label: 'debtCard.deleteDebt'.tr(),
+                          isDestructive: true,
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'log_payment':
+                          onLogPayment();
+                        case 'edit':
+                          onEdit();
+                        case 'history':
+                          onHistory();
+                        case 'delete':
+                          _confirmDelete(context);
+                      }
+                    },
                   ),
                 ],
               ),
-            ],
 
-            // ── Interest trap warning ─────────────────────────────────────
-            if (interestTrapText != null) ...[
-              const SizedBox(height: AppSizes.xs + 2),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.sm,
-                  vertical: AppSizes.xs + 1,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                ),
-                child: Row(
-                  children: [
-                    Icon(CupertinoIcons.exclamationmark_triangle,
-                        size: 13, color: AppColors.warning),
-                    const SizedBox(width: AppSizes.xs),
-                    Expanded(
-                      child: Text(
-                        interestTrapText,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(
-                              color: AppColors.warning,
-                              fontWeight: FontWeight.w600,
+              const SizedBox(height: AppSizes.sm),
+
+              // ── Footer: min payment + months remaining ────────────────────
+              Row(
+                children: [
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'debtCard.minPayment'.tr(namedArgs: {
+                              'amount':
+                                  currencyFormat.format(debt.minimumPayment)
+                            }),
+                          ),
+                          if (monthsLeft != null) ...[
+                            const TextSpan(text: '  ·  '),
+                            TextSpan(
+                              text: 'debtCard.monthsLeft'
+                                  .tr(namedArgs: {'months': '$monthsLeft'}),
+                              style: const TextStyle(
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ],
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
                             ),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  OutlinedButton(
+                    onPressed: onLogPayment,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.success,
+                      side: BorderSide(
+                          color: AppColors.success.withValues(alpha: 0.6)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md,
+                        vertical: AppSizes.xs,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusFull),
+                      ),
+                    ),
+                    child: Text(
+                      'debtCard.logPayment'.tr(),
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+
+              // ── Due date chip ─────────────────────────────────────────────
+              if (dueDateLabel != null) ...[
+                const SizedBox(height: AppSizes.xs),
+                Row(
+                  children: [
+                    Icon(CupertinoIcons.calendar,
+                        size: 11, color: dueDateColor),
+                    const SizedBox(width: AppSizes.xs),
+                    Text(
+                      dueDateLabel,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: dueDateColor,
+                            fontWeight: daysUntil <= 5
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
                     ),
                   ],
                 ),
-              ),
+              ],
+
+              // ── Interest trap warning ─────────────────────────────────────
+              if (interestTrapText != null) ...[
+                const SizedBox(height: AppSizes.xs + 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.sm,
+                    vertical: AppSizes.xs + 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(CupertinoIcons.exclamationmark_triangle,
+                          size: 13, color: AppColors.warning),
+                      const SizedBox(width: AppSizes.xs),
+                      Expanded(
+                        child: Text(
+                          interestTrapText,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.warning,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -433,12 +438,14 @@ class DebtCard extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        icon: const Icon(CupertinoIcons.trash_fill, color: AppColors.error, size: 28),
+        icon: const Icon(CupertinoIcons.trash_fill,
+            color: AppColors.error, size: 28),
         title: Text('debtCard.deleteTitle'.tr()),
         titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
-        content: Text('debtCard.deleteMessage'.tr(namedArgs: {'name': debt.name})),
+        content:
+            Text('debtCard.deleteMessage'.tr(namedArgs: {'name': debt.name})),
         contentTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),

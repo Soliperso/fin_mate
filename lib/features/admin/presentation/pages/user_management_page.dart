@@ -95,13 +95,15 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        final cardBg = isDark
-            ? const Color(0xFF2C2C2E)
-            : const Color(0xFFF2F2F7);
+        final cardBg =
+            isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.pagePadding, 12, AppSizes.pagePadding, 16,
+              AppSizes.pagePadding,
+              12,
+              AppSizes.pagePadding,
+              16,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -110,7 +112,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.separatorDark : AppColors.separator,
+                    color:
+                        isDark ? AppColors.separatorDark : AppColors.separator,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -184,7 +187,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(
         top: isFirst ? const Radius.circular(AppSizes.radiusCard) : Radius.zero,
-        bottom: isLast ? const Radius.circular(AppSizes.radiusCard) : Radius.zero,
+        bottom:
+            isLast ? const Radius.circular(AppSizes.radiusCard) : Radius.zero,
       ),
       child: Material(
         color: Colors.transparent,
@@ -291,7 +295,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
           ref.invalidate(usersListProvider);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${user.displayName}\'s account disabled')),
+              SnackBar(
+                  content: Text('${user.displayName}\'s account disabled')),
             );
           }
         } catch (e) {
@@ -616,9 +621,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                   });
                 }
 
-                final sourceToUse = _sourceUsers.isNotEmpty
-                    ? _sourceUsers
-                    : _applySort(users);
+                final sourceToUse =
+                    _sourceUsers.isNotEmpty ? _sourceUsers : _applySort(users);
                 final display = _displayUsers.isNotEmpty
                     ? _displayUsers
                     : _filterUsers(sourceToUse);
@@ -646,7 +650,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                           ),
                           const SizedBox(height: AppSizes.lg),
                           Text(
-                            _searchQuery != null || _activeFilter != _FilterType.all
+                            _searchQuery != null ||
+                                    _activeFilter != _FilterType.all
                                 ? 'No users found'
                                 : 'No users yet',
                             style: Theme.of(context)
@@ -751,8 +756,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                       const SizedBox(height: AppSizes.lg),
                       ElevatedButton.icon(
                         onPressed: () => ref.invalidate(usersListProvider),
-                        icon: const Icon(
-                            CupertinoIcons.arrow_counterclockwise,
+                        icon: const Icon(CupertinoIcons.arrow_counterclockwise,
                             size: 16),
                         label: const Text('Retry'),
                         style: ElevatedButton.styleFrom(

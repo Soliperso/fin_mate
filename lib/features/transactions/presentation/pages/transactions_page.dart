@@ -245,8 +245,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     icon: const Icon(CupertinoIcons.add, size: 20),
                     label: Text(
                       'addTransaction.newTitle'.tr(),
-                      style:
-                          const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 16),
                     ),
                   ),
                 ),
@@ -288,10 +288,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   children: [
                                     EmptyStateCard(
                                       icon: CupertinoIcons.doc_text,
-                                      title:
-                                          'transactions.noTransactions'.tr(),
+                                      title: 'transactions.noTransactions'.tr(),
                                       message:
-                                          'transactions.noTransactionsMessage'.tr(),
+                                          'transactions.noTransactionsMessage'
+                                              .tr(),
                                       backgroundColor: AppColors.brandTeal,
                                     ),
                                     const SizedBox(height: AppSizes.lg),
@@ -366,12 +366,20 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                      child: _buildFilterChip(context, 'All',
-                                          'transactions.filterAll'.tr(), state.selectedFilter, notifier)),
+                                      child: _buildFilterChip(
+                                          context,
+                                          'All',
+                                          'transactions.filterAll'.tr(),
+                                          state.selectedFilter,
+                                          notifier)),
                                   const SizedBox(width: AppSizes.sm),
                                   Expanded(
-                                      child: _buildFilterChip(context, 'Income',
-                                          'transactions.filterIncome'.tr(), state.selectedFilter, notifier)),
+                                      child: _buildFilterChip(
+                                          context,
+                                          'Income',
+                                          'transactions.filterIncome'.tr(),
+                                          state.selectedFilter,
+                                          notifier)),
                                   const SizedBox(width: AppSizes.sm),
                                   Expanded(
                                       child: _buildFilterChip(
@@ -405,7 +413,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
   }
 
-  Widget _buildSearchBar(BuildContext context, TransactionListNotifier notifier) {
+  Widget _buildSearchBar(
+      BuildContext context, TransactionListNotifier notifier) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final showHistory = _searchFocused &&
         _searchController.text.isEmpty &&
@@ -423,7 +432,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: 'transactions.searchHint'.tr(),
-              hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              hintStyle:
+                  TextStyle(fontSize: 14, color: AppColors.textSecondary),
               prefixIcon: const Icon(CupertinoIcons.search, size: 18),
               suffixIcon: _searchController.text.isNotEmpty
                   ? GestureDetector(
@@ -524,8 +534,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(CupertinoIcons.clock,
-                                      size: 12,
-                                      color: AppColors.textSecondary),
+                                      size: 12, color: AppColors.textSecondary),
                                   const SizedBox(width: 4),
                                   Text(
                                     query,
@@ -650,8 +659,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       periodTxns = periodTxns.where((t) {
         return t.date.isAfter(
                 state.dateRange!.start.subtract(const Duration(days: 1))) &&
-            t.date
-                .isBefore(state.dateRange!.end.add(const Duration(days: 1)));
+            t.date.isBefore(state.dateRange!.end.add(const Duration(days: 1)));
       }).toList();
     }
 
@@ -905,7 +913,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       size: 20),
                   label: Text(
                     'common.cancel'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -927,7 +936,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   icon: const Icon(CupertinoIcons.add, size: 20),
                   label: Text(
                     'addTransaction.newTitle'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
               ),
@@ -1011,7 +1021,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   child: Column(
                     children: [
                       for (int i = 0; i < txList.length; i++) ...[
-                        _buildTransactionCard(context, txList[i], notifier, ref),
+                        _buildTransactionCard(
+                            context, txList[i], notifier, ref),
                         if (i < txList.length - 1)
                           Divider(
                             height: 0,
@@ -1060,19 +1071,21 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     return Dismissible(
       key: ValueKey(transaction.id),
-      direction: _isSelecting ? DismissDirection.none : DismissDirection.endToStart,
+      direction:
+          _isSelecting ? DismissDirection.none : DismissDirection.endToStart,
       background: Container(
         color: AppColors.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSizes.lg),
-        child: const Icon(CupertinoIcons.trash_fill, color: Colors.white, size: 20),
+        child: const Icon(CupertinoIcons.trash_fill,
+            color: Colors.white, size: 20),
       ),
       onDismissed: (_) async {
         final success = await notifier.deleteTransaction(transaction.id);
         if (success) {
           unawaited(ref.read(analyticsServiceProvider).trackTransactionDeleted(
-            transactionId: transaction.id,
-          ));
+                transactionId: transaction.id,
+              ));
           ref.invalidate(dashboardNotifierProvider);
           ref.invalidate(recentTransactionsProvider);
           ref.invalidate(monthlyFlowDataProvider);
@@ -1084,109 +1097,111 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           if (success) {
             SuccessSnackbar.show(context, message: 'transactions.deleted'.tr());
           } else {
-            ErrorSnackbar.show(context, message: 'transactions.failedToDelete'.tr());
+            ErrorSnackbar.show(context,
+                message: 'transactions.failedToDelete'.tr());
           }
         }
       },
       child: InkWell(
-      onLongPress: () {
-        if (!_isSelecting) {
-          setState(() {
-            _isSelecting = true;
-            _selectedIds.add(transaction.id);
-          });
-        }
-      },
-      onTap: () {
-        if (_isSelecting) {
-          setState(() {
-            if (isSelected) {
-              _selectedIds.remove(transaction.id);
-            } else {
+        onLongPress: () {
+          if (!_isSelecting) {
+            setState(() {
+              _isSelecting = true;
               _selectedIds.add(transaction.id);
-            }
-          });
-        } else {
-          context.push('/transactions/${transaction.id}');
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: 12,
-        ),
-        child: Row(
-          children: [
-            if (_isSelecting)
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Icon(
-                  isSelected
-                      ? CupertinoIcons.checkmark_circle_fill
-                      : CupertinoIcons.circle,
-                  color: isSelected
-                      ? AppColors.brandTeal
-                      : AppColors.textSecondary,
-                  size: 22,
+            });
+          }
+        },
+        onTap: () {
+          if (_isSelecting) {
+            setState(() {
+              if (isSelected) {
+                _selectedIds.remove(transaction.id);
+              } else {
+                _selectedIds.add(transaction.id);
+              }
+            });
+          } else {
+            context.push('/transactions/${transaction.id}');
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: 12,
+          ),
+          child: Row(
+            children: [
+              if (_isSelecting)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Icon(
+                    isSelected
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : CupertinoIcons.circle,
+                    color: isSelected
+                        ? AppColors.brandTeal
+                        : AppColors.textSecondary,
+                    size: 22,
+                  ),
+                ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                ),
+                child: Icon(_getTransactionIcon(transaction),
+                    color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description ?? 'Transaction',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (transaction.categoryName != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        transaction.categoryName!,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              ),
-              child: Icon(_getTransactionIcon(transaction),
-                  color: iconColor, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: AppSizes.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    transaction.description ?? 'Transaction',
+                    '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          color: iconColor,
+                          fontWeight: FontWeight.w600,
                         ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (transaction.categoryName != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      transaction.categoryName!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      maxLines: 1,
-                    ),
-                  ],
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormat('h:mm a')
+                        .format(transaction.createdAt.toLocal()),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: AppSizes.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: iconColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  DateFormat('h:mm a').format(transaction.createdAt.toLocal()),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -1219,7 +1234,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     if (cat.contains('housing')) return CupertinoIcons.house;
     return CupertinoIcons.creditcard;
   }
-
 
   Widget _buildCategoryFilter(
     StateSetter setModalState,
@@ -1269,7 +1283,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       }).toList(),
     );
   }
-
 
   void _exitSelectionMode() {
     setState(() {
@@ -1368,7 +1381,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.sm,
+            AppSizes.md,
+            AppSizes.sm,
+            AppSizes.md,
+            AppSizes.sm,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1427,8 +1443,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   }
 
   Future<void> _exportCsv(BuildContext context) async {
-    final transactions =
-        ref.read(transactionListProvider).filteredTransactions;
+    final transactions = ref.read(transactionListProvider).filteredTransactions;
 
     if (transactions.isEmpty) {
       if (!context.mounted) return;
@@ -1468,8 +1483,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     if (result == null || result.files.single.path == null) return;
 
     // 2. Read content
-    final content =
-        await File(result.files.single.path!).readAsString();
+    final content = await File(result.files.single.path!).readAsString();
 
     // 3. Load accounts + categories
     final repo = ref.read(transactionRepositoryProvider);
@@ -1552,7 +1566,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         height: 4,
                         margin: const EdgeInsets.only(bottom: AppSizes.md),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -1658,7 +1675,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               labelText: 'transactions.minAmount'.tr(),
                               prefixText: '\$ ',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusMd),
                               ),
                             ),
                             keyboardType: TextInputType.number,
@@ -1677,7 +1695,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               labelText: 'transactions.maxAmount'.tr(),
                               prefixText: '\$ ',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                                borderRadius:
+                                    BorderRadius.circular(AppSizes.radiusMd),
                               ),
                             ),
                             keyboardType: TextInputType.number,
@@ -1701,7 +1720,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           children: [
                             Text(
                               'Hide Future Transactions',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -1716,8 +1738,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           scale: 0.8,
                           child: Switch(
                             value: hideFuture,
-                            onChanged: (val) => setModalState(() => hideFuture = val),
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            onChanged: (val) =>
+                                setModalState(() => hideFuture = val),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                         ),
                       ],
@@ -1736,7 +1760,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.brandTeal,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(AppSizes.buttonHeightMd),
+                        minimumSize:
+                            const Size.fromHeight(AppSizes.buttonHeightMd),
                         shape: const StadiumBorder(),
                       ),
                       child: const Text('Apply Filters'),

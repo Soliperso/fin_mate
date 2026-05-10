@@ -16,10 +16,12 @@ class CategoryBreakdownChart extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
+  ConsumerState<CategoryBreakdownChart> createState() =>
+      _CategoryBreakdownChartState();
 }
 
-class _CategoryBreakdownChartState extends ConsumerState<CategoryBreakdownChart> {
+class _CategoryBreakdownChartState
+    extends ConsumerState<CategoryBreakdownChart> {
   int? _touchedIndex;
 
   @override
@@ -54,7 +56,8 @@ class _CategoryBreakdownChartState extends ConsumerState<CategoryBreakdownChart>
                 child: PieChart(
                   PieChartData(
                     sections: _buildPieChartSections(total),
-                    centerSpaceRadius: chartSize * 0.28, // Proportional to chart size
+                    centerSpaceRadius:
+                        chartSize * 0.28, // Proportional to chart size
                     sectionsSpace: 2,
                     borderData: FlBorderData(show: false),
                     pieTouchData: PieTouchData(
@@ -67,9 +70,11 @@ class _CategoryBreakdownChartState extends ConsumerState<CategoryBreakdownChart>
                             _touchedIndex = null;
                             return;
                           }
-                          final index = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                          final index = pieTouchResponse
+                              .touchedSection!.touchedSectionIndex;
                           // Validate the index is within bounds
-                          if (index >= 0 && index < widget.categoryData.length) {
+                          if (index >= 0 &&
+                              index < widget.categoryData.length) {
                             _touchedIndex = index;
                           } else {
                             _touchedIndex = null;
@@ -130,7 +135,8 @@ class _CategoryBreakdownChartState extends ConsumerState<CategoryBreakdownChart>
     });
   }
 
-  Widget _buildTouchedSectionDetails(BuildContext context, double total, WidgetRef ref) {
+  Widget _buildTouchedSectionDetails(
+      BuildContext context, double total, WidgetRef ref) {
     if (_touchedIndex == null ||
         _touchedIndex! < 0 ||
         _touchedIndex! >= widget.categoryData.length) {

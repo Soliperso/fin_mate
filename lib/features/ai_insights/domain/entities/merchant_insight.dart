@@ -71,7 +71,8 @@ class MerchantInsight extends Equatable {
       lastTransaction: lastTransaction ?? this.lastTransaction,
       monthlyFrequency: monthlyFrequency ?? this.monthlyFrequency,
       transactionDates: transactionDates ?? this.transactionDates,
-      percentageOfCategorySpending: percentageOfCategorySpending ?? this.percentageOfCategorySpending,
+      percentageOfCategorySpending:
+          percentageOfCategorySpending ?? this.percentageOfCategorySpending,
       isTopMerchant: isTopMerchant ?? this.isTopMerchant,
     );
   }
@@ -87,7 +88,8 @@ class MerchantInsight extends Equatable {
       'first_transaction': firstTransaction.toIso8601String(),
       'last_transaction': lastTransaction.toIso8601String(),
       'monthly_frequency': monthlyFrequency,
-      'transaction_dates': transactionDates.map((d) => d.toIso8601String()).toList(),
+      'transaction_dates':
+          transactionDates.map((d) => d.toIso8601String()).toList(),
       'percentage_of_category_spending': percentageOfCategorySpending,
       'is_top_merchant': isTopMerchant,
     };
@@ -107,7 +109,8 @@ class MerchantInsight extends Equatable {
       transactionDates: (json['transaction_dates'] as List<dynamic>)
           .map((d) => DateTime.parse(d as String))
           .toList(),
-      percentageOfCategorySpending: (json['percentage_of_category_spending'] as num).toDouble(),
+      percentageOfCategorySpending:
+          (json['percentage_of_category_spending'] as num).toDouble(),
       isTopMerchant: json['is_top_merchant'] as bool? ?? false,
     );
   }

@@ -128,9 +128,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       final success = await _service.archiveNotification(notificationId);
       if (success) {
         // Remove from local state
-        final updatedNotifications = state.notifications
-            .where((n) => n.id != notificationId)
-            .toList();
+        final updatedNotifications =
+            state.notifications.where((n) => n.id != notificationId).toList();
 
         state = state.copyWith(notifications: updatedNotifications);
       }
@@ -145,9 +144,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       final success = await _service.deleteNotification(notificationId);
       if (success) {
         // Remove from local state
-        final updatedNotifications = state.notifications
-            .where((n) => n.id != notificationId)
-            .toList();
+        final updatedNotifications =
+            state.notifications.where((n) => n.id != notificationId).toList();
 
         // Update unread count if the deleted notification was unread
         final deleted = state.notifications

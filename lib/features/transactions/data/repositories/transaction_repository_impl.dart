@@ -30,14 +30,16 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<TransactionEntity> createTransaction(TransactionEntity transaction) async {
+  Future<TransactionEntity> createTransaction(
+      TransactionEntity transaction) async {
     final model = TransactionModel.fromEntity(transaction);
     final result = await _dataSource.createTransaction(model);
     return result.toEntity();
   }
 
   @override
-  Future<TransactionEntity> updateTransaction(String id, TransactionEntity transaction) async {
+  Future<TransactionEntity> updateTransaction(
+      String id, TransactionEntity transaction) async {
     final model = TransactionModel.fromEntity(transaction);
     final result = await _dataSource.updateTransaction(id, model);
     return result.toEntity();
@@ -97,7 +99,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<List<TransactionEntity>> getRecentTransactions({int limit = 10}) async {
+  Future<List<TransactionEntity>> getRecentTransactions(
+      {int limit = 10}) async {
     final models = await _dataSource.getRecentTransactions(limit: limit);
     return models.map((m) => m.toEntity()).toList();
   }

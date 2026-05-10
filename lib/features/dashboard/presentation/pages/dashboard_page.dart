@@ -72,7 +72,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     String greeting() {
       final firstName = user?.fullName?.trim().split(' ').first ?? 'there';
       final hour = DateTime.now().hour;
-      final timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+      final timeOfDay = hour < 12
+          ? 'morning'
+          : hour < 17
+              ? 'afternoon'
+              : 'evening';
       return 'Good $timeOfDay, $firstName';
     }
 
@@ -90,7 +94,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
-              DateFormat('MMMM d, yyyy', context.locale.toString()).format(DateTime.now()),
+              DateFormat('MMMM d, yyyy', context.locale.toString())
+                  .format(DateTime.now()),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.systemGray,
                   ),
@@ -116,19 +121,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   right: 0,
                   top: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.xs, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.xs, vertical: 1),
                     decoration: BoxDecoration(
                       color: AppColors.systemRed,
                       borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                     ),
-                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    constraints:
+                        const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
                       unreadCount > 99 ? '99+' : '$unreadCount',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            height: 1.2,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -162,11 +169,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         backgroundColor: AppColors.brandTeal,
                         child: Text(
                           getInitials(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.08,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.08,
+                                  ),
                         ),
                       ),
               ),
@@ -203,15 +211,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 // ── Metrics carousel: Health score | Budget snapshot | Goals
                 Consumer(
                   builder: (context, ref, _) {
-                    final budgets = ref.watch(budgetsWithSpendingProvider).valueOrNull;
-                    final hasActiveBudgets = budgets?.any((b) => b.isActive) ?? false;
+                    final budgets =
+                        ref.watch(budgetsWithSpendingProvider).valueOrNull;
+                    final hasActiveBudgets =
+                        budgets?.any((b) => b.isActive) ?? false;
 
                     final goals = ref.watch(savingsGoalsProvider).valueOrNull;
                     final totalSaved =
                         goals?.fold(0.0, (s, g) => s + g.currentAmount) ?? 0.0;
                     final hasActiveGoals =
                         (goals?.any((g) => !g.isCompleted) ?? false) &&
-                        totalSaved > 0;
+                            totalSaved > 0;
 
                     // Build unwrapped list first so single-card early return
                     // stays aligned with the rest of the page content.
@@ -298,7 +308,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       data: (flowData) {
                         if (flowData.isEmpty) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSizes.sm),
                             child: Center(
                               child: Text(
                                 'dashboard.noFlowData'.tr(),
@@ -319,7 +330,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     );
                   },
                 ),
-
 
                 // ── Spending breakdown ────────────────────────────────────
                 const SpendingBreakdownCard(),
@@ -489,9 +499,7 @@ class _PageDots extends StatelessWidget {
           width: isActive ? 20 : 6,
           height: 4,
           decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.brandTeal
-                : AppColors.systemGray3,
+            color: isActive ? AppColors.brandTeal : AppColors.systemGray3,
             borderRadius: BorderRadius.circular(2),
           ),
         );
@@ -539,13 +547,14 @@ class _RecentTransactionsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
               ),
-              icon: const Icon(CupertinoIcons.add, size: AppSizes.iconSm, color: Colors.white),
+              icon: const Icon(CupertinoIcons.add,
+                  size: AppSizes.iconSm, color: Colors.white),
               label: Text(
                 'dashboard.addTransaction'.tr(),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
               ),
             ),
           ),
@@ -693,11 +702,13 @@ class _TransactionRow extends ConsumerWidget {
       if (cat.contains('gift')) return CupertinoIcons.gift;
       return CupertinoIcons.money_dollar_circle;
     }
-    if (cat.contains('food') || cat.contains('dining')) return CupertinoIcons.cart;
+    if (cat.contains('food') || cat.contains('dining'))
+      return CupertinoIcons.cart;
     if (cat.contains('transport')) return CupertinoIcons.car;
     if (cat.contains('shopping')) return CupertinoIcons.bag;
     if (cat.contains('entertainment')) return CupertinoIcons.film;
-    if (cat.contains('bills') || cat.contains('utilities')) return CupertinoIcons.doc_text;
+    if (cat.contains('bills') || cat.contains('utilities'))
+      return CupertinoIcons.doc_text;
     if (cat.contains('health')) return CupertinoIcons.heart;
     if (cat.contains('education')) return CupertinoIcons.book;
     if (cat.contains('housing')) return CupertinoIcons.house;

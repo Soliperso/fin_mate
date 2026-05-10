@@ -70,18 +70,22 @@ void main() {
       expect(result.schedule.first.focusDebtName, 'Chase Credit Card');
     });
 
-    test('total monthly payment in month 1 equals sum of all minimums (\$591)', () {
+    test('total monthly payment in month 1 equals sum of all minimums (\$591)',
+        () {
       final month1 = result.schedule.first;
       expect(month1.totalPaymentThisMonth, closeTo(591, 0.5));
     });
 
     test('all balances are zero at the end of the schedule', () {
       final last = result.schedule.last;
-      final remaining = last.debtBalancesAfter.values.fold(0.0, (s, b) => s + b);
+      final remaining =
+          last.debtBalancesAfter.values.fold(0.0, (s, b) => s + b);
       expect(remaining, closeTo(0, 0.01));
     });
 
-    test('total paid is greater than total original balance (\$25,300) due to interest', () {
+    test(
+        'total paid is greater than total original balance (\$25,300) due to interest',
+        () {
       expect(result.totalPaid, greaterThan(25300));
     });
 
@@ -121,19 +125,22 @@ void main() {
       expect(result.schedule, isNotEmpty);
     });
 
-    test('month 1 focus debt is Chase Credit Card (\$4,800 — lowest balance)', () {
+    test('month 1 focus debt is Chase Credit Card (\$4,800 — lowest balance)',
+        () {
       // CC has the lowest balance among the three debts
       expect(result.schedule.first.focusDebtName, 'Chase Credit Card');
     });
 
-    test('total monthly payment in month 1 equals sum of all minimums (\$591)', () {
+    test('total monthly payment in month 1 equals sum of all minimums (\$591)',
+        () {
       final month1 = result.schedule.first;
       expect(month1.totalPaymentThisMonth, closeTo(591, 0.5));
     });
 
     test('all balances are zero at the end of the schedule', () {
       final last = result.schedule.last;
-      final remaining = last.debtBalancesAfter.values.fold(0.0, (s, b) => s + b);
+      final remaining =
+          last.debtBalancesAfter.values.fold(0.0, (s, b) => s + b);
       expect(remaining, closeTo(0, 0.01));
     });
 
@@ -168,7 +175,8 @@ void main() {
 
     test('Avalanche pays less total interest than Snowball', () {
       // Mathematically optimal — Avalanche always wins on interest
-      expect(avalanche.totalInterestPaid, lessThanOrEqualTo(snowball.totalInterestPaid));
+      expect(avalanche.totalInterestPaid,
+          lessThanOrEqualTo(snowball.totalInterestPaid));
     });
 
     test('Avalanche total paid is <= Snowball total paid', () {
@@ -180,7 +188,8 @@ void main() {
       expect(snowball.totalMonths, lessThan(600));
     });
 
-    test('interest savings reported correctly (avalanche - snowball delta)', () {
+    test('interest savings reported correctly (avalanche - snowball delta)',
+        () {
       final savings = snowball.totalInterestPaid - avalanche.totalInterestPaid;
       // Savings should be non-negative (Avalanche is always at least as good)
       expect(savings, greaterThanOrEqualTo(0));
@@ -244,7 +253,8 @@ void main() {
       expect(result.schedule, isEmpty);
     });
 
-    test('minimum payment > monthly interest pays off debt (no infinite loop)', () {
+    test('minimum payment > monthly interest pays off debt (no infinite loop)',
+        () {
       final highRate = _debt(
         id: 'hr',
         name: 'High Rate Card',
@@ -260,7 +270,9 @@ void main() {
       expect(result.totalMonths, lessThan(600));
     });
 
-    test('monthsToPayoffAtMinimum returns null when minimum <= monthly interest', () {
+    test(
+        'monthsToPayoffAtMinimum returns null when minimum <= monthly interest',
+        () {
       // minimum $10 on $10,000 at 2% APR → monthly interest = $16.67 > $10
       final trapDebt = _debt(
         id: 'trap',

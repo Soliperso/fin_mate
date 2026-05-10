@@ -26,7 +26,8 @@ class PasswordStrengthIndicator extends StatelessWidget {
     if (RegExp(r'[A-Z]').hasMatch(password)) score++; // Has uppercase
     if (RegExp(r'[a-z]').hasMatch(password)) score++; // Has lowercase
     if (RegExp(r'[0-9]').hasMatch(password)) score++; // Has number
-    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++; // Has special char
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password))
+      score++; // Has special char
 
     if (score <= 2) return PasswordStrength.weak;
     if (score <= 4) return PasswordStrength.medium;
@@ -182,7 +183,9 @@ class _RequirementChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isMet ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
+            isMet
+                ? CupertinoIcons.checkmark_circle_fill
+                : CupertinoIcons.circle,
             size: 12,
             color: isMet ? AppColors.success : AppColors.textTertiary,
           ),

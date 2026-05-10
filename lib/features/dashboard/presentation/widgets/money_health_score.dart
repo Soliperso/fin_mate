@@ -16,7 +16,8 @@ class MoneyHealthScore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _hasNoData ? AppColors.systemGray : _getScoreColor(score);
-    final label = _hasNoData ? 'moneyHealth.noDataYet'.tr() : _getScoreLabel(score);
+    final label =
+        _hasNoData ? 'moneyHealth.noDataYet'.tr() : _getScoreLabel(score);
     final subtitle = _hasNoData
         ? 'moneyHealth.addTransactionsMsg'.tr()
         : 'moneyHealth.basedOnMsg'.tr();
@@ -24,9 +25,8 @@ class MoneyHealthScore extends StatelessWidget {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
-    final ringBg = isDark
-        ? AppColors.tertiarySystemBackgroundDark
-        : AppColors.systemGray5;
+    final ringBg =
+        isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.systemGray5;
 
     return Container(
       decoration: BoxDecoration(
@@ -77,7 +77,8 @@ class MoneyHealthScore extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSizes.xs),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm + 2, vertical: AppSizes.xs - 1),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.sm + 2, vertical: AppSizes.xs - 1),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull),

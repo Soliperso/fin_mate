@@ -31,12 +31,12 @@ class PaymentService {
     String? cancelUrl,
   }) async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/create-checkout-session'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({
           'priceId': priceId,
@@ -64,12 +64,12 @@ class PaymentService {
     required String currency,
   }) async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/create-payment-intent'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({
           'amount': amountCents,
@@ -96,18 +96,15 @@ class PaymentService {
   /// This queries your database which is kept in sync via Stripe webhooks
   Future<Map<String, dynamic>?> getSubscriptionStatus(String userId) async {
     try {
-      final response = await Supabase.instance.client
-          .from('user_profiles')
-          .select('''
+      final response =
+          await Supabase.instance.client.from('user_profiles').select('''
             subscription_tier,
             subscription_status,
             subscription_start_date,
             subscription_end_date,
             trial_end_date,
             external_subscription_id
-          ''')
-          .eq('id', userId)
-          .maybeSingle();
+          ''').eq('id', userId).maybeSingle();
 
       return response;
     } catch (e) {
@@ -186,12 +183,12 @@ class PaymentService {
   /// Returns a Map with 'success' (bool) and 'message' (String)
   Future<Map<String, dynamic>> cancelSubscription(String userId) async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/cancel-subscription'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({'userId': userId}),
       );
@@ -204,8 +201,8 @@ class PaymentService {
         };
       } else {
         final errorData = jsonDecode(response.body);
-        final errorMessage = errorData['error'] ?? 'Failed to cancel subscription';
-
+        final errorMessage =
+            errorData['error'] ?? 'Failed to cancel subscription';
 
         // Return structured error with helpful message
         return {
@@ -230,7 +227,8 @@ class PaymentService {
         Uri.parse('$_functionsUrl/create-portal-session'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({
           'userId': userId,
@@ -269,12 +267,12 @@ class PaymentService {
   /// Returns client secret for Payment Sheet
   Future<Map<String, dynamic>?> createSetupIntent() async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/create-setup-intent'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
       );
 
@@ -296,12 +294,12 @@ class PaymentService {
   /// Get all payment methods for the user
   Future<List<Map<String, dynamic>>> getPaymentMethods() async {
     try {
-
       final response = await http.get(
         Uri.parse('$_functionsUrl/get-payment-methods'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
       );
 
@@ -320,12 +318,12 @@ class PaymentService {
   /// Set default payment method
   Future<bool> setDefaultPaymentMethod(String paymentMethodId) async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/update-default-payment-method'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({
           'paymentMethodId': paymentMethodId,
@@ -346,12 +344,12 @@ class PaymentService {
   /// Remove a payment method
   Future<bool> removePaymentMethod(String paymentMethodId) async {
     try {
-
       final response = await http.post(
         Uri.parse('$_functionsUrl/update-default-payment-method'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
         body: jsonEncode({
           'paymentMethodId': paymentMethodId,
@@ -372,12 +370,12 @@ class PaymentService {
   /// Get invoices from Stripe
   Future<List<Map<String, dynamic>>> getInvoices() async {
     try {
-
       final response = await http.get(
         Uri.parse('$_functionsUrl/get-invoices'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+          'Authorization':
+              'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
         },
       );
 
@@ -396,5 +394,7 @@ class PaymentService {
   /// Create subscription and present Payment Sheet (in-app purchase)
   /// Returns true if subscription was created successfully
   /// Stubbed — requires flutter_stripe SDK (post-MVP).
-  Future<bool> createSubscriptionWithPaymentSheet({required String priceId}) async => false;
+  Future<bool> createSubscriptionWithPaymentSheet(
+          {required String priceId}) async =>
+      false;
 }

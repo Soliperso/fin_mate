@@ -18,7 +18,8 @@ class EditGoalBottomSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EditGoalBottomSheet> createState() => _EditGoalBottomSheetState();
+  ConsumerState<EditGoalBottomSheet> createState() =>
+      _EditGoalBottomSheetState();
 }
 
 class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
@@ -46,7 +47,8 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.goal.name);
-    _descriptionController = TextEditingController(text: widget.goal.description ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.goal.description ?? '');
     _targetAmountController = TextEditingController(
       text: widget.goal.targetAmount.toStringAsFixed(2),
     );
@@ -70,7 +72,9 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
     final success = await ref.read(goalOperationsProvider.notifier).updateGoal(
           goalId: widget.goal.id,
           name: _nameController.text,
-          description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+          description: _descriptionController.text.isEmpty
+              ? null
+              : _descriptionController.text,
           targetAmount: double.parse(_targetAmountController.text),
           deadline: _selectedDeadline,
           category: _selectedCategory,
@@ -157,7 +161,8 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                   prefixIcon: Icon(CupertinoIcons.money_dollar),
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -205,7 +210,8 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                 onTap: () async {
                   final date = await showDatePicker(
                     context: context,
-                    initialDate: _selectedDeadline ?? DateTime.now().add(const Duration(days: 30)),
+                    initialDate: _selectedDeadline ??
+                        DateTime.now().add(const Duration(days: 30)),
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 3650)),
                   );
@@ -245,12 +251,15 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSizes.md),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.cardBackgroundDark : AppColors.lightGray,
+                  color: isDark
+                      ? AppColors.cardBackgroundDark
+                      : AppColors.lightGray,
                   borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
                 child: Row(
                   children: [
-                    const Icon(CupertinoIcons.info_circle, size: 20, color: AppColors.textSecondary),
+                    const Icon(CupertinoIcons.info_circle,
+                        size: 20, color: AppColors.textSecondary),
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: Text(
@@ -281,7 +290,8 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColors.white),
                           ),
                         )
                       : const Text('Update Goal'),

@@ -24,14 +24,18 @@ class BalanceTimelineChart extends ConsumerWidget {
     }
 
     final currencyFormatCompact = ref.watch(currencyFormatCompactProvider);
-    final hasCritical = forecast.dailyForecasts.any((f) => f.status == BalanceStatus.critical);
+    final hasCritical =
+        forecast.dailyForecasts.any((f) => f.status == BalanceStatus.critical);
     final lineColor = hasCritical ? AppColors.error : AppColors.primaryTeal;
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),
       border: Border.all(color: Colors.transparent, width: 0),
       padding: const EdgeInsets.fromLTRB(
-        AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.md,
+        AppSizes.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,17 +89,20 @@ class BalanceTimelineChart extends ConsumerWidget {
                       interval: _xLabelInterval(),
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
-                        if (index < 0 || index >= forecast.dailyForecasts.length) {
+                        if (index < 0 ||
+                            index >= forecast.dailyForecasts.length) {
                           return const SizedBox.shrink();
                         }
                         return Padding(
                           padding: const EdgeInsets.only(top: 6.0),
                           child: Text(
-                            DateFormat('MMM d').format(forecast.dailyForecasts[index].date),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontSize: 9,
-                                  color: AppColors.textSecondary,
-                                ),
+                            DateFormat('MMM d')
+                                .format(forecast.dailyForecasts[index].date),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontSize: 9,
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                         );
                       },
@@ -169,7 +176,9 @@ class BalanceTimelineChart extends ConsumerWidget {
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         final index = spot.x.toInt();
-                        if (index < 0 || index >= forecast.dailyForecasts.length) return null;
+                        if (index < 0 ||
+                            index >= forecast.dailyForecasts.length)
+                          return null;
                         final day = forecast.dailyForecasts[index];
                         final format = ref.watch(currencyFormat0Provider);
                         final dateFormat = DateFormat('MMM d');
@@ -192,11 +201,14 @@ class BalanceTimelineChart extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(context, color: AppColors.success, label: 'Healthy'),
+              _buildLegendItem(context,
+                  color: AppColors.success, label: 'Healthy'),
               const SizedBox(width: AppSizes.md),
-              _buildLegendItem(context, color: AppColors.warning, label: 'Warning'),
+              _buildLegendItem(context,
+                  color: AppColors.warning, label: 'Warning'),
               const SizedBox(width: AppSizes.md),
-              _buildLegendItem(context, color: AppColors.error, label: 'Critical'),
+              _buildLegendItem(context,
+                  color: AppColors.error, label: 'Critical'),
             ],
           ),
         ],
@@ -205,13 +217,18 @@ class BalanceTimelineChart extends ConsumerWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context, bool hasCritical) {
-    final hasWarning = forecast.dailyForecasts.any((f) => f.status == BalanceStatus.warning);
+    final hasWarning =
+        forecast.dailyForecasts.any((f) => f.status == BalanceStatus.warning);
     final color = hasCritical
         ? AppColors.error
         : hasWarning
             ? AppColors.warning
             : AppColors.success;
-    final label = hasCritical ? 'Critical' : hasWarning ? 'Warning' : 'On Track';
+    final label = hasCritical
+        ? 'Critical'
+        : hasWarning
+            ? 'Warning'
+            : 'On Track';
     final icon = hasCritical
         ? CupertinoIcons.arrow_down_right
         : hasWarning
@@ -244,7 +261,8 @@ class BalanceTimelineChart extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, {required Color color, required String label}) {
+  Widget _buildLegendItem(BuildContext context,
+      {required Color color, required String label}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -265,7 +283,8 @@ class BalanceTimelineChart extends ConsumerWidget {
   }
 
   double _calculateMinY() {
-    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
+    final balances =
+        forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
     final min = balances.reduce((a, b) => a < b ? a : b);
     final max = balances.reduce((a, b) => a > b ? a : b);
     if (min == max) return min - 100;
@@ -273,7 +292,8 @@ class BalanceTimelineChart extends ConsumerWidget {
   }
 
   double _calculateMaxY() {
-    final balances = forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
+    final balances =
+        forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
     final min = balances.reduce((a, b) => a < b ? a : b);
     final max = balances.reduce((a, b) => a > b ? a : b);
     if (min == max) return max + 100;

@@ -88,5 +88,6 @@ class DebtRepositoryImpl implements DebtRepository {
   Future<Map<String, dynamic>> getDebtSummary() => _datasource.getDebtSummary();
 
   @override
-  Future<List<DebtPaymentEntity>> getAllPayments() => _datasource.getAllPayments();
+  Future<List<DebtPaymentEntity>> getAllPayments() =>
+      _datasource.getAllPayments();
 }

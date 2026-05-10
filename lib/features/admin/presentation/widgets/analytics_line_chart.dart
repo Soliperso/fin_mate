@@ -39,8 +39,7 @@ class AnalyticsLineChart extends StatelessWidget {
     this.secondLabel,
   });
 
-  bool get _isDual =>
-      secondValues != null && secondValues!.isNotEmpty;
+  bool get _isDual => secondValues != null && secondValues!.isNotEmpty;
 
   double get _trendPct {
     if (values.length < 2) return 0;
@@ -132,10 +131,10 @@ class AnalyticsLineChart extends StatelessWidget {
                 ),
               ),
               titlesData: FlTitlesData(
-                rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: !compact,
@@ -145,15 +144,17 @@ class AnalyticsLineChart extends StatelessWidget {
                         : 1,
                     getTitlesWidget: (v, _) {
                       final i = v.toInt();
-                      if (i < 0 || i >= dates.length) return const SizedBox.shrink();
+                      if (i < 0 || i >= dates.length)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
                           DateFormat('MMM d').format(dates[i]),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontSize: 9,
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: 9,
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       );
                     },
@@ -188,9 +189,8 @@ class AnalyticsLineChart extends StatelessWidget {
                   getTooltipItems: (spots) => spots.map((spot) {
                     final date = dates[spot.x.toInt()];
                     final isSecond = spot.barIndex == 1;
-                    final lbl = isSecond
-                        ? (secondLabel ?? '')
-                        : (firstLabel ?? '');
+                    final lbl =
+                        isSecond ? (secondLabel ?? '') : (firstLabel ?? '');
                     return LineTooltipItem(
                       '${lbl.isNotEmpty ? '$lbl · ' : ''}'
                       '${DateFormat('MMM d').format(date)}\n'
@@ -211,10 +211,8 @@ class AnalyticsLineChart extends StatelessWidget {
     );
   }
 
-  LineChartBarData _line(List<double> data, Color color) =>
-      LineChartBarData(
-        spots: List.generate(
-            data.length, (i) => FlSpot(i.toDouble(), data[i])),
+  LineChartBarData _line(List<double> data, Color color) => LineChartBarData(
+        spots: List.generate(data.length, (i) => FlSpot(i.toDouble(), data[i])),
         isCurved: true,
         curveSmoothness: 0.3,
         color: color,
@@ -250,7 +248,9 @@ class AnalyticsLineChart extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            up ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right,
+            up
+                ? CupertinoIcons.arrow_up_right
+                : CupertinoIcons.arrow_down_right,
             size: 11,
             color: color,
           ),
@@ -268,8 +268,7 @@ class AnalyticsLineChart extends StatelessWidget {
     );
   }
 
-  Widget _legendDot(BuildContext context, Color color, String label) =>
-      Row(
+  Widget _legendDot(BuildContext context, Color color, String label) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(

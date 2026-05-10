@@ -36,7 +36,10 @@ class MonthlyFundingCard extends ConsumerWidget {
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.md,
+              AppSizes.sm,
             ),
             child: Row(
               children: [
@@ -96,10 +99,9 @@ class MonthlyFundingCard extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         debt.name,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -117,7 +119,10 @@ class MonthlyFundingCard extends ConsumerWidget {
           // Total footer
           Container(
             margin: const EdgeInsets.fromLTRB(
-              AppSizes.md, 0, AppSizes.md, AppSizes.md,
+              AppSizes.md,
+              0,
+              AppSizes.md,
+              AppSizes.md,
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSizes.md,

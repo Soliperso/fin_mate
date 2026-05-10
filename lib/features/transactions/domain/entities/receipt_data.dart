@@ -1,10 +1,10 @@
 /// Entity representing extracted receipt data
 class ReceiptData {
   final String fullText;
-  final double amount;    // grand total
-  final double subtotal;  // pre-tax total (0 if not found)
-  final double tax;       // total tax (0 if not found)
-  final double tip;       // tip / gratuity (0 if not found)
+  final double amount; // grand total
+  final double subtotal; // pre-tax total (0 if not found)
+  final double tax; // total tax (0 if not found)
+  final double tip; // tip / gratuity (0 if not found)
   final String merchant;
   final DateTime date;
   final List<String> items; // "Item Name — $price" or plain description

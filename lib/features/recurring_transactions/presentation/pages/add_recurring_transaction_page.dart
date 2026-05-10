@@ -105,7 +105,8 @@ class _AddRecurringTransactionPageState
   Future<void> _submit() async {
     if (_amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount greater than 0')),
+        const SnackBar(
+            content: Text('Please enter a valid amount greater than 0')),
       );
       return;
     }
@@ -117,7 +118,8 @@ class _AddRecurringTransactionPageState
     }
 
     try {
-      final notifier = ref.read(recurringTransactionsOperationsProvider.notifier);
+      final notifier =
+          ref.read(recurringTransactionsOperationsProvider.notifier);
 
       if (isEditing) {
         await notifier.updateRecurringTransaction(
@@ -259,15 +261,16 @@ class _AddRecurringTransactionPageState
       }
     });
 
-    final sectionBg = isDark
-        ? AppColors.tertiarySystemBackgroundDark
-        : AppColors.systemGray6;
+    final sectionBg =
+        isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.systemGray6;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
         title: Text(
-          isEditing ? 'Edit Recurring Transaction' : 'Add Recurring Transaction',
+          isEditing
+              ? 'Edit Recurring Transaction'
+              : 'Add Recurring Transaction',
         ),
         leading: Center(
           child: CircularIconButton(
@@ -304,7 +307,8 @@ class _AddRecurringTransactionPageState
             const SizedBox(height: AppSizes.lg),
 
             // Amount section
-            _sectionLabel(context, CupertinoIcons.money_dollar_circle, 'Amount'),
+            _sectionLabel(
+                context, CupertinoIcons.money_dollar_circle, 'Amount'),
             const SizedBox(height: AppSizes.xs),
             Container(
               decoration: BoxDecoration(
@@ -394,7 +398,8 @@ class _AddRecurringTransactionPageState
                         filled: true,
                         fillColor: sectionBg,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusMd),
                           borderSide: BorderSide.none,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -429,7 +434,8 @@ class _AddRecurringTransactionPageState
                         filled: true,
                         fillColor: sectionBg,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusMd),
                           borderSide: BorderSide.none,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -460,11 +466,8 @@ class _AddRecurringTransactionPageState
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.brandTeal
-                            : sectionBg,
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusSm),
+                        color: selected ? AppColors.brandTeal : sectionBg,
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                         border: Border.all(
                           color: selected
                               ? AppColors.brandTeal

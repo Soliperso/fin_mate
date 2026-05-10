@@ -49,7 +49,10 @@ class _CompactStrip extends ConsumerWidget {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(
-        AppSizes.md, AppSizes.xs, AppSizes.md, 0,
+        AppSizes.md,
+        AppSizes.xs,
+        AppSizes.md,
+        0,
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.md,
@@ -74,9 +77,8 @@ class _CompactStrip extends ConsumerWidget {
             '${usage.queriesUsed}/10 queries',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: hasReachedLimit
-                      ? AppColors.error
-                      : AppColors.textPrimary,
+                  color:
+                      hasReachedLimit ? AppColors.error : AppColors.textPrimary,
                 ),
           ),
           const SizedBox(width: AppSizes.sm),

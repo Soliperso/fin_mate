@@ -118,9 +118,9 @@ class BudgetsPage extends ConsumerWidget {
                   label: Text(
                     'budgets.newBudget'.tr(),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                   ),
                 ),
               ),
@@ -159,13 +159,17 @@ class BudgetsPage extends ConsumerWidget {
                         elevation: 4,
                         shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
                         ),
                       ),
                       icon: const Icon(CupertinoIcons.add, size: 20),
                       label: Text(
                         'budgets.newBudget'.tr(),
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: Colors.white),
                       ),
                     ),
                   ),
@@ -178,7 +182,8 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBudgetCard(BuildContext context, BudgetEntity budget, WidgetRef ref) {
+  Widget _buildBudgetCard(
+      BuildContext context, BudgetEntity budget, WidgetRef ref) {
     final currencySymbol = ref.watch(currencySymbolProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.effectiveAmount;
@@ -186,7 +191,8 @@ class BudgetsPage extends ConsumerWidget {
     final isOverBudget = budget.isExceeded;
     final isNearLimit = budget.isNearLimit;
 
-    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
+    final categoryColor =
+        _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
@@ -237,7 +243,8 @@ class BudgetsPage extends ConsumerWidget {
                             height: 40,
                             decoration: BoxDecoration(
                               color: categoryColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusMd),
                             ),
                             child: Icon(
                               _getIconForCategory(budget.categoryIcon),
@@ -252,7 +259,10 @@ class BudgetsPage extends ConsumerWidget {
                               children: [
                                 Text(
                                   budget.categoryName ?? 'Uncategorized',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.textSecondary,
                                       ),
@@ -262,7 +272,8 @@ class BudgetsPage extends ConsumerWidget {
                                   children: [
                                     Text(
                                       budget.period.displayName,
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
                                     ),
                                     if (budget.carryOverEnabled &&
                                         budget.lastCarryOverAmount != 0) ...[
@@ -275,17 +286,18 @@ class BudgetsPage extends ConsumerWidget {
                                                   ? AppColors.systemGreen
                                                   : AppColors.systemRed)
                                               .withValues(alpha: 0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(AppSizes.radiusFull),
+                                          borderRadius: BorderRadius.circular(
+                                              AppSizes.radiusFull),
                                         ),
                                         child: Text(
                                           budget.lastCarryOverAmount > 0
                                               ? '+$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover'
                                               : '-$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover',
                                           style: TextStyle(
-                                            color: budget.lastCarryOverAmount > 0
-                                                ? AppColors.systemGreen
-                                                : AppColors.systemRed,
+                                            color:
+                                                budget.lastCarryOverAmount > 0
+                                                    ? AppColors.systemGreen
+                                                    : AppColors.systemRed,
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -296,7 +308,10 @@ class BudgetsPage extends ConsumerWidget {
                                 ),
                                 Text(
                                   '$periodStart – $periodEnd',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
                                 ),
@@ -307,14 +322,16 @@ class BudgetsPage extends ConsumerWidget {
                             isOverBudget
                                 ? CupertinoIcons.exclamationmark_circle_fill
                                 : isNearLimit
-                                    ? CupertinoIcons.exclamationmark_triangle_fill
+                                    ? CupertinoIcons
+                                        .exclamationmark_triangle_fill
                                     : CupertinoIcons.checkmark_circle_fill,
                             color: statusColor,
                             size: 20,
                           ),
                           const SizedBox(width: AppSizes.xs),
                           GestureDetector(
-                            onTap: () => _showBudgetOptions(context, ref, budget),
+                            onTap: () =>
+                                _showBudgetOptions(context, ref, budget),
                             child: const Icon(
                               CupertinoIcons.ellipsis,
                               size: 20,
@@ -329,10 +346,11 @@ class BudgetsPage extends ConsumerWidget {
                         alignment: Alignment.centerRight,
                         child: Text(
                           '${budget.spentPercentage.clamp(0, double.infinity).toStringAsFixed(0)}${'budgets.percentUsed'.tr()}',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                       const SizedBox(height: AppSizes.xs),
@@ -342,15 +360,18 @@ class BudgetsPage extends ConsumerWidget {
                         duration: const Duration(milliseconds: 700),
                         curve: Curves.easeOutCubic,
                         builder: (context, value, _) => ClipRRect(
-                          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
                           child: LinearProgressIndicator(
                             value: value,
                             minHeight: 6,
                             backgroundColor: isDark
                                 ? AppColors.tertiarySystemBackgroundDark
                                 : AppColors.systemGray5,
-                            valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(progressColor),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusFull),
                           ),
                         ),
                       ),
@@ -362,11 +383,15 @@ class BudgetsPage extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('budgets.spent'.tr(), style: Theme.of(context).textTheme.bodySmall),
+                              Text('budgets.spent'.tr(),
+                                  style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
                                 '$currencySymbol${spent.toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textSecondary,
                                     ),
@@ -377,13 +402,18 @@ class BudgetsPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                isOverBudget ? 'budgets.overBy'.tr() : 'budgets.remaining'.tr(),
+                                isOverBudget
+                                    ? 'budgets.overBy'.tr()
+                                    : 'budgets.remaining'.tr(),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const SizedBox(height: AppSizes.xs),
                               Text(
                                 '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       color: isOverBudget
                                           ? AppColors.error
                                           : AppColors.success,
@@ -395,11 +425,15 @@ class BudgetsPage extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('budgets.budget'.tr(), style: Theme.of(context).textTheme.bodySmall),
+                              Text('budgets.budget'.tr(),
+                                  style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
                                 '$currencySymbol${budget.effectiveAmount.toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textSecondary,
                                     ),
@@ -419,21 +453,24 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  void _showCreateBudgetBottomSheet(BuildContext context, {BudgetEntity? budget}) {
+  void _showCreateBudgetBottomSheet(BuildContext context,
+      {BudgetEntity? budget}) {
     GlassBottomSheet.show(
       context: context,
       child: CreateBudgetBottomSheet(budget: budget),
     );
   }
 
-  void _showBudgetOptions(BuildContext context, WidgetRef ref, BudgetEntity budget) {
+  void _showBudgetOptions(
+      BuildContext context, WidgetRef ref, BudgetEntity budget) {
     final currencySymbol = ref.watch(currencySymbolProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.amount;
     final percentage = (budget.spentPercentage.clamp(0.0, 100.0) / 100);
     final isOverBudget = budget.isExceeded;
     final isNearLimit = budget.isNearLimit;
-    final categoryColor = _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
+    final categoryColor =
+        _parseColor(budget.categoryColor) ?? AppColors.brandTeal;
     final progressColor = isOverBudget
         ? AppColors.systemRed
         : isNearLimit
@@ -444,196 +481,234 @@ class BudgetsPage extends ConsumerWidget {
     GlassBottomSheet.show(
       context: context,
       child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Budget summary
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSizes.lg, AppSizes.md, AppSizes.lg, AppSizes.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: categoryColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                          ),
-                          child: Icon(
-                            _getIconForCategory(budget.categoryIcon),
-                            color: categoryColor,
-                            size: 22,
-                          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Budget summary
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.lg,
+                AppSizes.md,
+                AppSizes.lg,
+                AppSizes.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusMd),
                         ),
-                        const SizedBox(width: AppSizes.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                budget.categoryName ?? 'Uncategorized',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              Text(
-                                budget.period.displayName,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                              ),
-                            ],
-                          ),
+                        child: Icon(
+                          _getIconForCategory(budget.categoryIcon),
+                          color: categoryColor,
+                          size: 22,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.md),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                      child: LinearProgressIndicator(
-                        value: percentage,
-                        minHeight: 6,
-                        backgroundColor: isDark
-                            ? AppColors.tertiarySystemBackgroundDark
-                            : AppColors.systemGray5,
-                        valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                       ),
-                    ),
-                    const SizedBox(height: AppSizes.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
+                      const SizedBox(width: AppSizes.md),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'budgets.spent'.tr(),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.textSecondary,
+                              budget.categoryName ?? 'Uncategorized',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
                                   ),
                             ),
                             Text(
-                              '$currencySymbol${spent.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                              budget.period.displayName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                           ],
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              isOverBudget ? 'budgets.overBy'.tr() : 'budgets.remaining'.tr(),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                            ),
-                            Text(
-                              '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: isOverBudget
-                                        ? AppColors.systemRed
-                                        : AppColors.systemGreen,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.md),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    child: LinearProgressIndicator(
+                      value: percentage,
+                      minHeight: 6,
+                      backgroundColor: isDark
+                          ? AppColors.tertiarySystemBackgroundDark
+                          : AppColors.systemGray5,
+                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSizes.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'budgets.spent'.tr(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                          Text(
+                            '$currencySymbol${spent.toStringAsFixed(0)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            isOverBudget
+                                ? 'budgets.overBy'.tr()
+                                : 'budgets.remaining'.tr(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                          Text(
+                            '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isOverBudget
+                                      ? AppColors.systemRed
+                                      : AppColors.systemGreen,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ),
 
-              Divider(height: 1, thickness: 0.5, color: isDark ? AppColors.separatorDark : AppColors.separator),
+            Divider(
+                height: 1,
+                thickness: 0.5,
+                color: isDark ? AppColors.separatorDark : AppColors.separator),
 
-              // Edit action
-              _buildActionRow(
-                context: context,
-                icon: CupertinoIcons.pencil,
-                iconColor: AppColors.brandTeal,
-                label: 'budgets.editBudget'.tr(),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showCreateBudgetBottomSheet(context, budget: budget);
-                },
-              ),
+            // Edit action
+            _buildActionRow(
+              context: context,
+              icon: CupertinoIcons.pencil,
+              iconColor: AppColors.brandTeal,
+              label: 'budgets.editBudget'.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                _showCreateBudgetBottomSheet(context, budget: budget);
+              },
+            ),
 
-              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: isDark ? AppColors.separatorDark : AppColors.separator),
+            Divider(
+                height: 1,
+                thickness: 0.5,
+                indent: AppSizes.lg + 36 + 12,
+                color: isDark ? AppColors.separatorDark : AppColors.separator),
 
-              // View Transactions action
-              _buildActionRow(
-                context: context,
-                icon: CupertinoIcons.list_bullet,
-                iconColor: AppColors.brandTeal,
-                label: 'budgets.viewTransactions'.tr(),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/transactions');
-                },
-              ),
+            // View Transactions action
+            _buildActionRow(
+              context: context,
+              icon: CupertinoIcons.list_bullet,
+              iconColor: AppColors.brandTeal,
+              label: 'budgets.viewTransactions'.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/transactions');
+              },
+            ),
 
-              Divider(height: 1, thickness: 0.5, indent: AppSizes.lg + 36 + 12, color: isDark ? AppColors.separatorDark : AppColors.separator),
+            Divider(
+                height: 1,
+                thickness: 0.5,
+                indent: AppSizes.lg + 36 + 12,
+                color: isDark ? AppColors.separatorDark : AppColors.separator),
 
-              // Delete action
-              _buildActionRow(
-                context: context,
-                icon: CupertinoIcons.trash,
-                iconColor: AppColors.systemRed,
-                label: 'budgets.deleteBudget'.tr(),
-                labelColor: AppColors.systemRed,
-                onTap: () async {
-                  Navigator.pop(context);
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (dialogContext) => AlertDialog(
-                      title: Text('budgets.deleteTitle'.tr()),
-                      content: Text('budgets.deleteMessage'.tr()),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(dialogContext, false),
-                          child: Text('common.cancel'.tr()),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(dialogContext, true),
-                          child: Text('budgets.delete'.tr(), style: const TextStyle(color: AppColors.error)),
-                        ),
-                      ],
-                    ),
-                  );
+            // Delete action
+            _buildActionRow(
+              context: context,
+              icon: CupertinoIcons.trash,
+              iconColor: AppColors.systemRed,
+              label: 'budgets.deleteBudget'.tr(),
+              labelColor: AppColors.systemRed,
+              onTap: () async {
+                Navigator.pop(context);
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text('budgets.deleteTitle'.tr()),
+                    content: Text('budgets.deleteMessage'.tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: Text('common.cancel'.tr()),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: Text('budgets.delete'.tr(),
+                            style: const TextStyle(color: AppColors.error)),
+                      ),
+                    ],
+                  ),
+                );
 
-                  if (confirm == true && context.mounted) {
-                    try {
-                      await ref.read(budgetNotifierProvider.notifier).deleteBudget(budget.id);
-                      if (context.mounted) {
-                        SuccessDialog.show(
-                          context,
-                          title: 'budgets.deleted'.tr(),
-                          message: 'budgets.deletedMessage'.tr(),
-                          autoDismissDuration: const Duration(milliseconds: 800),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        showErrorDialog(context, 'Failed to delete budget: $e');
-                      }
+                if (confirm == true && context.mounted) {
+                  try {
+                    await ref
+                        .read(budgetNotifierProvider.notifier)
+                        .deleteBudget(budget.id);
+                    if (context.mounted) {
+                      SuccessDialog.show(
+                        context,
+                        title: 'budgets.deleted'.tr(),
+                        message: 'budgets.deletedMessage'.tr(),
+                        autoDismissDuration: const Duration(milliseconds: 800),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorDialog(context, 'Failed to delete budget: $e');
                     }
                   }
-                },
-              ),
+                }
+              },
+            ),
 
-              const SizedBox(height: AppSizes.sm),
-            ],
-          ),
+            const SizedBox(height: AppSizes.sm),
+          ],
         ),
+      ),
     );
   }
 
@@ -688,32 +763,51 @@ class BudgetsPage extends ConsumerWidget {
   IconData _getIconForCategory(String? icon) {
     switch (icon) {
       // Income
-      case '💼': return CupertinoIcons.briefcase;
-      case '💻': return CupertinoIcons.desktopcomputer;
-      case '📈': return CupertinoIcons.arrow_up_right;
-      case '🎁': return CupertinoIcons.gift;
-      case '💰': return CupertinoIcons.money_dollar;
+      case '💼':
+        return CupertinoIcons.briefcase;
+      case '💻':
+        return CupertinoIcons.desktopcomputer;
+      case '📈':
+        return CupertinoIcons.arrow_up_right;
+      case '🎁':
+        return CupertinoIcons.gift;
+      case '💰':
+        return CupertinoIcons.money_dollar;
       // Expense — food & transport
-      case '🍔': return CupertinoIcons.cart;
-      case '🚗': return CupertinoIcons.car;
-      case '🛍️': return CupertinoIcons.bag;
-      case '🎬': return CupertinoIcons.film;
-      case '💡': return CupertinoIcons.lightbulb;
+      case '🍔':
+        return CupertinoIcons.cart;
+      case '🚗':
+        return CupertinoIcons.car;
+      case '🛍️':
+        return CupertinoIcons.bag;
+      case '🎬':
+        return CupertinoIcons.film;
+      case '💡':
+        return CupertinoIcons.lightbulb;
       // Healthcare & education
       case '⚕️':
-      case '🏥': return CupertinoIcons.heart;
-      case '📚': return CupertinoIcons.book;
-      case '🎓': return CupertinoIcons.book;
+      case '🏥':
+        return CupertinoIcons.heart;
+      case '📚':
+        return CupertinoIcons.book;
+      case '🎓':
+        return CupertinoIcons.book;
       // Housing
       case '🏠':
-      case '🏡': return CupertinoIcons.house;
+      case '🏡':
+        return CupertinoIcons.house;
       // Personal & misc
-      case '💅': return CupertinoIcons.sparkles;
-      case '💸': return CupertinoIcons.money_dollar;
+      case '💅':
+        return CupertinoIcons.sparkles;
+      case '💸':
+        return CupertinoIcons.money_dollar;
       // Debt payments
-      case '💳': return CupertinoIcons.creditcard;
-      case '🏦': return CupertinoIcons.building_2_fill;
-      default:   return CupertinoIcons.tag;
+      case '💳':
+        return CupertinoIcons.creditcard;
+      case '🏦':
+        return CupertinoIcons.building_2_fill;
+      default:
+        return CupertinoIcons.tag;
     }
   }
 

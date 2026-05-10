@@ -88,7 +88,8 @@ class DailyForecast extends Equatable {
       income: income ?? this.income,
       expenses: expenses ?? this.expenses,
       status: status ?? this.status,
-      scheduledTransactions: scheduledTransactions ?? this.scheduledTransactions,
+      scheduledTransactions:
+          scheduledTransactions ?? this.scheduledTransactions,
     );
   }
 }

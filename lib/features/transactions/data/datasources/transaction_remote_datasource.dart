@@ -28,8 +28,7 @@ class TransactionRemoteDataSource {
           categories(name),
           accounts!transactions_account_id_fkey(name),
           to_account:accounts!transactions_to_account_id_fkey(name)
-        ''')
-        .eq('user_id', userId);
+        ''').eq('user_id', userId);
 
     if (startDate != null) {
       query = query.gte('date', startDate.toIso8601String().split('T')[0]);
@@ -46,9 +45,8 @@ class TransactionRemoteDataSource {
 
     var orderedQuery = query.order('date', ascending: false);
 
-    final response = limit != null
-        ? await orderedQuery.limit(limit)
-        : await orderedQuery;
+    final response =
+        limit != null ? await orderedQuery.limit(limit) : await orderedQuery;
 
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
@@ -60,7 +58,8 @@ class TransactionRemoteDataSource {
   }
 
   /// Create new transaction
-  Future<TransactionModel> createTransaction(TransactionModel transaction) async {
+  Future<TransactionModel> createTransaction(
+      TransactionModel transaction) async {
     final response = await _supabase
         .from('transactions')
         .insert(transaction.toJson())
@@ -86,7 +85,8 @@ class TransactionRemoteDataSource {
   }
 
   /// Update transaction
-  Future<TransactionModel> updateTransaction(String id, TransactionModel transaction) async {
+  Future<TransactionModel> updateTransaction(
+      String id, TransactionModel transaction) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
       throw Exception('User not authenticated');
@@ -110,7 +110,11 @@ class TransactionRemoteDataSource {
       throw Exception('User not authenticated');
     }
 
-    await _supabase.from('transactions').delete().eq('id', id).eq('user_id', userId);
+    await _supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
   }
 
   /// Bulk-delete transactions by IDs (single DB round-trip)
@@ -140,7 +144,9 @@ class TransactionRemoteDataSource {
         .eq('is_active', true)
         .order('created_at');
 
-    return (response as List).map((json) => AccountModel.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => AccountModel.fromJson(json))
+        .toList();
   }
 
   /// Create account
@@ -163,7 +169,9 @@ class TransactionRemoteDataSource {
     }
 
     final response = await query.order('name');
-    return (response as List).map((json) => CategoryModel.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => CategoryModel.fromJson(json))
+        .toList();
   }
 
   /// Get dashboard statistics
@@ -308,17 +316,12 @@ class TransactionRemoteDataSource {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('User not authenticated');
 
-    final response = await _supabase
-        .from('transactions')
-        .select('''
+    final response = await _supabase.from('transactions').select('''
           *,
           categories(name),
           accounts!transactions_account_id_fkey(name),
           to_account:accounts!transactions_to_account_id_fkey(name)
-        ''')
-        .eq('id', id)
-        .eq('user_id', userId)
-        .maybeSingle();
+        ''').eq('id', id).eq('user_id', userId).maybeSingle();
 
     if (response == null) return null;
     final data = Map<String, dynamic>.from(response);

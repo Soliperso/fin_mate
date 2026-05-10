@@ -76,10 +76,9 @@ class _ImportPreviewBottomSheetState
                   children: [
                     Text(
                       'Import $count Transaction${count == 1 ? '' : 's'}',
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
                     if (skipped > 0)
                       Text(
@@ -245,15 +244,13 @@ class _PreviewRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpense = tx.type == TransactionType.expense;
-    final color =
-        isExpense ? AppColors.systemRed : AppColors.systemGreen;
+    final color = isExpense ? AppColors.systemRed : AppColors.systemGreen;
     final sign = isExpense ? '−' : '+';
-    final amountStr =
-        '$sign\$${NumberFormat('#,##0.00').format(tx.amount)}';
+    final amountStr = '$sign\$${NumberFormat('#,##0.00').format(tx.amount)}';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md, vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 10),
       child: Row(
         children: [
           Expanded(

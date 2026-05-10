@@ -48,7 +48,8 @@ class OpenAiChatService {
         for (final a in accounts) {
           final bal = (a['balance'] as num).toDouble();
           total += bal;
-          buffer.writeln('- ${a['name']} (${a['type']}): \$${bal.toStringAsFixed(2)}');
+          buffer.writeln(
+              '- ${a['name']} (${a['type']}): \$${bal.toStringAsFixed(2)}');
         }
         buffer.writeln('Total balance: \$${total.toStringAsFixed(2)}');
       }
@@ -59,7 +60,8 @@ class OpenAiChatService {
     try {
       // Top 5 spending categories this month
       final now = DateTime.now();
-      final monthStart = DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+      final monthStart =
+          DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
       final txns = await _supabase
           .from('transactions')
           .select('amount, categories(name)')
@@ -69,8 +71,11 @@ class OpenAiChatService {
 
       final categoryTotals = <String, double>{};
       for (final t in txns as List) {
-        final cat = (t['categories'] as Map<String, dynamic>?)?['name'] as String? ?? 'Other';
-        categoryTotals[cat] = (categoryTotals[cat] ?? 0) + (t['amount'] as num).toDouble();
+        final cat =
+            (t['categories'] as Map<String, dynamic>?)?['name'] as String? ??
+                'Other';
+        categoryTotals[cat] =
+            (categoryTotals[cat] ?? 0) + (t['amount'] as num).toDouble();
       }
 
       if (categoryTotals.isNotEmpty) {
@@ -99,7 +104,8 @@ class OpenAiChatService {
       if ((bills as List).isNotEmpty) {
         buffer.writeln('\nUpcoming bills (next 14 days):');
         for (final b in bills) {
-          buffer.writeln('- ${b['description']}: \$${(b['amount'] as num).toStringAsFixed(2)} on ${b['next_occurrence']}');
+          buffer.writeln(
+              '- ${b['description']}: \$${(b['amount'] as num).toStringAsFixed(2)} on ${b['next_occurrence']}');
         }
       }
     } catch (e) {
@@ -159,7 +165,8 @@ class OpenAiChatService {
     }
 
     final decoded = json.decode(response.body) as Map<String, dynamic>;
-    final content = (decoded['choices'] as List).first['message']['content'] as String;
+    final content =
+        (decoded['choices'] as List).first['message']['content'] as String;
 
     _conversationHistory.add({'role': 'assistant', 'content': content});
 
@@ -214,7 +221,8 @@ class OpenAiChatService {
 
       if (streamedResponse.statusCode != 200) {
         _conversationHistory.removeLast();
-        throw Exception('Streaming request failed: ${streamedResponse.statusCode}');
+        throw Exception(
+            'Streaming request failed: ${streamedResponse.statusCode}');
       }
 
       await for (final line in streamedResponse.stream
@@ -240,7 +248,8 @@ class OpenAiChatService {
       }
 
       if (fullContent.isNotEmpty) {
-        _conversationHistory.add({'role': 'assistant', 'content': fullContent.toString()});
+        _conversationHistory
+            .add({'role': 'assistant', 'content': fullContent.toString()});
       } else {
         _conversationHistory.removeLast();
       }

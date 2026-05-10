@@ -23,7 +23,8 @@ class AdService {
 
     try {
       if (Platform.isIOS) {
-        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+        final status =
+            await AppTrackingTransparency.trackingAuthorizationStatus;
         if (status == TrackingStatus.notDetermined) {
           await AppTrackingTransparency.requestTrackingAuthorization();
         }
@@ -51,7 +52,8 @@ class AdService {
   // before submitting to the App Store / Play Store.
   static const _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
   static const _testBannerIos = 'ca-app-pub-3940256099942544/2934735716';
-  static const _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';
+  static const _testInterstitialAndroid =
+      'ca-app-pub-3940256099942544/1033173712';
   static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
   static const _testNativeAndroid = 'ca-app-pub-3940256099942544/2247696110';
   static const _testNativeIos = 'ca-app-pub-3940256099942544/3986624511';

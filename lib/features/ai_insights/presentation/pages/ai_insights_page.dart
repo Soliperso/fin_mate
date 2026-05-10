@@ -227,13 +227,20 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.brandTeal,
           indicatorWeight: 2.5,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           unselectedLabelStyle:
               const TextStyle(fontWeight: FontWeight.w400, fontSize: 12),
           tabs: const [
-            Tab(icon: Icon(CupertinoIcons.chat_bubble_text, size: 20), text: 'Chat'),
-            Tab(icon: Icon(CupertinoIcons.chart_bar_alt_fill, size: 20), text: 'Insights'),
-            Tab(icon: Icon(CupertinoIcons.graph_circle, size: 20), text: 'Forecast'),
+            Tab(
+                icon: Icon(CupertinoIcons.chat_bubble_text, size: 20),
+                text: 'Chat'),
+            Tab(
+                icon: Icon(CupertinoIcons.chart_bar_alt_fill, size: 20),
+                text: 'Insights'),
+            Tab(
+                icon: Icon(CupertinoIcons.graph_circle, size: 20),
+                text: 'Forecast'),
           ],
         ),
       ),
@@ -270,9 +277,11 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                   ? _buildChatWelcome()
                   : ListView.builder(
                       controller: _chatScrollController,
-                      padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSizes.md),
                       itemCount: messages.length,
-                      itemBuilder: (context, index) => EnhancedChatMessageBubble(
+                      itemBuilder: (context, index) =>
+                          EnhancedChatMessageBubble(
                         message: messages[index],
                         onFollowUpTap: _handleSendMessage,
                         onActionTap: _handleActionTap,
@@ -589,8 +598,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                                       .textTheme
                                       .labelSmall
                                       ?.copyWith(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.9),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.9),
                                         fontWeight: FontWeight.w500,
                                       ),
                                 ),
@@ -602,8 +611,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                             children: [
                               HeroStatBadge(
                                 label: 'Safe to Spend',
-                                value: currencyFormat
-                                    .format(forecast.safeToSpend),
+                                value:
+                                    currencyFormat.format(forecast.safeToSpend),
                               ),
                               const SizedBox(width: AppSizes.sm),
                               HeroStatBadge(
@@ -618,8 +627,8 @@ class _AiInsightsPageState extends ConsumerState<AiInsightsPage>
                     ),
                     const SizedBox(height: AppSizes.sm),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.xs),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSizes.xs),
                       child: Text(
                         oneLiner,
                         style: Theme.of(context)

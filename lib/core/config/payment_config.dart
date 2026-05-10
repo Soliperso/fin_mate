@@ -51,7 +51,8 @@ class PaymentConfig {
   // Annual discount percentage
   static double get annualDiscountPercentage {
     final monthlyYearlyCost = monthlyPriceUSD * 12;
-    final discount = ((monthlyYearlyCost - annualPriceUSD) / monthlyYearlyCost) * 100;
+    final discount =
+        ((monthlyYearlyCost - annualPriceUSD) / monthlyYearlyCost) * 100;
     return discount;
   }
 

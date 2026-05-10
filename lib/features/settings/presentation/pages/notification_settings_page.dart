@@ -124,7 +124,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Budget Alerts ─────────────────────────────────────────
-                _sectionTitle(context, 'notificationSettings.budgetAlerts'.tr()),
+                _sectionTitle(
+                    context, 'notificationSettings.budgetAlerts'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
@@ -143,7 +144,9 @@ class _NotificationSettingsPageState
                     context,
                     title: 'notificationSettings.budgetAlerts'.tr(),
                     subtitle: 'notificationSettings.budgetAlertsSub'.tr(
-                      namedArgs: {'threshold': _budgetThreshold!.toInt().toString()},
+                      namedArgs: {
+                        'threshold': _budgetThreshold!.toInt().toString()
+                      },
                     ),
                     value: _budgetThreshold!,
                     min: 10,
@@ -159,7 +162,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Bill Reminders ────────────────────────────────────────
-                _sectionTitle(context, 'notificationSettings.billReminders'.tr()),
+                _sectionTitle(
+                    context, 'notificationSettings.billReminders'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
@@ -178,7 +182,9 @@ class _NotificationSettingsPageState
                     context,
                     title: 'notificationSettings.billReminders'.tr(),
                     subtitle: 'notificationSettings.billRemindersSub'.tr(
-                      namedArgs: {'days': _billReminderDays!.toInt().toString()},
+                      namedArgs: {
+                        'days': _billReminderDays!.toInt().toString()
+                      },
                     ),
                     value: _billReminderDays!,
                     min: 1,
@@ -194,7 +200,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Transaction Alerts ────────────────────────────────────
-                _sectionTitle(context, 'notificationSettings.transactionAlerts'.tr()),
+                _sectionTitle(
+                    context, 'notificationSettings.transactionAlerts'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _switchTile(
                   context,
@@ -213,7 +220,9 @@ class _NotificationSettingsPageState
                     context,
                     title: 'notificationSettings.transactionAlerts'.tr(),
                     subtitle: 'notificationSettings.transactionAlertsSub'.tr(
-                      namedArgs: {'amount': '\$${_transactionThreshold!.toInt()}'},
+                      namedArgs: {
+                        'amount': '\$${_transactionThreshold!.toInt()}'
+                      },
                     ),
                     value: _transactionThreshold!,
                     min: 100,
@@ -229,7 +238,8 @@ class _NotificationSettingsPageState
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Money Health & Goals ──────────────────────────────────
-                _sectionTitle(context, 'notificationSettings.healthUpdates'.tr()),
+                _sectionTitle(
+                    context, 'notificationSettings.healthUpdates'.tr()),
                 const SizedBox(height: AppSizes.sm),
                 _dropdownTile(
                   context,
@@ -404,7 +414,8 @@ class _NotificationSettingsPageState
           const SizedBox(height: AppSizes.xs),
           Text(
             subtitle,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style:
+                const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
           Slider(
             value: value,
@@ -449,7 +460,8 @@ class _NotificationSettingsPageState
             children: [
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               const SizedBox(height: AppSizes.xs),
               Text(

@@ -134,9 +134,9 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
                 child: Text(
                   'No internet connection',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
               _isRetrying
@@ -176,8 +176,8 @@ class OfflineBanner extends StatelessWidget {
     return FutureBuilder<List<ConnectivityResult>>(
       future: Connectivity().checkConnectivity(),
       builder: (context, snapshot) {
-        final isOffline =
-            snapshot.hasData && snapshot.data!.contains(ConnectivityResult.none);
+        final isOffline = snapshot.hasData &&
+            snapshot.data!.contains(ConnectivityResult.none);
 
         if (!isOffline) return const SizedBox.shrink();
 

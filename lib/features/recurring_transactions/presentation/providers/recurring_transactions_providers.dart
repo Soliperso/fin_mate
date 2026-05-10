@@ -37,23 +37,23 @@ final upcomingRecurringTransactionsProvider =
 });
 
 // Single recurring transaction by ID
-final recurringTransactionByIdProvider = FutureProvider.family<
-    RecurringTransactionEntity,
-    String>((ref, id) async {
+final recurringTransactionByIdProvider =
+    FutureProvider.family<RecurringTransactionEntity, String>((ref, id) async {
   final repository = ref.watch(recurringTransactionsRepositoryProvider);
   return await repository.getRecurringTransactionById(id);
 });
 
 // Operations provider for CRUD operations
-final recurringTransactionsOperationsProvider =
-    StateNotifierProvider<RecurringTransactionsOperationsNotifier, AsyncValue<void>>(
+final recurringTransactionsOperationsProvider = StateNotifierProvider<
+    RecurringTransactionsOperationsNotifier, AsyncValue<void>>(
   (ref) => RecurringTransactionsOperationsNotifier(
     ref.watch(recurringTransactionsRepositoryProvider),
     ref,
   ),
 );
 
-class RecurringTransactionsOperationsNotifier extends StateNotifier<AsyncValue<void>> {
+class RecurringTransactionsOperationsNotifier
+    extends StateNotifier<AsyncValue<void>> {
   final RecurringTransactionsRepository _repository;
   final Ref _ref;
 

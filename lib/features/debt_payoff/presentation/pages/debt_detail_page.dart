@@ -139,8 +139,8 @@ class _ProgressTab extends ConsumerWidget {
     double? progressPercent;
     double paidAmount = 0;
     if (debt.originalBalance != null && debt.originalBalance! > 0) {
-      paidAmount =
-          (debt.originalBalance! - debt.balance).clamp(0.0, debt.originalBalance!);
+      paidAmount = (debt.originalBalance! - debt.balance)
+          .clamp(0.0, debt.originalBalance!);
       progressPercent =
           (paidAmount / debt.originalBalance! * 100).clamp(0.0, 100.0);
     }
@@ -163,14 +163,14 @@ class _ProgressTab extends ConsumerWidget {
       if (debt.originalBalance != null) {
         final targetBalance = debt.originalBalance! * (1 - next / 100);
         final toGo = (debt.balance - targetBalance).clamp(0.0, debt.balance);
-        milestoneHint =
-            'debtDetail.milestoneHint'.tr(namedArgs: {'pct': '$next', 'amount': currencyFormat.format(toGo)});
+        milestoneHint = 'debtDetail.milestoneHint'.tr(
+            namedArgs: {'pct': '$next', 'amount': currencyFormat.format(toGo)});
       }
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          AppSizes.lg, AppSizes.lg, AppSizes.lg, 120),
+      padding:
+          const EdgeInsets.fromLTRB(AppSizes.lg, AppSizes.lg, AppSizes.lg, 120),
       children: [
         // Large donut ring
         Center(
@@ -248,8 +248,8 @@ class _ProgressTab extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.brandTeal.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              border: Border.all(
-                  color: AppColors.brandTeal.withValues(alpha: 0.2)),
+              border:
+                  Border.all(color: AppColors.brandTeal.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -372,10 +372,10 @@ class _TransactionsTab extends ConsumerWidget {
                   const SizedBox(width: AppSizes.sm),
                   Text(
                     payments.length == 1
-                        ? 'paymentHistory.paymentsLogged'.tr(
-                            namedArgs: {'count': '${payments.length}'})
-                        : 'paymentHistory.paymentsLoggedPlural'.tr(
-                            namedArgs: {'count': '${payments.length}'}),
+                        ? 'paymentHistory.paymentsLogged'
+                            .tr(namedArgs: {'count': '${payments.length}'})
+                        : 'paymentHistory.paymentsLoggedPlural'
+                            .tr(namedArgs: {'count': '${payments.length}'}),
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
@@ -383,8 +383,9 @@ class _TransactionsTab extends ConsumerWidget {
                   ),
                   const Spacer(),
                   Text(
-                    'paymentHistory.totalPaid'.tr(
-                        namedArgs: {'amount': currencyFormat.format(totalPaid)}),
+                    'paymentHistory.totalPaid'.tr(namedArgs: {
+                      'amount': currencyFormat.format(totalPaid)
+                    }),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.success,
                           fontWeight: FontWeight.bold,
@@ -522,9 +523,7 @@ class _PaymentItem extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    final success = await ref
-        .read(debtNotifierProvider.notifier)
-        .deletePayment(
+    final success = await ref.read(debtNotifierProvider.notifier).deletePayment(
           paymentId: payment.id,
           debtId: payment.debtId,
           amount: payment.amount,
@@ -549,7 +548,8 @@ class _DetailsTab extends ConsumerWidget {
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSizes.lg, AppSizes.lg, AppSizes.lg, 120),
+      padding:
+          const EdgeInsets.fromLTRB(AppSizes.lg, AppSizes.lg, AppSizes.lg, 120),
       children: [
         _DetailRow(
           label: 'debtDetail.type'.tr(),
@@ -626,10 +626,7 @@ class _DetailRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   value,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
                       ),

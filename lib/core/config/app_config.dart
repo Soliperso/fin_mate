@@ -14,7 +14,8 @@ class AppConfig {
 
   // Storage Keys - Specific
   static const String userSessionKey = '${secureStoragePrefix}user_session';
-  static const String biometricEnabledKey = '${secureStoragePrefix}biometric_enabled';
+  static const String biometricEnabledKey =
+      '${secureStoragePrefix}biometric_enabled';
   static const String themePreferenceKey = 'theme_preference';
   static const String onboardingCompletedKey = 'onboarding_completed';
 

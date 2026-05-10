@@ -50,7 +50,8 @@ class _RecurringTransactionsPageState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Recurring Transaction?'),
-        content: const Text('This recurring transaction will be deleted permanently.'),
+        content: const Text(
+            'This recurring transaction will be deleted permanently.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -58,7 +59,8 @@ class _RecurringTransactionsPageState
           ),
           TextButton(
             onPressed: () {
-              ref.read(recurringTransactionsOperationsProvider.notifier)
+              ref
+                  .read(recurringTransactionsOperationsProvider.notifier)
                   .deleteRecurringTransaction(id);
               Navigator.pop(context);
             },
@@ -102,10 +104,13 @@ class _RecurringTransactionsPageState
         createdAt: now,
         updatedAt: now,
       );
-      await ref.read(transactionRepositoryProvider).createTransaction(newTransaction);
+      await ref
+          .read(transactionRepositoryProvider)
+          .createTransaction(newTransaction);
 
       // Advance nextOccurrence to the next cycle
-      final next = _advanceOccurrence(transaction.nextOccurrence, transaction.frequency);
+      final next =
+          _advanceOccurrence(transaction.nextOccurrence, transaction.frequency);
       await ref
           .read(recurringTransactionsOperationsProvider.notifier)
           .updateRecurringTransaction(
@@ -146,8 +151,18 @@ class _RecurringTransactionsPageState
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}';
   }
@@ -248,15 +263,20 @@ class _RecurringTransactionsPageState
                                     backgroundColor: AppColors.brandTeal,
                                     foregroundColor: Colors.white,
                                     elevation: 4,
-                                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
+                                    shadowColor: AppColors.brandTeal
+                                        .withValues(alpha: 0.4),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                                      borderRadius: BorderRadius.circular(
+                                          AppSizes.radiusFull),
                                     ),
                                   ),
-                                  icon: const Icon(CupertinoIcons.add, size: 20),
+                                  icon:
+                                      const Icon(CupertinoIcons.add, size: 20),
                                   label: const Text(
                                     'Add Recurring Transaction',
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16),
                                   ),
                                 ),
                               ),
@@ -265,7 +285,8 @@ class _RecurringTransactionsPageState
                         ),
                       )
                     : RefreshIndicator(
-                        onRefresh: () => ref.refresh(recurringTransactionsProvider.future),
+                        onRefresh: () =>
+                            ref.refresh(recurringTransactionsProvider.future),
                         child: ListView.builder(
                           padding: const EdgeInsets.only(bottom: AppSizes.lg),
                           itemCount: filtered.length,
@@ -284,7 +305,8 @@ class _RecurringTransactionsPageState
                                   color: Colors.white,
                                 ),
                               ),
-                              onDismissed: (_) => _deleteTransaction(transaction.id),
+                              onDismissed: (_) =>
+                                  _deleteTransaction(transaction.id),
                               child: GestureDetector(
                                 onLongPress: () {
                                   GlassBottomSheet.show(
@@ -309,9 +331,12 @@ class _RecurringTransactionsPageState
                                 child: RecurringTransactionListItem(
                                   transaction: transaction,
                                   onTap: () => _showAddForm(transaction),
-                                  onDelete: () => _deleteTransaction(transaction.id),
-                                  onToggleActive: (_) => _toggleActive(transaction),
-                                  onMarkPaid: transaction.type == 'expense' && transaction.isActive
+                                  onDelete: () =>
+                                      _deleteTransaction(transaction.id),
+                                  onToggleActive: (_) =>
+                                      _toggleActive(transaction),
+                                  onMarkPaid: transaction.type == 'expense' &&
+                                          transaction.isActive
                                       ? () => _markAsPaid(transaction)
                                       : null,
                                 ),
@@ -339,7 +364,8 @@ class _RecurringTransactionsPageState
             child: EmptyStateCard(
               icon: CupertinoIcons.exclamationmark_circle,
               title: 'Failed to Load',
-              message: 'Unable to load recurring transactions. Please check your connection and try again.',
+              message:
+                  'Unable to load recurring transactions. Please check your connection and try again.',
               backgroundColor: AppColors.error,
             ),
           ),
@@ -476,7 +502,8 @@ class _TransactionActionSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.description ?? 'Recurring ${transaction.type}',
+                      transaction.description ??
+                          'Recurring ${transaction.type}',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -570,7 +597,8 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? Theme.of(context).textTheme.bodyLarge?.color;
+    final effectiveColor =
+        color ?? Theme.of(context).textTheme.bodyLarge?.color;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -584,7 +612,8 @@ class _ActionRow extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: (color ?? AppColors.textSecondary).withValues(alpha: 0.08),
+                color:
+                    (color ?? AppColors.textSecondary).withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 20, color: effectiveColor),

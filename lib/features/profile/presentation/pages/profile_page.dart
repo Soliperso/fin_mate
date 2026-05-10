@@ -50,8 +50,8 @@ class ProfilePage extends ConsumerWidget {
                           size: 48, color: AppColors.error),
                       const SizedBox(height: AppSizes.md),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.lg),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: AppSizes.lg),
                         child: Text(
                           profileState.errorMessage!,
                           style: const TextStyle(color: AppColors.error),
@@ -142,8 +142,7 @@ class ProfilePage extends ConsumerWidget {
                               ],
                               const SizedBox(height: AppSizes.md),
                               OutlinedButton.icon(
-                                onPressed: () =>
-                                    context.push('/profile/edit'),
+                                onPressed: () => context.push('/profile/edit'),
                                 icon:
                                     const Icon(CupertinoIcons.pencil, size: 16),
                                 label: Text('profile.editProfile'.tr()),
@@ -212,7 +211,8 @@ class ProfilePage extends ConsumerWidget {
                         // const SizedBox(height: AppSizes.lg);
 
                         // ── Preferences ───────────────────────────────────
-                        _sectionLabel(context, 'profile.sectionPreferences'.tr()),
+                        _sectionLabel(
+                            context, 'profile.sectionPreferences'.tr()),
                         const SizedBox(height: AppSizes.sm),
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
@@ -228,7 +228,8 @@ class ProfilePage extends ConsumerWidget {
                             icon: CupertinoIcons.moon,
                             title: 'profile.appearance'.tr(),
                             subtitle: _getThemeModeLabel(themeMode),
-                            onTap: () => context.push('/settings/display?section=theme'),
+                            onTap: () =>
+                                context.push('/settings/display?section=theme'),
                           ),
                           _buildDivider(context, isDark),
                           _buildSettingsTile(
@@ -250,7 +251,8 @@ class ProfilePage extends ConsumerWidget {
                             icon: CupertinoIcons.question_circle,
                             title: 'profile.helpCenter'.tr(),
                             subtitle: 'profile.helpCenterSub'.tr(),
-                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                            onTap: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('common.comingSoon'.tr()),
                                 duration: const Duration(seconds: 2),
@@ -405,8 +407,8 @@ class ProfilePage extends ConsumerWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -447,7 +449,9 @@ class ProfilePage extends ConsumerWidget {
             ),
             Icon(CupertinoIcons.chevron_right,
                 size: 16,
-                color: isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3),
+                color: isDark
+                    ? AppColors.tertiaryLabelDark
+                    : AppColors.systemGray3),
           ],
         ),
       ),
@@ -463,7 +467,6 @@ class ProfilePage extends ConsumerWidget {
       color: Theme.of(context).dividerColor,
     );
   }
-
 
   Widget _buildProfileSkeleton(BuildContext context) {
     const rowHeight = 56.0;
@@ -577,13 +580,15 @@ class ProfilePage extends ConsumerWidget {
                             LoadingSkeleton(
                               width: double.infinity,
                               height: 14,
-                              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusXs),
                             ),
                             const SizedBox(height: 6),
                             LoadingSkeleton(
                               width: 140,
                               height: 11,
-                              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusXs),
                             ),
                           ],
                         ),

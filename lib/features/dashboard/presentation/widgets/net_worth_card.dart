@@ -54,7 +54,8 @@ class NetWorthCard extends ConsumerWidget {
               ),
               // Trend badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
@@ -116,7 +117,8 @@ class NetWorthCard extends ConsumerWidget {
 
           // Monthly stats mini-row
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.md, vertical: AppSizes.sm),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -164,7 +166,9 @@ class _StatChip extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: AppSizes.iconSm),
+          Icon(icon,
+              color: Colors.white.withValues(alpha: 0.9),
+              size: AppSizes.iconSm),
           const SizedBox(width: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,18 +176,18 @@ class _StatChip extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.95),
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                ),
+                      color: Colors.white.withValues(alpha: 0.95),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
               ),
               Text(
                 value,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3,
+                    ),
               ),
             ],
           ),

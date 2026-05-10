@@ -59,9 +59,7 @@ class DebtProgressRing extends StatelessWidget {
             ),
           ),
           Text(
-            progressPercent != null
-                ? '${pct.toStringAsFixed(0)}%'
-                : '—',
+            progressPercent != null ? '${pct.toStringAsFixed(0)}%' : '—',
             style: TextStyle(
               fontSize: size * 0.18,
               fontWeight: FontWeight.bold,

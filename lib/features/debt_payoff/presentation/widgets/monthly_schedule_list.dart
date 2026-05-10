@@ -31,7 +31,8 @@ class MonthlyScheduleList extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<MonthlyScheduleList> createState() => _MonthlyScheduleListState();
+  ConsumerState<MonthlyScheduleList> createState() =>
+      _MonthlyScheduleListState();
 }
 
 class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
@@ -135,7 +136,8 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
     };
     final debtColorMap = <String, Color>{
       for (int i = 0; i < widget.debts.length; i++)
-        widget.debts[i].id: _kScheduleDebtColors[i % _kScheduleDebtColors.length]
+        widget.debts[i].id:
+            _kScheduleDebtColors[i % _kScheduleDebtColors.length]
     };
 
     final listItems = _buildListItems(
@@ -164,9 +166,12 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
             ),
             const Spacer(),
             Text(
-              'schedule.totalMonths'.tr(namedArgs: {'months': '${widget.result.totalMonths}'}),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary),
+              'schedule.totalMonths'
+                  .tr(namedArgs: {'months': '${widget.result.totalMonths}'}),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -209,7 +214,8 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
               label: Text(
                 _expanded
                     ? 'schedule.showLess'.tr()
-                    : 'schedule.seeFullSchedule'.tr(namedArgs: {'months': '${widget.result.totalMonths}'}),
+                    : 'schedule.seeFullSchedule'.tr(
+                        namedArgs: {'months': '${widget.result.totalMonths}'}),
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
@@ -395,12 +401,10 @@ class _ScheduleRow extends StatelessWidget {
                       Expanded(
                         child: Text(
                           snap.focusDebtName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -551,9 +555,7 @@ class _BreakdownPanel extends StatelessWidget {
                     currencyDetail.format(entry.value),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? AppColors.labelDark
-                              : AppColors.label,
+                          color: isDark ? AppColors.labelDark : AppColors.label,
                         ),
                   ),
                 ],

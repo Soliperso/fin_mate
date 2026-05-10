@@ -115,10 +115,7 @@ class TransactionDetailPage extends ConsumerWidget {
                   children: [
                     Text(
                       currencyFormat.format(transaction.amount.abs()),
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall
-                          ?.copyWith(
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: amountColor,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -1.5,
@@ -206,8 +203,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 4, bottom: 6),
+                    padding: const EdgeInsets.only(left: 4, bottom: 6),
                     child: Text(
                       'transactionDetail.notes'.tr(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -319,8 +315,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 const SizedBox(width: AppSizes.md),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () =>
-                        _confirmDelete(context, ref, transaction),
+                    onPressed: () => _confirmDelete(context, ref, transaction),
                     icon: const Icon(CupertinoIcons.trash),
                     label: Text('common.delete'.tr()),
                     style: OutlinedButton.styleFrom(
@@ -332,8 +327,7 @@ class TransactionDetailPage extends ConsumerWidget {
             ),
           ),
 
-          SizedBox(
-              height: MediaQuery.of(context).padding.bottom + AppSizes.xl),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSizes.xl),
         ],
       ),
     );
@@ -364,8 +358,7 @@ class TransactionDetailPage extends ConsumerWidget {
     return Column(
       children: [
         Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               Text(
@@ -397,8 +390,7 @@ class TransactionDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _typeBadge(
-      BuildContext context, TransactionType type, Color color) {
+  Widget _typeBadge(BuildContext context, TransactionType type, Color color) {
     final label = switch (type) {
       TransactionType.income => 'transactionDetail.income'.tr(),
       TransactionType.expense => 'transactionDetail.expense'.tr(),
@@ -442,8 +434,8 @@ class TransactionDetailPage extends ConsumerWidget {
     return CupertinoIcons.creditcard;
   }
 
-  Future<void> _confirmDelete(
-      BuildContext context, WidgetRef ref, TransactionEntity transaction) async {
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref,
+      TransactionEntity transaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(

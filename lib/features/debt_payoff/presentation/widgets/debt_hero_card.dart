@@ -54,8 +54,7 @@ class DebtHeroCard extends ConsumerWidget {
       if (originalBalance != null && originalBalance > 0) {
         hasAnyOriginal = true;
         totalOriginal += originalBalance;
-        totalPaid +=
-            (originalBalance - d.balance).clamp(0.0, originalBalance);
+        totalPaid += (originalBalance - d.balance).clamp(0.0, originalBalance);
       }
       // Debts without originalBalance are excluded from the progress
       // calculation — adding their current balance to the denominator (but
@@ -95,11 +94,15 @@ class DebtHeroCard extends ConsumerWidget {
           // Stats row
           Row(
             children: [
-              HeroStatBadge(label: 'debtHero.debtFree'.tr(), value: debtFreeLabel),
+              HeroStatBadge(
+                  label: 'debtHero.debtFree'.tr(), value: debtFreeLabel),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'debtHero.totalInterest'.tr(), value: totalInterestLabel),
+              HeroStatBadge(
+                  label: 'debtHero.totalInterest'.tr(),
+                  value: totalInterestLabel),
               const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(label: 'debtHero.accounts'.tr(), value: '$debtCount'),
+              HeroStatBadge(
+                  label: 'debtHero.accounts'.tr(), value: '$debtCount'),
             ],
           ),
 
@@ -160,14 +163,17 @@ class DebtHeroCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(CupertinoIcons.bolt_fill, color: Colors.white, size: AppSizes.iconXs),
+                  const Icon(CupertinoIcons.bolt_fill,
+                      color: Colors.white, size: AppSizes.iconXs),
                   const SizedBox(width: 4),
                   Text(
-                    'debtHero.extraPayment'.tr(namedArgs: {'amount': currencyFormat0.format(extraMonthly)}),
+                    'debtHero.extraPayment'.tr(namedArgs: {
+                      'amount': currencyFormat0.format(extraMonthly)
+                    }),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -195,9 +201,9 @@ class DebtHeroCard extends ConsumerWidget {
                 Text(
                   '${(overallProgress * 100).toStringAsFixed(0)}${'debtHero.percentPaid'.tr()}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),

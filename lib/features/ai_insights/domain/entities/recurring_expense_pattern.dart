@@ -102,7 +102,8 @@ class RecurringExpensePattern extends Equatable {
       amountVariance: amountVariance ?? this.amountVariance,
       category: category ?? this.category,
       isPriceIncreased: isPriceIncreased ?? this.isPriceIncreased,
-      priceChangePercentage: priceChangePercentage ?? this.priceChangePercentage,
+      priceChangePercentage:
+          priceChangePercentage ?? this.priceChangePercentage,
       transactionDates: transactionDates ?? this.transactionDates,
     );
   }
@@ -121,7 +122,8 @@ class RecurringExpensePattern extends Equatable {
       'category': category,
       'is_price_increased': isPriceIncreased,
       'price_change_percentage': priceChangePercentage,
-      'transaction_dates': transactionDates.map((d) => d.toIso8601String()).toList(),
+      'transaction_dates':
+          transactionDates.map((d) => d.toIso8601String()).toList(),
     };
   }
 
@@ -130,18 +132,26 @@ class RecurringExpensePattern extends Equatable {
       id: json['id'] as String,
       merchantName: json['merchant_name'] as String,
       averageAmount: (json['average_amount'] as num).toDouble(),
-      previousAmount: json['previous_amount'] != null ? (json['previous_amount'] as num).toDouble() : null,
+      previousAmount: json['previous_amount'] != null
+          ? (json['previous_amount'] as num).toDouble()
+          : null,
       interval: RecurringInterval.values.firstWhere(
         (e) => e.name == json['interval'],
         orElse: () => RecurringInterval.unknown,
       ),
-      lastOccurrence: json['last_occurrence'] != null ? DateTime.parse(json['last_occurrence'] as String) : null,
-      nextExpectedDate: json['next_expected_date'] != null ? DateTime.parse(json['next_expected_date'] as String) : null,
+      lastOccurrence: json['last_occurrence'] != null
+          ? DateTime.parse(json['last_occurrence'] as String)
+          : null,
+      nextExpectedDate: json['next_expected_date'] != null
+          ? DateTime.parse(json['next_expected_date'] as String)
+          : null,
       occurrenceCount: json['occurrence_count'] as int,
       amountVariance: (json['amount_variance'] as num?)?.toDouble() ?? 5.0,
       category: json['category'] as String,
       isPriceIncreased: json['is_price_increased'] as bool? ?? false,
-      priceChangePercentage: json['price_change_percentage'] != null ? (json['price_change_percentage'] as num).toDouble() : null,
+      priceChangePercentage: json['price_change_percentage'] != null
+          ? (json['price_change_percentage'] as num).toDouble()
+          : null,
       transactionDates: (json['transaction_dates'] as List<dynamic>)
           .map((d) => DateTime.parse(d as String))
           .toList(),

@@ -24,9 +24,7 @@ void main() {
       expect(secret, matches(RegExp(r'^[A-Z2-7]+$')));
     });
 
-    test(
-        'generates a different secret on each call (non-deterministic)',
-        () {
+    test('generates a different secret on each call (non-deterministic)', () {
       final secret1 = svc.generateTotpSecret();
       final secret2 = svc.generateTotpSecret();
       expect(secret1, isNot(equals(secret2)));

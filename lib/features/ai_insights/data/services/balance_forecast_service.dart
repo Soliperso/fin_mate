@@ -24,7 +24,8 @@ class BalanceForecastService {
     final scenarios = <ForecastScenario>[];
 
     for (final scenarioType in ForecastScenarioType.values) {
-      final adjustedSpending = baselineAvgDailySpending * scenarioType.spendingMultiplier;
+      final adjustedSpending =
+          baselineAvgDailySpending * scenarioType.spendingMultiplier;
       final dailyForecasts = _generateDailyForecasts(
         currentBalance,
         adjustedSpending,
@@ -53,7 +54,6 @@ class BalanceForecastService {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
-
 
       // Get current total balance across all accounts
       final currentBalance = await _getCurrentBalance(userId);
@@ -138,7 +138,8 @@ class BalanceForecastService {
   }
 
   /// Get scheduled transactions for next 30 days
-  Future<List<Map<String, dynamic>>> _getScheduledTransactions(String userId) async {
+  Future<List<Map<String, dynamic>>> _getScheduledTransactions(
+      String userId) async {
     try {
       final endDate = DateTime.now().add(const Duration(days: 30));
       final scheduledTxs = <Map<String, dynamic>>[];
@@ -152,7 +153,8 @@ class BalanceForecastService {
             .gte('date', DateTime.now().toIso8601String().split('T')[0])
             .lte('date', endDate.toIso8601String().split('T')[0]);
 
-        scheduledTxs.addAll((futureTransactions as List).cast<Map<String, dynamic>>());
+        scheduledTxs
+            .addAll((futureTransactions as List).cast<Map<String, dynamic>>());
       } catch (e) {
         // Silently ignore if future transactions not available
       }
@@ -198,7 +200,8 @@ class BalanceForecastService {
       DateTime nextDate = DateTime.parse(nextOccurrence);
       final amount = (recurring['amount'] as num).toDouble();
       final type = recurring['type'] as String;
-      final description = recurring['description'] as String? ?? 'Recurring transaction';
+      final description =
+          recurring['description'] as String? ?? 'Recurring transaction';
       final endDate = DateTime.now().add(Duration(days: days));
 
       while (nextDate.isBefore(endDate)) {
@@ -248,9 +251,8 @@ class BalanceForecastService {
       final dateStr = date.toIso8601String().split('T')[0];
 
       // Get scheduled transactions for this day
-      final dayTransactions = scheduledTransactions
-          .where((tx) => tx['date'] == dateStr)
-          .toList();
+      final dayTransactions =
+          scheduledTransactions.where((tx) => tx['date'] == dateStr).toList();
 
       double dayIncome = 0;
       double dayExpenses = avgDailySpending; // Start with average
@@ -261,10 +263,12 @@ class BalanceForecastService {
         final amount = (tx['amount'] as num).toDouble();
         if (tx['type'] == 'income') {
           dayIncome += amount;
-          descriptions.add('+ ${tx['description']} (\$${amount.toStringAsFixed(0)})');
+          descriptions
+              .add('+ ${tx['description']} (\$${amount.toStringAsFixed(0)})');
         } else if (tx['type'] == 'expense') {
           dayExpenses += amount;
-          descriptions.add('- ${tx['description']} (\$${amount.toStringAsFixed(0)})');
+          descriptions
+              .add('- ${tx['description']} (\$${amount.toStringAsFixed(0)})');
         }
       }
 
@@ -344,8 +348,18 @@ class BalanceForecastService {
   /// Format date for display
   String _formatDate(DateTime date) {
     const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${monthNames[date.month - 1]} ${date.day}';
   }

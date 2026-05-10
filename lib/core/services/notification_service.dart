@@ -75,7 +75,8 @@ class AppNotification {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       type: NotificationType.fromString(json['type'] as String),
-      priority: NotificationPriority.fromString(json['priority'] as String? ?? 'medium'),
+      priority: NotificationPriority.fromString(
+          json['priority'] as String? ?? 'medium'),
       title: json['title'] as String,
       message: json['message'] as String,
       actionUrl: json['action_url'] as String?,
@@ -84,8 +85,12 @@ class AppNotification {
       isArchived: json['is_archived'] as bool? ?? false,
       metadata: json['metadata'] as Map<String, dynamic>?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
-      archivedAt: json['archived_at'] != null ? DateTime.parse(json['archived_at'] as String) : null,
+      readAt: json['read_at'] != null
+          ? DateTime.parse(json['read_at'] as String)
+          : null,
+      archivedAt: json['archived_at'] != null
+          ? DateTime.parse(json['archived_at'] as String)
+          : null,
     );
   }
 
@@ -142,7 +147,8 @@ class NotificationService {
         throw Exception('User not authenticated');
       }
 
-      var query = _supabase.from('notifications').select().eq('user_id', userId);
+      var query =
+          _supabase.from('notifications').select().eq('user_id', userId);
 
       if (isRead != null) {
         query = query.eq('is_read', isRead);
@@ -152,9 +158,8 @@ class NotificationService {
         query = query.eq('is_archived', false);
       }
 
-      final response = await query
-          .order('created_at', ascending: false)
-          .limit(limit);
+      final response =
+          await query.order('created_at', ascending: false).limit(limit);
 
       return (response as List)
           .map((json) => AppNotification.fromJson(json))
@@ -227,10 +232,7 @@ class NotificationService {
   /// Delete a notification
   Future<bool> deleteNotification(String notificationId) async {
     try {
-      await _supabase
-          .from('notifications')
-          .delete()
-          .eq('id', notificationId);
+      await _supabase.from('notifications').delete().eq('id', notificationId);
       return true;
     } catch (e) {
       return false;

@@ -81,7 +81,8 @@ void main() {
       expect(goal.isOverdue, isFalse);
     });
 
-    test('returns true when deadline is in the past and goal is incomplete', () {
+    test('returns true when deadline is in the past and goal is incomplete',
+        () {
       final goal = _goal(
         targetAmount: 1000,
         currentAmount: 0,
@@ -90,7 +91,8 @@ void main() {
       expect(goal.isOverdue, isTrue);
     });
 
-    test('returns false when goal is completed regardless of past deadline', () {
+    test('returns false when goal is completed regardless of past deadline',
+        () {
       final goal = _goal(
         targetAmount: 1000,
         currentAmount: 1000,

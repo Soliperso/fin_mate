@@ -64,7 +64,8 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
     bool baseHitCap = false;
     if (extra > 0 && baseResult != null && simResult != null) {
       monthsSaved = baseResult.totalMonths - simResult.totalMonths;
-      interestSaved = baseResult.totalInterestPaid - simResult.totalInterestPaid;
+      interestSaved =
+          baseResult.totalInterestPaid - simResult.totalInterestPaid;
       baseHitCap = baseResult.hitMaxMonths;
     }
 
@@ -108,10 +109,13 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                       if (widget.totalMinimum > 0) ...[
                         const SizedBox(height: 2),
                         Text(
-                          'extraPayment.requiredMinimum'.tr(namedArgs: {'amount': currencyFormat.format(widget.totalMinimum)}),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          'extraPayment.requiredMinimum'.tr(namedArgs: {
+                            'amount': currencyFormat.format(widget.totalMinimum)
+                          }),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ],
@@ -126,7 +130,8 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
               child: Text(
                 extra == 0
                     ? 'extraPayment.moveSlider'.tr()
-                    : 'extraPayment.extraPerMonth'.tr(namedArgs: {'amount': currencyFormat.format(extra)}),
+                    : 'extraPayment.extraPerMonth'.tr(
+                        namedArgs: {'amount': currencyFormat.format(extra)}),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: extra == 0
                           ? AppColors.textSecondary
@@ -215,7 +220,10 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
             ),
 
             // Impact summary
-            if (monthsSaved != null && interestSaved != null && extra > 0 && simResult != null) ...[
+            if (monthsSaved != null &&
+                interestSaved != null &&
+                extra > 0 &&
+                simResult != null) ...[
               const SizedBox(height: AppSizes.md),
               if (baseHitCap) ...[
                 Container(
@@ -251,12 +259,16 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                     children: [
                       _ImpactRow(
                         icon: CupertinoIcons.calendar,
-                        text: 'extraPayment.withExtraPayoff'.tr(namedArgs: {'months': '${simResult.totalMonths}'}),
+                        text: 'extraPayment.withExtraPayoff'.tr(
+                            namedArgs: {'months': '${simResult.totalMonths}'}),
                       ),
                       const SizedBox(height: 4),
                       _ImpactRow(
                         icon: CupertinoIcons.money_dollar,
-                        text: 'extraPayment.withExtraInterest'.tr(namedArgs: {'amount': currencyFormat.format(simResult.totalInterestPaid)}),
+                        text: 'extraPayment.withExtraInterest'.tr(namedArgs: {
+                          'amount':
+                              currencyFormat.format(simResult.totalInterestPaid)
+                        }),
                       ),
                     ],
                   ),
@@ -273,14 +285,17 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                       _ImpactRow(
                         icon: CupertinoIcons.calendar,
                         text: monthsSaved > 0
-                            ? 'extraPayment.payOffSooner'.tr(namedArgs: {'months': '$monthsSaved'})
+                            ? 'extraPayment.payOffSooner'
+                                .tr(namedArgs: {'months': '$monthsSaved'})
                             : 'extraPayment.sameTimeline'.tr(),
                       ),
                       if (interestSaved > 0) ...[
                         const SizedBox(height: 4),
                         _ImpactRow(
                           icon: CupertinoIcons.money_dollar,
-                          text: 'extraPayment.saveInInterest'.tr(namedArgs: {'amount': currencyFormat.format(interestSaved)}),
+                          text: 'extraPayment.saveInInterest'.tr(namedArgs: {
+                            'amount': currencyFormat.format(interestSaved)
+                          }),
                         ),
                       ],
                     ],

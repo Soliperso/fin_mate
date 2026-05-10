@@ -49,10 +49,8 @@ class AutoBackupService {
       budgets: budgets,
     );
 
-    final timestamp = DateTime.now()
-        .toIso8601String()
-        .replaceAll(':', '-')
-        .substring(0, 19);
+    final timestamp =
+        DateTime.now().toIso8601String().replaceAll(':', '-').substring(0, 19);
     final path = '$userId/backup_$timestamp.json';
 
     await client.storage.from(_bucket).uploadBinary(
@@ -84,7 +82,9 @@ class AutoBackupService {
           .eq('id', userId)
           .maybeSingle();
 
-      final prefs = (row?['notification_preferences'] as Map?)?.cast<String, dynamic>() ?? {};
+      final prefs =
+          (row?['notification_preferences'] as Map?)?.cast<String, dynamic>() ??
+              {};
       final schedule = prefs['auto_backup_schedule'] as String? ?? 'off';
 
       if (!await shouldRunBackup(schedule)) return;
@@ -101,11 +101,8 @@ class AutoBackupService {
   Future<Map<String, dynamic>> _fetchProfile(
       SupabaseClient client, String userId) async {
     try {
-      final data = await client
-          .from('user_profiles')
-          .select()
-          .eq('id', userId)
-          .single();
+      final data =
+          await client.from('user_profiles').select().eq('id', userId).single();
       return Map<String, dynamic>.from(data);
     } catch (_) {
       return {};

@@ -166,8 +166,12 @@ class SpendingAnomaly extends Equatable {
       title: json['title'] as String,
       description: json['description'] as String,
       transactionAmount: (json['transaction_amount'] as num).toDouble(),
-      categoryAverage: json['category_average'] != null ? (json['category_average'] as num).toDouble() : null,
-      deviationPercentage: json['deviation_percentage'] != null ? (json['deviation_percentage'] as num).toDouble() : null,
+      categoryAverage: json['category_average'] != null
+          ? (json['category_average'] as num).toDouble()
+          : null,
+      deviationPercentage: json['deviation_percentage'] != null
+          ? (json['deviation_percentage'] as num).toDouble()
+          : null,
       category: json['category'] as String,
       merchant: json['merchant'] as String,
       transactionDate: DateTime.parse(json['transaction_date'] as String),

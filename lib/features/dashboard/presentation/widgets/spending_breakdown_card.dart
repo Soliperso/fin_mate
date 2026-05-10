@@ -36,8 +36,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
         if (data.isEmpty) return const SizedBox.shrink();
 
         final sorted = [...data]
-          ..sort(
-              (a, b) => (b['amount'] as num).compareTo(a['amount'] as num));
+          ..sort((a, b) => (b['amount'] as num).compareTo(a['amount'] as num));
         final top = sorted.take(5).toList();
         final topTotal = top.fold<double>(
           0,
@@ -65,7 +64,10 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.sm,
+                    AppSizes.md,
+                    AppSizes.md,
+                    AppSizes.md,
+                    AppSizes.sm,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,7 +107,10 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                 firstChild: const SizedBox.shrink(),
                 secondChild: Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.md, 0, AppSizes.md, AppSizes.sm,
+                    AppSizes.md,
+                    0,
+                    AppSizes.md,
+                    AppSizes.sm,
                   ),
                   child: Row(
                     children: [
@@ -114,8 +119,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color:
-                                _categoryColors[i % _categoryColors.length],
+                            color: _categoryColors[i % _categoryColors.length],
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -123,7 +127,8 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                       ],
                       const SizedBox(width: AppSizes.sm),
                       Text(
-                        'spending.categories'.tr(namedArgs: {'count': '${top.length}'}),
+                        'spending.categories'
+                            .tr(namedArgs: {'count': '${top.length}'}),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
@@ -144,7 +149,10 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
               AnimatedCrossFade(
                 firstChild: Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    AppSizes.md, 0, AppSizes.md, AppSizes.md,
+                    AppSizes.md,
+                    0,
+                    AppSizes.md,
+                    AppSizes.md,
                   ),
                   child: Column(
                     children: [
@@ -179,7 +187,10 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.sm,
+                  AppSizes.md,
+                  AppSizes.sm,
+                  AppSizes.md,
+                  AppSizes.sm,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,16 +200,18 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                       children: [
                         Text(
                           'spending.totalExpenses'.tr(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.secondaryLabel,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.secondaryLabel,
+                                  ),
                         ),
                         Text(
                           ref.watch(currencyFormat2Provider).format(realTotal),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.systemRed,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.systemRed,
+                                  ),
                         ),
                       ],
                     ),
@@ -244,8 +257,7 @@ class _CategoryRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fraction = total > 0 ? (amount / total).clamp(0.0, 1.0) : 0.0;
     final pct = (fraction * 100).toStringAsFixed(0);
-    final currencyFormat =
-        ref.watch(currencyFormat0Provider);
+    final currencyFormat = ref.watch(currencyFormat0Provider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,8 +290,7 @@ class _CategoryRow extends ConsumerWidget {
             ),
             // Percentage badge
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),

@@ -70,11 +70,12 @@ class GoalsSummarySlide extends ConsumerWidget {
                       ),
                       Text(
                         '$progressPct%',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.brandTeal,
-                              letterSpacing: -0.5,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.brandTeal,
+                                  letterSpacing: -0.5,
+                                ),
                       ),
                     ],
                   ),
@@ -95,11 +96,12 @@ class GoalsSummarySlide extends ConsumerWidget {
                       const SizedBox(height: AppSizes.xs),
                       Text(
                         currencyFmt.format(totalSaved),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.secondaryLabel,
-                              letterSpacing: -0.5,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.secondaryLabel,
+                                  letterSpacing: -0.5,
+                                ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -118,7 +120,8 @@ class GoalsSummarySlide extends ConsumerWidget {
                               vertical: AppSizes.xs - 1,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.brandTeal.withValues(alpha: 0.12),
+                              color:
+                                  AppColors.brandTeal.withValues(alpha: 0.12),
                               borderRadius:
                                   BorderRadius.circular(AppSizes.radiusFull),
                             ),

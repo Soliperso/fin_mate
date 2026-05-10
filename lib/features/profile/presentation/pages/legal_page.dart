@@ -135,8 +135,8 @@ class LegalPage extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -177,7 +177,9 @@ class LegalPage extends StatelessWidget {
             ),
             Icon(CupertinoIcons.chevron_right,
                 size: 16,
-                color: isDark ? AppColors.tertiaryLabelDark : AppColors.systemGray3),
+                color: isDark
+                    ? AppColors.tertiaryLabelDark
+                    : AppColors.systemGray3),
           ],
         ),
       ),
@@ -210,8 +212,7 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(
-            context, 'legal.failedToLoadPrivacy'.tr());
+        _showErrorDialog(context, 'legal.failedToLoadPrivacy'.tr());
       }
     }
   }
@@ -232,8 +233,7 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(
-            context, 'legal.failedToLoadTerms'.tr());
+        _showErrorDialog(context, 'legal.failedToLoadTerms'.tr());
       }
     }
   }
@@ -254,8 +254,7 @@ class LegalPage extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorDialog(
-            context, 'legal.failedToLoadDetails'.tr());
+        _showErrorDialog(context, 'legal.failedToLoadDetails'.tr());
       }
     }
   }

@@ -99,8 +99,7 @@ class AIQueryOperations {
         final currentCount = existing['query_count'] as int;
         await supabase
             .from('ai_usage_tracking')
-            .update({'query_count': currentCount + 1})
-            .eq('id', existing['id']);
+            .update({'query_count': currentCount + 1}).eq('id', existing['id']);
       } else {
         // Create new record for this month
         await supabase.from('ai_usage_tracking').insert({
@@ -143,8 +142,7 @@ class AIQueryUsage {
 
   /// Get remaining queries
   int get queriesRemaining {
-    final remaining =
-        PaymentConfig.freemiumAIQueriesPerMonth - queriesUsed;
+    final remaining = PaymentConfig.freemiumAIQueriesPerMonth - queriesUsed;
     return remaining > 0 ? remaining : 0;
   }
 

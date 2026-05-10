@@ -47,7 +47,8 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         final welcomeMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           sender: MessageSender.assistant,
-          content: 'Hi! I\'m your AI financial assistant. Ask me anything about your finances, '
+          content:
+              'Hi! I\'m your AI financial assistant. Ask me anything about your finances, '
               'spending patterns, upcoming bills, or balance forecast. How can I help you today?',
           timestamp: DateTime.now(),
           followUpSuggestions: [
@@ -67,11 +68,13 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   /// Save chat history to storage (max 50 messages, streaming messages excluded)
   Future<void> _saveChatHistory(List<ChatMessage> messages) async {
     try {
-      final toSave = messages
-          .where((m) => m.status != MessageStatus.streaming)
-          .toList();
-      final capped = toSave.length > 50 ? toSave.sublist(toSave.length - 50) : toSave;
-      await _storage.write(key: _chatHistoryKey, value: json.encode(capped.map((m) => m.toJson()).toList()));
+      final toSave =
+          messages.where((m) => m.status != MessageStatus.streaming).toList();
+      final capped =
+          toSave.length > 50 ? toSave.sublist(toSave.length - 50) : toSave;
+      await _storage.write(
+          key: _chatHistoryKey,
+          value: json.encode(capped.map((m) => m.toJson()).toList()));
     } catch (_) {
       // Ignore storage errors — UI already updated
     }
@@ -136,7 +139,8 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     );
   }
 
-  void _resolveStream(String assistantId, String fullContent, {required bool isError}) {
+  void _resolveStream(String assistantId, String fullContent,
+      {required bool isError}) {
     if (!mounted) return;
     final current = state.valueOrNull;
     if (current == null) return;
@@ -187,7 +191,8 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
 }
 
 // Chat provider
-final chatProvider = StateNotifierProvider<ChatNotifier, AsyncValue<List<ChatMessage>>>((ref) {
+final chatProvider =
+    StateNotifierProvider<ChatNotifier, AsyncValue<List<ChatMessage>>>((ref) {
   final queryProcessor = ref.watch(queryProcessorProvider);
   return ChatNotifier(queryProcessor);
 });

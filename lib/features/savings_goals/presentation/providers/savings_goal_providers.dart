@@ -21,13 +21,15 @@ final savingsGoalsProvider = FutureProvider<List<SavingsGoal>>((ref) async {
 });
 
 // Single goal provider
-final goalProvider = FutureProvider.family<SavingsGoal, String>((ref, goalId) async {
+final goalProvider =
+    FutureProvider.family<SavingsGoal, String>((ref, goalId) async {
   final repository = ref.watch(savingsGoalRepositoryProvider);
   return await repository.getGoalById(goalId);
 });
 
 // Goal contributions provider
-final goalContributionsProvider = FutureProvider.family<List<GoalContribution>, String>((ref, goalId) async {
+final goalContributionsProvider =
+    FutureProvider.family<List<GoalContribution>, String>((ref, goalId) async {
   final repository = ref.watch(savingsGoalRepositoryProvider);
   return await repository.getGoalContributions(goalId);
 });
@@ -43,7 +45,8 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
   final SavingsGoalRepository repository;
   final Ref _ref;
 
-  GoalOperationsNotifier(this.repository, this._ref) : super(const AsyncValue.data(null));
+  GoalOperationsNotifier(this.repository, this._ref)
+      : super(const AsyncValue.data(null));
 
   void _invalidate() {
     _ref.invalidate(savingsGoalsProvider);
@@ -175,6 +178,7 @@ class GoalOperationsNotifier extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final goalOperationsProvider = StateNotifierProvider<GoalOperationsNotifier, AsyncValue<void>>((ref) {
+final goalOperationsProvider =
+    StateNotifierProvider<GoalOperationsNotifier, AsyncValue<void>>((ref) {
   return GoalOperationsNotifier(ref.watch(savingsGoalRepositoryProvider), ref);
 });

@@ -26,28 +26,32 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   Animation<double> _hintFade = const AlwaysStoppedAnimation(0.0);
 
   List<OnboardingSlide> get _slides => [
-    OnboardingSlide(
-      title: 'onboarding.slide1.title'.tr(),
-      description: 'onboarding.slide1.description'.tr(),
-      icon: CupertinoIcons.chart_pie_fill,
-      color: AppColors.brandTeal,
-      features: ['Custom categories', 'Monthly reports', 'Spending limits'],
-    ),
-    OnboardingSlide(
-      title: 'onboarding.slide2.title'.tr(),
-      description: 'onboarding.slide2.description'.tr(),
-      icon: CupertinoIcons.creditcard_fill,
-      color: AppColors.systemPurple,
-      features: ['Avalanche & Snowball', 'Payoff timeline', 'Interest tracker'],
-    ),
-    OnboardingSlide(
-      title: 'onboarding.slide3.title'.tr(),
-      description: 'onboarding.slide3.description'.tr(),
-      icon: CupertinoIcons.lightbulb_fill,
-      color: AppColors.systemOrange,
-      features: ['Balance forecast', 'Spending alerts', 'Smart tips'],
-    ),
-  ];
+        OnboardingSlide(
+          title: 'onboarding.slide1.title'.tr(),
+          description: 'onboarding.slide1.description'.tr(),
+          icon: CupertinoIcons.chart_pie_fill,
+          color: AppColors.brandTeal,
+          features: ['Custom categories', 'Monthly reports', 'Spending limits'],
+        ),
+        OnboardingSlide(
+          title: 'onboarding.slide2.title'.tr(),
+          description: 'onboarding.slide2.description'.tr(),
+          icon: CupertinoIcons.creditcard_fill,
+          color: AppColors.systemPurple,
+          features: [
+            'Avalanche & Snowball',
+            'Payoff timeline',
+            'Interest tracker'
+          ],
+        ),
+        OnboardingSlide(
+          title: 'onboarding.slide3.title'.tr(),
+          description: 'onboarding.slide3.description'.tr(),
+          icon: CupertinoIcons.lightbulb_fill,
+          color: AppColors.systemOrange,
+          features: ['Balance forecast', 'Spending alerts', 'Smart tips'],
+        ),
+      ];
 
   Color get _currentColor => _slides[_currentPage].color;
   bool get _isLastPage => _currentPage == _slides.length - 1;
@@ -155,14 +159,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: List.generate(
                                   _slides.length,
-                                  (index) => _buildSegment(index == _currentPage),
+                                  (index) =>
+                                      _buildSegment(index == _currentPage),
                                 ),
                               ),
                               const SizedBox(height: AppSizes.xl),
                               AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
                                 transitionBuilder: (child, animation) =>
-                                    FadeTransition(opacity: animation, child: child),
+                                    FadeTransition(
+                                        opacity: animation, child: child),
                                 child: _isLastPage
                                     ? _buildFinalActions()
                                     : _buildInterimActions(),
@@ -324,13 +330,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       children: slide.features
           .map(
             (f) => Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: slide.color.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                border:
-                    Border.all(color: slide.color.withValues(alpha: 0.25)),
+                border: Border.all(color: slide.color.withValues(alpha: 0.25)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

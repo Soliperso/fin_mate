@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   group('Splash Page Widget Tests', () {
-    testWidgets('should display splash screen on app launch', (WidgetTester tester) async {
+    testWidgets('should display splash screen on app launch',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(

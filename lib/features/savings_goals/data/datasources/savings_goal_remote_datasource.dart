@@ -99,7 +99,8 @@ class SavingsGoalRemoteDatasource {
       if (name != null) updateData['name'] = name;
       if (description != null) updateData['description'] = description;
       if (targetAmount != null) updateData['target_amount'] = targetAmount;
-      if (deadline != null) updateData['deadline'] = deadline.toIso8601String().split('T')[0];
+      if (deadline != null)
+        updateData['deadline'] = deadline.toIso8601String().split('T')[0];
       if (category != null) updateData['category'] = category;
       if (icon != null) updateData['icon'] = icon;
       if (color != null) updateData['color'] = color;
@@ -119,7 +120,11 @@ class SavingsGoalRemoteDatasource {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
-      await _supabase.from('savings_goals').delete().eq('id', goalId).eq('user_id', userId);
+      await _supabase
+          .from('savings_goals')
+          .delete()
+          .eq('id', goalId)
+          .eq('user_id', userId);
     } catch (e) {
       throw Exception('Failed to delete goal: $e');
     }
@@ -130,17 +135,22 @@ class SavingsGoalRemoteDatasource {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
-      await _supabase.from('savings_goals').update({
-        'is_completed': true,
-        'completed_at': DateTime.now().toIso8601String(),
-      }).eq('id', goalId).eq('user_id', userId);
+      await _supabase
+          .from('savings_goals')
+          .update({
+            'is_completed': true,
+            'completed_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', goalId)
+          .eq('user_id', userId);
     } catch (e) {
       throw Exception('Failed to mark goal as completed: $e');
     }
   }
 
   // Contributions
-  Future<List<GoalContributionModel>> getGoalContributions(String goalId) async {
+  Future<List<GoalContributionModel>> getGoalContributions(
+      String goalId) async {
     try {
       final response = await _supabase
           .from('goal_contributions')
@@ -183,7 +193,10 @@ class SavingsGoalRemoteDatasource {
 
   Future<void> deleteContribution(String contributionId) async {
     try {
-      await _supabase.from('goal_contributions').delete().eq('id', contributionId);
+      await _supabase
+          .from('goal_contributions')
+          .delete()
+          .eq('id', contributionId);
     } catch (e) {
       throw Exception('Failed to delete contribution: $e');
     }

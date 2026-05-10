@@ -18,8 +18,9 @@ class SavingsRateCard extends ConsumerWidget {
     required this.expenses,
   });
 
-  double get _rate =>
-      income > 0 ? ((income - expenses) / income * 100).clamp(-999.0, 100.0) : 0.0;
+  double get _rate => income > 0
+      ? ((income - expenses) / income * 100).clamp(-999.0, 100.0)
+      : 0.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,70 +50,70 @@ class SavingsRateCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push('/transactions'),
       child: Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.secondarySystemBackgroundDark
-            : AppColors.systemBackground,
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppColors.secondarySystemBackgroundDark
+              : AppColors.systemBackground,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        ),
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: AppSizes.iconContainer,
+              height: AppSizes.iconContainer,
+              decoration: BoxDecoration(
+                color: rateColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              ),
+              child: Icon(
+                CupertinoIcons.arrow_down_circle,
+                color: rateColor,
+                size: AppSizes.iconSm,
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
+            // Label + value
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'savingsRate.label'.tr(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.secondaryLabel,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    income <= 0
+                        ? rateLabel
+                        : '${rate.toStringAsFixed(1)}% — $rateLabel',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: rateColor,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            // Month-over-month trend badge
+            flowAsync.maybeWhen(
+              data: (flow) {
+                if (flow.length < 2) return const SizedBox.shrink();
+                return _TrendBadge(flowData: flow);
+              },
+              orElse: () => const SizedBox.shrink(),
+            ),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              size: AppSizes.iconXs,
+              color: AppColors.systemGray3,
+            ),
+          ],
+        ),
       ),
-      padding: const EdgeInsets.all(AppSizes.md),
-      child: Row(
-        children: [
-          // Icon
-          Container(
-            width: AppSizes.iconContainer,
-            height: AppSizes.iconContainer,
-            decoration: BoxDecoration(
-              color: rateColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            ),
-            child: Icon(
-              CupertinoIcons.arrow_down_circle,
-              color: rateColor,
-              size: AppSizes.iconSm,
-            ),
-          ),
-          const SizedBox(width: AppSizes.md),
-          // Label + value
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'savingsRate.label'.tr(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.secondaryLabel,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  income <= 0
-                      ? rateLabel
-                      : '${rate.toStringAsFixed(1)}% — $rateLabel',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: rateColor,
-                      ),
-                ),
-              ],
-            ),
-          ),
-          // Month-over-month trend badge
-          flowAsync.maybeWhen(
-            data: (flow) {
-              if (flow.length < 2) return const SizedBox.shrink();
-              return _TrendBadge(flowData: flow);
-            },
-            orElse: () => const SizedBox.shrink(),
-          ),
-          const Icon(
-            CupertinoIcons.chevron_right,
-            size: AppSizes.iconXs,
-            color: AppColors.systemGray3,
-          ),
-        ],
-      ),
-    ),
     );
   }
 }

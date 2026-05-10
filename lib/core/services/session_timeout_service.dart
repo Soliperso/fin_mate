@@ -40,7 +40,7 @@ class SessionTimeoutService {
   /// Handle timeout event
   Future<void> _onTimeout() async {
     final timeSinceLastActivity = DateTime.now().difference(_lastActivityTime);
-    
+
     // Only logout if truly inactive
     if (timeSinceLastActivity >= _inactivityTimeout) {
       await _handleLogout();

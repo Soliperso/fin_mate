@@ -59,7 +59,8 @@ class BiometricService {
         return BiometricAuthResult(
           success: false,
           errorType: BiometricErrorType.notAvailable,
-          errorMessage: 'Biometric authentication is not available on this device',
+          errorMessage:
+              'Biometric authentication is not available on this device',
         );
       }
 
@@ -135,7 +136,8 @@ class BiometricService {
         break;
       case 'NotEnrolled':
         errorType = BiometricErrorType.notEnrolled;
-        errorMessage = 'No biometrics enrolled. Please set up biometrics in device settings';
+        errorMessage =
+            'No biometrics enrolled. Please set up biometrics in device settings';
         break;
       case 'LockedOut':
       case 'PermanentlyLockedOut':
@@ -148,7 +150,8 @@ class BiometricService {
         break;
       case 'PasscodeNotSet':
         errorType = BiometricErrorType.passcodeNotSet;
-        errorMessage = 'Device passcode is not set. Please set a passcode first';
+        errorMessage =
+            'Device passcode is not set. Please set a passcode first';
         break;
       default:
         errorType = BiometricErrorType.unknown;

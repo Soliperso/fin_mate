@@ -88,8 +88,10 @@ void main() {
         {'type': 'expense', 'amount': 75.0},
       ];
 
-      final expenses = allTransactions.where((t) => t['type'] == 'expense').toList();
-      final incomes = allTransactions.where((t) => t['type'] == 'income').toList();
+      final expenses =
+          allTransactions.where((t) => t['type'] == 'expense').toList();
+      final incomes =
+          allTransactions.where((t) => t['type'] == 'income').toList();
 
       expect(expenses.length, 2);
       expect(incomes.length, 1);
@@ -103,7 +105,8 @@ void main() {
         {'date': now.add(const Duration(days: 1)), 'amount': 100.0},
       ];
 
-      transactions.sort((a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
+      transactions.sort(
+          (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
 
       expect(transactions[0]['amount'], 100.0); // Most recent first
       expect(transactions[2]['amount'], 75.0); // Oldest last
@@ -123,7 +126,7 @@ bool _isValidAmount(double amount) {
 
 String _formatCurrency(double amount) {
   return '\$${amount.toStringAsFixed(2).replaceAllMapped(
-    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-    (match) => '${match[1]},',
-  )}';
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (match) => '${match[1]},',
+      )}';
 }

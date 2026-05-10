@@ -1,7 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch, CupertinoPicker, CupertinoPickerDefaultSelectionOverlay, CupertinoButton;
+import 'package:flutter/cupertino.dart'
+    show
+        CupertinoIcons,
+        CupertinoSwitch,
+        CupertinoPicker,
+        CupertinoPickerDefaultSelectionOverlay,
+        CupertinoButton;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,7 +136,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
       final repository = ref.read(transactionRepositoryProvider);
       final allTransactions = await repository.getTransactions();
-      final match = allTransactions.where((t) => t.id == widget.transactionId).toList();
+      final match =
+          allTransactions.where((t) => t.id == widget.transactionId).toList();
       if (match.isEmpty) throw Exception('Transaction not found');
       final transaction = match.first;
 
@@ -140,7 +147,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               ? 'transfer'
               : 'expense';
 
-      final categoryType = transaction.type == TransactionType.income ? 'income' : 'expense';
+      final categoryType =
+          transaction.type == TransactionType.income ? 'income' : 'expense';
 
       final results = await Future.wait([
         ref.read(categoriesProvider(categoryType).future),
@@ -150,10 +158,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       final categories = results[0] as List<dynamic>;
       final accounts = results[1] as List<dynamic>;
 
-      final categoryMatches = categories.where((c) => (c as dynamic).id == transaction.categoryId);
-      final category = categoryMatches.isNotEmpty ? categoryMatches.first : null;
+      final categoryMatches =
+          categories.where((c) => (c as dynamic).id == transaction.categoryId);
+      final category =
+          categoryMatches.isNotEmpty ? categoryMatches.first : null;
 
-      final accountMatches = accounts.where((a) => (a as dynamic).id == transaction.accountId);
+      final accountMatches =
+          accounts.where((a) => (a as dynamic).id == transaction.accountId);
       final account = accountMatches.isNotEmpty
           ? accountMatches.first
           : accounts.isNotEmpty
@@ -167,7 +178,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           _notesController.text = transaction.notes ?? '';
           _selectedType = type;
           _selectedDate = transaction.date;
-          if (category != null) _selectedCategory = (category as dynamic).name as String?;
+          if (category != null)
+            _selectedCategory = (category as dynamic).name as String?;
           if (account != null) _selectedAccount = account as AccountEntity;
           _isRecurring = transaction.isRecurring;
           if (transaction.recurringInterval != null) {
@@ -246,7 +258,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         backgroundColor: isDark
             ? AppColors.systemGroupedBackgroundDark
             : AppColors.systemGroupedBackground,
-        title: Text(_isEditing ? 'addTransaction.editTitle'.tr() : 'addTransaction.newTitle'.tr()),
+        title: Text(_isEditing
+            ? 'addTransaction.editTitle'.tr()
+            : 'addTransaction.newTitle'.tr()),
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.xmark,
@@ -256,8 +270,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSizes.pagePadding, AppSizes.sm, AppSizes.pagePadding, AppSizes.md),
+          padding: const EdgeInsets.fromLTRB(AppSizes.pagePadding, AppSizes.sm,
+              AppSizes.pagePadding, AppSizes.md),
           child: ElevatedButton.icon(
             onPressed: _handleSubmit,
             icon: Icon(
@@ -267,7 +281,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             label: Text(
               _isEditing
                   ? 'addTransaction.updateButton'.tr()
-                  : (_selectedType == 'expense' ? 'addTransaction.addExpense'.tr() : 'addTransaction.addIncome'.tr()),
+                  : (_selectedType == 'expense'
+                      ? 'addTransaction.addExpense'.tr()
+                      : 'addTransaction.addIncome'.tr()),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryTeal,
@@ -335,8 +351,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   Widget _buildAmountSection(bool isDark) {
     final displayText = _amountController.text;
     final parsedAmount = double.tryParse(displayText);
-    final isInvalid = displayText.isNotEmpty &&
-        (parsedAmount == null || parsedAmount <= 0);
+    final isInvalid =
+        displayText.isNotEmpty && (parsedAmount == null || parsedAmount <= 0);
 
     return Column(
       children: [
@@ -426,8 +442,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           return Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
             child: GestureDetector(
-              onTap: () =>
-                  setState(() => _amountController.text = amount.toStringAsFixed(0)),
+              onTap: () => setState(
+                  () => _amountController.text = amount.toStringAsFixed(0)),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding:
@@ -444,11 +460,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color:
-                        isSelected ? _typeColor : AppColors.secondaryLabel,
-                  ),
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color:
+                            isSelected ? _typeColor : AppColors.secondaryLabel,
+                      ),
                 ),
               ),
             ),
@@ -554,10 +570,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isSelected ? selectedColor : AppColors.secondaryLabel,
-                letterSpacing: -0.2,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color:
+                        isSelected ? selectedColor : AppColors.secondaryLabel,
+                    letterSpacing: -0.2,
+                  ),
             ),
           ),
         ),
@@ -584,7 +601,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 horizontal: AppSizes.md, vertical: 4),
             child: Row(
               children: [
-                _rowIcon(CupertinoIcons.pencil, accentColor: _typeColor, isDark: isDark),
+                _rowIcon(CupertinoIcons.pencil,
+                    accentColor: _typeColor, isDark: isDark),
                 const SizedBox(width: AppSizes.md),
                 Expanded(
                   child: TextFormField(
@@ -683,66 +701,71 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 // Debt picker — inline row, visible for any expense
                 if (_selectedType == 'expense')
                   ref.watch(debtsProvider).when(
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                    data: (debts) {
-                      if (debts.isEmpty) return const SizedBox.shrink();
-                      return Column(
-                        children: [
-                          _divider(isDark),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.md, vertical: 4),
-                            child: Row(
-                              children: [
-                                _rowIcon(CupertinoIcons.link,
-                                    accentColor: _typeColor, isDark: isDark),
-                                const SizedBox(width: AppSizes.md),
-                                Expanded(
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<DebtEntity>(
-                                      value: _linkedDebt,
-                                      hint: Text(
-                                        'addTransaction.linkDebt'.tr(),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                                color: AppColors.tertiaryLabel),
-                                      ),
-                                      isExpanded: true,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.w500),
-                                      icon: const Icon(
-                                          CupertinoIcons.chevron_up_chevron_down,
-                                          size: 14,
-                                          color: AppColors.systemGray3),
-                                      items: [
-                                        DropdownMenuItem(
-                                          value: null,
-                                          child: Text('common.none'.tr(),
-                                              style: TextStyle(
-                                                  color:
-                                                      AppColors.tertiaryLabel)),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                        data: (debts) {
+                          if (debts.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            children: [
+                              _divider(isDark),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSizes.md, vertical: 4),
+                                child: Row(
+                                  children: [
+                                    _rowIcon(CupertinoIcons.link,
+                                        accentColor: _typeColor,
+                                        isDark: isDark),
+                                    const SizedBox(width: AppSizes.md),
+                                    Expanded(
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<DebtEntity>(
+                                          value: _linkedDebt,
+                                          hint: Text(
+                                            'addTransaction.linkDebt'.tr(),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                    color: AppColors
+                                                        .tertiaryLabel),
+                                          ),
+                                          isExpanded: true,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.w500),
+                                          icon: const Icon(
+                                              CupertinoIcons
+                                                  .chevron_up_chevron_down,
+                                              size: 14,
+                                              color: AppColors.systemGray3),
+                                          items: [
+                                            DropdownMenuItem(
+                                              value: null,
+                                              child: Text('common.none'.tr(),
+                                                  style: TextStyle(
+                                                      color: AppColors
+                                                          .tertiaryLabel)),
+                                            ),
+                                            ...debts.map((d) =>
+                                                DropdownMenuItem(
+                                                    value: d,
+                                                    child: Text(d.name))),
+                                          ],
+                                          onChanged: (d) =>
+                                              setState(() => _linkedDebt = d),
                                         ),
-                                        ...debts.map((d) => DropdownMenuItem(
-                                            value: d, child: Text(d.name))),
-                                      ],
-                                      onChanged: (d) =>
-                                          setState(() => _linkedDebt = d),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
               ],
             ),
           ),
@@ -754,79 +777,84 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             Consumer(
               builder: (context, ref, _) {
                 return ref.watch(savingsGoalsProvider).when(
-                  data: (goals) {
-                    final active = goals.where((g) => !g.isCompleted).toList();
-                    if (active.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: AppSizes.md, vertical: 4),
-                          child: Row(
-                            children: [
-                              _rowIcon(CupertinoIcons.flag,
-                                  accentColor: _typeColor, isDark: isDark),
-                              const SizedBox(width: AppSizes.md),
-                              Expanded(
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<SavingsGoal?>(
-                                    value: _linkedGoal,
-                                    hint: Text(
-                                      'Save toward goal (Optional)',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                              color: AppColors.tertiaryLabel),
-                                    ),
-                                    isExpanded: true,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w500),
-                                    icon: const Icon(
-                                        CupertinoIcons.chevron_up_chevron_down,
-                                        size: 14,
-                                        color: AppColors.systemGray3),
-                                    items: [
-                                      DropdownMenuItem(
-                                        value: null,
-                                        child: Text('common.none'.tr(),
-                                            style: TextStyle(
-                                                color: AppColors.tertiaryLabel)),
-                                      ),
-                                      ...active.map((g) => DropdownMenuItem(
-                                          value: g, child: Text(g.name))),
-                                    ],
-                                    onChanged: (g) {
-                                      setState(() {
-                                        _linkedGoal = g;
-                                        if (g != null) {
-                                          _selectedType = 'expense';
-                                          _selectedCategory = 'Savings';
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            if (mounted) {
-                                              _syncCategoryWheel(
-                                                  _loadedCategories);
+                      data: (goals) {
+                        final active =
+                            goals.where((g) => !g.isCompleted).toList();
+                        if (active.isEmpty) return const SizedBox.shrink();
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.md, vertical: 4),
+                              child: Row(
+                                children: [
+                                  _rowIcon(CupertinoIcons.flag,
+                                      accentColor: _typeColor, isDark: isDark),
+                                  const SizedBox(width: AppSizes.md),
+                                  Expanded(
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<SavingsGoal?>(
+                                        value: _linkedGoal,
+                                        hint: Text(
+                                          'Save toward goal (Optional)',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                  color:
+                                                      AppColors.tertiaryLabel),
+                                        ),
+                                        isExpanded: true,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w500),
+                                        icon: const Icon(
+                                            CupertinoIcons
+                                                .chevron_up_chevron_down,
+                                            size: 14,
+                                            color: AppColors.systemGray3),
+                                        items: [
+                                          DropdownMenuItem(
+                                            value: null,
+                                            child: Text('common.none'.tr(),
+                                                style: TextStyle(
+                                                    color: AppColors
+                                                        .tertiaryLabel)),
+                                          ),
+                                          ...active.map((g) => DropdownMenuItem(
+                                              value: g, child: Text(g.name))),
+                                        ],
+                                        onChanged: (g) {
+                                          setState(() {
+                                            _linkedGoal = g;
+                                            if (g != null) {
+                                              _selectedType = 'expense';
+                                              _selectedCategory = 'Savings';
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                if (mounted) {
+                                                  _syncCategoryWheel(
+                                                      _loadedCategories);
+                                                }
+                                              });
                                             }
                                           });
-                                        }
-                                      });
-                                    },
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        _divider(isDark),
-                      ],
+                            ),
+                            _divider(isDark),
+                          ],
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
                     );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
               },
             ),
 
@@ -839,7 +867,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               children: [
                 Row(
                   children: [
-                    _rowIcon(CupertinoIcons.calendar, accentColor: _typeColor, isDark: isDark),
+                    _rowIcon(CupertinoIcons.calendar,
+                        accentColor: _typeColor, isDark: isDark),
                     const SizedBox(width: AppSizes.md),
                     Text(
                       'addTransaction.dateLabel'.tr(),
@@ -867,60 +896,64 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           Consumer(
             builder: (context, ref, _) {
               return ref.watch(accountsProvider).when(
-                data: (accounts) {
-                  if (accounts.length <= 1) return const SizedBox.shrink();
-                  final selectedAccount =
-                      _selectedAccount ?? accounts.first;
+                    data: (accounts) {
+                      if (accounts.length <= 1) return const SizedBox.shrink();
+                      final selectedAccount =
+                          _selectedAccount ?? accounts.first;
 
-                  return Column(
-                    children: [
-                      _divider(isDark),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.md, vertical: 4),
-                        child: Row(
-                          children: [
-                            _rowIcon(CupertinoIcons.creditcard, accentColor: _typeColor, isDark: isDark),
-                            const SizedBox(width: AppSizes.md),
-                            Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<AccountEntity>(
-                                  value: accounts.contains(selectedAccount)
-                                      ? selectedAccount
-                                      : accounts.first,
-                                  isExpanded: true,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(fontWeight: FontWeight.w500),
-                                  icon: const Icon(
-                                      CupertinoIcons.chevron_up_chevron_down,
-                                      size: 14,
-                                      color: AppColors.systemGray3),
-                                  items: accounts.map((account) {
-                                    return DropdownMenuItem<AccountEntity>(
-                                      value: account,
-                                      child: Text(account.name),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() => _selectedAccount = value);
-                                  },
+                      return Column(
+                        children: [
+                          _divider(isDark),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.md, vertical: 4),
+                            child: Row(
+                              children: [
+                                _rowIcon(CupertinoIcons.creditcard,
+                                    accentColor: _typeColor, isDark: isDark),
+                                const SizedBox(width: AppSizes.md),
+                                Expanded(
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<AccountEntity>(
+                                      value: accounts.contains(selectedAccount)
+                                          ? selectedAccount
+                                          : accounts.first,
+                                      isExpanded: true,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w500),
+                                      icon: const Icon(
+                                          CupertinoIcons
+                                              .chevron_up_chevron_down,
+                                          size: 14,
+                                          color: AppColors.systemGray3),
+                                      items: accounts.map((account) {
+                                        return DropdownMenuItem<AccountEntity>(
+                                          value: account,
+                                          child: Text(account.name),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(
+                                            () => _selectedAccount = value);
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        ],
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (e, _) => ErrorRetryWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(accountsProvider),
+                    ),
                   );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (e, _) => ErrorRetryWidget(
-                  message: e.toString(),
-                  onRetry: () => ref.invalidate(accountsProvider),
-                ),
-              );
             },
           ),
 
@@ -935,7 +968,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
-
   // ── Recurring row ─────────────────────────────────────────────────────────
 
   Widget _buildRecurringRow(BuildContext context, bool isDark) {
@@ -949,7 +981,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         children: [
           Row(
             children: [
-              _rowIcon(CupertinoIcons.repeat, accentColor: _typeColor, isDark: isDark),
+              _rowIcon(CupertinoIcons.repeat,
+                  accentColor: _typeColor, isDark: isDark),
               const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Text(
@@ -983,7 +1016,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   final interval = e.value;
                   final isSelected = _recurringInterval == interval;
                   return Padding(
-                    padding: EdgeInsets.only(right: i < intervals.length - 1 ? 4 : 0),
+                    padding: EdgeInsets.only(
+                        right: i < intervals.length - 1 ? 4 : 0),
                     child: GestureDetector(
                       onTap: () =>
                           setState(() => _recurringInterval = interval),
@@ -1006,14 +1040,15 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         ),
                         child: Text(
                           '${interval[0].toUpperCase()}${interval.substring(1)}',
-                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? AppColors.primaryTeal
-                                : AppColors.secondaryLabel,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? AppColors.primaryTeal
+                                        : AppColors.secondaryLabel,
+                                  ),
                         ),
                       ),
                     ),
@@ -1058,8 +1093,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ? AppColors.tertiarySystemBackgroundDark
             : AppColors.secondarySystemBackground;
         final dividerColor = Theme.of(context).dividerColor;
-        final labelColor =
-            isDark ? AppColors.labelDark : AppColors.label;
+        final labelColor = isDark ? AppColors.labelDark : AppColors.label;
 
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(
@@ -1078,8 +1112,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.systemGray4,
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusFull),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
                 ),
@@ -1089,50 +1122,48 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   decoration: BoxDecoration(
                     color: toolbarColor,
                     border: Border(
-                      bottom: BorderSide(
-                          color: dividerColor, width: 0.5),
+                      bottom: BorderSide(color: dividerColor, width: 0.5),
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CupertinoButton(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.md),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: AppSizes.md),
                         onPressed: () => Navigator.of(ctx).pop(),
                         child: Text(
                           'common.cancel'.tr(),
                           style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
-                            color: AppColors.systemGray,
-                          ),
+                                color: AppColors.systemGray,
+                              ),
                         ),
                       ),
                       Column(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'addTransaction.categoryLabel'.tr(),
-                            style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: labelColor,
-                              letterSpacing: -0.3,
-                            ),
+                            style:
+                                Theme.of(ctx).textTheme.titleMedium!.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: labelColor,
+                                      letterSpacing: -0.3,
+                                    ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
                             style: Theme.of(ctx).textTheme.labelSmall!.copyWith(
-                              color: _typeColor,
-                              fontWeight: FontWeight.w500,
-                            ),
+                                  color: _typeColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
                         ],
                       ),
                       CupertinoButton(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.md),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: AppSizes.md),
                         onPressed: () {
                           setState(() {
                             _selectedCategory = tempCategory;
@@ -1143,9 +1174,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         child: Text(
                           'common.done'.tr(),
                           style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
-                            color: _typeColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                                color: _typeColor,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ),
                     ],
@@ -1158,16 +1189,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     scrollController: controller,
                     itemExtent: 48,
                     backgroundColor: bgColor,
-                    selectionOverlay:
-                        CupertinoPickerDefaultSelectionOverlay(
-                      background:
-                          _typeColor.withValues(alpha: 0.15),
+                    selectionOverlay: CupertinoPickerDefaultSelectionOverlay(
+                      background: _typeColor.withValues(alpha: 0.15),
                       capStartEdge: false,
                       capEndEdge: false,
                     ),
                     onSelectedItemChanged: (index) {
-                      tempCategory =
-                          categories[index].name as String;
+                      tempCategory = categories[index].name as String;
                     },
                     children: categories.map((cat) {
                       return Center(
@@ -1182,10 +1210,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                             const SizedBox(width: 12),
                             Text(
                               cat.name,
-                              style: Theme.of(ctx).textTheme.titleMedium!.copyWith(
-                                color: labelColor,
-                                letterSpacing: -0.2,
-                              ),
+                              style:
+                                  Theme.of(ctx).textTheme.titleMedium!.copyWith(
+                                        color: labelColor,
+                                        letterSpacing: -0.2,
+                                      ),
                             ),
                           ],
                         ),
@@ -1193,8 +1222,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     }).toList(),
                   ),
                 ),
-                SizedBox(
-                    height: MediaQuery.of(ctx).padding.bottom),
+                SizedBox(height: MediaQuery.of(ctx).padding.bottom),
               ],
             ),
           ),
@@ -1214,8 +1242,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_dateStripController.hasClients) return;
-      final selNorm = DateTime(
-          _selectedDate.year, _selectedDate.month, _selectedDate.day);
+      final selNorm =
+          DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
       final idx = days.indexWhere((d) => d == selNorm);
       if (idx != -1) {
         const itemWidth = 52.0;
@@ -1241,8 +1269,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 final selNorm = DateTime(
                     _selectedDate.year, _selectedDate.month, _selectedDate.day);
                 final isSelected = day == selNorm;
-                final isToday = day ==
-                    DateTime(today.year, today.month, today.day);
+                final isToday =
+                    day == DateTime(today.year, today.month, today.day);
                 return GestureDetector(
                   onTap: () => setState(() => _selectedDate = day),
                   child: AnimatedContainer(
@@ -1256,32 +1284,33 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                           : (isDark
                               ? AppColors.tertiarySystemBackgroundDark
                               : AppColors.systemGray5),
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSm),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           dayNames[day.weekday - 1],
-                          style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white.withValues(alpha: 0.85)
-                                : AppColors.tertiaryLabel,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: isSelected
+                                        ? Colors.white.withValues(alpha: 0.85)
+                                        : AppColors.tertiaryLabel,
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${day.day}',
-                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w400,
-                            color: isSelected
-                                ? Colors.white
-                                : (isToday ? _typeColor : null),
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : (isToday ? _typeColor : null),
+                                  ),
                         ),
                       ],
                     ),
@@ -1319,14 +1348,15 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 4),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 14),
-              child: _rowIcon(CupertinoIcons.text_alignleft, accentColor: _typeColor, isDark: isDark),
+              child: _rowIcon(CupertinoIcons.text_alignleft,
+                  accentColor: _typeColor, isDark: isDark),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
@@ -1337,10 +1367,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: 'addTransaction.noteHint'.tr(),
-                  hintStyle:
-                      Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.tertiaryLabel,
-                          ),
+                  hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.tertiaryLabel,
+                      ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.only(
                       left: AppSizes.sm, top: 14, bottom: 14),
@@ -1379,8 +1408,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       const SizedBox(height: 4),
                       Text(
                         'Get notified before this transaction\'s date',
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                            color: AppColors.textSecondary),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall!
+                            .copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -1407,7 +1438,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   AppSizes.md, AppSizes.sm, AppSizes.md, 0),
               child: Row(
                 children: [
-                  _rowIcon(CupertinoIcons.bell, accentColor: _typeColor, isDark: isDark),
+                  _rowIcon(CupertinoIcons.bell,
+                      accentColor: _typeColor, isDark: isDark),
                   const SizedBox(width: AppSizes.md),
                   const Text('Remind me'),
                   const SizedBox(width: AppSizes.sm),
@@ -1495,7 +1527,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
   }
 
-  Widget _rowIcon(IconData icon, {required Color accentColor, bool isDark = false}) {
+  Widget _rowIcon(IconData icon,
+      {required Color accentColor, bool isDark = false}) {
     return Container(
       width: 32,
       height: 32,
@@ -1521,7 +1554,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final sel = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final sel =
+        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
     if (sel == today) return 'Today';
     if (sel == yesterday) return 'Yesterday';
     return _formatDateFull(_selectedDate);
@@ -1530,8 +1564,18 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   String _formatDateFull(DateTime date) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }
@@ -1544,7 +1588,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       setState(() {}); // shows inline error
-      await showErrorDialog(context, 'Please enter a valid amount greater than 0.');
+      await showErrorDialog(
+          context, 'Please enter a valid amount greater than 0.');
       return;
     }
 
@@ -1587,8 +1632,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       }
 
       final categoriesAsync = await ref.read(
-          categoriesProvider(
-                  _selectedType == 'expense' ? 'expense' : 'income')
+          categoriesProvider(_selectedType == 'expense' ? 'expense' : 'income')
               .future);
 
       final category = categoriesAsync.firstWhere(

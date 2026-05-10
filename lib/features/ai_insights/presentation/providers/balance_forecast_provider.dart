@@ -36,7 +36,8 @@ final safeToSpendProvider = Provider<double>((ref) {
 });
 
 // Multi-scenario forecast provider
-final multiScenarioForecastProvider = FutureProvider<List<ForecastScenario>>((ref) async {
+final multiScenarioForecastProvider =
+    FutureProvider<List<ForecastScenario>>((ref) async {
   final service = ref.watch(balanceForecastServiceProvider);
   return await service.generateMultiScenarioForecast();
 });

@@ -55,7 +55,8 @@ import '../services/ad_service.dart';
 import '../providers/ad_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 /// Page used for the 5 bottom-nav tabs — fades in over 150 ms.
 /// Only one page lives in the tree at a time so there are no GlobalKey conflicts.
@@ -140,7 +141,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // If authenticated and trying to access auth routes, redirect to dashboard
-      if (isAuthenticated && isAuthRoute && state.matchedLocation != '/' && !state.matchedLocation.startsWith('/verify-email')) {
+      if (isAuthenticated &&
+          isAuthRoute &&
+          state.matchedLocation != '/' &&
+          !state.matchedLocation.startsWith('/verify-email')) {
         return '/dashboard';
       }
 
@@ -240,18 +244,21 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
-            pageBuilder: (context, state) => _FadeTransitionPage(child: const DashboardPage()),
+            pageBuilder: (context, state) =>
+                _FadeTransitionPage(child: const DashboardPage()),
             routes: [],
           ),
           GoRoute(
             path: '/budgets',
             name: 'budgets',
-            pageBuilder: (context, state) => _FadeTransitionPage(child: const BudgetsPage()),
+            pageBuilder: (context, state) =>
+                _FadeTransitionPage(child: const BudgetsPage()),
           ),
           GoRoute(
             path: '/recurring-transactions',
             name: 'recurring-transactions',
-            pageBuilder: (context, state) => const CupertinoPage(child: RecurringTransactionsPage()),
+            pageBuilder: (context, state) =>
+                const CupertinoPage(child: RecurringTransactionsPage()),
             routes: [
               GoRoute(
                 path: 'add',
@@ -302,7 +309,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/debt',
             name: 'debt',
-            pageBuilder: (context, state) => _FadeTransitionPage(child: const DebtPage()),
+            pageBuilder: (context, state) =>
+                _FadeTransitionPage(child: const DebtPage()),
             routes: [
               GoRoute(
                 path: ':debtId',
@@ -322,12 +330,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/notifications',
             name: 'notifications',
-            pageBuilder: (context, state) => const CupertinoPage(child: NotificationsPage()),
+            pageBuilder: (context, state) =>
+                const CupertinoPage(child: NotificationsPage()),
           ),
           GoRoute(
             path: '/goals',
             name: 'goals',
-            pageBuilder: (context, state) => const CupertinoPage(child: SavingsGoalsPage()),
+            pageBuilder: (context, state) =>
+                const CupertinoPage(child: SavingsGoalsPage()),
             routes: [
               GoRoute(
                 path: ':goalId',
@@ -348,7 +358,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/profile',
             name: 'profile',
-            pageBuilder: (context, state) => _FadeTransitionPage(child: const ProfilePage()),
+            pageBuilder: (context, state) =>
+                _FadeTransitionPage(child: const ProfilePage()),
             routes: [
               GoRoute(
                 path: 'edit',
@@ -388,7 +399,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/settings',
             name: 'settings',
-            pageBuilder: (context, state) => const CupertinoPage(child: SettingsPage()),
+            pageBuilder: (context, state) =>
+                const CupertinoPage(child: SettingsPage()),
             routes: [
               GoRoute(
                 path: 'notifications',
@@ -515,14 +527,10 @@ class _MainShellState extends ConsumerState<MainShell>
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF1C1C1E)
-              : const Color(0xFFFFFFFF),
+          color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF),
           border: Border(
             top: BorderSide(
-              color: isDark
-                  ? const Color(0xFF38383A)
-                  : const Color(0xFFC6C6C8),
+              color: isDark ? const Color(0xFF38383A) : const Color(0xFFC6C6C8),
               width: 0.5,
             ),
           ),

@@ -76,9 +76,10 @@ class DebtSummaryCard extends ConsumerWidget {
                       children: [
                         Text(
                           'debtSummary.dtiRatio'.tr(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Container(
@@ -88,11 +89,15 @@ class DebtSummaryCard extends ConsumerWidget {
                           ),
                           decoration: BoxDecoration(
                             color: dtiColor(dti).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radiusSm),
                           ),
                           child: Text(
                             '${dti.toStringAsFixed(1)}%',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
                                   color: dtiColor(dti),
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -109,7 +114,8 @@ class DebtSummaryCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStat(BuildContext context, {required String label, required String value}) {
+  Widget _buildStat(BuildContext context,
+      {required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

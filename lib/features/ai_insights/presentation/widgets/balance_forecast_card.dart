@@ -72,7 +72,8 @@ class BalanceForecastCard extends ConsumerWidget {
                 currencyFormat,
                 forecast.dailyForecasts.last.status == BalanceStatus.healthy
                     ? AppColors.success
-                    : forecast.dailyForecasts.last.status == BalanceStatus.warning
+                    : forecast.dailyForecasts.last.status ==
+                            BalanceStatus.warning
                         ? AppColors.warning
                         : AppColors.error,
                 false,
@@ -108,7 +109,10 @@ class BalanceForecastCard extends ConsumerWidget {
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
                               warning,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: AppColors.warning,
                                     fontWeight: FontWeight.w500,
                                   ),

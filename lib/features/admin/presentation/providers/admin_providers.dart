@@ -36,7 +36,8 @@ final adminRepositoryProvider = Provider<AdminRepository>((ref) {
 // Users List Provider
 // ============================================================================
 
-final usersListProvider = FutureProvider.autoDispose.family<List<AdminUserEntity>, UsersFilter>(
+final usersListProvider =
+    FutureProvider.autoDispose.family<List<AdminUserEntity>, UsersFilter>(
   (ref, filter) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getAllUsers(
@@ -87,7 +88,8 @@ class UsersFilter {
 // System Stats Provider
 // ============================================================================
 
-final systemStatsProvider = FutureProvider.autoDispose<SystemStatsEntity>((ref) async {
+final systemStatsProvider =
+    FutureProvider.autoDispose<SystemStatsEntity>((ref) async {
   final repository = ref.watch(adminRepositoryProvider);
   return await repository.getSystemStats();
 });
@@ -96,7 +98,8 @@ final systemStatsProvider = FutureProvider.autoDispose<SystemStatsEntity>((ref) 
 // User Details Provider
 // ============================================================================
 
-final userDetailsProvider = FutureProvider.autoDispose.family<AdminUserEntity, String>(
+final userDetailsProvider =
+    FutureProvider.autoDispose.family<AdminUserEntity, String>(
   (ref, userId) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getUserDetails(userId);
@@ -173,8 +176,8 @@ class AnalyticsDateRange {
 }
 
 /// User Growth Trends Provider
-final userGrowthTrendsProvider =
-    FutureProvider.autoDispose.family<List<UserGrowthTrendEntity>, AnalyticsDateRange>(
+final userGrowthTrendsProvider = FutureProvider.autoDispose
+    .family<List<UserGrowthTrendEntity>, AnalyticsDateRange>(
   (ref, dateRange) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getUserGrowthTrends(
@@ -186,8 +189,8 @@ final userGrowthTrendsProvider =
 );
 
 /// Financial Trends Provider
-final financialTrendsProvider =
-    FutureProvider.autoDispose.family<List<FinancialTrendEntity>, AnalyticsDateRange>(
+final financialTrendsProvider = FutureProvider.autoDispose
+    .family<List<FinancialTrendEntity>, AnalyticsDateRange>(
   (ref, dateRange) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getFinancialTrends(
@@ -206,8 +209,8 @@ final featureAdoptionStatsProvider =
 });
 
 /// Category Breakdown Provider
-final categoryBreakdownProvider =
-    FutureProvider.autoDispose.family<List<CategoryBreakdownEntity>, AnalyticsDateRange>(
+final categoryBreakdownProvider = FutureProvider.autoDispose
+    .family<List<CategoryBreakdownEntity>, AnalyticsDateRange>(
   (ref, dateRange) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getCategoryBreakdown(
@@ -236,8 +239,8 @@ final netWorthPercentilesProvider =
 });
 
 /// Churn Metrics Provider
-final churnMetricsProvider =
-    FutureProvider.autoDispose.family<List<ChurnMetricEntity>, AnalyticsDateRange>(
+final churnMetricsProvider = FutureProvider.autoDispose
+    .family<List<ChurnMetricEntity>, AnalyticsDateRange>(
   (ref, dateRange) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getChurnMetrics(
@@ -255,8 +258,8 @@ final subscriptionCohortsProvider =
 });
 
 /// Subscription Timeline Provider
-final subscriptionTimelineProvider =
-    FutureProvider.autoDispose.family<List<SubscriptionTimelineEntity>, AnalyticsDateRange>(
+final subscriptionTimelineProvider = FutureProvider.autoDispose
+    .family<List<SubscriptionTimelineEntity>, AnalyticsDateRange>(
   (ref, dateRange) async {
     final repository = ref.watch(adminRepositoryProvider);
     return await repository.getSubscriptionTimeline(

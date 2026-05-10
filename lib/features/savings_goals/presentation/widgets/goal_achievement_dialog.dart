@@ -106,7 +106,8 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                   child: Container(
                     padding: const EdgeInsets.all(AppSizes.xl),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.cardBackgroundDark : Colors.white,
+                      color:
+                          isDark ? AppColors.cardBackgroundDark : Colors.white,
                       borderRadius: BorderRadius.circular(AppSizes.radiusXl),
                     ),
                     child: Column(
@@ -204,11 +205,11 @@ class _Star {
 }
 
 class _Shell {
-  final double x;            // 0..1 normalised horizontal launch position
-  final double burstY;       // 0..1 normalised vertical burst height (0 = top)
+  final double x; // 0..1 normalised horizontal launch position
+  final double burstY; // 0..1 normalised vertical burst height (0 = top)
   final double launchOffset; // 0..1 phase offset within the animation loop
-  final Color coreColor;     // white-hot colour shown at initial burst
-  final Color outerColor;    // cooled star colour
+  final Color coreColor; // white-hot colour shown at initial burst
+  final Color outerColor; // cooled star colour
   final List<_Star> stars;
 
   const _Shell({
@@ -262,7 +263,12 @@ class _FireworksPainter extends CustomPainter {
   // ── Rocket ascent ────────────────────────────────────────────────────────────
 
   void _drawRocket(
-    Canvas canvas, Size size, _Shell shell, double ft, double bx, double by,
+    Canvas canvas,
+    Size size,
+    _Shell shell,
+    double ft,
+    double bx,
+    double by,
   ) {
     // Ease-in: rocket accelerates as it rises
     final rt = ft / _rocketPhase;
@@ -326,7 +332,12 @@ class _FireworksPainter extends CustomPainter {
   // ── Burst ─────────────────────────────────────────────────────────────────
 
   void _drawBurst(
-    Canvas canvas, Size size, _Shell shell, double ft, double bx, double by,
+    Canvas canvas,
+    Size size,
+    _Shell shell,
+    double ft,
+    double bx,
+    double by,
   ) {
     final bt = (ft - _rocketPhase) / (1.0 - _rocketPhase); // 0..1 within burst
 
@@ -363,7 +374,7 @@ class _FireworksPainter extends CustomPainter {
       final vy = sin(star.angle) * star.speed;
 
       // Current position — drag physics + gravity
-      final dpNow  = _dp(1.0, bt);
+      final dpNow = _dp(1.0, bt);
       final px = bx + vx * dpNow * spread;
       final py = by + vy * dpNow * spread + gravity * bt * bt;
 
@@ -374,9 +385,8 @@ class _FireworksPainter extends CustomPainter {
       final starColor = Color.lerp(Colors.white, shell.coreColor, heatT)!;
 
       // Opacity: hold full brightness until halfway, then taper to black
-      final opacity = bt < 0.50
-          ? 1.0
-          : (1.0 - (bt - 0.50) / 0.50).clamp(0.0, 1.0);
+      final opacity =
+          bt < 0.50 ? 1.0 : (1.0 - (bt - 0.50) / 0.50).clamp(0.0, 1.0);
 
       // ── Trail ─────────────────────────────────────────────────────────
       if (star.trail) {
@@ -432,8 +442,9 @@ class _FireworksPainter extends CustomPainter {
           Offset(px, py),
           star.size * 0.35,
           Paint()
-            ..color = Colors.white
-                .withValues(alpha: opacity * (1.0 - bt / (heatDuration * 2)).clamp(0.0, 1.0))
+            ..color = Colors.white.withValues(
+                alpha:
+                    opacity * (1.0 - bt / (heatDuration * 2)).clamp(0.0, 1.0))
             ..style = PaintingStyle.fill,
         );
       }

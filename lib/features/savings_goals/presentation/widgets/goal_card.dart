@@ -42,13 +42,18 @@ class GoalCard extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSizes.sm),
                     decoration: BoxDecoration(
-                      color: (isCompleted ? AppColors.success : AppColors.brandTeal)
+                      color: (isCompleted
+                              ? AppColors.success
+                              : AppColors.brandTeal)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: Icon(
-                      isCompleted ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.money_dollar,
-                      color: isCompleted ? AppColors.success : AppColors.brandTeal,
+                      isCompleted
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.money_dollar,
+                      color:
+                          isCompleted ? AppColors.success : AppColors.brandTeal,
                       size: 24,
                     ),
                   ),
@@ -59,16 +64,18 @@ class GoalCard extends ConsumerWidget {
                       children: [
                         Text(
                           goal.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         if (goal.category != null)
                           Text(
                             goal.category!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                       ],
                     ),
@@ -88,7 +95,9 @@ class GoalCard extends ConsumerWidget {
                       child: Text(
                         '${goal.daysRemaining} days',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: goal.isOverdue ? AppColors.error : AppColors.warning,
+                              color: goal.isOverdue
+                                  ? AppColors.error
+                                  : AppColors.warning,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -102,7 +111,9 @@ class GoalCard extends ConsumerWidget {
                   Text(
                     currencyFormat.format(goal.currentAmount),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: isCompleted ? AppColors.success : AppColors.brandTeal,
+                          color: isCompleted
+                              ? AppColors.success
+                              : AppColors.brandTeal,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -139,9 +150,10 @@ class GoalCard extends ConsumerWidget {
                       children: [
                         Text(
                           '${currencyFormat.format(goal.remainingAmount)} to go',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                         if (onContribute != null) ...[
                           const SizedBox(width: AppSizes.sm),
@@ -154,7 +166,8 @@ class GoalCard extends ConsumerWidget {
                                 color: AppColors.brandTeal,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(CupertinoIcons.add, color: AppColors.white, size: 16),
+                              child: const Icon(CupertinoIcons.add,
+                                  color: AppColors.white, size: 16),
                             ),
                           ),
                         ],

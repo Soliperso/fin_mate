@@ -21,7 +21,6 @@ class UserDetailPage extends ConsumerStatefulWidget {
 }
 
 class _UserDetailPageState extends ConsumerState<UserDetailPage> {
-
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   void _copyEmail(BuildContext context, String email) {
@@ -55,8 +54,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ),
           const SizedBox(height: 12),
           ListTile(
-            leading: _quickActionIcon(CupertinoIcons.lock_fill, AppColors.brandTeal),
-            title: const Text('Reset Password', style: TextStyle(fontWeight: FontWeight.w500)),
+            leading:
+                _quickActionIcon(CupertinoIcons.lock_fill, AppColors.brandTeal),
+            title: const Text('Reset Password',
+                style: TextStyle(fontWeight: FontWeight.w500)),
             onTap: () {
               Navigator.pop(ctx);
               _handleResetPassword(context, ref, user);
@@ -64,13 +65,16 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ),
           ListTile(
             leading: _quickActionIcon(
-              user.isActive ? CupertinoIcons.xmark_circle_fill : CupertinoIcons.checkmark_circle_fill,
+              user.isActive
+                  ? CupertinoIcons.xmark_circle_fill
+                  : CupertinoIcons.checkmark_circle_fill,
               user.isActive ? AppColors.systemRed : AppColors.systemGreen,
             ),
             title: Text(
               user.isActive ? 'Disable Account' : 'Enable Account',
               style: TextStyle(
-                color: user.isActive ? AppColors.systemRed : AppColors.systemGreen,
+                color:
+                    user.isActive ? AppColors.systemRed : AppColors.systemGreen,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -158,7 +162,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 ElevatedButton.icon(
-                  onPressed: () => ref.invalidate(userDetailsProvider(widget.userId)),
+                  onPressed: () =>
+                      ref.invalidate(userDetailsProvider(widget.userId)),
                   icon: const Icon(CupertinoIcons.arrow_counterclockwise,
                       size: 16),
                   label: const Text('Retry'),
@@ -175,8 +180,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     );
   }
 
-  Widget _buildBody(BuildContext context, bool isDark, AdminUserEntity user,
-      WidgetRef ref) {
+  Widget _buildBody(
+      BuildContext context, bool isDark, AdminUserEntity user, WidgetRef ref) {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
@@ -233,7 +238,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                               ),
                               child: CircleAvatar(
                                 radius: 48,
-                                backgroundColor: accentColor.withValues(alpha: 0.2),
+                                backgroundColor:
+                                    accentColor.withValues(alpha: 0.2),
                                 backgroundImage: user.avatarUrl != null &&
                                         user.avatarUrl!.isNotEmpty
                                     ? NetworkImage(user.avatarUrl!)
@@ -260,7 +266,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                                   decoration: BoxDecoration(
                                     color: AppColors.systemRed,
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: cardColor, width: 2),
+                                    border:
+                                        Border.all(color: cardColor, width: 2),
                                   ),
                                   child: const Icon(
                                     CupertinoIcons.lock_fill,
@@ -315,12 +322,13 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       Flexible(
                         child: Text(
                           user.email,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: isDark
-                                    ? AppColors.secondaryLabelDark
-                                    : AppColors.secondaryLabel,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: isDark
+                                        ? AppColors.secondaryLabelDark
+                                        : AppColors.secondaryLabel,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -391,7 +399,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     : AppColors.separator.withValues(alpha: 0.25),
                 width: 0.7,
               ),
-
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +425,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  NumberFormat.compactCurrency(symbol: '\$').format(user.netWorth),
+                  NumberFormat.compactCurrency(symbol: '\$')
+                      .format(user.netWorth),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: -1.0,
@@ -485,7 +493,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     : AppColors.separator.withValues(alpha: 0.3),
                 width: 0.8,
               ),
-
             ),
             clipBehavior: Clip.hardEdge,
             child: Column(
@@ -494,10 +501,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     icon: CupertinoIcons.calendar,
                     iconColor: AppColors.tealBlue,
                     label: 'Joined',
-                    value:
-                        DateFormat('MMM d, yyyy').format(user.createdAt)),
+                    value: DateFormat('MMM d, yyyy').format(user.createdAt)),
                 _divider(context),
-
                 _infoRow(context, isDark,
                     icon: CupertinoIcons.doc_text,
                     iconColor: AppColors.brandTeal,
@@ -764,7 +769,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               : AppColors.separator.withValues(alpha: 0.3),
           width: 0.8,
         ),
-
       ),
       clipBehavior: Clip.hardEdge,
       child: auditAsync.when(
@@ -928,7 +932,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     final day = DateUtils.dateOnly(local);
     final timeStr = DateFormat('h:mm a').format(local);
     if (day == today) return 'Today, $timeStr';
-    if (day == today.subtract(const Duration(days: 1))) return 'Yesterday, $timeStr';
+    if (day == today.subtract(const Duration(days: 1)))
+      return 'Yesterday, $timeStr';
     final diff = today.difference(day).inDays;
     if (diff < 7) return '$diff days ago';
     return DateFormat('MMM d, yyyy').format(local);
@@ -939,8 +944,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
 
   static double _monthsSince(DateTime date) {
     final now = DateTime.now();
-    final months =
-        (now.year - date.year) * 12 + (now.month - date.month);
+    final months = (now.year - date.year) * 12 + (now.month - date.month);
     return months < 1 ? 1.0 : months.toDouble();
   }
 
@@ -1024,16 +1028,14 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       Expanded(
                         child: Text(
                           action,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: isDark
-                                    ? AppColors.labelDark
-                                    : AppColors.label,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                    color: isDark
+                                        ? AppColors.labelDark
+                                        : AppColors.label,
+                                  ),
                         ),
                       ),
                       if (formattedTime.isNotEmpty)
@@ -1293,16 +1295,14 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                         children: [
                           Text(
                             'Audit Log',
-                            style: Theme.of(ctx)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
-                                  color: isDark
-                                      ? AppColors.labelDark
-                                      : AppColors.label,
-                                ),
+                            style:
+                                Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
+                                      color: isDark
+                                          ? AppColors.labelDark
+                                          : AppColors.label,
+                                    ),
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -1359,10 +1359,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                                   rowBuilder: (entry, isLast) {
                                     final screen =
                                         entry['screen_name'] as String?;
-                                    final formattedScreen = screen != null &&
-                                            screen.isNotEmpty
-                                        ? _formatAction(screen)
-                                        : null;
+                                    final formattedScreen =
+                                        screen != null && screen.isNotEmpty
+                                            ? _formatAction(screen)
+                                            : null;
                                     return _timelineRow(
                                       ctx,
                                       isDark,
@@ -1410,8 +1410,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('Disabling account…'),
-          duration: Duration(seconds: 1)),
+          content: Text('Disabling account…'), duration: Duration(seconds: 1)),
     );
     try {
       await ref.read(disableUserAccountProvider(user.id).future);
@@ -1452,8 +1451,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.systemGreen),
+            style: TextButton.styleFrom(foregroundColor: AppColors.systemGreen),
             child: const Text('Enable'),
           ),
         ],
@@ -1492,9 +1490,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
   // ── Reusable row/card widgets ────────────────────────────────────────────
 
   Widget _badge(BuildContext context,
-      {required String label,
-      required Color color,
-      required IconData icon}) {
+      {required String label, required Color color, required IconData icon}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -1724,8 +1720,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         children: [
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -1735,8 +1730,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 LoadingSkeleton(
                     width: 84,
                     height: 84,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusFull)),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull)),
                 const SizedBox(height: 18),
                 LoadingSkeleton(
                     width: 135,
@@ -1772,9 +1766,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ),
           const SizedBox(height: 24),
           LoadingSkeleton(
-              width: 90,
-              height: 11,
-              borderRadius: BorderRadius.circular(4)),
+              width: 90, height: 11, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: 12),
           LoadingSkeleton(
               height: 95,
@@ -1784,61 +1776,49 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
             const SizedBox(width: 9),
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
           ]),
           const SizedBox(height: 24),
           LoadingSkeleton(
-              width: 90,
-              height: 11,
-              borderRadius: BorderRadius.circular(4)),
+              width: 90, height: 11, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: 12),
           LoadingSkeleton(
               height: 135,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
           const SizedBox(height: 24),
           LoadingSkeleton(
-              width: 90,
-              height: 11,
-              borderRadius: BorderRadius.circular(4)),
+              width: 90, height: 11, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: 12),
           Row(children: [
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
             const SizedBox(width: 9),
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
           ]),
           const SizedBox(height: 24),
           LoadingSkeleton(
-              width: 90,
-              height: 11,
-              borderRadius: BorderRadius.circular(4)),
+              width: 90, height: 11, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: 12),
           Row(children: [
             Expanded(
                 child: LoadingSkeleton(
                     height: 81,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
             const SizedBox(width: 9),
             Expanded(
                 child: LoadingSkeleton(
                     height: 81,
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusCard))),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
           ]),
           const SizedBox(height: 9),
           LoadingSkeleton(

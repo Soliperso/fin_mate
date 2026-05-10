@@ -61,11 +61,14 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
           balance: double.parse(_balanceController.text),
           interestRate: double.parse(_interestRateController.text),
           minimumPayment: double.parse(_minimumPaymentController.text),
-          originalBalance: rawOriginal.isNotEmpty ? double.tryParse(rawOriginal) : null,
+          originalBalance:
+              rawOriginal.isNotEmpty ? double.tryParse(rawOriginal) : null,
           dueDay: _dueDayController.text.isNotEmpty
               ? int.tryParse(_dueDayController.text)
               : null,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
         );
 
     if (!mounted) return;
@@ -133,8 +136,9 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     border: const OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'addDebt.nameRequired'.tr() : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'addDebt.nameRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: AppSizes.md),
 
@@ -146,9 +150,12 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     border: const OutlineInputBorder(),
                   ),
                   items: _debtTypes
-                      .map((t) => DropdownMenuItem(value: t.$1, child: Text(t.$2)))
+                      .map((t) =>
+                          DropdownMenuItem(value: t.$1, child: Text(t.$2)))
                       .toList(),
-                  onChanged: (v) { if (v != null) setState(() => _selectedDebtType = v); },
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedDebtType = v);
+                  },
                 ),
                 const SizedBox(height: AppSizes.md),
 
@@ -160,11 +167,14 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     prefixText: '\$ ',
                     border: const OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'common.required'.tr();
-                    if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
-                    if (double.parse(v) < 0) return 'addDebt.mustBeZeroOrMore'.tr();
+                    if (double.tryParse(v) == null)
+                      return 'addDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0)
+                      return 'addDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -181,11 +191,14 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                     border: const OutlineInputBorder(),
                     helperText: 'addDebt.originalBalanceHelper'.tr(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
-                    if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
-                    if (double.parse(v) < 0) return 'addDebt.mustBeZeroOrMore'.tr();
+                    if (double.tryParse(v) == null)
+                      return 'addDebt.invalidNumber'.tr();
+                    if (double.parse(v) < 0)
+                      return 'addDebt.mustBeZeroOrMore'.tr();
                     return null;
                   },
                 ),
@@ -202,10 +215,13 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                           suffixText: '%',
                           border: const OutlineInputBorder(),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'common.required'.tr();
-                          if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
+                          if (v == null || v.isEmpty)
+                            return 'common.required'.tr();
+                          if (double.tryParse(v) == null)
+                            return 'addDebt.invalidNumber'.tr();
                           return null;
                         },
                       ),
@@ -220,11 +236,15 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                           prefixText: '\$ ',
                           border: const OutlineInputBorder(),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'common.required'.tr();
-                          if (double.tryParse(v) == null) return 'addDebt.invalidNumber'.tr();
-                          if (double.parse(v) <= 0) return 'addDebt.mustBeGreaterThanZero'.tr();
+                          if (v == null || v.isEmpty)
+                            return 'common.required'.tr();
+                          if (double.tryParse(v) == null)
+                            return 'addDebt.invalidNumber'.tr();
+                          if (double.parse(v) <= 0)
+                            return 'addDebt.mustBeGreaterThanZero'.tr();
                           return null;
                         },
                       ),
@@ -245,7 +265,8 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return null;
                     final day = int.tryParse(v);
-                    if (day == null || day < 1 || day > 31) return 'addDebt.mustBe1to31'.tr();
+                    if (day == null || day < 1 || day > 31)
+                      return 'addDebt.mustBe1to31'.tr();
                     return null;
                   },
                 ),
@@ -271,7 +292,9 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                           minimumSize: const Size.fromHeight(48),
                           shape: const StadiumBorder(),
                         ),
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: Text('common.cancel'.tr()),
                       ),
                     ),
@@ -289,7 +312,8 @@ class _AddDebtBottomSheetState extends ConsumerState<AddDebtBottomSheet> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white),
                               )
                             : Text('addDebt.addButton'.tr()),
                       ),

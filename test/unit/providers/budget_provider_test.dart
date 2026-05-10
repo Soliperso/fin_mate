@@ -79,7 +79,8 @@ void main() {
       expect(_budget(amount: 500, spent: 450).isNearLimit, isTrue);
     });
 
-    test('returns false when budget is exceeded (isExceeded takes precedence)', () {
+    test('returns false when budget is exceeded (isExceeded takes precedence)',
+        () {
       expect(_budget(amount: 500, spent: 600).isNearLimit, isFalse);
     });
   });

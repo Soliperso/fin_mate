@@ -82,7 +82,8 @@ class SettingsPage extends ConsumerWidget {
                   title: 'settings.theme'.tr(),
                   subtitle: 'settings.lightOrDark'.tr(),
                   onTap: () => context.push('/settings/display?section=theme'),
-                  trailingText: settings?.themeMode ?? 'settings.themeSystem'.tr(),
+                  trailingText:
+                      settings?.themeMode ?? 'settings.themeSystem'.tr(),
                 ),
                 _buildDivider(context, isDark),
                 _buildSettingsTile(
@@ -91,7 +92,8 @@ class SettingsPage extends ConsumerWidget {
                   icon: CupertinoIcons.money_dollar,
                   title: 'settings.currency'.tr(),
                   subtitle: 'settings.currencyDefault'.tr(),
-                  onTap: () => context.push('/settings/display?section=currency'),
+                  onTap: () =>
+                      context.push('/settings/display?section=currency'),
                   trailingText: 'USD',
                 ),
                 _buildDivider(context, isDark),
@@ -101,7 +103,8 @@ class SettingsPage extends ConsumerWidget {
                   icon: CupertinoIcons.calendar,
                   title: 'settings.dateFormat'.tr(),
                   subtitle: 'settings.dateFormatDisplay'.tr(),
-                  onTap: () => context.push('/settings/display?section=dateformat'),
+                  onTap: () =>
+                      context.push('/settings/display?section=dateformat'),
                   trailingText: 'MM/DD/YYYY',
                 ),
               ]),
@@ -192,8 +195,8 @@ class SettingsPage extends ConsumerWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md, vertical: 12),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: [
             Container(
