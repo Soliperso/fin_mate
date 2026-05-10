@@ -39,10 +39,15 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
           ..sort(
               (a, b) => (b['amount'] as num).compareTo(a['amount'] as num));
         final top = sorted.take(5).toList();
-        final total = top.fold<double>(
+        final topTotal = top.fold<double>(
           0,
           (sum, item) => sum + (item['amount'] as num).toDouble(),
         );
+        final realTotal = data.fold<double>(
+          0,
+          (sum, item) => sum + (item['amount'] as num).toDouble(),
+        );
+        final hasOthers = data.length > 5;
 
         return Container(
           decoration: BoxDecoration(
@@ -147,7 +152,7 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                         _CategoryRow(
                           name: top[i]['category'] as String,
                           amount: (top[i]['amount'] as num).toDouble(),
-                          total: total,
+                          total: topTotal,
                           color: _categoryColors[i % _categoryColors.length],
                           isDark: isDark,
                         ),
@@ -176,23 +181,36 @@ class _SpendingBreakdownCardState extends ConsumerState<SpendingBreakdownCard> {
                 padding: const EdgeInsets.fromLTRB(
                   AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.sm,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'spending.totalExpenses'.tr(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.secondaryLabel,
-                          ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'spending.totalExpenses'.tr(),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.secondaryLabel,
+                              ),
+                        ),
+                        Text(
+                          ref.watch(currencyFormat2Provider).format(realTotal),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.systemRed,
+                              ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      ref.watch(currencyFormat2Provider)
-                          .format(total),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.systemRed,
-                          ),
-                    ),
+                    if (hasOthers) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Top 5 of ${data.length} categories',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.secondaryLabel,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
               ),

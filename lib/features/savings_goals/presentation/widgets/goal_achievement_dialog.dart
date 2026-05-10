@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 
@@ -157,6 +158,19 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                             child: const Text(
                               'Awesome!',
                               style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            context.go('/goals');
+                          },
+                          child: const Text(
+                            'Start a New Goal',
+                            style: TextStyle(
+                              color: AppColors.brandTeal,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),

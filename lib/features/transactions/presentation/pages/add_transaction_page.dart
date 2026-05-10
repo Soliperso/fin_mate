@@ -24,6 +24,8 @@ import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/domain/entities/debt_entity.dart';
 import '../../../debt_payoff/presentation/providers/debt_providers.dart';
+import '../../../savings_goals/domain/entities/savings_goal_entity.dart';
+import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
 import '../../data/datasources/reminder_remote_datasource.dart';
 // import '../../../../core/providers/subscription_provider.dart'; // [V1.1: Attachment]
 // import '../../../../shared/widgets/premium_feature_dialog.dart'; // [V1.1: Attachment]
@@ -74,6 +76,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   // Debt linking (shown for any expense — optionally reduces a tracked debt balance)
   DebtEntity? _linkedDebt;
+
+  // Goal linking (optional — auto-creates a contribution for the saved amount)
+  SavingsGoal? _linkedGoal;
 
   // Maps debt-payment category names → debt type strings in the debts table
   static const _categoryDebtTypeMap = {
@@ -743,6 +748,87 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ),
 
           _divider(isDark),
+
+          // Save toward goal — only for new transactions with active goals
+          if (!_isEditing)
+            Consumer(
+              builder: (context, ref, _) {
+                return ref.watch(savingsGoalsProvider).when(
+                  data: (goals) {
+                    final active = goals.where((g) => !g.isCompleted).toList();
+                    if (active.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSizes.md, vertical: 4),
+                          child: Row(
+                            children: [
+                              _rowIcon(CupertinoIcons.flag,
+                                  accentColor: _typeColor, isDark: isDark),
+                              const SizedBox(width: AppSizes.md),
+                              Expanded(
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<SavingsGoal?>(
+                                    value: _linkedGoal,
+                                    hint: Text(
+                                      'Save toward goal (Optional)',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                              color: AppColors.tertiaryLabel),
+                                    ),
+                                    isExpanded: true,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w500),
+                                    icon: const Icon(
+                                        CupertinoIcons.chevron_up_chevron_down,
+                                        size: 14,
+                                        color: AppColors.systemGray3),
+                                    items: [
+                                      DropdownMenuItem(
+                                        value: null,
+                                        child: Text('common.none'.tr(),
+                                            style: TextStyle(
+                                                color: AppColors.tertiaryLabel)),
+                                      ),
+                                      ...active.map((g) => DropdownMenuItem(
+                                          value: g, child: Text(g.name))),
+                                    ],
+                                    onChanged: (g) {
+                                      setState(() {
+                                        _linkedGoal = g;
+                                        if (g != null) {
+                                          _selectedType = 'expense';
+                                          _selectedCategory = 'Savings';
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (mounted) {
+                                              _syncCategoryWheel(
+                                                  _loadedCategories);
+                                            }
+                                          });
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _divider(isDark),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              },
+            ),
 
           // Date — quick shortcuts
           Padding(
@@ -1563,6 +1649,17 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ref.invalidate(debtsProvider);
           ref.invalidate(debtSummaryProvider);
         }
+        // If a savings goal was linked, auto-create a contribution
+        if (_linkedGoal != null) {
+          await ref.read(goalOperationsProvider.notifier).addContribution(
+                goalId: _linkedGoal!.id,
+                amount: amount.abs(),
+                notes: notesText.isEmpty ? null : notesText,
+                transactionId: savedTransactionId,
+              );
+          ref.invalidate(savingsGoalsProvider);
+          ref.invalidate(goalsSummaryProvider);
+        }
       }
 
       // Upload attachment if one was picked
@@ -1650,6 +1747,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         return CupertinoIcons.chart_bar_alt_fill;
       case 'gift':
         return CupertinoIcons.gift;
+      case 'savings':
+        return CupertinoIcons.arrow_up_circle_fill;
       case 'other income':
         return CupertinoIcons.money_dollar_circle;
 

@@ -655,6 +655,29 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       }).toList();
     }
 
+    if (state.selectedCategory != null) {
+      periodTxns = periodTxns
+          .where((t) => t.categoryName == state.selectedCategory)
+          .toList();
+    }
+
+    if (state.searchQuery.isNotEmpty) {
+      final q = state.searchQuery.toLowerCase();
+      periodTxns = periodTxns.where((t) {
+        return (t.description ?? '').toLowerCase().contains(q) ||
+            (t.categoryName ?? '').toLowerCase().contains(q);
+      }).toList();
+    }
+
+    if (state.minAmount != null || state.maxAmount != null) {
+      periodTxns = periodTxns.where((t) {
+        final amt = t.amount.abs();
+        if (state.minAmount != null && amt < state.minAmount!) return false;
+        if (state.maxAmount != null && amt > state.maxAmount!) return false;
+        return true;
+      }).toList();
+    }
+
     final income = _totalIncome(periodTxns);
     final expense = _totalExpense(periodTxns);
     final remaining = income - expense;
@@ -665,6 +688,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
 
+    final isFiltered = state.selectedCategory != null ||
+        state.searchQuery.isNotEmpty ||
+        state.minAmount != null ||
+        state.maxAmount != null;
+
     return Padding(
       padding:
           const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
@@ -673,40 +701,50 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           color: cardBg,
           borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         ),
-        child: Row(
-          children: [
-            _buildSummaryCell(
-              context: context,
-              icon: CupertinoIcons.arrow_up,
-              color: AppColors.systemGreen,
-              label: 'transactions.filterIncome'.tr(),
-              amount: fmt.format(income),
-            ),
-            VerticalDivider(
-              width: 1,
-              thickness: 0.5,
-              color: Theme.of(context).dividerColor,
-            ),
-            _buildSummaryCell(
-              context: context,
-              icon: CupertinoIcons.arrow_down,
-              color: AppColors.systemRed,
-              label: 'transactions.filterExpense'.tr(),
-              amount: fmt.format(expense),
-            ),
-            VerticalDivider(
-              width: 1,
-              thickness: 0.5,
-              color: Theme.of(context).dividerColor,
-            ),
-            _buildSummaryCell(
-              context: context,
-              icon: Icons.account_balance_wallet_outlined,
-              color: remainingColor,
-              label: 'Remaining',
-              amount: fmt.format(remaining.abs()),
-            ),
-          ],
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              _buildSummaryCell(
+                context: context,
+                icon: CupertinoIcons.arrow_up,
+                color: AppColors.systemGreen,
+                label: 'transactions.filterIncome'.tr(),
+                amount: fmt.format(income),
+                horizontal: isFiltered,
+              ),
+              VerticalDivider(
+                width: 1,
+                thickness: 0.5,
+                indent: 10,
+                endIndent: 10,
+                color: Theme.of(context).dividerColor,
+              ),
+              _buildSummaryCell(
+                context: context,
+                icon: CupertinoIcons.arrow_down,
+                color: AppColors.systemRed,
+                label: 'transactions.filterExpense'.tr(),
+                amount: fmt.format(expense),
+                horizontal: isFiltered,
+              ),
+              if (!isFiltered) ...[
+                VerticalDivider(
+                  width: 1,
+                  thickness: 0.5,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Theme.of(context).dividerColor,
+                ),
+                _buildSummaryCell(
+                  context: context,
+                  icon: Icons.account_balance_wallet_outlined,
+                  color: remainingColor,
+                  label: 'Remaining',
+                  amount: fmt.format(remaining.abs()),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -718,43 +756,64 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     required Color color,
     required String label,
     required String amount,
+    bool horizontal = false,
   }) {
+    final iconBox = Container(
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Icon(icon, size: 13, color: color),
+    );
+
+    final textCol = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          horizontal ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 1),
+        Text(
+          amount,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(6),
+        child: horizontal
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  iconBox,
+                  const SizedBox(width: 8),
+                  textCol,
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  iconBox,
+                  const SizedBox(height: 5),
+                  textCol,
+                ],
               ),
-              child: Icon(icon, size: 13, color: color),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 1),
-            Text(
-              amount,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     );
   }

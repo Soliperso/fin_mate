@@ -29,6 +29,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
 
   DateTime? _selectedDeadline;
   String? _selectedCategory;
+  bool _isLoading = false;
 
   final List<String> _categories = [
     'Emergency Fund',
@@ -64,11 +65,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
   Future<void> _updateGoal() async {
     if (!_formKey.currentState!.validate()) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    setState(() => _isLoading = true);
 
     final success = await ref.read(goalOperationsProvider.notifier).updateGoal(
           goalId: widget.goal.id,
@@ -80,10 +77,9 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
         );
 
     if (mounted) {
-      Navigator.pop(context); // Close loading dialog
-
+      setState(() => _isLoading = false);
       if (success) {
-        Navigator.pop(context, true); // Close bottom sheet with success
+        Navigator.pop(context, true);
         SuccessSnackbar.show(context, message: 'Goal updated successfully!');
       } else {
         ErrorSnackbar.show(context, message: 'Failed to update goal');
@@ -278,8 +274,17 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                     backgroundColor: AppColors.brandTeal,
                     foregroundColor: AppColors.white,
                   ),
-                  onPressed: _updateGoal,
-                  child: const Text('Update Goal'),
+                  onPressed: _isLoading ? null : _updateGoal,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                          ),
+                        )
+                      : const Text('Update Goal'),
                 ),
               ),
             ],

@@ -23,7 +23,9 @@ import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
 import '../widgets/upcoming_bills_card.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
+import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
 import '../widgets/budget_snapshot_card.dart';
+import '../widgets/goals_summary_slide.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
 
@@ -199,29 +201,63 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const SizedBox(height: AppSizes.md),
 
-                // ── Metrics carousel: Health score | Budget snapshot ──────
+                // ── Metrics carousel: Health score | Budget snapshot | Goals
                 Consumer(
                   builder: (context, ref, _) {
                     final budgets = ref.watch(budgetsWithSpendingProvider).valueOrNull;
                     final hasActiveBudgets = budgets?.any((b) => b.isActive) ?? false;
-                    if (!hasActiveBudgets) {
-                      return MoneyHealthScore(score: stats.moneyHealthScore);
-                    }
+
+                    final goals = ref.watch(savingsGoalsProvider).valueOrNull;
+                    final totalSaved =
+                        goals?.fold(0.0, (s, g) => s + g.currentAmount) ?? 0.0;
+                    final hasActiveGoals =
+                        (goals?.any((g) => !g.isCompleted) ?? false) &&
+                        totalSaved > 0;
+
+                    // Build unwrapped list first so single-card early return
+                    // stays aligned with the rest of the page content.
+                    final rawSlides = <Widget>[
+                      MoneyHealthScore(score: stats.moneyHealthScore),
+                      if (hasActiveBudgets) const BudgetSnapshotCard(),
+                      if (hasActiveGoals) const GoalsSummarySlide(),
+                    ];
+
+                    if (rawSlides.length == 1) return rawSlides.first;
+
+                    // Multi-card: each slide re-applies pagePadding so the card
+                    // width matches every other element on the page. OverflowBox
+                    // lets the PageView break out of the parent's horizontal
+                    // padding, making the gap between cards visible during swipe.
+                    final slides = rawSlides
+                        .map((child) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.pagePadding,
+                              ),
+                              child: child,
+                            ))
+                        .toList();
+
                     return Column(
                       children: [
                         SizedBox(
                           height: 148,
-                          child: PageView(
-                            controller: _metricsController,
-                            onPageChanged: (p) => setState(() => _metricsPage = p),
-                            children: [
-                              MoneyHealthScore(score: stats.moneyHealthScore),
-                              const BudgetSnapshotCard(),
-                            ],
+                          child: OverflowBox(
+                            maxWidth: MediaQuery.of(context).size.width,
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: 148,
+                              child: PageView(
+                                controller: _metricsController,
+                                onPageChanged: (p) =>
+                                    setState(() => _metricsPage = p),
+                                children: slides,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSizes.md),
-                        _PageDots(count: 2, current: _metricsPage),
+                        _PageDots(count: slides.length, current: _metricsPage),
                       ],
                     );
                   },

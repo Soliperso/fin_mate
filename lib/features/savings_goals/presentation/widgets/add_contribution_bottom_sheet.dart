@@ -7,6 +7,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
+import '../../../transactions/domain/entities/transaction_entity.dart';
+import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../providers/savings_goal_providers.dart';
 
 class AddContributionBottomSheet extends ConsumerStatefulWidget {
@@ -30,6 +32,7 @@ class _AddContributionBottomSheetState
 
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
+  TransactionEntity? _linkedTransaction;
 
   @override
   void dispose() {
@@ -65,6 +68,7 @@ class _AddContributionBottomSheetState
         goalId: widget.goalId,
         amount: amount,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+        transactionId: _linkedTransaction?.id,
       );
 
       if (contribution != null && mounted) {
@@ -183,6 +187,19 @@ class _AddContributionBottomSheetState
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
               ),
+              const SizedBox(height: AppSizes.md),
+
+              // Link to Transaction (optional)
+              _TransactionPicker(
+                selected: _linkedTransaction,
+                onSelected: (tx) => setState(() {
+                  _linkedTransaction = tx;
+                  if (tx != null) {
+                    _amountController.text =
+                        tx.amount.toStringAsFixed(2);
+                  }
+                }),
+              ),
               const SizedBox(height: AppSizes.xl),
 
               // Submit Button
@@ -211,6 +228,63 @@ class _AddContributionBottomSheetState
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TransactionPicker extends ConsumerWidget {
+  final TransactionEntity? selected;
+  final ValueChanged<TransactionEntity?> onSelected;
+
+  const _TransactionPicker({required this.selected, required this.onSelected});
+
+  String _label(TransactionEntity tx) {
+    final parts = <String>[];
+    if (tx.categoryName != null) parts.add(tx.categoryName!);
+    if (tx.description != null && tx.description!.isNotEmpty) {
+      parts.add(tx.description!);
+    }
+    final name = parts.isNotEmpty ? parts.join(' · ') : tx.type.displayName;
+    final date = DateFormat('MMM d').format(tx.date);
+    return '\$${tx.amount.toStringAsFixed(2)} — $name — $date';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final txAsync = ref.watch(recentTransactionsProvider);
+
+    return txAsync.when(
+      data: (transactions) {
+        if (transactions.isEmpty) return const SizedBox.shrink();
+
+        return DropdownButtonFormField<TransactionEntity?>(
+          initialValue: selected,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Link to Transaction (Optional)',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(CupertinoIcons.link, size: 16),
+          ),
+          items: [
+            const DropdownMenuItem<TransactionEntity?>(
+              value: null,
+              child: Text('None'),
+            ),
+            ...transactions.map(
+              (tx) => DropdownMenuItem<TransactionEntity?>(
+                value: tx,
+                child: Text(
+                  _label(tx),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+          onChanged: onSelected,
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

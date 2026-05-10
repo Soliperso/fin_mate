@@ -108,12 +108,20 @@ class BudgetSnapshotCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSizes.xs),
                       Text(
-                        '${currencyFmt.format(totalSpent)} of ${currencyFmt.format(totalBudgeted)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        currencyFmt.format(totalBudgeted - totalSpent),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: AppColors.secondaryLabel,
+                              letterSpacing: -0.5,
                             ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'of ${currencyFmt.format(totalBudgeted)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.secondaryLabel,
+                            ),
                       ),
                       const SizedBox(height: AppSizes.xs),
                       Container(
