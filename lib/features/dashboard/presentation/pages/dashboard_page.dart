@@ -11,7 +11,6 @@ import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
-// import '../../../../shared/widgets/ads/finmate_native_ad_widget.dart'; // [Ads - commented out: intrusive]
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
@@ -338,9 +337,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isDark: isDark,
                 ),
 
-                // [Ads - commented out: intrusive]
-                // const SizedBox(height: AppSizes.md),
-                // const FinmateNativeAdWidget(),
                 const SizedBox(height: AppSizes.md),
               ],
             ),

@@ -17,8 +17,9 @@ class SettingsRemoteDataSource {
           .from('user_profiles')
           .select()
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
+      if (response == null) return null;
       return SettingsModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to get settings: $e');

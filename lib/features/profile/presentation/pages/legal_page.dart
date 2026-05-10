@@ -22,7 +22,13 @@ class LegalPage extends StatelessWidget {
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
-            onTap: () => context.pop(),
+            onTap: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/profile');
+              }
+            },
           ),
         ),
       ),

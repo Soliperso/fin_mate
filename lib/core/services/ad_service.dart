@@ -179,20 +179,23 @@ class AdService {
   }
 
   InterstitialAd? _preloadedInterstitial;
+  bool _isLoadingInterstitial = false;
 
-  /// Preload an interstitial ad silently. No-op if already loaded.
+  /// Preload an interstitial ad silently. No-op if already loaded or loading.
   Future<void> preloadInterstitial() async {
-    if (_preloadedInterstitial != null) return;
+    if (_preloadedInterstitial != null || _isLoadingInterstitial) return;
     // Self-heal: wait for SDK before trying to load
     if (!_isInitialized) await initialize();
     if (!_isInitialized) return;
 
+    _isLoadingInterstitial = true;
     _preloadedInterstitial = await loadInterstitialAd(
       onAdDismissedFullScreenContent: (_) {
         _preloadedInterstitial = null;
         preloadInterstitial();
       },
     );
+    _isLoadingInterstitial = false;
   }
 
   /// Show the preloaded interstitial on every Nth app session.
