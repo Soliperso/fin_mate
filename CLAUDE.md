@@ -72,22 +72,23 @@ lib/
 │   ├── constants/     # app_sizes.dart, app_effects.dart
 │   ├── error/         # global_error_handler.dart
 │   ├── guards/        # admin_guard.dart (isAdminProvider)
-│   ├── providers/     # analytics_provider.dart
-│   ├── services/      # biometric, mfa, secure_storage, sentry, ad, analytics, theme, session, device_security
+│   ├── providers/     # analytics_provider.dart, subscription_provider.dart
+│   ├── services/      # biometric, mfa, secure_storage, sentry, ad, analytics, theme, device_security
 │   └── theme/         # AppTheme (light + dark, Material 3)
 ├── features/
 │   ├── auth/          # Email/password, OTP verify, MFA (TOTP + email OTP), biometric
-│   ├── dashboard/     # Net worth card, cash flow chart, money health score, emergency fund
-│   ├── transactions/  # CRUD with accounts and categories, receipt scanner (ML Kit)
+│   ├── dashboard/     # Net worth card, cash flow chart, money health score, upcoming bills carousel
+│   ├── transactions/  # CRUD with accounts and categories, receipt scanner (ML Kit), CSV import/export
 │   ├── budgets/       # Category budgets with progress tracking
-│   ├── savings_goals/ # Goals + contributions (active, accessible via Profile)
-│   ├── ai_insights/   # OpenAI GPT-4o-mini chat, balance forecast, spending alerts (active)
-│   ├── notifications/ # In-app notifications (active)
-│   ├── settings/      # Display, notification settings, data privacy (active)
-│   ├── profile/       # Profile edit, security settings, legal (active)
-│   ├── bill_splitting/# Groups/expenses/settlements (commented out — being replaced by Debt Payoff)
-│   ├── admin/         # User management, system analytics (code complete, route commented out)
-│   └── documents/     # Receipt/doc storage (code complete, route commented out)
+│   ├── savings_goals/ # Goals + contributions (accessible via Profile → /goals)
+│   ├── recurring_transactions/ # Scheduled income/expenses, auto-generation, mark-as-paid
+│   ├── debt_payoff/   # Avalanche/Snowball payoff, payment plans, DTI widget
+│   ├── ai_insights/   # OpenAI GPT-4o-mini chat, balance forecast (code complete, route dormant)
+│   ├── notifications/ # In-app notifications with real-time updates
+│   ├── settings/      # Display, notification settings, data privacy, CSV/JSON export
+│   ├── profile/       # Profile edit, security settings, legal, about
+│   ├── admin/         # User management, system analytics (active, admin-guarded)
+│   └── subscription/  # Paywall page, subscription status card
 └── shared/            # Reusable widgets (buttons, containers, offline indicator, ad widgets)
 ```
 
@@ -150,30 +151,30 @@ Auth state flows through `authNotifierProvider` (StateNotifierProvider<AuthNotif
 
 ## Routing
 
-Router is in `lib/core/config/router.dart`. The main `ShellRoute` renders `MainShell` — a 3-tab `NavigationBar`: **Dashboard, Transactions, Budgets**.
+Router is in `lib/core/config/router.dart`. The main `ShellRoute` renders `MainShell` — a **5-tab `NavigationBar`**: **Dashboard, Transactions, Budgets, Debt, Profile**.
 
-Many routes exist in the file but are commented out with their reason:
-- `[MVP: AI Insights]` — AI chat/forecast page
-- `[MVP: Documents]` — document storage
-- `[MVP: Admin Panel]` — admin user management and analytics
-- `[MVP: Pricing/Subscription]` — subscription management
-- `[V1.1: Bill Splitting]` — group expense splitting (being replaced by Debt Payoff)
-- `[V1.1: Recurring Transactions]` — recurring transaction automation
-- `COMMENTED OUT - Savings Goals not in MVP Phase 1`
+Commented-out routes (with their reason tag):
+- `[AI Insights - Commented out]` — AI chat/forecast page (code complete, dormant until V1.1)
+- `[MVP: Pricing/Subscription - Commented out for initial launch]` — subscription management pages
 
-To activate a commented-out route: uncomment its import at the top of `router.dart` and uncomment the corresponding `GoRoute` block.
+To activate a dormant route: uncomment its import at the top of `router.dart` and uncomment the corresponding `GoRoute` block.
 
 ### Active Routes
 | Route | Feature |
 |---|---|
-| `/dashboard` | Dashboard (net worth, cash flow, health score) |
+| `/dashboard` | Dashboard (net worth, cash flow, health score, upcoming bills carousel) |
 | `/dashboard/emergency-fund` | Emergency Fund tracker |
-| `/transactions`, `/transactions/add` | Transactions + add/edit |
+| `/transactions`, `/transactions/add` | Transactions + add/edit + CSV import/export |
 | `/transactions/scan-receipt` | ML Kit receipt scanner |
 | `/budgets` | Budgets |
+| `/goals`, `/goals/:id` | Savings Goals (also linked from Profile) |
+| `/recurring-transactions`, `/recurring-transactions/add` | Recurring Transactions (also linked from Profile) |
+| `/debt`, `/debt/:debtId` | Debt Payoff (Avalanche/Snowball) |
 | `/notifications` | In-app notifications |
-| `/profile`, `/profile/edit`, `/profile/security` | Profile management |
+| `/profile`, `/profile/edit`, `/profile/security`, `/profile/legal` | Profile management |
 | `/settings`, `/settings/notifications`, `/settings/display`, `/settings/data-privacy` | Settings |
+| `/admin/users`, `/admin/analytics`, `/admin/settings` | Admin panel (admin-guarded) |
+| `/paywall` | Subscription paywall |
 
 ---
 
@@ -185,7 +186,9 @@ To activate a commented-out route: uncomment its import at the top of `router.da
 | `AnalyticsService` | Custom event tracking (Supabase-backed) |
 | `AdService` | Google Mobile Ads |
 | `DeviceSecurityService` | Jailbreak/root detection (logs warning, does not block) |
-| Stripe (`PaymentService`) | **Commented out** — not active in MVP |
+| `AutoBackupService` | Scheduled local data backup |
+| `RecurringTransactionProcessor` | Auto-generates transactions from overdue recurring entries |
+| `ReviewService` | In-app review prompt logic |
 
 ---
 
@@ -198,7 +201,7 @@ Key tables:
 - `budgets`, `net_worth_snapshots`, `notifications`
 - `savings_goals`, `goal_contributions`
 - `documents`, `analytics_events`, `emergency_fund_settings`
-- `bill_groups`, `group_members`, `group_expenses`, `expense_splits`, `settlements` — to be replaced by debt payoff tables
+- `debts`, `debt_payments` — Debt Payoff feature
 
 Financial amounts stored as `DECIMAL(15,2)`.
 
@@ -206,9 +209,11 @@ Financial amounts stored as `DECIMAL(15,2)`.
 
 ## AI Integration
 
-The app uses **OpenAI GPT-4o-mini** via direct HTTP calls (`openai_chat_service.dart`). The API key is loaded from `.env` via `EnvConfig.openAiApiKey`. (`AppConfig.aiModel` references `'gpt-4'` but is stale/unused — do not rely on it.)
+The AI Insights feature (`lib/features/ai_insights/`) uses **OpenAI GPT-4o-mini** via direct HTTP calls (`openai_chat_service.dart`). The API key is loaded from `.env` via `EnvConfig.openAiApiKey`. (`AppConfig.aiModel` references `'gpt-4'` but is stale/unused — do not rely on it.)
 
 `BalanceForecastService` (`lib/features/ai_insights/data/services/balance_forecast_service.dart`) generates 30-day balance forecasts from spending history and recurring transactions — this runs locally without any AI API call.
+
+**The entire `ai_insights` feature is currently dormant** (route commented out in `router.dart`). Do not enable it without explicit instruction.
 
 ---
 
@@ -216,22 +221,23 @@ The app uses **OpenAI GPT-4o-mini** via direct HTTP calls (`openai_chat_service.
 
 ### Active (routed and working)
 - Auth (email/password, MFA TOTP + email OTP, biometric, OTP verify)
-- Dashboard, Transactions, Budgets, Emergency Fund
+- Dashboard (net worth, cash flow, health score, upcoming bills carousel, emergency fund)
+- Transactions (CRUD, receipt scanner via ML Kit, CSV import/export)
+- Budgets, Emergency Fund
 - Debt Payoff (Avalanche/Snowball, payment plans, DTI widget)
-- AI Insights / OpenAI Chat (GPT-4o-mini, balance forecast, spending alerts)
-- Savings Goals (accessible via Profile page)
+- Savings Goals (accessible via Profile → `/goals`)
+- Recurring Transactions (create/edit/delete, schedule, auto-generation, accessible via Profile → `/recurring-transactions`)
 - Notifications, Profile, Settings
+- Admin Panel (user management, system analytics — admin-guarded, accessible via Profile for admins)
+- Data export (JSON, CSV) via Settings → Data & Privacy
 
-### Code complete but commented out of routing
-- Documents (`[MVP: Documents]`)
-- Admin Panel (`[MVP: Admin Panel]`)
-- Subscription / Pricing (`[MVP: Pricing/Subscription]`)
-- Recurring Transactions (`[V1.1: Recurring Transactions]`)
-- Bill Splitting (`[V1.1: Bill Splitting]`) — replaced by Debt Payoff feature
+### Code complete but route dormant
+- AI Insights (`[AI Insights - Commented out]`) — full implementation in `lib/features/ai_insights/`; re-enable by uncommenting import + route in `router.dart`
+- Subscription / Pricing (`[MVP: Pricing/Subscription - Commented out]`) — paywall page active at `/paywall`; full subscription management pages are dormant
 
 ### Planned / Not yet implemented
-- CSV import for transactions
-- Data export (CSV/PDF)
+- Password reset deep-link verification (pending testing)
+- CSV export for budgets (partial — transactions CSV export is live)
 
 ---
 
