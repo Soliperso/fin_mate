@@ -47,9 +47,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         OnboardingSlide(
           title: 'onboarding.slide3.title'.tr(),
           description: 'onboarding.slide3.description'.tr(),
-          icon: CupertinoIcons.lightbulb_fill,
+          icon: CupertinoIcons.chart_bar_fill,
           color: AppColors.systemOrange,
-          features: ['Balance forecast', 'Spending alerts', 'Smart tips'],
+          features: ['Budget by category', 'Track overspending', 'Monthly summary'],
         ),
       ];
 

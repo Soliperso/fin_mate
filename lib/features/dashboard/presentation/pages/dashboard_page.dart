@@ -26,6 +26,7 @@ import '../../../recurring_transactions/presentation/providers/recurring_transac
 import '../widgets/budget_snapshot_card.dart';
 import '../widgets/goals_summary_slide.dart';
 import '../widgets/upcoming_bills_slide.dart';
+import '../widgets/get_started_card.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
 
@@ -287,6 +288,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 // [AI Insights - Commented out]
                 // const _AiInsightsCard(),
                 // const SizedBox(height: AppSizes.md),
+
+                // ── Get Started (new users only) ──────────────────────────
+                if (stats.recentTransactions.isEmpty &&
+                    stats.monthlyIncome == 0.0 &&
+                    stats.monthlyExpenses == 0.0) ...[
+                  const GetStartedCard(),
+                  const SizedBox(height: AppSizes.md),
+                ],
 
                 // ── DTI ratio ─────────────────────────────────────────────
                 const DtiWidget(),
