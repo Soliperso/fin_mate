@@ -48,7 +48,7 @@ final aiQueryUsageProvider = FutureProvider<AIQueryUsage>((ref) async {
 /// Provider to check if user can make another AI query
 final canMakeQueryProvider = FutureProvider<bool>((ref) async {
   // Check if user is premium
-  final isPremium = await ref.watch(stripePremiumProvider.future);
+  final isPremium = await ref.watch(isPremiumProvider.future);
   if (isPremium) {
     return true; // Premium users have unlimited queries
   }
@@ -76,7 +76,7 @@ class AIQueryOperations {
     }
 
     // Don't count queries for premium users
-    final isPremium = await _ref.read(stripePremiumProvider.future);
+    final isPremium = await _ref.read(isPremiumProvider.future);
     if (isPremium) {
       return;
     }

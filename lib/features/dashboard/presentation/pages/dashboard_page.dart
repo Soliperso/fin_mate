@@ -20,11 +20,12 @@ import '../widgets/cash_flow_card.dart';
 import '../widgets/cash_flow_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
-import '../widgets/upcoming_bills_card.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
+import '../../../recurring_transactions/presentation/providers/recurring_transactions_providers.dart';
 import '../widgets/budget_snapshot_card.dart';
 import '../widgets/goals_summary_slide.dart';
+import '../widgets/upcoming_bills_slide.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
 
@@ -223,12 +224,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         (goals?.any((g) => !g.isCompleted) ?? false) &&
                             totalSaved > 0;
 
+                    final upcomingBills = ref
+                            .watch(upcomingRecurringTransactionsProvider)
+                            .valueOrNull
+                            ?.where((t) => t.type == 'expense')
+                            .toList() ??
+                        [];
+                    final hasUpcomingBills = upcomingBills.isNotEmpty;
+
                     // Build unwrapped list first so single-card early return
                     // stays aligned with the rest of the page content.
                     final rawSlides = <Widget>[
                       MoneyHealthScore(score: stats.moneyHealthScore),
                       if (hasActiveBudgets) const BudgetSnapshotCard(),
                       if (hasActiveGoals) const GoalsSummarySlide(),
+                      if (hasUpcomingBills) const UpcomingBillsSlide(),
                     ];
 
                     if (rawSlides.length == 1) return rawSlides.first;
@@ -280,10 +290,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
                 // ── DTI ratio ─────────────────────────────────────────────
                 const DtiWidget(),
-                const SizedBox(height: AppSizes.md),
-
-                // ── Upcoming bills ────────────────────────────────────────
-                const UpcomingBillsCard(),
                 const SizedBox(height: AppSizes.md),
 
                 // ── Cash flow ─────────────────────────────────────────────

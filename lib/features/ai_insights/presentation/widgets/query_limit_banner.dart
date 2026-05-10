@@ -13,7 +13,7 @@ class QueryLimitBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPremiumAsync = ref.watch(stripePremiumProvider);
+    final isPremiumAsync = ref.watch(isPremiumProvider);
     final queryUsageAsync = ref.watch(aiQueryUsageProvider);
 
     return isPremiumAsync.when(

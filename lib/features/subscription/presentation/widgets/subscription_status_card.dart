@@ -13,7 +13,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionStatus = ref.watch(subscriptionStatusProvider);
+    final subscriptionStatus = ref.watch(userSubscriptionProvider);
 
     return subscriptionStatus.when(
       data: (status) {
@@ -203,7 +203,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ref.refresh(subscriptionStatusProvider),
+              onPressed: () => ref.refresh(userSubscriptionProvider),
               child: const Text('Retry'),
             ),
           ],

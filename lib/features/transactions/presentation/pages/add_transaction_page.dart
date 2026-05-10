@@ -22,7 +22,7 @@ import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/account_entity.dart';
-// import '../../domain/entities/receipt_data.dart'; // [V1.1: Attachment]
+import '../../domain/entities/receipt_data.dart';
 // import '../../data/services/receipt_categorizer_service.dart'; // [V1.1: Attachment]
 import '../../../../core/services/review_service.dart';
 import '../providers/transaction_providers.dart';
@@ -267,6 +267,16 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             onTap: () => context.pop(),
           ),
         ),
+        actions: [
+          if (!_isEditing)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSizes.sm),
+              child: CircularIconButton(
+                icon: CupertinoIcons.camera,
+                onTap: _openScanReceipt,
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -326,17 +336,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               const SizedBox(height: AppSizes.sm),
               _buildReminderSection(context, isDark, cardColor),
               const SizedBox(height: AppSizes.lg),
-
-              // [V1.1: Receipt Scan - AI feature, hidden until next release]
-              // Column(
-              //   children: [
-              //     GestureDetector(
-              //       onTap: _openScanReceipt,
-              //       ...
-              //     ),
-              //     const SizedBox(height: AppSizes.md),
-              //   ],
-              // ),
 
               const SizedBox(height: AppSizes.lg),
             ],
@@ -1580,8 +1579,23 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }
 
-  // [V1.1: Receipt Scan - removed from UI until AI features are released]
-  // Future<void> _openScanReceipt() async { ... }
+  Future<void> _openScanReceipt() async {
+    final result =
+        await context.push<ReceiptData>('/transactions/scan-receipt');
+    if (result == null || !mounted) return;
+    setState(() {
+      if (result.amount > 0) {
+        _amountController.text = result.amount.toStringAsFixed(2);
+      }
+      if (result.merchant.isNotEmpty) {
+        _titleController.text = result.merchant;
+      }
+      _selectedDate = result.date;
+      if (result.items.isNotEmpty && _notesController.text.isEmpty) {
+        _notesController.text = result.items.join('\n');
+      }
+    });
+  }
 
   Future<void> _handleSubmit() async {
     // Validate amount

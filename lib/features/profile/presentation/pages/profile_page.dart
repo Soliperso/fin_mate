@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -184,6 +185,15 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'profile.savingsGoalsSub'.tr(),
                             onTap: () => context.push('/goals'),
                           ),
+                          _buildDivider(context, isDark),
+                          _buildSettingsTile(
+                            context: context,
+                            icon: CupertinoIcons.repeat,
+                            title: 'Recurring Transactions',
+                            subtitle: 'Manage your scheduled income & expenses',
+                            onTap: () =>
+                                context.push('/recurring-transactions'),
+                          ),
                         ]),
                         const SizedBox(height: AppSizes.lg),
 
@@ -248,20 +258,6 @@ class ProfilePage extends ConsumerWidget {
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
                             context: context,
-                            icon: CupertinoIcons.question_circle,
-                            title: 'profile.helpCenter'.tr(),
-                            subtitle: 'profile.helpCenterSub'.tr(),
-                            onTap: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('common.comingSoon'.tr()),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            ),
-                          ),
-                          _buildDivider(context, isDark),
-                          _buildSettingsTile(
-                            context: context,
                             icon: CupertinoIcons.hand_raised,
                             title: 'profile.legal'.tr(),
                             subtitle: 'profile.legalSub'.tr(),
@@ -273,7 +269,26 @@ class ProfilePage extends ConsumerWidget {
                             icon: CupertinoIcons.info_circle,
                             title: 'profile.about'.tr(),
                             subtitle: 'profile.aboutVersion'.tr(),
-                            onTap: () {},
+                            onTap: () async {
+                              final info =
+                                  await PackageInfo.fromPlatform();
+                              if (!context.mounted) return;
+                              showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: const Text('Finmate'),
+                                  content: Text(
+                                      'Version ${info.version} (${info.buildNumber})'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: Text('common.ok'.tr()),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ]),
                         const SizedBox(height: AppSizes.lg),
