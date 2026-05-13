@@ -25,7 +25,7 @@ class TransactionRemoteDataSource {
 
     var query = _supabase.from('transactions').select('''
           *,
-          categories(name),
+          categories(name, icon, color),
           accounts!transactions_account_id_fkey(name),
           to_account:accounts!transactions_to_account_id_fkey(name)
         ''').eq('user_id', userId);
@@ -51,6 +51,8 @@ class TransactionRemoteDataSource {
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
       data['category_name'] = json['categories']?['name'];
+      data['category_icon'] = json['categories']?['icon'];
+      data['category_color'] = json['categories']?['color'];
       data['account_name'] = json['accounts']?['name'];
       data['to_account_name'] = json['to_account']?['name'];
       return TransactionModel.fromJson(data);
@@ -296,7 +298,7 @@ class TransactionRemoteDataSource {
         .from('transactions')
         .select('''
           *,
-          categories(name),
+          categories(name, icon, color),
           accounts!transactions_account_id_fkey(name)
         ''')
         .eq('user_id', userId)
@@ -307,6 +309,8 @@ class TransactionRemoteDataSource {
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
       data['category_name'] = json['categories']?['name'];
+      data['category_icon'] = json['categories']?['icon'];
+      data['category_color'] = json['categories']?['color'];
       data['account_name'] = json['accounts']?['name'];
       return TransactionModel.fromJson(data);
     }).toList();
@@ -318,7 +322,7 @@ class TransactionRemoteDataSource {
 
     final response = await _supabase.from('transactions').select('''
           *,
-          categories(name),
+          categories(name, icon, color),
           accounts!transactions_account_id_fkey(name),
           to_account:accounts!transactions_to_account_id_fkey(name)
         ''').eq('id', id).eq('user_id', userId).maybeSingle();
@@ -326,6 +330,8 @@ class TransactionRemoteDataSource {
     if (response == null) return null;
     final data = Map<String, dynamic>.from(response);
     data['category_name'] = response['categories']?['name'];
+    data['category_icon'] = response['categories']?['icon'];
+    data['category_color'] = response['categories']?['color'];
     data['account_name'] = response['accounts']?['name'];
     data['to_account_name'] = response['to_account']?['name'];
     return TransactionModel.fromJson(data);

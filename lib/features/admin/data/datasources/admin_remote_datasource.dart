@@ -383,6 +383,21 @@ class AdminRemoteDataSource {
     return s;
   }
 
+  /// Get all feature flags
+  Future<List<Map<String, dynamic>>> getFeatureFlags() async {
+    final result = await _supabase.rpc('admin_get_feature_flags');
+    if (result == null) return [];
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Enable or disable a feature flag by key
+  Future<void> setFeatureFlag(String key, bool enabled) async {
+    await _supabase.rpc('admin_set_feature_flag', params: {
+      'p_key': key,
+      'p_enabled': enabled,
+    });
+  }
+
   /// Delete analytics_events older than 90 days
   Future<void> cleanOldData() async {
     await _supabase.rpc('cleanup_old_analytics');
@@ -396,6 +411,77 @@ class AdminRemoteDataSource {
     });
   }
 
+  /// Get all system-wide default categories (is_default = TRUE)
+  Future<List<Map<String, dynamic>>> getDefaultCategories() async {
+    final result = await _supabase
+        .from('categories')
+        .select('id, name, type, icon, color, is_default, created_at')
+        .eq('is_default', true)
+        .order('type')
+        .order('name');
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Add a new default category
+  Future<void> addDefaultCategory({
+    required String name,
+    required String type,
+    required String icon,
+    required String color,
+  }) async {
+    await _supabase.rpc('admin_add_default_category', params: {
+      'p_name': name,
+      'p_type': type,
+      'p_icon': icon,
+      'p_color': color,
+    });
+  }
+
+  /// Update name, icon, and color of a default category (type is immutable)
+  Future<void> updateDefaultCategory({
+    required String id,
+    required String name,
+    required String icon,
+    required String color,
+  }) async {
+    await _supabase.rpc('admin_update_default_category', params: {
+      'p_id': id,
+      'p_name': name,
+      'p_icon': icon,
+      'p_color': color,
+    });
+  }
+
+  /// Delete a default category by ID
+  Future<void> deleteDefaultCategory(String id) async {
+    await _supabase.rpc('admin_delete_default_category', params: {'p_id': id});
+  }
+
+  /// Get all email templates
+  Future<List<Map<String, dynamic>>> getEmailTemplates() async {
+    final result = await _supabase
+        .from('email_templates')
+        .select(
+            'id, key, name, description, subject, body, is_enabled, variables, updated_at')
+        .order('name');
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Update an email template's subject, body, and enabled status
+  Future<void> updateEmailTemplate({
+    required String id,
+    required String subject,
+    required String body,
+    required bool isEnabled,
+  }) async {
+    await _supabase.from('email_templates').update({
+      'subject': subject,
+      'body': body,
+      'is_enabled': isEnabled,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', id);
+  }
+
   /// Get system-wide audit log
   Future<List<Map<String, dynamic>>> getSystemAuditLog() async {
     try {
@@ -406,11 +492,35 @@ class AdminRemoteDataSource {
           .order('created_at', ascending: false)
           .limit(100);
 
-      return List<Map<String, dynamic>>.from(response).map((e) {
+      final logs = List<Map<String, dynamic>>.from(response);
+
+      final uniqueIds =
+          logs.map((e) => e['user_id'] as String?).whereType<String>().toSet();
+
+      Map<String, String> nameMap = {};
+      if (uniqueIds.isNotEmpty) {
+        try {
+          final profiles = await _supabase
+              .from('user_profiles')
+              .select('id, full_name')
+              .inFilter('id', uniqueIds.toList());
+          for (final p in List<Map<String, dynamic>>.from(profiles)) {
+            final id = p['id'] as String?;
+            final name = p['full_name'] as String?;
+            if (id != null && name != null && name.isNotEmpty) {
+              nameMap[id] = name;
+            }
+          }
+        } catch (_) {}
+      }
+
+      return logs.map((e) {
+        final uid = e['user_id'] as String? ?? '';
         return {
           'action': e['event_name'],
           'created_at': e['created_at'],
-          'user_id': e['user_id'],
+          'user_id': uid,
+          'user_name': nameMap[uid],
           'screen_name': e['screen_name'],
           'properties': e['event_properties'],
         };

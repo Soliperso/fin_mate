@@ -48,6 +48,9 @@ import '../../features/admin/presentation/pages/user_management_page.dart';
 import '../../features/admin/presentation/pages/user_detail_page.dart';
 import '../../features/admin/presentation/pages/system_analytics_page_enhanced.dart';
 import '../../features/admin/presentation/pages/system_settings_page.dart';
+import '../../features/admin/presentation/pages/default_categories_page.dart';
+import '../../features/admin/presentation/pages/feature_toggles_page.dart';
+import '../../features/admin/presentation/pages/email_templates_page.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
@@ -447,6 +450,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/admin/settings',
         name: 'admin-settings',
         builder: (context, state) => const SystemSettingsPage(),
+      ),
+      GoRoute(
+        path: '/admin/categories',
+        name: 'admin-categories',
+        builder: (context, state) => DefaultCategoriesPage(
+          autoAdd: state.uri.queryParameters['add'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: '/admin/feature-toggles',
+        name: 'admin-feature-toggles',
+        builder: (context, state) => FeatureTogglesPage(
+          betaOnly: state.uri.queryParameters['beta'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: '/admin/email-templates',
+        name: 'admin-email-templates',
+        builder: (context, state) => const EmailTemplatesPage(),
       ),
     ],
   );

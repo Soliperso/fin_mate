@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/ad_service.dart';
+import 'feature_flag_provider.dart';
 import 'subscription_provider.dart';
 
 /// Provider for AdService singleton
@@ -8,11 +9,13 @@ final adServiceProvider = Provider<AdService>((ref) {
 });
 
 /// Determines if ads should be shown to the current user.
-/// Returns true for freemium users, false for premium users.
+/// Returns false for premium users or when the ads flag is disabled.
 final shouldShowAdsProvider = FutureProvider<bool>((ref) async {
   try {
     final isPremium = await ref.watch(isPremiumProvider.future);
-    return !isPremium;
+    if (isPremium) return false;
+    final flags = await ref.watch(appFeatureFlagsProvider.future);
+    return featureEnabled(flags, 'ads');
   } catch (e) {
     return true;
   }

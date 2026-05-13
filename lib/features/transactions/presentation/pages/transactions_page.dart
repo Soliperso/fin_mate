@@ -13,10 +13,12 @@ import '../../data/services/csv_export_service.dart';
 import '../../data/services/csv_import_service.dart';
 import '../widgets/import_preview_bottom_sheet.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/utils/category_icon_utils.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/services/search_history_service.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
@@ -26,6 +28,7 @@ import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
+import '../../../../core/providers/feature_flag_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 
@@ -78,6 +81,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(transactionListProvider);
     final notifier = ref.read(transactionListProvider.notifier);
+    final featureFlags = ref.watch(appFeatureFlagsProvider).valueOrNull;
 
     return PopScope(
       canPop: !_isSelecting,
@@ -197,13 +201,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       key: const ValueKey('normal-actions'),
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: AppSizes.sm),
-                          child: CircularIconButton(
-                            icon: CupertinoIcons.arrow_down_to_line,
-                            onTap: () => _showCsvOptions(context),
+                        if (featureEnabled(featureFlags, 'csv_export'))
+                          Padding(
+                            padding: const EdgeInsets.only(right: AppSizes.sm),
+                            child: CircularIconButton(
+                              icon: CupertinoIcons.arrow_down_to_line,
+                              onTap: () => _showCsvOptions(context),
+                            ),
                           ),
-                        ),
                         Padding(
                           padding: const EdgeInsets.only(right: AppSizes.sm),
                           child: Badge(
@@ -643,6 +648,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget _buildSummaryRow(
       BuildContext context, TransactionListState state, WidgetRef ref) {
     final fmt = ref.watch(currencyFormat2Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
 
     // Compute income/expense ignoring the type-chip filter so the summary
     // always shows the full period picture (only date range + hide-future applied).
@@ -717,7 +723,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 icon: CupertinoIcons.arrow_up,
                 color: AppColors.systemGreen,
                 label: 'transactions.filterIncome'.tr(),
-                amount: fmt.format(income),
+                amount: fmt.format(income * convFactor),
                 horizontal: isFiltered,
               ),
               VerticalDivider(
@@ -732,7 +738,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 icon: CupertinoIcons.arrow_down,
                 color: AppColors.systemRed,
                 label: 'transactions.filterExpense'.tr(),
-                amount: fmt.format(expense),
+                amount: fmt.format(expense * convFactor),
                 horizontal: isFiltered,
               ),
               if (!isFiltered) ...[
@@ -748,7 +754,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   icon: Icons.account_balance_wallet_outlined,
                   color: remainingColor,
                   label: 'Remaining',
-                  amount: fmt.format(remaining.abs()),
+                  amount: fmt.format(remaining.abs() * convFactor),
                 ),
               ],
             ],
@@ -1055,12 +1061,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final isIncome = transaction.type == TransactionType.income;
     final isTransfer = transaction.type == TransactionType.transfer;
     final currencyFormat = ref.watch(currencyFormat2Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
 
-    final iconColor = isIncome
+    final defaultIconColor = isIncome
         ? AppColors.systemGreen
         : isTransfer
             ? AppColors.systemBlue
             : AppColors.systemRed;
+    final iconColor = transaction.categoryColor != null
+        ? _parseHexColor(transaction.categoryColor!)
+        : defaultIconColor;
     final amountPrefix = isIncome
         ? '+'
         : isTransfer
@@ -1183,20 +1193,33 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix${currencyFormat.format(transaction.amount.abs())}',
+                    '$amountPrefix${currencyFormat.format(transaction.amount.abs() * convFactor)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: iconColor,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    DateFormat('h:mm a')
-                        .format(transaction.createdAt.toLocal()),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
+                  if (ref.watch(usdEquivalentProvider(
+                          transaction.amount.abs())) !=
+                      null)
+                    Text(
+                      ref.watch(usdEquivalentProvider(
+                          transaction.amount.abs()))!,
+                      style:
+                          Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                    )
+                  else
+                    Text(
+                      DateFormat('h:mm a')
+                          .format(transaction.createdAt.toLocal()),
+                      style:
+                          Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                    ),
                 ],
               ),
             ],
@@ -1207,32 +1230,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   }
 
   IconData _getTransactionIcon(TransactionEntity transaction) {
-    final cat = transaction.categoryName?.toLowerCase() ?? '';
-    if (transaction.type == TransactionType.income) {
-      if (cat.contains('salary')) return CupertinoIcons.briefcase;
-      if (cat.contains('freelance')) return CupertinoIcons.desktopcomputer;
-      if (cat.contains('investment')) return CupertinoIcons.graph_circle;
-      if (cat.contains('gift')) return CupertinoIcons.gift;
-      return CupertinoIcons.money_dollar_circle;
+    return getCategoryIcon(
+      transaction.categoryName,
+      type: transaction.type.name,
+    );
+  }
+
+  Color _parseHexColor(String hex) {
+    try {
+      final h = hex.replaceAll('#', '');
+      return Color(int.parse('FF$h', radix: 16));
+    } catch (_) {
+      return AppColors.brandTeal;
     }
-    if (transaction.type == TransactionType.transfer) {
-      return CupertinoIcons.arrow_right_arrow_left;
-    }
-    if (cat.contains('food') || cat.contains('dining')) {
-      return CupertinoIcons.cart;
-    }
-    if (cat.contains('transport') || cat.contains('gas')) {
-      return CupertinoIcons.car;
-    }
-    if (cat.contains('shopping')) return CupertinoIcons.bag;
-    if (cat.contains('entertainment')) return CupertinoIcons.film;
-    if (cat.contains('utilities') || cat.contains('bill')) {
-      return CupertinoIcons.doc_text;
-    }
-    if (cat.contains('health')) return CupertinoIcons.heart;
-    if (cat.contains('education')) return CupertinoIcons.book;
-    if (cat.contains('housing')) return CupertinoIcons.house;
-    return CupertinoIcons.creditcard;
   }
 
   Widget _buildCategoryFilter(

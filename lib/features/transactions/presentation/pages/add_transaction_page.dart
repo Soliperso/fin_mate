@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/utils/category_icon_utils.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -26,6 +27,7 @@ import '../../domain/entities/receipt_data.dart';
 // import '../../data/services/receipt_categorizer_service.dart'; // [V1.1: Attachment]
 import '../../../../core/services/review_service.dart';
 import '../providers/transaction_providers.dart';
+import '../../../../core/providers/feature_flag_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/domain/entities/debt_entity.dart';
@@ -249,6 +251,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
+    final featureFlags = ref.watch(appFeatureFlagsProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: isDark
@@ -268,7 +271,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ),
         ),
         actions: [
-          if (!_isEditing)
+          if (!_isEditing && featureEnabled(featureFlags, 'receipt_scanner'))
             Padding(
               padding: const EdgeInsets.only(right: AppSizes.sm),
               child: CircularIconButton(
@@ -1795,45 +1798,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   }
 
   IconData _getCategoryIcon(String categoryName, String? emojiIcon) {
-    switch (categoryName.toLowerCase()) {
-      // Income
-      case 'salary':
-        return CupertinoIcons.briefcase;
-      case 'freelance':
-        return CupertinoIcons.desktopcomputer;
-      case 'investment':
-        return CupertinoIcons.chart_bar_alt_fill;
-      case 'gift':
-        return CupertinoIcons.gift;
-      case 'savings':
-        return CupertinoIcons.arrow_up_circle_fill;
-      case 'other income':
-        return CupertinoIcons.money_dollar_circle;
-
-      // Expense
-      case 'food & dining':
-        return CupertinoIcons.cart;
-      case 'transportation':
-        return CupertinoIcons.car_detailed;
-      case 'shopping':
-        return CupertinoIcons.bag;
-      case 'entertainment':
-        return CupertinoIcons.film;
-      case 'bills & utilities':
-        return CupertinoIcons.bolt;
-      case 'healthcare':
-        return CupertinoIcons.heart;
-      case 'education':
-        return CupertinoIcons.book;
-      case 'housing':
-        return CupertinoIcons.house;
-      case 'personal care':
-        return CupertinoIcons.person_crop_circle;
-      case 'other expense':
-        return CupertinoIcons.creditcard;
-
-      default:
-        return CupertinoIcons.tag;
-    }
+    return getCategoryIcon(categoryName);
   }
 }

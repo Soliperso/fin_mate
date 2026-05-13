@@ -38,6 +38,8 @@ class TransactionEntity extends Equatable {
 
   // Populated from joins
   final String? categoryName;
+  final String? categoryIcon;
+  final String? categoryColor;
   final String? accountName;
   final String? toAccountName;
 
@@ -58,6 +60,8 @@ class TransactionEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.categoryName,
+    this.categoryIcon,
+    this.categoryColor,
     this.accountName,
     this.toAccountName,
   });
@@ -98,6 +102,8 @@ class TransactionEntity extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? categoryName,
+    String? categoryIcon,
+    String? categoryColor,
     String? accountName,
     String? toAccountName,
   }) {
@@ -118,6 +124,8 @@ class TransactionEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       categoryName: categoryName ?? this.categoryName,
+      categoryIcon: categoryIcon ?? this.categoryIcon,
+      categoryColor: categoryColor ?? this.categoryColor,
       accountName: accountName ?? this.accountName,
       toAccountName: toAccountName ?? this.toAccountName,
     );

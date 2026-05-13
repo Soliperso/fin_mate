@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -184,7 +185,8 @@ class BudgetsPage extends ConsumerWidget {
 
   Widget _buildBudgetCard(
       BuildContext context, BudgetEntity budget, WidgetRef ref) {
-    final currencySymbol = ref.watch(currencySymbolProvider);
+    final fmt = ref.watch(currencyFormat0Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.effectiveAmount;
     final percentage = budget.spentPercentage.clamp(0.0, 100.0) / 100;
@@ -291,8 +293,8 @@ class BudgetsPage extends ConsumerWidget {
                                         ),
                                         child: Text(
                                           budget.lastCarryOverAmount > 0
-                                              ? '+$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover'
-                                              : '-$currencySymbol${budget.lastCarryOverAmount.abs().toStringAsFixed(0)} rollover',
+                                              ? '+${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)} rollover'
+                                              : '-${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)} rollover',
                                           style: TextStyle(
                                             color:
                                                 budget.lastCarryOverAmount > 0
@@ -387,7 +389,7 @@ class BudgetsPage extends ConsumerWidget {
                                   style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '$currencySymbol${spent.toStringAsFixed(0)}',
+                                fmt.format(spent * convFactor),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -396,6 +398,16 @@ class BudgetsPage extends ConsumerWidget {
                                       color: AppColors.textSecondary,
                                     ),
                               ),
+                              if (ref.watch(usdEquivalentProvider(spent)) !=
+                                  null)
+                                Text(
+                                  ref.watch(usdEquivalentProvider(spent))!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                          color: AppColors.textSecondary),
+                                ),
                             ],
                           ),
                           Column(
@@ -409,7 +421,7 @@ class BudgetsPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
+                                fmt.format(remaining.abs() * convFactor),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -420,6 +432,18 @@ class BudgetsPage extends ConsumerWidget {
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
+                              if (ref.watch(usdEquivalentProvider(
+                                      remaining.abs())) !=
+                                  null)
+                                Text(
+                                  ref.watch(usdEquivalentProvider(
+                                      remaining.abs()))!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                          color: AppColors.textSecondary),
+                                ),
                             ],
                           ),
                           Column(
@@ -429,7 +453,7 @@ class BudgetsPage extends ConsumerWidget {
                                   style: Theme.of(context).textTheme.bodySmall),
                               const SizedBox(height: AppSizes.xs),
                               Text(
-                                '$currencySymbol${budget.effectiveAmount.toStringAsFixed(0)}',
+                                fmt.format(budget.effectiveAmount * convFactor),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -463,7 +487,8 @@ class BudgetsPage extends ConsumerWidget {
 
   void _showBudgetOptions(
       BuildContext context, WidgetRef ref, BudgetEntity budget) {
-    final currencySymbol = ref.watch(currencySymbolProvider);
+    final fmt = ref.watch(currencyFormat0Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.amount;
     final percentage = (budget.spentPercentage.clamp(0.0, 100.0) / 100);
@@ -569,7 +594,7 @@ class BudgetsPage extends ConsumerWidget {
                                 ),
                           ),
                           Text(
-                            '$currencySymbol${spent.toStringAsFixed(0)}',
+                            fmt.format(spent * convFactor),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -578,6 +603,14 @@ class BudgetsPage extends ConsumerWidget {
                                   color: AppColors.textSecondary,
                                 ),
                           ),
+                          if (ref.watch(usdEquivalentProvider(spent)) != null)
+                            Text(
+                              ref.watch(usdEquivalentProvider(spent))!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
                         ],
                       ),
                       Column(
@@ -595,7 +628,7 @@ class BudgetsPage extends ConsumerWidget {
                                 ),
                           ),
                           Text(
-                            '$currencySymbol${remaining.abs().toStringAsFixed(0)}',
+                            fmt.format(remaining.abs() * convFactor),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -606,6 +639,17 @@ class BudgetsPage extends ConsumerWidget {
                                       : AppColors.systemGreen,
                                 ),
                           ),
+                          if (ref.watch(
+                                  usdEquivalentProvider(remaining.abs())) !=
+                              null)
+                            Text(
+                              ref.watch(
+                                  usdEquivalentProvider(remaining.abs()))!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
                         ],
                       ),
                     ],

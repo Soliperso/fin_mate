@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/utils/category_icon_utils.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
@@ -84,6 +86,7 @@ class TransactionDetailPage extends ConsumerWidget {
   Widget _buildDetail(
       BuildContext context, WidgetRef ref, TransactionEntity transaction) {
     final currencyFormat = ref.watch(currencyFormat2Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
     final dateFormat = DateFormat('M/d/yy, h:mm a');
     final cardColor = Theme.of(context).cardTheme.color;
     final isIncome = transaction.type == TransactionType.income;
@@ -114,7 +117,7 @@ class TransactionDetailPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      currencyFormat.format(transaction.amount.abs()),
+                      currencyFormat.format(transaction.amount.abs() * convFactor),
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: amountColor,
                             fontWeight: FontWeight.w700,
@@ -123,6 +126,20 @@ class TransactionDetailPage extends ConsumerWidget {
                           ),
                       textAlign: TextAlign.center,
                     ),
+                    if (ref.watch(usdEquivalentProvider(
+                            transaction.amount.abs())) !=
+                        null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        ref.watch(usdEquivalentProvider(
+                            transaction.amount.abs()))!,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     if (transaction.description != null &&
                         transaction.description!.isNotEmpty)
@@ -406,32 +423,10 @@ class TransactionDetailPage extends ConsumerWidget {
   }
 
   IconData _getCategoryIcon(TransactionEntity transaction) {
-    final cat = transaction.categoryName?.toLowerCase() ?? '';
-    if (transaction.type == TransactionType.income) {
-      if (cat.contains('salary')) return CupertinoIcons.briefcase;
-      if (cat.contains('freelance')) return CupertinoIcons.desktopcomputer;
-      if (cat.contains('investment')) return CupertinoIcons.graph_circle;
-      if (cat.contains('gift')) return CupertinoIcons.gift;
-      return CupertinoIcons.money_dollar_circle;
-    }
-    if (transaction.type == TransactionType.transfer) {
-      return CupertinoIcons.arrow_right_arrow_left;
-    }
-    if (cat.contains('food') || cat.contains('dining')) {
-      return CupertinoIcons.cart;
-    }
-    if (cat.contains('transport') || cat.contains('gas')) {
-      return CupertinoIcons.car;
-    }
-    if (cat.contains('shopping')) return CupertinoIcons.bag;
-    if (cat.contains('entertainment')) return CupertinoIcons.film;
-    if (cat.contains('utilities') || cat.contains('bill')) {
-      return CupertinoIcons.doc_text;
-    }
-    if (cat.contains('health')) return CupertinoIcons.heart;
-    if (cat.contains('education')) return CupertinoIcons.book;
-    if (cat.contains('housing')) return CupertinoIcons.house;
-    return CupertinoIcons.creditcard;
+    return getCategoryIcon(
+      transaction.categoryName,
+      type: transaction.type.name,
+    );
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref,

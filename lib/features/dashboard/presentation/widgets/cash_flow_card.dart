@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 
 /// Apple Wallet-style cash flow summary card
 class CashFlowCard extends ConsumerWidget {
@@ -20,6 +21,7 @@ class CashFlowCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat = ref.watch(currencyFormat0Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
     final balance = income - expenses;
     final isPositive = balance >= 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -65,7 +67,7 @@ class CashFlowCard extends ConsumerWidget {
                 Expanded(
                   child: _FlowCell(
                     label: 'cashFlowCard.income'.tr(),
-                    amount: income,
+                    amount: income * convFactor,
                     color: AppColors.systemGreen,
                     icon: CupertinoIcons.arrow_down,
                     currencyFormat: currencyFormat,
@@ -79,7 +81,7 @@ class CashFlowCard extends ConsumerWidget {
                 Expanded(
                   child: _FlowCell(
                     label: 'cashFlowCard.expenses'.tr(),
-                    amount: expenses,
+                    amount: expenses * convFactor,
                     color: AppColors.systemRed,
                     icon: CupertinoIcons.arrow_up,
                     currencyFormat: currencyFormat,
@@ -115,14 +117,26 @@ class CashFlowCard extends ConsumerWidget {
                         color: AppColors.secondaryLabel,
                       ),
                 ),
-                Text(
-                  '${isPositive ? '+' : ''}${currencyFormat.format(balance)}',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: isPositive
-                            ? AppColors.systemGreen
-                            : AppColors.systemRed,
-                        fontWeight: FontWeight.w700,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${isPositive ? '+' : ''}${currencyFormat.format(balance * convFactor)}',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: isPositive
+                                ? AppColors.systemGreen
+                                : AppColors.systemRed,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    if (ref.watch(usdEquivalentProvider(balance)) != null)
+                      Text(
+                        ref.watch(usdEquivalentProvider(balance))!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.secondaryLabel,
+                            ),
                       ),
+                  ],
                 ),
               ],
             ),

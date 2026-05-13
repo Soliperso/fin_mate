@@ -17,6 +17,8 @@ class TransactionModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? categoryName;
+  final String? categoryIcon;
+  final String? categoryColor;
   final String? accountName;
   final String? toAccountName;
 
@@ -37,6 +39,8 @@ class TransactionModel {
     required this.createdAt,
     required this.updatedAt,
     this.categoryName,
+    this.categoryIcon,
+    this.categoryColor,
     this.accountName,
     this.toAccountName,
   });
@@ -59,6 +63,8 @@ class TransactionModel {
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       categoryName: json['category_name'],
+      categoryIcon: json['category_icon'],
+      categoryColor: json['category_color'],
       accountName: json['account_name'],
       toAccountName: json['to_account_name'],
     );
@@ -101,6 +107,8 @@ class TransactionModel {
       createdAt: createdAt,
       updatedAt: updatedAt,
       categoryName: categoryName,
+      categoryIcon: categoryIcon,
+      categoryColor: categoryColor,
       accountName: accountName,
       toAccountName: toAccountName,
     );
@@ -124,6 +132,8 @@ class TransactionModel {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       categoryName: entity.categoryName,
+      categoryIcon: entity.categoryIcon,
+      categoryColor: entity.categoryColor,
       accountName: entity.accountName,
       toAccountName: entity.toAccountName,
     );

@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/profile_providers.dart';
@@ -38,18 +40,40 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       _selectedCurrency != _originalCurrency ||
       _selectedAvatarPath != null;
 
-  final List<String> _currencies = [
-    'USD',
-    'EUR',
-    'GBP',
-    'JPY',
-    'CAD',
-    'AUD',
-    'CHF',
-    'CNY',
-    'INR',
-    'MXN',
+  static const _currencyData = [
+    {'code': 'USD', 'name': 'US Dollar', 'symbol': '\$'},
+    {'code': 'EUR', 'name': 'Euro', 'symbol': '€'},
+    {'code': 'GBP', 'name': 'British Pound', 'symbol': '£'},
+    {'code': 'JPY', 'name': 'Japanese Yen', 'symbol': '¥'},
+    {'code': 'CAD', 'name': 'Canadian Dollar', 'symbol': 'CA\$'},
+    {'code': 'AUD', 'name': 'Australian Dollar', 'symbol': 'A\$'},
+    {'code': 'CHF', 'name': 'Swiss Franc', 'symbol': 'Fr'},
+    {'code': 'CNY', 'name': 'Chinese Yuan', 'symbol': '¥'},
+    {'code': 'INR', 'name': 'Indian Rupee', 'symbol': '₹'},
+    {'code': 'MXN', 'name': 'Mexican Peso', 'symbol': 'MX\$'},
+    {'code': 'BRL', 'name': 'Brazilian Real', 'symbol': 'R\$'},
+    {'code': 'KRW', 'name': 'South Korean Won', 'symbol': '₩'},
+    {'code': 'SGD', 'name': 'Singapore Dollar', 'symbol': 'S\$'},
+    {'code': 'HKD', 'name': 'Hong Kong Dollar', 'symbol': 'HK\$'},
+    {'code': 'SEK', 'name': 'Swedish Krona', 'symbol': 'kr'},
+    {'code': 'NOK', 'name': 'Norwegian Krone', 'symbol': 'kr'},
+    {'code': 'DKK', 'name': 'Danish Krone', 'symbol': 'kr'},
+    {'code': 'NZD', 'name': 'New Zealand Dollar', 'symbol': 'NZ\$'},
+    {'code': 'ZAR', 'name': 'South African Rand', 'symbol': 'R'},
+    {'code': 'AED', 'name': 'UAE Dirham', 'symbol': 'د.إ'},
+    {'code': 'SAR', 'name': 'Saudi Riyal', 'symbol': '﷼'},
+    {'code': 'TRY', 'name': 'Turkish Lira', 'symbol': '₺'},
+    {'code': 'PLN', 'name': 'Polish Złoty', 'symbol': 'zł'},
+    {'code': 'THB', 'name': 'Thai Baht', 'symbol': '฿'},
+    {'code': 'IDR', 'name': 'Indonesian Rupiah', 'symbol': 'Rp'},
+    {'code': 'MYR', 'name': 'Malaysian Ringgit', 'symbol': 'RM'},
+    {'code': 'PHP', 'name': 'Philippine Peso', 'symbol': '₱'},
   ];
+
+  Map<String, String> get _selectedCurrencyInfo =>
+      _currencyData.firstWhere((c) => c['code'] == _selectedCurrency,
+          orElse: () =>
+              {'code': _selectedCurrency, 'name': '', 'symbol': '\$'});
 
   @override
   void initState() {
@@ -319,6 +343,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               currency: _selectedCurrency,
             );
 
+        await ref
+            .read(displayFormatProvider.notifier)
+            .setCurrency(_selectedCurrency);
+
         if (mounted) {
           SuccessSnackbar.show(
             context,
@@ -534,25 +562,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                   const SizedBox(height: AppSizes.sm),
                   _buildSectionCard(
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedCurrency,
-                        decoration: _fieldDecoration(
-                          labelText: 'profile.preferredCurrency'.tr(),
-                          prefixIcon: _iconBadge(CupertinoIcons.money_dollar),
-                        ),
-                        dropdownColor: isDark
-                            ? AppColors.secondarySystemBackgroundDark
-                            : AppColors.systemBackground,
-                        items: _currencies.map((currency) {
-                          return DropdownMenuItem(
-                            value: currency,
-                            child: Text(currency),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          if (v != null) setState(() => _selectedCurrency = v);
-                        },
-                      ),
+                      _buildCurrencyRow(isDark),
                     ],
                   ),
                   const SizedBox(height: AppSizes.xl),
@@ -563,6 +573,253 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         ),
       ),
     );
+  }
+
+  String _formatRate(double rate) {
+    if (rate >= 1) return rate.toStringAsFixed(2);
+    if (rate >= 0.01) return rate.toStringAsFixed(3);
+    if (rate >= 0.001) return rate.toStringAsFixed(4);
+    return rate.toStringAsFixed(6);
+  }
+
+  Widget _buildCurrencyRow(bool isDark) {
+    final info = _selectedCurrencyInfo;
+    return InkWell(
+      onTap: _showCurrencyPicker,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md, vertical: 14),
+        child: Row(
+          children: [
+            _iconBadge(CupertinoIcons.money_dollar,
+                color: AppColors.primaryTeal),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'profile.preferredCurrency'.tr(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: isDark
+                              ? AppColors.secondaryLabelDark
+                              : AppColors.secondaryLabel,
+                        ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${info['symbol']}  ${info['code']} — ${info['name']}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: isDark
+                  ? AppColors.secondaryLabelDark
+                  : AppColors.secondaryLabel,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCurrencyPicker() async {
+    final searchController = TextEditingController();
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (_, setSheetState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final query = searchController.text.toLowerCase();
+          final filtered = _currencyData.where((c) {
+            return c['code']!.toLowerCase().contains(query) ||
+                c['name']!.toLowerCase().contains(query);
+          }).toList();
+
+          return DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (_, scrollController) => Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.secondarySystemBackgroundDark
+                    : AppColors.systemBackground,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      margin:
+                          const EdgeInsets.only(top: 12, bottom: 4),
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.tertiarySystemBackgroundDark
+                            : AppColors.systemGray4,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md, vertical: 10),
+                    child: Text(
+                      'profile.preferredCurrency'.tr(),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  // Search field
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.md),
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: (_) => setSheetState(() {}),
+                      decoration: InputDecoration(
+                        hintText: 'Search currency…',
+                        prefixIcon: const Icon(CupertinoIcons.search,
+                            size: 18),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: isDark
+                            ? AppColors.tertiarySystemBackgroundDark
+                            : AppColors.secondarySystemBackground,
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Currency list
+                  Expanded(
+                    child: Consumer(
+                      builder: (_, cRef, __) {
+                        final ratesAsync =
+                            cRef.watch(exchangeRatesProvider);
+                        return ListView.builder(
+                          controller: scrollController,
+                          itemCount: filtered.length,
+                          itemBuilder: (_, i) {
+                            final c = filtered[i];
+                            final code = c['code']!;
+                            final isSelected =
+                                code == _selectedCurrency;
+
+                            final rateLabel = code == 'USD'
+                                ? 'base currency'
+                                : ratesAsync.when(
+                                    data: (r) {
+                                      final perUsd = r[code];
+                                      if (perUsd == null ||
+                                          perUsd == 0) {
+                                        return null;
+                                      }
+                                      return '1 $code ≈ \$${_formatRate(1 / perUsd)}';
+                                    },
+                                    loading: () => '…',
+                                    error: (_, __) => null,
+                                  );
+
+                            return ListTile(
+                              leading: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primaryTeal
+                                          .withValues(alpha: 0.15)
+                                      : (isDark
+                                          ? AppColors
+                                              .tertiarySystemBackgroundDark
+                                          : AppColors
+                                              .secondarySystemBackground),
+                                  borderRadius:
+                                      BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    c['symbol']!,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSelected
+                                          ? AppColors.primaryTeal
+                                          : (isDark
+                                              ? AppColors.labelDark
+                                              : AppColors.label),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                code,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? AppColors.primaryTeal
+                                      : null,
+                                ),
+                              ),
+                              subtitle: Text(
+                                rateLabel != null
+                                    ? '${c['name']}  ·  $rateLabel'
+                                    : c['name']!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.secondaryLabelDark
+                                      : AppColors.secondaryLabel,
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? const Icon(
+                                      CupertinoIcons.checkmark_alt,
+                                      color: AppColors.primaryTeal,
+                                      size: 20,
+                                    )
+                                  : null,
+                              onTap: () =>
+                                  Navigator.of(sheetContext).pop(code),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                      height: MediaQuery.of(context).padding.bottom +
+                          8),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    if (selected != null && mounted) {
+      setState(() => _selectedCurrency = selected);
+    }
   }
 
   Widget _buildAvatar(dynamic profile) {

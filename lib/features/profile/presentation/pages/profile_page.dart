@@ -14,6 +14,7 @@ import '../../../../shared/widgets/success_animation.dart';
 // import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 // import '../../../../core/providers/subscription_provider.dart';
+import '../../../../core/providers/feature_flag_provider.dart';
 import '../providers/profile_providers.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -25,6 +26,7 @@ class ProfilePage extends ConsumerWidget {
     final profile = profileState.profile;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
+    final featureFlags = ref.watch(appFeatureFlagsProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -177,23 +179,29 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'profile.securitySub'.tr(),
                             onTap: () => context.push('/profile/security'),
                           ),
-                          _buildDivider(context, isDark),
-                          _buildSettingsTile(
-                            context: context,
-                            icon: CupertinoIcons.money_dollar_circle,
-                            title: 'profile.savingsGoals'.tr(),
-                            subtitle: 'profile.savingsGoalsSub'.tr(),
-                            onTap: () => context.push('/goals'),
-                          ),
-                          _buildDivider(context, isDark),
-                          _buildSettingsTile(
-                            context: context,
-                            icon: CupertinoIcons.repeat,
-                            title: 'Recurring Transactions',
-                            subtitle: 'Manage your scheduled income & expenses',
-                            onTap: () =>
-                                context.push('/recurring-transactions'),
-                          ),
+                          if (featureEnabled(featureFlags, 'savings_goals')) ...[
+                            _buildDivider(context, isDark),
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.money_dollar_circle,
+                              title: 'profile.savingsGoals'.tr(),
+                              subtitle: 'profile.savingsGoalsSub'.tr(),
+                              onTap: () => context.push('/goals'),
+                            ),
+                          ],
+                          if (featureEnabled(
+                              featureFlags, 'recurring_transactions')) ...[
+                            _buildDivider(context, isDark),
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.repeat,
+                              title: 'Recurring Transactions',
+                              subtitle:
+                                  'Manage your scheduled income & expenses',
+                              onTap: () =>
+                                  context.push('/recurring-transactions'),
+                            ),
+                          ],
                         ]),
                         const SizedBox(height: AppSizes.lg),
 

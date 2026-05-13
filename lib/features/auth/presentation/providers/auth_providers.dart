@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../../../core/config/supabase_client.dart';
-import '../../../../core/config/env_config.dart';
 import '../../../../core/services/sentry_service.dart';
 import '../../../../core/services/secure_storage_provider.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -95,7 +94,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   StreamSubscription<UserEntity?>? _authSubscription;
   StreamSubscription? _recoverySubscription;
   StreamSubscription? _deepLinkSubscription;
+  StreamSubscription? _signInSubscription;
   // StreamSubscription? _tokenSyncSubscription; // [Biometric]
+
+  static const _kPendingReset = 'pending_password_reset';
+  bool _pendingReset = false;
 
   AuthNotifier(this._repository, this._ref) : super(AuthState()) {
     _init();
@@ -103,11 +106,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _init() async {
     state = state.copyWith(isLoading: true);
+
+    // Load persistent recovery flag before getCurrentUser() so we can detect
+    // the case where the SDK already exchanged the PKCE code before _init() ran.
+    final prefs = await SharedPreferences.getInstance();
+    _pendingReset = prefs.getBool(_kPendingReset) ?? false;
+
     try {
       final user = await _repository.getCurrentUser();
-      state = AuthState(user: user, isLoading: false);
 
-      // Set user context in Sentry
+      // SDK may have already processed the PKCE code before _init() ran —
+      // if so, getCurrentUser() returns the signed-in user while the flag is set.
+      if (user != null && _pendingReset) {
+        _pendingReset = false;
+        await prefs.remove(_kPendingReset);
+        state = AuthState(user: user, isLoading: false, isPasswordRecovery: true);
+      } else {
+        state = AuthState(user: user, isLoading: false);
+      }
+
       if (user != null) {
         await _setUserContext(user);
       }
@@ -139,8 +156,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
     });
 
-    // PKCE flow does not emit passwordRecovery — detect the recovery deep
-    // link directly so the router redirects to Set New Password regardless.
+    // Reliable recovery detection: when a signedIn event fires while the
+    // pending-reset flag is set, this must be the PKCE recovery sign-in.
+    // Fires only on signedIn (not tokenRefreshed), so normal token rotation
+    // does not incorrectly trigger this.
+    _signInSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn && _pendingReset) {
+        _pendingReset = false;
+        prefs.remove(_kPendingReset);
+        state = state.copyWith(isPasswordRecovery: true);
+      }
+    });
+
+    // Secondary safety net: app_links detection for PKCE code in deep link.
     final appLinks = AppLinks();
     appLinks.getInitialLink().then((uri) {
       if (uri != null && uri.queryParameters.containsKey('code')) {
@@ -171,11 +199,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _authSubscription?.cancel();
     _recoverySubscription?.cancel();
     _deepLinkSubscription?.cancel();
+    _signInSubscription?.cancel();
     // _tokenSyncSubscription?.cancel(); // [Biometric]
     super.dispose();
   }
 
   void clearPasswordRecovery() {
+    _pendingReset = false;
+    SharedPreferences.getInstance().then((p) => p.remove(_kPendingReset));
     state = state.copyWith(isPasswordRecovery: false);
   }
 
@@ -202,6 +233,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
+      // Explicit sign-in: clear any pending reset flag so it doesn't
+      // incorrectly trigger recovery mode on the next signedIn event.
+      _pendingReset = false;
+      SharedPreferences.getInstance().then((p) => p.remove(_kPendingReset));
+
       final user = await _repository.signInWithEmail(
         email: email,
         password: password,
@@ -211,14 +247,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Bump session key so all data providers re-run for the new user
       _ref.read(userSessionProvider.notifier).state++;
 
-      // Identify user in RevenueCat so entitlements load correctly
-      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-        unawaited(() async {
-          try {
-            await Purchases.logIn(user.id);
-          } catch (_) {}
-        }());
-      }
+      // [V1.1: RevenueCat — re-enable when Purchases.configure() is active in main.dart]
+      // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //   unawaited(() async {
+      //     try { await Purchases.logIn(user.id); } catch (_) {}
+      //   }());
+      // }
 
       // Set user context in Sentry and track sign in
       await _setUserContext(user);
@@ -287,13 +321,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _repository.deleteAccount();
       state = AuthState(user: null, isLoading: false);
 
-      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-        unawaited(() async {
-          try {
-            await Purchases.logOut();
-          } catch (_) {}
-        }());
-      }
+      // [V1.1: RevenueCat — re-enable when Purchases.configure() is active in main.dart]
+      // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //   unawaited(() async {
+      //     try { await Purchases.logOut(); } catch (_) {}
+      //   }());
+      // }
 
       _ref.read(userSessionProvider.notifier).state++;
       await _clearUserContext();
@@ -317,13 +350,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _repository.signOut();
       state = AuthState(user: null, isLoading: false);
 
-      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-        unawaited(() async {
-          try {
-            await Purchases.logOut();
-          } catch (_) {}
-        }());
-      }
+      // [V1.1: RevenueCat — re-enable when Purchases.configure() is active in main.dart]
+      // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //   unawaited(() async {
+      //     try { await Purchases.logOut(); } catch (_) {}
+      //   }());
+      // }
+
+      _pendingReset = false;
+      SharedPreferences.getInstance().then((p) => p.remove(_kPendingReset));
 
       // Bump session key so all cached data providers are cleared
       _ref.read(userSessionProvider.notifier).state++;
@@ -344,6 +379,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await _repository.resetPassword(email);
+      // Persist flag so any subsequent signedIn event is treated as recovery,
+      // regardless of whether the app was killed and restarted between now and
+      // when the user taps the link.
+      _pendingReset = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_kPendingReset, true);
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(

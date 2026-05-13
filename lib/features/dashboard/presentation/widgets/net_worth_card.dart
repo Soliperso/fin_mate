@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/gradient_hero_card.dart';
 
 /// Apple Wallet-style hero card showing total net worth
@@ -28,6 +29,7 @@ class NetWorthCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat = ref.watch(currencyFormat0Provider);
     final currencyFmt2 = ref.watch(currencyFormat2Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final sign = isPositive ? '+' : '–';
     final hasChange = changePercentage.abs() >= 0.05;
@@ -90,7 +92,7 @@ class NetWorthCard extends ConsumerWidget {
 
           // Balance — large Apple Pay-style number
           Text(
-            currencyFormat.format(netWorth),
+            currencyFormat.format(netWorth * convFactor),
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontSize: 40,
                   fontWeight: FontWeight.w700,
@@ -99,6 +101,15 @@ class NetWorthCard extends ConsumerWidget {
                   height: 1.1,
                 ),
           ),
+          if (ref.watch(usdEquivalentProvider(netWorth)) != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              ref.watch(usdEquivalentProvider(netWorth))!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.65),
+                  ),
+            ),
+          ],
 
           const SizedBox(height: AppSizes.md),
 
@@ -128,7 +139,7 @@ class NetWorthCard extends ConsumerWidget {
                 _StatChip(
                   icon: CupertinoIcons.arrow_up_circle_fill,
                   label: 'netWorthCard.income'.tr(),
-                  value: currencyFmt2.format(monthlyIncome),
+                  value: currencyFmt2.format(monthlyIncome * convFactor),
                 ),
                 Container(
                   width: 1,
@@ -139,7 +150,7 @@ class NetWorthCard extends ConsumerWidget {
                 _StatChip(
                   icon: CupertinoIcons.arrow_down_circle_fill,
                   label: 'netWorthCard.expenses'.tr(),
-                  value: currencyFmt2.format(monthlyExpenses),
+                  value: currencyFmt2.format(monthlyExpenses * convFactor),
                 ),
               ],
             ),
@@ -170,26 +181,32 @@ class _StatChip extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.9),
               size: AppSizes.iconSm),
           const SizedBox(width: 6),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.95),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.2,
-                    ),
-              ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.3,
-                    ),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.2,
+                      ),
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.3,
+                      ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

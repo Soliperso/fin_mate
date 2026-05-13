@@ -8,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../core/services/notification_provider.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
@@ -15,6 +16,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/profile_providers.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../providers/dashboard_providers.dart';
+import '../../../../core/providers/feature_flag_provider.dart';
 import '../widgets/net_worth_card.dart';
 import '../widgets/cash_flow_card.dart';
 import '../widgets/cash_flow_chart.dart';
@@ -218,20 +220,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     final hasActiveBudgets =
                         budgets?.any((b) => b.isActive) ?? false;
 
+                    final featureFlags =
+                        ref.watch(appFeatureFlagsProvider).valueOrNull;
+
                     final goals = ref.watch(savingsGoalsProvider).valueOrNull;
                     final totalSaved =
                         goals?.fold(0.0, (s, g) => s + g.currentAmount) ?? 0.0;
                     final hasActiveGoals =
-                        (goals?.any((g) => !g.isCompleted) ?? false) &&
+                        featureEnabled(featureFlags, 'savings_goals') &&
+                            (goals?.any((g) => !g.isCompleted) ?? false) &&
                             totalSaved > 0;
 
-                    final upcomingBills = ref
-                            .watch(upcomingRecurringTransactionsProvider)
-                            .valueOrNull
-                            ?.where((t) => t.type == 'expense')
-                            .toList() ??
-                        [];
-                    final hasUpcomingBills = upcomingBills.isNotEmpty;
+                    final hasUpcomingBills =
+                        featureEnabled(featureFlags, 'recurring_transactions') &&
+                            (ref
+                                    .watch(
+                                        upcomingRecurringTransactionsProvider)
+                                    .valueOrNull
+                                    ?.any((t) => t.type == 'expense') ??
+                                false);
 
                     // Build unwrapped list first so single-card early return
                     // stays aligned with the rest of the page content.
@@ -616,6 +623,7 @@ class _TransactionRow extends ConsumerWidget {
     final isIncome = transaction.type == TransactionType.income;
     final amount = isIncome ? transaction.amount : -transaction.amount;
     final currencyFormat = ref.watch(currencyFormat2Provider);
+    final convFactor = ref.watch(conversionFactorProvider);
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -687,7 +695,7 @@ class _TransactionRow extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${amount >= 0 ? '+' : ''}${currencyFormat.format(amount)}',
+                  '${amount >= 0 ? '+' : ''}${currencyFormat.format(amount * convFactor)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: amount >= 0
                             ? AppColors.systemGreen

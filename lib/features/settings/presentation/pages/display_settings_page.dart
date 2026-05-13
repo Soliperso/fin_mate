@@ -27,7 +27,7 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
   final _currencyKey = GlobalKey();
   final _scrollController = ScrollController();
 
-  static const _langCodes = ['en', 'es', 'fr', 'ar'];
+  static const _langCodes = ['en', 'es', 'fr' /*, 'ar'*/];
 
   String _langCodeToLabel(String code) {
     switch (code) {
@@ -35,8 +35,8 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
         return 'display.langEs'.tr();
       case 'fr':
         return 'display.langFr'.tr();
-      case 'ar':
-        return 'display.langAr'.tr();
+      // case 'ar':
+      //   return 'display.langAr'.tr();
       default:
         return 'display.langEn'.tr();
     }

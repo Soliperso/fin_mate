@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── SharedPreferences keys ──────────────────────────────────────────────────
 const _keyCurrency = 'pref_currency';
+const _keyHomeCurrency = 'pref_home_currency';
 const _keyDateFormat = 'pref_date_format';
 const _keyNumberFormat = 'pref_number_format';
 
@@ -13,7 +14,29 @@ const currencySymbols = {
   'EUR': '€',
   'GBP': '£',
   'JPY': '¥',
+  'CAD': 'CA\$',
+  'AUD': 'A\$',
+  'CHF': 'Fr',
+  'CNY': '¥',
   'INR': '₹',
+  'MXN': 'MX\$',
+  'BRL': 'R\$',
+  'KRW': '₩',
+  'SGD': 'S\$',
+  'HKD': 'HK\$',
+  'SEK': 'kr',
+  'NOK': 'kr',
+  'DKK': 'kr',
+  'NZD': 'NZ\$',
+  'ZAR': 'R',
+  'AED': 'د.إ',
+  'SAR': '﷼',
+  'TRY': '₺',
+  'PLN': 'zł',
+  'THB': '฿',
+  'IDR': 'Rp',
+  'MYR': 'RM',
+  'PHP': '₱',
 };
 
 const numberLocales = {
@@ -31,11 +54,14 @@ const datePatterns = {
 // ─── State ───────────────────────────────────────────────────────────────────
 class DisplayFormatState {
   final String currencyCode;
+  /// The currency amounts are stored in (set once on first run, never auto-changed).
+  final String homeCurrencyCode;
   final String dateFormat;
   final String numberFormat;
 
   const DisplayFormatState({
     this.currencyCode = 'USD',
+    this.homeCurrencyCode = 'USD',
     this.dateFormat = 'MM/DD/YYYY',
     this.numberFormat = '1,234.56',
   });
@@ -46,11 +72,13 @@ class DisplayFormatState {
 
   DisplayFormatState copyWith({
     String? currencyCode,
+    String? homeCurrencyCode,
     String? dateFormat,
     String? numberFormat,
   }) {
     return DisplayFormatState(
       currencyCode: currencyCode ?? this.currencyCode,
+      homeCurrencyCode: homeCurrencyCode ?? this.homeCurrencyCode,
       dateFormat: dateFormat ?? this.dateFormat,
       numberFormat: numberFormat ?? this.numberFormat,
     );
@@ -156,8 +184,15 @@ DisplayFormatState getCachedDisplayFormat() {
 /// Call this in main() before runApp, and always call setCachedDisplayFormat with the result.
 Future<DisplayFormatState> loadInitialDisplayFormat() async {
   final prefs = await SharedPreferences.getInstance();
+  final currencyCode = prefs.getString(_keyCurrency) ?? 'USD';
+  // Seed home currency on first run so it is locked in and never changes automatically.
+  if (!prefs.containsKey(_keyHomeCurrency)) {
+    await prefs.setString(_keyHomeCurrency, currencyCode);
+  }
+  final homeCurrencyCode = prefs.getString(_keyHomeCurrency) ?? currencyCode;
   final state = DisplayFormatState(
-    currencyCode: prefs.getString(_keyCurrency) ?? 'USD',
+    currencyCode: currencyCode,
+    homeCurrencyCode: homeCurrencyCode,
     dateFormat: prefs.getString(_keyDateFormat) ?? 'MM/DD/YYYY',
     numberFormat: prefs.getString(_keyNumberFormat) ?? '1,234.56',
   );

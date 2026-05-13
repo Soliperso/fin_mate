@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../recurring_transactions/presentation/providers/recurring_transactions_providers.dart';
 
 class UpcomingBillsSlide extends ConsumerWidget {
@@ -22,10 +23,16 @@ class UpcomingBillsSlide extends ConsumerWidget {
 
         final next = bills.first;
         final extraCount = bills.length - 1;
-        final isUrgent = next.isOverdue || next.daysUntilDue <= 3;
-        final accentColor =
-            isUrgent ? AppColors.warning : AppColors.brandTeal;
+        final Color accentColor;
+        if (next.isOverdue || next.daysUntilDue <= 0) {
+          accentColor = AppColors.systemRed;
+        } else if (next.daysUntilDue <= 7) {
+          accentColor = AppColors.systemOrange;
+        } else {
+          accentColor = AppColors.systemGreen;
+        }
         final currencyFmt = ref.watch(currencyFormat2Provider);
+        final convFactor = ref.watch(conversionFactorProvider);
 
         String dueLabel;
         if (next.isOverdue) {
@@ -35,7 +42,7 @@ class UpcomingBillsSlide extends ConsumerWidget {
         } else if (next.daysUntilDue == 1) {
           dueLabel = 'Due tomorrow';
         } else {
-          dueLabel = 'In ${next.daysUntilDue}d';
+          dueLabel = 'Due in ${next.daysUntilDue} days';
         }
 
         return GestureDetector(
@@ -119,7 +126,7 @@ class UpcomingBillsSlide extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        currencyFmt.format(next.amount),
+                        currencyFmt.format(next.amount * convFactor),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppColors.secondaryLabel,
                             ),

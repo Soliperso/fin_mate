@@ -49,14 +49,14 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.brandTeal,
                 title: 'Default Categories',
                 subtitle: 'Manage system default transaction categories',
-                onTap: () => _showComingSoon(context, 'Default Categories'),
+                onTap: () => context.push('/admin/categories'),
               ),
               _SettingsTileData(
                 icon: CupertinoIcons.add_circled,
                 iconColor: AppColors.tealBlue,
                 title: 'Add Custom Category',
                 subtitle: 'Create new transaction categories',
-                onTap: () => _showComingSoon(context, 'Add Custom Category'),
+                onTap: () => context.push('/admin/categories?add=true'),
               ),
             ]),
             const SizedBox(height: AppSizes.lg),
@@ -70,14 +70,14 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.systemBlue,
                 title: 'Feature Toggles',
                 subtitle: 'Enable or disable features for all users',
-                onTap: () => _showComingSoon(context, 'Feature Toggles'),
+                onTap: () => context.push('/admin/feature-toggles'),
               ),
               _SettingsTileData(
                 icon: CupertinoIcons.lab_flask,
                 iconColor: AppColors.systemOrange,
                 title: 'Beta Features',
                 subtitle: 'Manage experimental features',
-                onTap: () => _showComingSoon(context, 'Beta Features'),
+                onTap: () => context.push('/admin/feature-toggles?beta=true'),
               ),
             ]),
             const SizedBox(height: AppSizes.lg),
@@ -126,7 +126,7 @@ class SystemSettingsPage extends ConsumerWidget {
                 iconColor: AppColors.systemBlue,
                 title: 'Email Templates',
                 subtitle: 'Manage system email templates',
-                onTap: () => _showComingSoon(context, 'Email Templates'),
+                onTap: () => context.push('/admin/email-templates'),
               ),
             ]),
             const SizedBox(height: AppSizes.lg),
@@ -413,7 +413,9 @@ class SystemSettingsPage extends ConsumerWidget {
                 ),
                 // Content
                 Expanded(
-                  child: ref.watch(systemAuditLogProvider).when(
+                  child: Consumer(
+                    builder: (context, ref, _) =>
+                        ref.watch(systemAuditLogProvider).when(
                         data: (logs) {
                           if (logs.isEmpty) {
                             return Center(
@@ -444,6 +446,15 @@ class SystemSettingsPage extends ConsumerWidget {
                             );
                           }
 
+                          final userIds = logs
+                              .map((e) => e['user_id'] as String? ?? '')
+                              .toSet()
+                              .toList();
+                          final userIndex = {
+                            for (var i = 0; i < userIds.length; i++)
+                              userIds[i]: i + 1
+                          };
+
                           return ListView.separated(
                             controller: scrollController,
                             padding: const EdgeInsets.all(AppSizes.pagePadding),
@@ -457,9 +468,9 @@ class SystemSettingsPage extends ConsumerWidget {
                             itemBuilder: (context, index) {
                               final entry = logs[index];
                               final action =
-                                  entry['action'] ?? 'Unknown Action';
+                                  entry['action'] as String? ?? 'Unknown Action';
                               final createdAt = entry['created_at'] ?? 'N/A';
-                              final userId = entry['user_id'] ?? 'N/A';
+                              final userId = entry['user_id'] as String? ?? '';
 
                               // Format timestamp
                               String formattedTime = 'N/A';
@@ -481,15 +492,15 @@ class SystemSettingsPage extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      action,
+                                      _formatEventName(action),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
                                           ?.copyWith(
-                                            fontWeight: FontWeight.w600,
+                                            fontWeight: FontWeight.w500,
                                             color: isDark
-                                                ? AppColors.labelDark
-                                                : AppColors.label,
+                                                ? AppColors.labelDark.withValues(alpha: 0.9)
+                                                : AppColors.label.withValues(alpha: 0.9),
                                           ),
                                     ),
                                     const SizedBox(height: 4),
@@ -507,14 +518,15 @@ class SystemSettingsPage extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'User: $userId',
+                                      entry['user_name'] as String? ??
+                                          'User #${userIndex[userId] ?? '?'}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelSmall
                                           ?.copyWith(
                                             color: isDark
                                                 ? AppColors.tertiaryLabelDark
-                                                : AppColors.systemGray3,
+                                                : AppColors.secondaryLabel,
                                             fontSize: 10,
                                           ),
                                     ),
@@ -574,6 +586,7 @@ class SystemSettingsPage extends ConsumerWidget {
                           ),
                         ),
                       ),
+                  ),
                 ),
               ],
             ),
@@ -583,6 +596,9 @@ class SystemSettingsPage extends ConsumerWidget {
     );
   }
 }
+
+String _formatEventName(String key) =>
+    key.split('_').map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
 
 class _SettingsTileData {
   final IconData icon;

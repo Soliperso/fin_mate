@@ -77,7 +77,7 @@ class LegalPage extends StatelessWidget {
                 context,
                 icon: CupertinoIcons.info_circle,
                 title: 'Last Updated',
-                subtitle: 'April 1, 2026',
+                subtitle: 'May 11, 2026',
                 onTap: () {},
               ),
               _buildDivider(context, isDark),

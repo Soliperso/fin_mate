@@ -316,3 +316,30 @@ final systemAuditLogProvider =
   final repository = ref.watch(adminRepositoryProvider);
   return await repository.getSystemAuditLog();
 });
+
+// ============================================================================
+// Default Categories Provider
+// ============================================================================
+
+final defaultCategoriesProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  return ref.read(adminRemoteDataSourceProvider).getDefaultCategories();
+});
+
+// ============================================================================
+// Feature Flags Provider
+// ============================================================================
+
+final featureFlagsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  return ref.read(adminRemoteDataSourceProvider).getFeatureFlags();
+});
+
+// ============================================================================
+// Email Templates Provider
+// ============================================================================
+
+final emailTemplatesProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  return ref.read(adminRemoteDataSourceProvider).getEmailTemplates();
+});
