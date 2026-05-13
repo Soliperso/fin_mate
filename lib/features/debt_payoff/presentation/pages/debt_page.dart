@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/feature_flag_provider.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -128,6 +129,30 @@ class _DebtPageState extends ConsumerState<DebtPage>
 
   @override
   Widget build(BuildContext context) {
+    final featureFlags = ref.watch(appFeatureFlagsProvider).valueOrNull;
+    if (!featureEnabled(featureFlags, 'debt_payoff')) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          title: Text('debt.title'.tr()),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSizes.md),
+            child: EmptyStateCard(
+              icon: CupertinoIcons.lock_shield,
+              title: 'Feature Unavailable',
+              message:
+                  'Debt Payoff is currently disabled.\nContact your administrator to enable it.',
+              backgroundColor: AppColors.brandTeal,
+            ),
+          ),
+        ),
+      );
+    }
+
     final debtsAsync = ref.watch(debtsProvider);
     final strategy = ref.watch(selectedStrategyProvider);
     final payoffResult = ref.watch(payoffResultProvider);

@@ -1204,11 +1204,12 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              _getCategoryIcon(cat.name, cat.icon),
-                              size: 18,
-                              color: AppColors.secondaryLabel,
-                            ),
+                            cat.icon != null && cat.icon!.isNotEmpty
+                                ? Text(cat.icon!,
+                                    style: const TextStyle(fontSize: 18))
+                                : Icon(getCategoryIcon(cat.name),
+                                    size: 18,
+                                    color: AppColors.secondaryLabel),
                             const SizedBox(width: 12),
                             Text(
                               cat.name,
@@ -1797,7 +1798,4 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     }
   }
 
-  IconData _getCategoryIcon(String categoryName, String? emojiIcon) {
-    return getCategoryIcon(categoryName);
-  }
 }

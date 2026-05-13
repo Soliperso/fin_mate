@@ -675,6 +675,23 @@ class _SectionLabel extends StatelessWidget {
 
 // ── Payment row ───────────────────────────────────────────────────────────────
 
+IconData _iconForDebtType(String debtType) {
+  switch (debtType) {
+    case 'credit_card':
+      return CupertinoIcons.creditcard;
+    case 'student_loan':
+      return CupertinoIcons.book;
+    case 'auto_loan':
+      return CupertinoIcons.car_detailed;
+    case 'mortgage':
+      return CupertinoIcons.house;
+    case 'medical':
+      return CupertinoIcons.heart;
+    default:
+      return CupertinoIcons.money_dollar_circle;
+  }
+}
+
 class _PaymentRow extends StatelessWidget {
   final DebtEntity debt;
   final bool isPastDue;
@@ -690,12 +707,21 @@ class _PaymentRow extends StatelessWidget {
     this.onTap,
   });
 
+  Color _urgencyColor() {
+    if (isPastDue) return AppColors.error;
+    if (daysUntil == null || daysUntil! <= 1) return AppColors.error;
+    if (daysUntil! <= 7) return AppColors.warning;
+    return AppColors.brandTeal;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final color = isPastDue ? AppColors.error : AppColors.textSecondary;
-    final bgColor = isPastDue
-        ? AppColors.error.withValues(alpha: 0.07)
-        : Colors.transparent;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final urgency = _urgencyColor();
+
+    final cardBg = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.secondarySystemBackground;
 
     String subtitle;
     if (isPastDue) {
@@ -712,72 +738,118 @@ class _PaymentRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSizes.xs),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm,
-        ),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: cardBg,
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
           border: Border.all(
-            color: isPastDue
-                ? AppColors.error.withValues(alpha: 0.25)
-                : Theme.of(context).dividerColor.withValues(alpha: 0.3),
+            color: isDark
+                ? AppColors.separatorDark.withValues(alpha: 0.4)
+                : AppColors.separator.withValues(alpha: 0.3),
           ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    debt.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Urgency accent bar
+              Container(
+                width: 3,
+                decoration: BoxDecoration(
+                  color: urgency.withValues(alpha: 0.6),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppSizes.radiusMd),
+                    bottomLeft: Radius.circular(AppSizes.radiusMd),
                   ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: color),
-                  ),
-                ],
+                ),
               ),
-            ),
-            if (isPastDue)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    currencyFormat.format(debt.minimumPayment),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.error,
+              const SizedBox(width: AppSizes.sm),
+              // Debt type icon
+              Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: AppColors.brandTeal.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _iconForDebtType(debt.debtType),
+                  size: 16,
+                  color: AppColors.brandTeal.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(width: AppSizes.sm),
+              // Name + due-date chip
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        debt.name,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: urgency.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                  ),
-                  Text(
-                    'track.markAsPaid'.tr(),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.brandTeal,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          subtitle,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                  color: urgency.withValues(alpha: 0.95),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 11),
                         ),
+                      ),
+                    ],
                   ),
-                ],
-              )
-            else
-              Text(
-                currencyFormat.format(debt.minimumPayment),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                ),
+              ),
+              // Amount
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.md, vertical: AppSizes.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      currencyFormat.format(debt.minimumPayment),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isPastDue
+                                ? AppColors.error.withValues(alpha: 0.85)
+                                : Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.color
+                                    ?.withValues(alpha: 0.75)),
                     ),
+                    if (isPastDue) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'track.markAsPaid'.tr(),
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(
+                                color: AppColors.brandTeal
+                                    .withValues(alpha: 0.85),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
