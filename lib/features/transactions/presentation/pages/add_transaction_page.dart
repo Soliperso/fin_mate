@@ -1094,7 +1094,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         final toolbarColor = isDark
             ? AppColors.tertiarySystemBackgroundDark
             : AppColors.secondarySystemBackground;
-        final dividerColor = Theme.of(context).dividerColor;
+        final dividerColor = Theme.of(ctx).dividerColor;
         final labelColor = isDark ? AppColors.labelDark : AppColors.label;
 
         return ClipRRect(
@@ -1204,12 +1204,12 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            cat.icon != null && cat.icon!.isNotEmpty
-                                ? Text(cat.icon!,
-                                    style: const TextStyle(fontSize: 18))
-                                : Icon(getCategoryIcon(cat.name),
-                                    size: 18,
-                                    color: AppColors.secondaryLabel),
+                            Icon(
+                              getCategoryIcon(cat.name,
+                                  iconKey: cat.icon as String?),
+                              size: 18,
+                              color: AppColors.secondaryLabel,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               cat.name,

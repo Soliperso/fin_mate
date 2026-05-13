@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/exchange_rate_provider.dart';
+import '../../../../shared/utils/category_icon_utils.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
@@ -249,7 +250,7 @@ class BudgetsPage extends ConsumerWidget {
                                   BorderRadius.circular(AppSizes.radiusMd),
                             ),
                             child: Icon(
-                              _getIconForCategory(budget.categoryIcon),
+                              _getIconForCategory(budget.categoryIcon, categoryName: budget.categoryName),
                               color: categoryColor,
                               size: 20,
                             ),
@@ -531,7 +532,7 @@ class BudgetsPage extends ConsumerWidget {
                               BorderRadius.circular(AppSizes.radiusMd),
                         ),
                         child: Icon(
-                          _getIconForCategory(budget.categoryIcon),
+                          _getIconForCategory(budget.categoryIcon, categoryName: budget.categoryName),
                           color: categoryColor,
                           size: 22,
                         ),
@@ -803,56 +804,8 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  /// Maps emoji icon strings (stored in DB) to Material IconData.
-  IconData _getIconForCategory(String? icon) {
-    switch (icon) {
-      // Income
-      case '💼':
-        return CupertinoIcons.briefcase;
-      case '💻':
-        return CupertinoIcons.desktopcomputer;
-      case '📈':
-        return CupertinoIcons.arrow_up_right;
-      case '🎁':
-        return CupertinoIcons.gift;
-      case '💰':
-        return CupertinoIcons.money_dollar;
-      // Expense — food & transport
-      case '🍔':
-        return CupertinoIcons.cart;
-      case '🚗':
-        return CupertinoIcons.car;
-      case '🛍️':
-        return CupertinoIcons.bag;
-      case '🎬':
-        return CupertinoIcons.film;
-      case '💡':
-        return CupertinoIcons.lightbulb;
-      // Healthcare & education
-      case '⚕️':
-      case '🏥':
-        return CupertinoIcons.heart;
-      case '📚':
-        return CupertinoIcons.book;
-      case '🎓':
-        return CupertinoIcons.book;
-      // Housing
-      case '🏠':
-      case '🏡':
-        return CupertinoIcons.house;
-      // Personal & misc
-      case '💅':
-        return CupertinoIcons.sparkles;
-      case '💸':
-        return CupertinoIcons.money_dollar;
-      // Debt payments
-      case '💳':
-        return CupertinoIcons.creditcard;
-      case '🏦':
-        return CupertinoIcons.building_2_fill;
-      default:
-        return CupertinoIcons.tag;
-    }
+  IconData _getIconForCategory(String? iconKey, {String? categoryName}) {
+    return getCategoryIcon(categoryName, iconKey: iconKey);
   }
 
   Color? _parseColor(String? colorString) {

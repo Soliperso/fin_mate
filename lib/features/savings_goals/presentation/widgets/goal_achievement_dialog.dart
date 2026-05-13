@@ -128,7 +128,7 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                         ),
                         const SizedBox(height: AppSizes.md),
                         const Text(
-                          'Goal Achieved! 🎉',
+                          'Goal Achieved!',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,

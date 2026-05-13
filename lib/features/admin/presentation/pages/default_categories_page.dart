@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/utils/category_icon_utils.dart'
+    show expenseIconOptions, getCategoryIcon, incomeIconOptions;
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../providers/admin_providers.dart';
 
@@ -96,11 +98,10 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
   }) async {
     final nameController =
         TextEditingController(text: existing?['name'] ?? '');
-    final iconController =
-        TextEditingController(text: existing?['icon'] ?? '');
     final colorController =
         TextEditingController(text: existing?['color'] ?? '#4DB6AC');
     String selectedType = existing?['type'] ?? 'expense';
+    String selectedIconKey = existing?['icon'] ?? 'tag';
     final formKey = GlobalKey<FormState>();
     bool saving = false;
 
@@ -174,40 +175,47 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
                     ),
                     const SizedBox(height: AppSizes.md),
 
-                    // Icon (emoji)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: iconController,
-                            decoration: const InputDecoration(
-                              labelText: 'Icon (emoji)',
-                              hintText: 'e.g. 🛒',
-                            ),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty)
-                                    ? 'Required'
-                                    : null,
+                    // Icon picker
+                    Text(
+                      'Icon',
+                      style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                            color: Theme.of(ctx).hintColor,
                           ),
-                        ),
-                        const SizedBox(width: AppSizes.md),
-                        ListenableBuilder(
-                          listenable: Listenable.merge(
-                              [iconController, colorController]),
-                          builder: (_, __) => CircleAvatar(
-                            radius: 22,
-                            backgroundColor:
-                                _parseColor(colorController.text)
-                                    .withValues(alpha: 0.15),
-                            child: Text(
-                              iconController.text.isEmpty
-                                  ? '?'
-                                  : iconController.text,
-                              style: const TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: (selectedType == 'income'
+                              ? incomeIconOptions
+                              : expenseIconOptions)
+                          .map((opt) {
+                        final (key, iconData, label) = opt;
+                        final isSelected = selectedIconKey == key;
+                        final color = _parseColor(colorController.text);
+                        return GestureDetector(
+                          onTap: () =>
+                              setSheetState(() => selectedIconKey = key),
+                          child: Tooltip(
+                            message: label,
+                            child: CircleAvatar(
+                              radius: 22,
+                              backgroundColor: isSelected
+                                  ? color.withValues(alpha: 0.25)
+                                  : Theme.of(ctx)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                              child: Icon(
+                                iconData,
+                                size: 20,
+                                color: isSelected
+                                    ? color
+                                    : Theme.of(ctx).hintColor,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: AppSizes.md),
 
@@ -259,14 +267,14 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
                                   await ds.addDefaultCategory(
                                     name: nameController.text.trim(),
                                     type: selectedType,
-                                    icon: iconController.text.trim(),
+                                    icon: selectedIconKey,
                                     color: colorController.text.trim(),
                                   );
                                 } else {
                                   await ds.updateDefaultCategory(
                                     id: existing['id'] as String,
                                     name: nameController.text.trim(),
-                                    icon: iconController.text.trim(),
+                                    icon: selectedIconKey,
                                     color: colorController.text.trim(),
                                   );
                                 }
@@ -393,9 +401,14 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
                   horizontal: AppSizes.md, vertical: 4),
               leading: CircleAvatar(
                 backgroundColor: color.withValues(alpha: 0.15),
-                child: Text(
-                  cat['icon'] as String? ?? '🏷️',
-                  style: const TextStyle(fontSize: 18),
+                child: Icon(
+                  getCategoryIcon(
+                    cat['name'] as String?,
+                    type: cat['type'] as String?,
+                    iconKey: cat['icon'] as String?,
+                  ),
+                  color: color,
+                  size: 18,
                 ),
               ),
               title: Text(

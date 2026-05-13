@@ -1161,13 +1161,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
-                child: transaction.categoryIcon != null &&
-                        transaction.categoryIcon!.isNotEmpty
-                    ? Center(
-                        child: Text(transaction.categoryIcon!,
-                            style: const TextStyle(fontSize: 20)))
-                    : Icon(_getTransactionIcon(transaction),
-                        color: iconColor, size: 20),
+                child: Icon(_getTransactionIcon(transaction),
+                    color: iconColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1238,6 +1233,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     return getCategoryIcon(
       transaction.categoryName,
       type: transaction.type.name,
+      iconKey: transaction.categoryIcon,
     );
   }
 
