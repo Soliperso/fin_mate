@@ -7,6 +7,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/debt_entity.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
 
 class EditDebtBottomSheet extends ConsumerStatefulWidget {
@@ -180,7 +181,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                   controller: _balanceController,
                   decoration: InputDecoration(
                     labelText: 'editDebt.balance'.tr(),
-                    prefixText: '\$ ',
+                    prefixText: '${ref.watch(currencySymbolProvider)} ',
                     border: const OutlineInputBorder(),
                   ),
                   keyboardType:
@@ -203,7 +204,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                     labelText: _selectedDebtType == 'credit_card'
                         ? 'editDebt.creditLimit'.tr()
                         : 'editDebt.originalBalance'.tr(),
-                    prefixText: '\$ ',
+                    prefixText: '${ref.watch(currencySymbolProvider)} ',
                     border: const OutlineInputBorder(),
                     helperText: 'addDebt.originalBalanceHelper'.tr(),
                   ),
@@ -246,7 +247,7 @@ class _EditDebtBottomSheetState extends ConsumerState<EditDebtBottomSheet> {
                         controller: _minimumPaymentController,
                         decoration: InputDecoration(
                           labelText: 'editDebt.minPayment'.tr(),
-                          prefixText: '\$ ',
+                          prefixText: '${ref.watch(currencySymbolProvider)} ',
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: const TextInputType.numberWithOptions(

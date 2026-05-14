@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,7 @@ class ReviewService {
   /// Increments the counter and shows the native review prompt when all
   /// conditions are met (3+ days since install, 5+ transactions, never shown).
   Future<void> maybePromptAfterTransaction() async {
+    if (!kReleaseMode) return;
     try {
       final prefs = await SharedPreferences.getInstance();
 

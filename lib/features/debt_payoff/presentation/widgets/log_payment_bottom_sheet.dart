@@ -7,6 +7,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/debt_entity.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
 
 class LogPaymentBottomSheet extends ConsumerStatefulWidget {
@@ -134,7 +135,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                   controller: _amountController,
                   decoration: InputDecoration(
                     labelText: 'logPayment.amountLabel'.tr(),
-                    prefixText: '\$ ',
+                    prefixText: '${ref.watch(currencySymbolProvider)} ',
                     border: const OutlineInputBorder(),
                   ),
                   keyboardType:

@@ -13,6 +13,8 @@ import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
+import '../../../../core/providers/display_format_provider.dart';
+import '../../../../core/providers/exchange_rate_provider.dart';
 import '../providers/recurring_transactions_providers.dart';
 import '../widgets/recurring_transaction_list_item.dart';
 
@@ -435,7 +437,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-class _TransactionActionSheet extends StatelessWidget {
+class _TransactionActionSheet extends ConsumerWidget {
   final RecurringTransactionEntity transaction;
   final VoidCallback onEdit;
   final VoidCallback onToggleActive;
@@ -449,7 +451,7 @@ class _TransactionActionSheet extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isIncome = transaction.type == 'income';
     final isExpense = transaction.type == 'expense';
     final typeColor = isIncome
@@ -457,6 +459,8 @@ class _TransactionActionSheet extends StatelessWidget {
         : isExpense
             ? AppColors.systemRed
             : AppColors.primaryTeal;
+    final currencyFormat = ref.watch(currencyFormat2Provider);
+    final conversionFactor = ref.watch(conversionFactorProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -521,7 +525,7 @@ class _TransactionActionSheet extends StatelessWidget {
                 ),
               ),
               Text(
-                '${isIncome ? '+' : isExpense ? '-' : ''}\$${transaction.amount.toStringAsFixed(2)}',
+                '${isIncome ? '+' : isExpense ? '-' : ''}${currencyFormat.format(transaction.amount * conversionFactor)}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: isIncome

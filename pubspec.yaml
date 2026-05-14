@@ -43,6 +43,9 @@ dependencies:
   # Routing
   go_router: ^17.0.1
 
+  # Notifications
+  flutter_local_notifications: ^18.0.0
+
   # Backend & Auth
   supabase_flutter: ^2.9.1
   app_links: ^6.4.1

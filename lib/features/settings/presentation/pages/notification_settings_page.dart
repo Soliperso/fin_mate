@@ -142,7 +142,6 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'notificationSettings.budgetAlerts'.tr(),
                     subtitle: 'notificationSettings.budgetAlertsSub'.tr(
                       namedArgs: {
                         'threshold': _budgetThreshold!.toInt().toString()
@@ -180,7 +179,6 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'notificationSettings.billReminders'.tr(),
                     subtitle: 'notificationSettings.billRemindersSub'.tr(
                       namedArgs: {
                         'days': _billReminderDays!.toInt().toString()
@@ -218,7 +216,6 @@ class _NotificationSettingsPageState
                   const SizedBox(height: AppSizes.sm),
                   _sliderTile(
                     context,
-                    title: 'notificationSettings.transactionAlerts'.tr(),
                     subtitle: 'notificationSettings.transactionAlertsSub'.tr(
                       namedArgs: {
                         'amount': '\$${_transactionThreshold!.toInt()}'
@@ -371,7 +368,7 @@ class _NotificationSettingsPageState
               ),
               const SizedBox(width: AppSizes.md),
               Transform.scale(
-                scale: 0.8,
+                scale: 0.70,
                 child: Switch(
                   value: value,
                   onChanged: onChanged,
@@ -388,7 +385,6 @@ class _NotificationSettingsPageState
 
   Widget _sliderTile(
     BuildContext context, {
-    required String title,
     required String subtitle,
     required double value,
     required double min,
@@ -407,11 +403,6 @@ class _NotificationSettingsPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          ),
-          const SizedBox(height: AppSizes.xs),
           Text(
             subtitle,
             style:

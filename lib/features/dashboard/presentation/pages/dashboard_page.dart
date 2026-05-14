@@ -23,7 +23,6 @@ import '../widgets/cash_flow_chart.dart';
 import '../widgets/money_health_score.dart';
 import '../widgets/dti_widget.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
-import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
 import '../../../recurring_transactions/presentation/providers/recurring_transactions_providers.dart';
 import '../widgets/budget_snapshot_card.dart';
 import '../widgets/goals_summary_slide.dart';
@@ -223,13 +222,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     final featureFlags =
                         ref.watch(appFeatureFlagsProvider).valueOrNull;
 
-                    final goals = ref.watch(savingsGoalsProvider).valueOrNull;
-                    final totalSaved =
-                        goals?.fold(0.0, (s, g) => s + g.currentAmount) ?? 0.0;
-                    final hasActiveGoals =
-                        featureEnabled(featureFlags, 'savings_goals') &&
-                            (goals?.any((g) => !g.isCompleted) ?? false) &&
-                            totalSaved > 0;
+                    final goalsFeatureEnabled =
+                        featureEnabled(featureFlags, 'savings_goals');
 
                     final hasUpcomingBills =
                         featureEnabled(featureFlags, 'recurring_transactions') &&
@@ -245,7 +239,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     final rawSlides = <Widget>[
                       MoneyHealthScore(score: stats.moneyHealthScore),
                       if (hasActiveBudgets) const BudgetSnapshotCard(),
-                      if (hasActiveGoals) const GoalsSummarySlide(),
+                      if (goalsFeatureEnabled) const GoalsSummarySlide(),
                       if (hasUpcomingBills) const UpcomingBillsSlide(),
                     ];
 

@@ -1078,6 +1078,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             : '-';
 
     final isSelected = _selectedIds.contains(transaction.id);
+    final today = DateTime.now();
+    final isProjected = transaction.date.isAfter(
+      DateTime(today.year, today.month, today.day),
+    );
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -1220,6 +1224,27 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                 color: AppColors.textSecondary,
                               ),
                     ),
+                  if (isProjected) ...[
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.systemBlue.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Projected',
+                        style:
+                            Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.systemBlue,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.3,
+                                ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -1599,15 +1624,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         ),
                         TextButton(
                           onPressed: () {
-                            setModalState(() {
-                              selectedCategory = null;
-                              dateRange = null;
-                              minAmount = null;
-                              maxAmount = null;
-                              hideFuture = false;
-                              _minAmountController.clear();
-                              _maxAmountController.clear();
-                            });
+                            notifier.setCategory(null);
+                            notifier.setDateRange(null);
+                            notifier.setAmountRange(null, null);
+                            notifier.setHideFutureTransactions(false);
+                            Navigator.pop(context);
                           },
                           child: const Text('Clear All'),
                         ),
@@ -1684,7 +1705,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             controller: _minAmountController,
                             decoration: InputDecoration(
                               labelText: 'transactions.minAmount'.tr(),
-                              prefixText: '\$ ',
+                              prefixText: '${ref.watch(currencySymbolProvider)} ',
                               border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.circular(AppSizes.radiusMd),
@@ -1704,7 +1725,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             controller: _maxAmountController,
                             decoration: InputDecoration(
                               labelText: 'transactions.maxAmount'.tr(),
-                              prefixText: '\$ ',
+                              prefixText: '${ref.watch(currencySymbolProvider)} ',
                               border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.circular(AppSizes.radiusMd),
@@ -1749,8 +1770,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           scale: 0.8,
                           child: Switch(
                             value: hideFuture,
-                            onChanged: (val) =>
-                                setModalState(() => hideFuture = val),
+                            onChanged: (val) {
+                              setModalState(() => hideFuture = val);
+                              notifier.setHideFutureTransactions(val);
+                            },
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                           ),

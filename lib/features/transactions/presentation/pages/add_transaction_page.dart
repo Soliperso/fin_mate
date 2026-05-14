@@ -27,6 +27,7 @@ import '../../domain/entities/receipt_data.dart';
 // import '../../data/services/receipt_categorizer_service.dart'; // [V1.1: Attachment]
 import '../../../../core/services/review_service.dart';
 import '../providers/transaction_providers.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/feature_flag_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../budgets/presentation/providers/budget_providers.dart';
@@ -385,7 +386,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Text(
-                '\$',
+                ref.watch(currencySymbolProvider),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
@@ -439,7 +440,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: amounts.map((amount) {
-          final label = '\$${amount.toStringAsFixed(0)}';
+          final label = '${ref.watch(currencySymbolProvider)}${amount.toStringAsFixed(0)}';
           final isSelected = current == amount;
           return Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),
@@ -1237,7 +1238,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   Widget _buildDateStrip(bool isDark) {
     final today = DateTime.now();
     const pastDays = 13;
-    final days = List.generate(pastDays + 1, (i) {
+    const futureDays = 7;
+    final days = List.generate(pastDays + 1 + futureDays, (i) {
       return DateTime(today.year, today.month, today.day - (pastDays - i));
     });
 
@@ -1331,7 +1333,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               context: context,
               initialDate: _selectedDate,
               firstDate: DateTime(2020),
-              lastDate: DateTime.now(),
+              lastDate: DateTime(DateTime.now().year + 2, 12, 31),
             );
             if (date != null) setState(() => _selectedDate = date);
           },
@@ -1557,10 +1559,12 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
+    final tomorrow = today.add(const Duration(days: 1));
     final sel =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
     if (sel == today) return 'Today';
     if (sel == yesterday) return 'Yesterday';
+    if (sel == tomorrow) return 'Tomorrow';
     return _formatDateFull(_selectedDate);
   }
 

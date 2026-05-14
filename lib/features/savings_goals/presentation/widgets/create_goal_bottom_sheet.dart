@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
@@ -159,10 +160,10 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                     const SizedBox(height: AppSizes.sm),
                     TextFormField(
                       controller: _targetAmountController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '0.00',
-                        prefixText: '\$ ',
-                        border: OutlineInputBorder(),
+                        prefixText: '${ref.watch(currencySymbolProvider)} ',
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),

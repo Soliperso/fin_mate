@@ -34,7 +34,8 @@ class SavingsGoalsPage extends ConsumerWidget {
         leading: Center(
           child: CircularIconButton(
             icon: CupertinoIcons.chevron_left,
-            onTap: () => context.pop(),
+            onTap: () =>
+                context.canPop() ? context.pop() : context.go('/dashboard'),
           ),
         ),
         actions: [

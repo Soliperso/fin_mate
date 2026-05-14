@@ -19,10 +19,79 @@ class GoalsSummarySlide extends ConsumerWidget {
       data: (goals) {
         final active = goals.where((g) => !g.isCompleted).toList();
         final activeGoals = active.length;
-        if (activeGoals == 0) return const SizedBox.shrink();
-
         final totalSaved = goals.fold(0.0, (s, g) => s + g.currentAmount);
-        if (totalSaved == 0) return const SizedBox.shrink();
+
+        if (activeGoals == 0) {
+          return GestureDetector(
+            onTap: () => context.push('/goals'),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.secondarySystemBackgroundDark
+                    : AppColors.systemBackground,
+                borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+              ),
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Row(
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: AppColors.brandTeal.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.flag_circle,
+                      size: 36,
+                      color: AppColors.brandTeal,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Savings Goals',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.secondaryLabel,
+                                  ),
+                        ),
+                        const SizedBox(height: AppSizes.xs),
+                        Text(
+                          'Set a goal, start saving',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.3,
+                              ),
+                        ),
+                        const SizedBox(height: AppSizes.xs),
+                        Text(
+                          'Tap to create your first goal',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.secondaryLabel,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    CupertinoIcons.chevron_right,
+                    size: AppSizes.iconSm,
+                    color: AppColors.secondaryLabel,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
         final completedGoals = goals.where((g) => g.isCompleted).length;
         final totalTarget = goals.fold(0.0, (s, g) => s + g.targetAmount);
@@ -37,7 +106,7 @@ class GoalsSummarySlide extends ConsumerWidget {
             : AppColors.systemGray5;
 
         return GestureDetector(
-          onTap: () => context.go('/goals'),
+          onTap: () => context.push('/goals'),
           child: Container(
             decoration: BoxDecoration(
               color: isDark

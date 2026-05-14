@@ -1,6 +1,8 @@
+import 'local_notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/settings/presentation/providers/settings_providers.dart';
 import 'notification_service.dart';
 
 /// Provider for NotificationService
@@ -41,10 +43,15 @@ class NotificationsState {
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final NotificationService _service;
   RealtimeChannel? _realtimeChannel;
+  bool _soundEnabled;
 
-  NotificationsNotifier(this._service) : super(const NotificationsState()) {
+  NotificationsNotifier(this._service, {bool soundEnabled = true})
+      : _soundEnabled = soundEnabled,
+        super(const NotificationsState()) {
     _init();
   }
+
+  void updateSoundEnabled(bool value) => _soundEnabled = value;
 
   Future<void> _init() async {
     await loadNotifications();
@@ -214,6 +221,12 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   void _subscribeToRealtimeUpdates() {
     _realtimeChannel = _service.subscribeToNotifications(
       onInsert: (notification) {
+        if (_soundEnabled) {
+          LocalNotificationService.instance.showNotification(
+            title: notification.title,
+            body: notification.message,
+          );
+        }
         final updated = [notification, ...state.notifications];
         state = state.copyWith(
           notifications: updated,
@@ -244,7 +257,20 @@ final notificationsProvider =
     StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
   ref.watch(userSessionProvider);
   final service = ref.watch(notificationServiceProvider);
-  return NotificationsNotifier(service);
+  final initialSound = ref
+          .read(settingsOperationsProvider)
+          .valueOrNull
+          ?.notificationPreferences
+          .soundEnabled ??
+      true;
+  final notifier =
+      NotificationsNotifier(service, soundEnabled: initialSound);
+  ref.listen(settingsOperationsProvider, (_, next) {
+    final sound =
+        next.valueOrNull?.notificationPreferences.soundEnabled ?? true;
+    notifier.updateSoundEnabled(sound);
+  });
+  return notifier;
 });
 
 /// Provider for unread notification count

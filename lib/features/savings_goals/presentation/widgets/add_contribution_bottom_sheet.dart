@@ -9,6 +9,7 @@ import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
+import '../../../../core/providers/display_format_provider.dart';
 import '../providers/savings_goal_providers.dart';
 
 class AddContributionBottomSheet extends ConsumerStatefulWidget {
@@ -134,10 +135,10 @@ class _AddContributionBottomSheetState
               // Amount Field
               TextFormField(
                 controller: _amountController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Amount',
-                  prefixText: '\$ ',
-                  border: OutlineInputBorder(),
+                  prefixText: '${ref.watch(currencySymbolProvider)} ',
+                  border: const OutlineInputBorder(),
                   hintText: '0.00',
                 ),
                 keyboardType:
@@ -239,7 +240,7 @@ class _TransactionPicker extends ConsumerWidget {
 
   const _TransactionPicker({required this.selected, required this.onSelected});
 
-  String _label(TransactionEntity tx) {
+  String _label(TransactionEntity tx, String symbol) {
     final parts = <String>[];
     if (tx.categoryName != null) parts.add(tx.categoryName!);
     if (tx.description != null && tx.description!.isNotEmpty) {
@@ -247,12 +248,13 @@ class _TransactionPicker extends ConsumerWidget {
     }
     final name = parts.isNotEmpty ? parts.join(' · ') : tx.type.displayName;
     final date = DateFormat('MMM d').format(tx.date);
-    return '\$${tx.amount.toStringAsFixed(2)} — $name — $date';
+    return '$symbol${tx.amount.toStringAsFixed(2)} — $name — $date';
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final txAsync = ref.watch(recentTransactionsProvider);
+    final currencySymbol = ref.watch(currencySymbolProvider);
 
     return txAsync.when(
       data: (transactions) {
@@ -275,7 +277,7 @@ class _TransactionPicker extends ConsumerWidget {
               (tx) => DropdownMenuItem<TransactionEntity?>(
                 value: tx,
                 child: Text(
-                  _label(tx),
+                  _label(tx, currencySymbol),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

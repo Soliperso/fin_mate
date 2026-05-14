@@ -13,6 +13,7 @@ import 'core/config/router.dart';
 import 'core/config/env_config.dart';
 import 'core/services/sentry_service.dart';
 import 'core/services/ad_service.dart';
+import 'core/services/local_notification_service.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/device_security_service.dart';
 // [MVP: Payment Service - Commented out for initial launch]
@@ -179,6 +180,7 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
 
       // Deferred: non-critical inits that don't affect the first frame
       unawaited(AdService.instance.initialize().catchError((_) {}));
+      unawaited(LocalNotificationService.instance.initialize().catchError((_) {}));
       unawaited(DeviceSecurityService().getSecurityStatus().then((status) {
         if (kReleaseMode && status.isJailbroken) {
           GlobalErrorHandler.handleWarning(
