@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 
@@ -149,7 +150,7 @@ class AnalyticsLineChart extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
-                          DateFormat('MMM d').format(dates[i]),
+                          DateFormat(AppDateFormats.shortDate).format(dates[i]),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontSize: 9,
@@ -193,7 +194,7 @@ class AnalyticsLineChart extends StatelessWidget {
                         isSecond ? (secondLabel ?? '') : (firstLabel ?? '');
                     return LineTooltipItem(
                       '${lbl.isNotEmpty ? '$lbl · ' : ''}'
-                      '${DateFormat('MMM d').format(date)}\n'
+                      '${DateFormat(AppDateFormats.shortDate).format(date)}\n'
                       '$valuePrefix${_fmt(spot.y)}',
                       const TextStyle(
                         color: Colors.white,

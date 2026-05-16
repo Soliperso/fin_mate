@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../providers/admin_providers.dart';
 
 (IconData, Color) _templateMeta(String key) {
@@ -248,7 +250,7 @@ class _TemplateTile extends StatelessWidget {
     String? formattedDate;
     if (updatedAt != null) {
       try {
-        formattedDate = DateFormat('MMM d, yyyy')
+        formattedDate = DateFormat(AppDateFormats.mediumDate)
             .format(DateTime.parse(updatedAt).toLocal());
       } catch (_) {}
     }
@@ -584,11 +586,7 @@ class _EditorSheetState extends State<_EditorSheet> {
                   child: ElevatedButton(
                     onPressed: _saving ? null : _save,
                     child: _saving
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const LoadingIndicator()
                         : const Text('Save Template'),
                   ),
                 ),

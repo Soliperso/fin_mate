@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -97,7 +98,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
-              DateFormat('MMMM d, yyyy', context.locale.toString())
+              DateFormat(AppDateFormats.fullDate, context.locale.toString())
                   .format(DateTime.now()),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.systemGray,
@@ -191,6 +192,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
             ref.invalidate(monthlyFlowDataProvider);
+            ref.invalidate(budgetsWithSpendingProvider);
+            ref.invalidate(upcomingRecurringTransactionsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -342,7 +345,34 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (e, _) => const SizedBox.shrink(),
+                      error: (e, _) => GestureDetector(
+                        onTap: () => ref.invalidate(monthlyFlowDataProvider),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.sm,
+                            vertical: AppSizes.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(CupertinoIcons.exclamationmark_circle,
+                                  size: 14, color: AppColors.error),
+                              const SizedBox(width: AppSizes.xs),
+                              Text(
+                                'Failed to load · Tap to retry',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(color: AppColors.error),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -386,6 +416,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onRefresh: () async {
             await ref.read(dashboardNotifierProvider.notifier).refresh();
             ref.invalidate(monthlyFlowDataProvider);
+            ref.invalidate(budgetsWithSpendingProvider);
+            ref.invalidate(upcomingRecurringTransactionsProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -511,7 +543,7 @@ class _PageDots extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
-          margin: const EdgeInsets.symmetric(horizontal: 3),
+          margin: const EdgeInsets.symmetric(horizontal: AppSizes.xs),
           width: isActive ? 20 : 6,
           height: 4,
           decoration: BoxDecoration(
@@ -630,7 +662,7 @@ class _TransactionRow extends ConsumerWidget {
             ? 'common.yesterday'.tr()
             : diff < 7
                 ? 'common.daysAgo'.tr(namedArgs: {'count': '$diff'})
-                : DateFormat('MMM d').format(transaction.date);
+                : DateFormat(AppDateFormats.shortDate).format(transaction.date);
 
     final iconData = _iconForTransaction(transaction);
     final iconColor = isIncome ? AppColors.systemGreen : AppColors.systemRed;
@@ -642,7 +674,7 @@ class _TransactionRow extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.md,
-          vertical: AppSizes.sm + 4,
+          vertical: AppSizes.sm,
         ),
         child: Row(
           children: [
@@ -656,7 +688,7 @@ class _TransactionRow extends ConsumerWidget {
               ),
               child: Icon(iconData, color: iconColor, size: 20),
             ),
-            const SizedBox(width: AppSizes.sm + 4),
+            const SizedBox(width: AppSizes.sm),
             // Title + category
             Expanded(
               child: Column(

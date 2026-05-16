@@ -198,7 +198,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/paywall',
         name: 'paywall',
         pageBuilder: (context, state) =>
-            _FadeTransitionPage(child: const PaywallPage()),
+            const CupertinoPage(child: PaywallPage()),
       ),
       GoRoute(
         path: '/login',

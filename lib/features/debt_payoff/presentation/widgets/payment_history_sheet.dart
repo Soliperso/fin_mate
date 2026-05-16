@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -21,7 +22,7 @@ class PaymentHistorySheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentsAsync = ref.watch(debtPaymentsProvider(debt.id));
     final currencyFormat = ref.watch(currencyFormat2Provider);
-    final dateFormat = DateFormat('MMM d, yyyy', context.locale.languageCode);
+    final dateFormat = DateFormat(AppDateFormats.mediumDate, context.locale.languageCode);
     final maxHeight = MediaQuery.of(context).size.height * 0.75;
 
     return ConstrainedBox(

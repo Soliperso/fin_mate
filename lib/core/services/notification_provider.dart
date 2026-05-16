@@ -222,10 +222,14 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     _realtimeChannel = _service.subscribeToNotifications(
       onInsert: (notification) {
         if (_soundEnabled) {
-          LocalNotificationService.instance.showNotification(
-            title: notification.title,
-            body: notification.message,
-          );
+          LocalNotificationService.instance
+              .showNotification(
+                title: notification.title,
+                body: notification.message,
+              )
+              // Prevent unhandled Future rejection if the local notification
+              // plugin fails (e.g. permission denied, iOS API change).
+              .catchError((_) {});
         }
         final updated = [notification, ...state.notifications];
         state = state.copyWith(

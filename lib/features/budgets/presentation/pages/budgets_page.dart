@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/exchange_rate_provider.dart';
@@ -18,11 +19,25 @@ import '../providers/budget_providers.dart';
 import '../widgets/budget_hero_card.dart';
 import '../widgets/create_budget_bottom_sheet.dart';
 
-class BudgetsPage extends ConsumerWidget {
+class BudgetsPage extends ConsumerStatefulWidget {
   const BudgetsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetsPage> createState() => _BudgetsPageState();
+}
+
+class _BudgetsPageState extends ConsumerState<BudgetsPage> {
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final budgetsState = ref.watch(budgetNotifierProvider);
 
     return Scaffold(
@@ -31,26 +46,90 @@ class BudgetsPage extends ConsumerWidget {
         title: Text('budgets.title'.tr()),
       ),
       body: budgetsState.when(
-        data: (budgets) => budgets.isEmpty
-            ? _buildEmptyState(context, ref)
-            : RefreshIndicator(
-                onRefresh: () async {
-                  await ref.read(budgetNotifierProvider.notifier).refresh();
-                },
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(AppSizes.md),
-                  itemCount: budgets.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSizes.md),
-                        child: BudgetHeroCard(budgets: budgets),
-                      );
-                    }
-                    return _buildBudgetCard(context, budgets[index - 1], ref);
+        data: (budgets) {
+          final filtered = _searchQuery.isEmpty
+              ? budgets
+              : budgets
+                  .where((b) =>
+                      (b.categoryName ?? '').toLowerCase().contains(_searchQuery.toLowerCase()))
+                  .toList();
+
+          if (budgets.isEmpty) return _buildEmptyState(context);
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, 0),
+                child: Builder(builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return TextField(
+                    controller: _searchController,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: 'budgets.searchHint'.tr(),
+                      hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(CupertinoIcons.search, size: 18),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? GestureDetector(
+                              onTap: () => setState(() {
+                                _searchQuery = '';
+                                _searchController.clear();
+                              }),
+                              child: const Icon(CupertinoIcons.xmark_circle_fill,
+                                  size: 18, color: AppColors.systemGray3),
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.secondarySystemBackgroundDark
+                          : AppColors.systemGray6,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.md, vertical: 10),
+                    ),
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                  );
+                }),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await ref.read(budgetNotifierProvider.notifier).refresh();
                   },
+                  child: filtered.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(AppSizes.md),
+                          children: [
+                            EmptyStateCard(
+                              icon: CupertinoIcons.search,
+                              title: 'budgets.noSearchResults'.tr(),
+                              message: 'budgets.noSearchResultsMessage'.tr(),
+                              backgroundColor: AppColors.brandTeal,
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(AppSizes.md),
+                          itemCount: filtered.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: AppSizes.md),
+                                child: BudgetHeroCard(budgets: budgets),
+                              );
+                            }
+                            return _buildBudgetCard(context, filtered[index - 1]);
+                          },
+                        ),
                 ),
               ),
+            ],
+          );
+        },
         loading: () => ListView(
           padding: const EdgeInsets.all(AppSizes.md),
           children: const [
@@ -131,7 +210,7 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+  Widget _buildEmptyState(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
@@ -184,8 +263,7 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBudgetCard(
-      BuildContext context, BudgetEntity budget, WidgetRef ref) {
+  Widget _buildBudgetCard(BuildContext context, BudgetEntity budget) {
     final fmt = ref.watch(currencyFormat0Provider);
     final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;
@@ -213,8 +291,8 @@ class BudgetsPage extends ConsumerWidget {
             ? AppColors.systemOrange
             : AppColors.brandTeal;
 
-    final periodStart = DateFormat('MMM d').format(budget.currentPeriodStart);
-    final periodEnd = DateFormat('MMM d').format(budget.currentPeriodEnd);
+    final periodStart = DateFormat(AppDateFormats.shortDate).format(budget.currentPeriodStart);
+    final periodEnd = DateFormat(AppDateFormats.shortDate).format(budget.currentPeriodEnd);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.md),
@@ -232,7 +310,7 @@ class BudgetsPage extends ConsumerWidget {
             // Card content
             Expanded(
               child: InkWell(
-                onTap: () => _showBudgetOptions(context, ref, budget),
+                onTap: () => _showBudgetOptions(context, budget),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.md),
                   child: Column(
@@ -334,7 +412,7 @@ class BudgetsPage extends ConsumerWidget {
                           const SizedBox(width: AppSizes.xs),
                           GestureDetector(
                             onTap: () =>
-                                _showBudgetOptions(context, ref, budget),
+                                _showBudgetOptions(context, budget),
                             child: const Icon(
                               CupertinoIcons.ellipsis,
                               size: 20,
@@ -486,8 +564,7 @@ class BudgetsPage extends ConsumerWidget {
     );
   }
 
-  void _showBudgetOptions(
-      BuildContext context, WidgetRef ref, BudgetEntity budget) {
+  void _showBudgetOptions(BuildContext context, BudgetEntity budget) {
     final fmt = ref.watch(currencyFormat0Provider);
     final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;

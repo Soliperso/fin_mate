@@ -129,9 +129,8 @@ class GoalDetailPage extends ConsumerWidget {
                                 children: [
                                   Text(
                                     goal.name,
-                                    style: const TextStyle(
+                                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                       color: AppColors.white,
-                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -139,10 +138,9 @@ class GoalDetailPage extends ConsumerWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       goal.category!,
-                                      style: TextStyle(
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                         color: AppColors.white
                                             .withValues(alpha: 0.8),
-                                        fontSize: 13,
                                       ),
                                     ),
                                   ],
@@ -151,9 +149,8 @@ class GoalDetailPage extends ConsumerWidget {
                             ),
                             Text(
                               '${progress.toStringAsFixed(0)}%',
-                              style: const TextStyle(
+                              style: Theme.of(context).textTheme.displaySmall?.copyWith(
                                 color: AppColors.white,
-                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -164,9 +161,8 @@ class GoalDetailPage extends ConsumerWidget {
                           const SizedBox(height: AppSizes.sm),
                           Text(
                             goal.description!,
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.white.withValues(alpha: 0.8),
-                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -193,17 +189,15 @@ class GoalDetailPage extends ConsumerWidget {
                           children: [
                             Text(
                               currencyFormat.format(goal.currentAmount),
-                              style: const TextStyle(
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 15,
                               ),
                             ),
                             Text(
                               currencyFormat.format(goal.targetAmount),
-                              style: TextStyle(
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.8),
-                                fontSize: 13,
                               ),
                             ),
                           ],
@@ -481,8 +475,8 @@ class GoalDetailPage extends ConsumerWidget {
                   icon: const Icon(CupertinoIcons.add, size: 20),
                   label: Text(
                     'goalDetail.addContribution'.tr(),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 16),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

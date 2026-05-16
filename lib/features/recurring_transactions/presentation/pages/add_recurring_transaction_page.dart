@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -33,6 +34,7 @@ class _AddRecurringTransactionPageState
   DateTime? _endDate;
   late DateTime _nextOccurrence;
 
+  final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -237,7 +239,7 @@ class _AddRecurringTransactionPageState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            DateFormat('MMM d, yyyy').format(date),
+            DateFormat(AppDateFormats.mediumDate).format(date),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -280,7 +282,13 @@ class _AddRecurringTransactionPageState
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.pagePadding,
           vertical: AppSizes.md,
@@ -325,8 +333,7 @@ class _AddRecurringTransactionPageState
                 children: [
                   Text(
                     ref.watch(currencySymbolProvider),
-                    style: TextStyle(
-                      fontSize: 28,
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
                       fontWeight: FontWeight.w300,
                       color: AppColors.textSecondary,
                     ),
@@ -338,8 +345,7 @@ class _AddRecurringTransactionPageState
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      style: const TextStyle(
-                        fontSize: 28,
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                       decoration: const InputDecoration(
@@ -394,6 +400,8 @@ class _AddRecurringTransactionPageState
                               ))
                           .toList(),
                       onChanged: (value) => setState(() => _accountId = value),
+                      validator: (value) =>
+                          value == null ? 'Please select an account' : null,
                       decoration: InputDecoration(
                         hintText: 'Account *',
                         filled: true,
@@ -478,8 +486,7 @@ class _AddRecurringTransactionPageState
                       child: Center(
                         child: Text(
                           freq.displayName,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: selected
                                 ? Colors.white
@@ -559,8 +566,7 @@ class _AddRecurringTransactionPageState
                     onTap: () => setState(() => _endDate = null),
                     child: Text(
                       'Clear',
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.brandTeal,
                         fontWeight: FontWeight.w500,
                       ),
@@ -585,7 +591,7 @@ class _AddRecurringTransactionPageState
                   children: [
                     Text(
                       _endDate != null
-                          ? DateFormat('MMM d, yyyy').format(_endDate!)
+                          ? DateFormat(AppDateFormats.mediumDate).format(_endDate!)
                           : 'No end date (ongoing)',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
@@ -623,9 +629,8 @@ class _AddRecurringTransactionPageState
                 icon: const Icon(CupertinoIcons.checkmark_alt, size: 20),
                 label: Text(
                   isEditing ? 'Update' : 'Save',
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
                   ),
                 ),
               ),
@@ -633,6 +638,8 @@ class _AddRecurringTransactionPageState
             const SizedBox(height: AppSizes.md),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

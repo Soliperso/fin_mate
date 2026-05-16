@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationService {
   LocalNotificationService._();
@@ -10,6 +12,12 @@ class LocalNotificationService {
 
   Future<void> initialize() async {
     if (_initialized) return;
+
+    // Android 13+ (API 33+) requires runtime POST_NOTIFICATIONS permission.
+    // iOS handles its own permission prompt via DarwinInitializationSettings.
+    if (Platform.isAndroid) {
+      await Permission.notification.request();
+    }
 
     const initSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),

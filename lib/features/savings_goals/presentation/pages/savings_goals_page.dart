@@ -19,11 +19,25 @@ import '../widgets/goal_achievement_dialog.dart';
 import '../widgets/goal_card.dart';
 import '../widgets/goals_summary_card.dart';
 
-class SavingsGoalsPage extends ConsumerWidget {
+class SavingsGoalsPage extends ConsumerStatefulWidget {
   const SavingsGoalsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SavingsGoalsPage> createState() => _SavingsGoalsPageState();
+}
+
+class _SavingsGoalsPageState extends ConsumerState<SavingsGoalsPage> {
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final goalsAsync = ref.watch(savingsGoalsProvider);
     final summaryAsync = ref.watch(goalsSummaryProvider);
 
@@ -86,6 +100,14 @@ class SavingsGoalsPage extends ConsumerWidget {
         },
         child: goalsAsync.when(
           data: (goals) {
+            final filtered = _searchQuery.isEmpty
+                ? goals
+                : goals
+                    .where((g) => g.name
+                        .toLowerCase()
+                        .contains(_searchQuery.toLowerCase()))
+                    .toList();
+
             if (goals.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.all(AppSizes.md),
@@ -144,32 +166,81 @@ class SavingsGoalsPage extends ConsumerWidget {
                     loading: () => const SkeletonCard(height: 150),
                     error: (error, stack) => const SizedBox.shrink(),
                   ),
+                  const SizedBox(height: AppSizes.md),
+
+                  // Search bar
+                  Builder(builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    return TextField(
+                      controller: _searchController,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: 'savings.searchHint'.tr(),
+                        hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                        prefixIcon: const Icon(CupertinoIcons.search, size: 18),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () => setState(() {
+                                  _searchQuery = '';
+                                  _searchController.clear();
+                                }),
+                                child: const Icon(CupertinoIcons.xmark_circle_fill,
+                                    size: 18, color: AppColors.systemGray3),
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: isDark
+                            ? AppColors.secondarySystemBackgroundDark
+                            : AppColors.systemGray6,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.md, vertical: 10),
+                      ),
+                      onChanged: (value) => setState(() => _searchQuery = value),
+                    );
+                  }),
                   const SizedBox(height: AppSizes.lg),
 
                   // Active Goals
-                  Text(
-                    'savings.activeGoals'.tr(),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  ...goals.where((g) => !g.isCompleted).map((goal) => GoalCard(
-                        goal: goal,
-                        onContribute: () =>
-                            _showContributeSheet(context, ref, goal),
-                      )),
+                  if (filtered.any((g) => !g.isCompleted)) ...[
+                    Text(
+                      'savings.activeGoals'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    ...filtered
+                        .where((g) => !g.isCompleted)
+                        .map((goal) => GoalCard(
+                              goal: goal,
+                              onContribute: () =>
+                                  _showContributeSheet(context, ref, goal),
+                            )),
+                  ],
 
                   // Completed Goals
-                  if (goals.any((g) => g.isCompleted)) ...[
+                  if (filtered.any((g) => g.isCompleted)) ...[
                     const SizedBox(height: AppSizes.lg),
                     Text(
                       'savings.completedGoals'.tr(),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppSizes.md),
-                    ...goals
+                    ...filtered
                         .where((g) => g.isCompleted)
                         .map((goal) => GoalCard(goal: goal)),
                   ],
+
+                  // No results state
+                  if (filtered.isEmpty && _searchQuery.isNotEmpty)
+                    EmptyStateCard(
+                      icon: CupertinoIcons.search,
+                      title: 'savings.noSearchResults'.tr(),
+                      message: 'savings.noSearchResultsMessage'.tr(),
+                      backgroundColor: AppColors.brandTeal,
+                    ),
                 ],
               ),
             );
@@ -189,6 +260,7 @@ class SavingsGoalsPage extends ConsumerWidget {
           error: (error, stack) => RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(savingsGoalsProvider);
+              ref.invalidate(goalsSummaryProvider);
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),

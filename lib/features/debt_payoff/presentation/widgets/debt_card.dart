@@ -239,7 +239,6 @@ class DebtCard extends ConsumerWidget {
                           style:
                               Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.textSecondary,
-                                    fontSize: 10,
                                   ),
                         ),
                       ],
@@ -365,8 +364,8 @@ class DebtCard extends ConsumerWidget {
                     ),
                     child: Text(
                       'debtCard.logPayment'.tr(),
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -501,8 +500,7 @@ class _MenuRow extends StatelessWidget {
         const SizedBox(width: AppSizes.sm),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: isDestructive
                 ? AppColors.error.withValues(alpha: 0.85)
                 : AppColors.textSecondary,

@@ -11,6 +11,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
+import '../../../../core/constants/app_date_formats.dart';
 
 class DataPrivacyPage extends ConsumerStatefulWidget {
   const DataPrivacyPage({super.key});
@@ -414,7 +415,7 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
         : const Rect.fromLTWH(0, 0, 100, 100);
     try {
       final dir = await getTemporaryDirectory();
-      final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final stamp = DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
       final file = File('${dir.path}/${filename}_$stamp.$ext');
       await file.writeAsString(content);
       if (!mounted) return;

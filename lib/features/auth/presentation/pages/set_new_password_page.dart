@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show UserAttributes;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
 
@@ -204,11 +205,7 @@ class _SetNewPasswordPageState extends ConsumerState<SetNewPasswordPage> {
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleSubmit,
                     child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const LoadingIndicator()
                         : const Text('Update Password'),
                   ),
                   const SizedBox(height: AppSizes.md),

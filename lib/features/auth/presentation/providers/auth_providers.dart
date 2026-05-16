@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart' show SentryLevel;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 import '../../data/datasources/auth_remote_datasource.dart';
@@ -135,38 +136,69 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // Subscribe to Supabase auth events so external session changes
     // (biometric refreshSession, deep-link sign-in, token rotation) automatically
     // update the notifier — no explicit refreshCurrentUser() call needed.
-    _authSubscription = _repository.authStateChanges.listen((user) {
-      state = AuthState(
-        user: user,
-        isLoading: false,
-        isPasswordRecovery: state.isPasswordRecovery,
-      );
-      if (user != null) {
-        _setUserContext(user);
-      } else {
-        _clearUserContext();
-      }
-    });
+    _authSubscription = _repository.authStateChanges.listen(
+      (user) {
+        state = AuthState(
+          user: user,
+          isLoading: false,
+          isPasswordRecovery: state.isPasswordRecovery,
+        );
+        if (user != null) {
+          _setUserContext(user);
+        } else {
+          _clearUserContext();
+        }
+      },
+      onError: (e, s) {
+        // Network/DNS errors during background token refresh — transient, not fatal.
+        // Session state is preserved; Sentry receives a warning, not a fatal event.
+        if (_isNetworkError(e)) {
+          SentryService.captureMessage(
+            'Token refresh failed (network): ${e.runtimeType}',
+            level: SentryLevel.warning,
+          );
+          return;
+        }
+        SentryService.captureException(e,
+            stackTrace: s, hint: 'authStateChanges error');
+      },
+    );
 
     // Listen for PASSWORD_RECOVERY events so the router can redirect to
     // the set-new-password page when the user opens a reset email link.
-    _recoverySubscription = supabase.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.passwordRecovery) {
-        state = state.copyWith(isPasswordRecovery: true);
-      }
-    });
+    _recoverySubscription = supabase.auth.onAuthStateChange.listen(
+      (data) {
+        if (data.event == AuthChangeEvent.passwordRecovery) {
+          state = state.copyWith(isPasswordRecovery: true);
+        }
+      },
+      onError: (e, s) {
+        if (!_isNetworkError(e)) {
+          SentryService.captureException(e,
+              stackTrace: s, hint: 'recoverySubscription error');
+        }
+      },
+    );
 
     // Reliable recovery detection: when a signedIn event fires while the
     // pending-reset flag is set, this must be the PKCE recovery sign-in.
     // Fires only on signedIn (not tokenRefreshed), so normal token rotation
     // does not incorrectly trigger this.
-    _signInSubscription = supabase.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn && _pendingReset) {
-        _pendingReset = false;
-        prefs.remove(_kPendingReset);
-        state = state.copyWith(isPasswordRecovery: true);
-      }
-    });
+    _signInSubscription = supabase.auth.onAuthStateChange.listen(
+      (data) {
+        if (data.event == AuthChangeEvent.signedIn && _pendingReset) {
+          _pendingReset = false;
+          prefs.remove(_kPendingReset);
+          state = state.copyWith(isPasswordRecovery: true);
+        }
+      },
+      onError: (e, s) {
+        if (!_isNetworkError(e)) {
+          SentryService.captureException(e,
+              stackTrace: s, hint: 'signInSubscription error');
+        }
+      },
+    );
 
     // Secondary safety net: app_links detection for PKCE code in deep link.
     final appLinks = AppLinks();
@@ -467,6 +499,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       rethrow;
     }
+  }
+
+  bool _isNetworkError(Object e) {
+    final msg = e.toString().toLowerCase();
+    return msg.contains('socket') ||
+        msg.contains('host lookup') ||
+        msg.contains('authretryablefetch') ||
+        msg.contains('network') ||
+        msg.contains('failed to connect') ||
+        msg.contains('connection refused') ||
+        msg.contains('errno = 8');
   }
 
   bool isEmailNotConfirmed(dynamic error) {

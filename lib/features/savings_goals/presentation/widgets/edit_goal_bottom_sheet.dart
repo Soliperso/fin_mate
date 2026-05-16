@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/savings_goal_entity.dart';
 import '../providers/savings_goal_providers.dart';
@@ -285,15 +286,7 @@ class _EditGoalBottomSheetState extends ConsumerState<EditGoalBottomSheet> {
                   ),
                   onPressed: _isLoading ? null : _updateGoal,
                   child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
-                          ),
-                        )
+                      ? const LoadingIndicator(color: AppColors.white)
                       : const Text('Update Goal'),
                 ),
               ),

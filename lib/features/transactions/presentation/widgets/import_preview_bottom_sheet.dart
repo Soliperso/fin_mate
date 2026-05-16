@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/services/csv_import_service.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
@@ -188,12 +190,7 @@ class _ImportPreviewBottomSheetState
                 child: FilledButton(
                   onPressed: count == 0 || _importing ? null : _runImport,
                   child: _importing
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
+                      ? const LoadingIndicator(size: 18, color: Colors.white)
                       : Text('Import $count'),
                 ),
               ),
@@ -267,7 +264,7 @@ class _PreviewRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${tx.accountName ?? ''} · ${DateFormat('MMM d').format(tx.date)}',
+                  '${tx.accountName ?? ''} · ${DateFormat(AppDateFormats.shortDate).format(tx.date)}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppColors.secondaryLabel,
                       ),

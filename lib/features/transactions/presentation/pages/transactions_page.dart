@@ -13,6 +13,7 @@ import '../../data/services/csv_export_service.dart';
 import '../../data/services/csv_import_service.dart';
 import '../widgets/import_preview_bottom_sheet.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../shared/utils/category_icon_utils.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/analytics_provider.dart';
@@ -25,6 +26,7 @@ import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/instant_fab_animator.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/ads/ad_banner_widget.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/transaction_providers.dart';
@@ -47,6 +49,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final TextEditingController _minAmountController = TextEditingController();
   final TextEditingController _maxAmountController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
   final _searchHistory = SearchHistoryService();
   List<String> _recentSearches = [];
@@ -58,6 +61,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     _searchHistory.load().then((h) => setState(() => _recentSearches = h));
     _searchFocusNode.addListener(() {
       setState(() => _searchFocused = _searchFocusNode.hasFocus);
+    });
+    _scrollController.addListener(() {
+      final pos = _scrollController.position;
+      if (pos.pixels >= pos.maxScrollExtent - 300) {
+        ref.read(transactionListProvider.notifier).loadMore();
+      }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(transactionListProvider.notifier).refresh();
@@ -73,6 +82,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     _minAmountController.dispose();
     _maxAmountController.dispose();
     _searchFocusNode.dispose();
+    _scrollController.dispose();
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -955,32 +965,32 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Group transactions by date, newest first
-    final sortedTxns = [...state.filteredTransactions]
-      ..sort((a, b) => b.date.compareTo(a.date));
-    final grouped = <String, List<TransactionEntity>>{};
-    for (final tx in sortedTxns) {
-      final key = DateFormat('MMMM d, yyyy').format(tx.date);
-      grouped.putIfAbsent(key, () => []).add(tx);
-    }
-    final groups = grouped.entries.toList();
+    // Group transactions by date, newest first (computed in provider state)
+    final groups = state.groupedByDate.entries.toList();
 
     return RefreshIndicator(
       color: AppColors.brandTeal,
       onRefresh: () => notifier.refresh(),
       child: ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.only(
           left: AppSizes.pagePadding,
           right: AppSizes.pagePadding,
           top: AppSizes.md,
           bottom: 96, // clears the FAB + its margin
         ),
-        itemCount: groups.length + 1, // +1 for banner
+        itemCount: groups.length + 1 + (state.isLoadingMore ? 1 : 0), // +1 banner, +1 when loading more
         itemBuilder: (context, groupIndex) {
           if (groupIndex == groups.length) {
             return const Padding(
               padding: EdgeInsets.only(top: AppSizes.md),
               child: AdBannerWidget(),
+            );
+          }
+          if (groupIndex == groups.length + 1) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSizes.lg),
+              child: Center(child: LoadingIndicator(size: 24)),
             );
           }
           final entry = groups[groupIndex];
@@ -1217,7 +1227,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     )
                   else
                     Text(
-                      DateFormat('h:mm a')
+                      DateFormat(AppDateFormats.timeOnly)
                           .format(transaction.createdAt.toLocal()),
                       style:
                           Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -1494,7 +1504,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final csv = CsvExportService().export(transactions);
     final dir = await getTemporaryDirectory();
-    final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final stamp = DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
     final file = File('${dir.path}/finmate_transactions_$stamp.csv');
     await file.writeAsString(csv);
 
@@ -1676,7 +1686,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       label: Text(
                         dateRange == null
                             ? 'Select Date Range'
-                            : '${DateFormat('MMM d').format(dateRange!.start)} - ${DateFormat('MMM d, y').format(dateRange!.end)}',
+                            : '${DateFormat(AppDateFormats.shortDate).format(dateRange!.start)} - ${DateFormat('MMM d, y').format(dateRange!.end)}',
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor:

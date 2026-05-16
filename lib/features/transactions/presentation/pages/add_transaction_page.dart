@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart'
     show
         CupertinoIcons,
-        CupertinoSwitch,
         CupertinoPicker,
         CupertinoPickerDefaultSelectionOverlay,
         CupertinoButton;
@@ -311,7 +310,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           ),
         ),
       ),
-      body: Form(
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
@@ -345,6 +347,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -387,8 +390,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               padding: const EdgeInsets.only(top: 10),
               child: Text(
                 ref.watch(currencySymbolProvider),
-                style: TextStyle(
-                  fontSize: 28,
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: displayText.isEmpty
                       ? _typeColor.withValues(alpha: 0.25)
@@ -995,13 +997,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       ),
                 ),
               ),
-              Transform.scale(
-                scale: 0.65,
-                child: CupertinoSwitch(
-                  value: _isRecurring,
-                  activeTrackColor: AppColors.primaryTeal,
-                  onChanged: (val) => setState(() => _isRecurring = val),
-                ),
+              Switch.adaptive(
+                value: _isRecurring,
+                activeTrackColor: AppColors.primaryTeal,
+                onChanged: (val) => setState(() => _isRecurring = val),
               ),
             ],
           ),
@@ -1421,13 +1420,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     ],
                   ),
                 ),
-                Transform.scale(
-                  scale: 0.75,
-                  child: CupertinoSwitch(
-                    value: _reminderEnabled,
-                    activeTrackColor: _typeColor,
-                    onChanged: (val) => setState(() => _reminderEnabled = val),
-                  ),
+                Switch.adaptive(
+                  value: _reminderEnabled,
+                  activeTrackColor: _typeColor,
+                  onChanged: (val) => setState(() => _reminderEnabled = val),
                 ),
               ],
             ),

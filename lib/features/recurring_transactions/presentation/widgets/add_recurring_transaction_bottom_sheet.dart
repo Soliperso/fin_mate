@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
@@ -239,7 +240,7 @@ class _AddRecurringTransactionBottomSheetState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            DateFormat('MMM d, yyyy').format(date),
+            DateFormat(AppDateFormats.mediumDate).format(date),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -623,7 +624,7 @@ class _AddRecurringTransactionBottomSheetState
                   children: [
                     Text(
                       _endDate != null
-                          ? DateFormat('MMM d, yyyy').format(_endDate!)
+                          ? DateFormat(AppDateFormats.mediumDate).format(_endDate!)
                           : 'No end date (ongoing)',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,

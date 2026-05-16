@@ -1,16 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/sentry_service.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/profile_providers.dart';
 
@@ -231,20 +234,21 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       return;
     }
 
-    final discard = await showCupertinoDialog<bool>(
+    final discard = await showAdaptiveDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => CupertinoAlertDialog(
+      builder: (_) => AlertDialog.adaptive(
         title: Text('profile.unsavedChanges'.tr()),
         content: Text('profile.discardChangesMessage'.tr()),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('common.cancel'.tr()),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+                foregroundColor: AppColors.error),
             child: Text('profile.discard'.tr()),
           ),
         ],
@@ -354,7 +358,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           );
           context.pop();
         }
-      } catch (e) {
+      } catch (e, stack) {
+        unawaited(SentryService.captureException(e, stackTrace: stack, hint: 'profile save failed'));
         if (mounted) {
           ErrorSnackbar.show(
             context,
@@ -397,7 +402,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             message: 'profile.profileUpdated'.tr(),
           );
         }
-      } catch (e) {
+      } catch (e, stack) {
+        unawaited(SentryService.captureException(e, stackTrace: stack, hint: 'delete avatar failed'));
         if (mounted) {
           ErrorSnackbar.show(
             context,
@@ -439,11 +445,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       ? null
                       : _handleSave,
               child: profileState.isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                  ? const LoadingIndicator()
                   : Text('common.save'.tr()),
             ),
           ],
@@ -458,6 +460,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             ),
             child: Form(
               key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -482,16 +485,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                                     color: AppColors.white, width: 3),
                               ),
                               child: profileState.isUploadingAvatar
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                AppColors.white),
-                                      ),
-                                    )
+                                  ? const LoadingIndicator(size: 16, color: AppColors.white)
                                   : const Icon(
                                       CupertinoIcons.camera,
                                       size: 20,
@@ -760,8 +754,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                                 child: Center(
                                   child: Text(
                                     c['symbol']!,
-                                    style: TextStyle(
-                                      fontSize: 17,
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
                                           ? AppColors.primaryTeal
@@ -785,8 +778,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                                 rateLabel != null
                                     ? '${c['name']}  ·  $rateLabel'
                                     : c['name']!,
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: isDark
                                       ? AppColors.secondaryLabelDark
                                       : AppColors.secondaryLabel,

@@ -336,7 +336,10 @@
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "deleted": "Eliminado",
-    "deletedMessage": "Presupuesto eliminado exitosamente"
+    "deletedMessage": "Presupuesto eliminado exitosamente",
+    "searchHint": "Buscar presupuestos...",
+    "noSearchResults": "No se encontraron presupuestos",
+    "noSearchResultsMessage": "Intente con otro nombre de categoría"
   },
   "budgetHero": {
     "totalBudgeted": "Total presupuestado",
@@ -600,7 +603,10 @@
     "feature2": "• Establece fechas límite opcionales",
     "feature3": "• Rastrea el progreso con contribuciones",
     "feature4": "• Categoriza tus objetivos",
-    "feature5": "• ¡Celebra cuando los alcances!"
+    "feature5": "• ¡Celebra cuando los alcances!",
+    "searchHint": "Buscar objetivos...",
+    "noSearchResults": "No se encontraron objetivos",
+    "noSearchResultsMessage": "Intente con otro nombre de objetivo"
   },
   "goalDetail": {
     "title": "Detalles del objetivo",
@@ -747,7 +753,11 @@
     "title": "Notificaciones",
     "markAllRead": "Marcar todo como leído",
     "emptyTitle": "Sin notificaciones",
-    "emptyMessage": "¡Estás al día! Las notificaciones sobre presupuestos, facturas e insights financieros aparecerán aquí."
+    "emptyMessage": "¡Estás al día! Las notificaciones sobre presupuestos, facturas e insights financieros aparecerán aquí.",
+    "justNow": "Ahora mismo",
+    "minutesAgo": "hace {count} min",
+    "hoursAgo": "hace {count} h",
+    "daysAgo": "hace {count} d"
   },
   "notificationSettings": {
     "title": "Configuración de notificaciones",
@@ -868,6 +878,9 @@
     "dueDayValue": "Día {day} del mes",
     "notes": "Notas",
     "addedOn": "Agregado el"
+  },
+  "recurring": {
+    "searchHint": "Buscar transacciones recurrentes..."
   },
   "errors": {
     "generic": "Algo salió mal. Por favor intenta de nuevo.",

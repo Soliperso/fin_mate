@@ -51,9 +51,8 @@ class GoalsSummaryCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   'Goals Overview',
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: AppColors.white,
-                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -70,9 +69,8 @@ class GoalsSummaryCard extends ConsumerWidget {
                 ),
                 child: Text(
                   '$completedGoals / $totalGoals done',
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.white,
-                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -117,16 +115,14 @@ class GoalsSummaryCard extends ConsumerWidget {
             children: [
               Text(
                 'Overall Progress',
-                style: TextStyle(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.white.withValues(alpha: 0.85),
-                  fontSize: 13,
                 ),
               ),
               Text(
                 '${overallProgress.toStringAsFixed(1)}%',
-                style: const TextStyle(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.white,
-                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -177,18 +173,16 @@ class _StatChip extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 13,
             ),
             overflow: TextOverflow.ellipsis,
           ),
           Text(
             label,
-            style: TextStyle(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: AppColors.white.withValues(alpha: 0.75),
-              fontSize: 11,
             ),
           ),
         ],

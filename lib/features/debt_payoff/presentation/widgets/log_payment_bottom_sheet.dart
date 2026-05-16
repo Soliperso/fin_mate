@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/debt_entity.dart';
 import '../../../../core/providers/display_format_provider.dart';
@@ -43,7 +45,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('MMM d, y').format(date);
+    return DateFormat(AppDateFormats.mediumDate).format(date);
   }
 
   Future<void> _submit() async {
@@ -210,12 +212,7 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                         ),
                         onPressed: _isSubmitting ? null : _submit,
                         child: _isSubmitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
-                              )
+                            ? const LoadingIndicator(color: Colors.white)
                             : Text('logPayment.logButton'.tr()),
                       ),
                     ),

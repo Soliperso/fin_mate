@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/savings_goal_providers.dart';
 
@@ -80,6 +81,7 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
             ),
             child: Form(
               key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: SingleChildScrollView(
                 controller: scrollController,
                 padding: const EdgeInsets.all(AppSizes.lg),
@@ -275,14 +277,7 @@ class _CreateGoalBottomSheetState extends ConsumerState<CreateGoalBottomSheet> {
                             ),
                             onPressed: _isLoading ? null : _createGoal,
                             child: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.white,
-                                    ),
-                                  )
+                                ? const LoadingIndicator(color: AppColors.white)
                                 : const Text('Create'),
                           ),
                         ),

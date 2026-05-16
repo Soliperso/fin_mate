@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,14 @@ class RecurringTransactionsPage extends ConsumerStatefulWidget {
 class _RecurringTransactionsPageState
     extends ConsumerState<RecurringTransactionsPage> {
   String _filterType = 'all'; // all, active, inactive
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -172,14 +181,18 @@ class _RecurringTransactionsPageState
   List<RecurringTransactionEntity> _filterTransactions(
     List<RecurringTransactionEntity> transactions,
   ) {
-    switch (_filterType) {
-      case 'active':
-        return transactions.where((t) => t.isActive).toList();
-      case 'inactive':
-        return transactions.where((t) => !t.isActive).toList();
-      default:
-        return transactions;
+    var result = switch (_filterType) {
+      'active' => transactions.where((t) => t.isActive).toList(),
+      'inactive' => transactions.where((t) => !t.isActive).toList(),
+      _ => transactions,
+    };
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result
+          .where((t) => (t.description ?? '').toLowerCase().contains(q))
+          .toList();
     }
+    return result;
   }
 
   @override
@@ -207,29 +220,73 @@ class _RecurringTransactionsPageState
 
           return Column(
             children: [
+              // Search bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    AppSizes.md, AppSizes.sm, AppSizes.md, 0),
+                child: Builder(builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return TextField(
+                    controller: _searchController,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: 'recurring.searchHint'.tr(),
+                      hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(CupertinoIcons.search, size: 18),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? GestureDetector(
+                              onTap: () => setState(() {
+                                _searchQuery = '';
+                                _searchController.clear();
+                              }),
+                              child: const Icon(CupertinoIcons.xmark_circle_fill,
+                                  size: 18, color: AppColors.systemGray3),
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.secondarySystemBackgroundDark
+                          : AppColors.systemGray6,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.md, vertical: 10),
+                    ),
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                  );
+                }),
+              ),
+              const SizedBox(height: AppSizes.sm),
+
               // Filter tabs
-              SizedBox(
-                height: 50,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+                child: Row(
                   children: [
-                    _FilterChip(
-                      label: 'All',
-                      selected: _filterType == 'all',
-                      onTap: () => setState(() => _filterType = 'all'),
+                    Expanded(
+                      child: _FilterChip(
+                        label: 'All',
+                        selected: _filterType == 'all',
+                        onTap: () => setState(() => _filterType = 'all'),
+                      ),
                     ),
                     const SizedBox(width: AppSizes.sm),
-                    _FilterChip(
-                      label: 'Active',
-                      selected: _filterType == 'active',
-                      onTap: () => setState(() => _filterType = 'active'),
+                    Expanded(
+                      child: _FilterChip(
+                        label: 'Active',
+                        selected: _filterType == 'active',
+                        onTap: () => setState(() => _filterType = 'active'),
+                      ),
                     ),
                     const SizedBox(width: AppSizes.sm),
-                    _FilterChip(
-                      label: 'Inactive',
-                      selected: _filterType == 'inactive',
-                      onTap: () => setState(() => _filterType = 'inactive'),
+                    Expanded(
+                      child: _FilterChip(
+                        label: 'Inactive',
+                        selected: _filterType == 'inactive',
+                        onTap: () => setState(() => _filterType = 'inactive'),
+                      ),
                     ),
                   ],
                 ),
@@ -418,20 +475,30 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      backgroundColor: Colors.transparent,
-      selectedColor: AppColors.brandTeal.withValues(alpha: 0.2),
-      showCheckmark: false,
-      checkmarkColor: Colors.transparent,
-      labelStyle: TextStyle(
-        color: selected ? AppColors.brandTeal : AppColors.textSecondary,
-        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-      ),
-      side: BorderSide(
-        color: selected ? AppColors.brandTeal : Colors.transparent,
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.brandTeal : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+          border: Border.all(
+            color: selected
+                ? AppColors.brandTeal
+                : AppColors.textSecondary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            color: selected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }

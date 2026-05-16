@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -238,7 +239,7 @@ class _StrategyCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAvalanche = strategy == DebtStrategy.avalanche;
     final currencyFormat = ref.watch(currencyFormat0Provider);
-    final dateFormat = DateFormat('MMM yyyy', context.locale.languageCode);
+    final dateFormat = DateFormat(AppDateFormats.monthYear, context.locale.languageCode);
 
     return GlassContainer(
       borderRadius: BorderRadius.circular(AppSizes.radiusCard),

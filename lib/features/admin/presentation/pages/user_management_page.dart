@@ -96,7 +96,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
       ),
       builder: (ctx) {
         final cardBg =
-            isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
+            isDark ? AppColors.tertiarySystemBackgroundDark : AppColors.secondarySystemBackground;
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(

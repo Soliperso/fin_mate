@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -189,7 +190,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     const accentColor = AppColors.brandTeal;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -248,10 +249,9 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                                         user.avatarUrl!.isEmpty
                                     ? Text(
                                         user.initials,
-                                        style: TextStyle(
+                                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
                                           color: accentColor,
                                           fontWeight: FontWeight.w800,
-                                          fontSize: 24,
                                         ),
                                       )
                                     : null,
@@ -262,7 +262,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                                 bottom: 4,
                                 right: 4,
                                 child: Container(
-                                  padding: const EdgeInsets.all(5),
+                                  padding: const EdgeInsets.all(AppSizes.xs),
                                   decoration: BoxDecoration(
                                     color: AppColors.systemRed,
                                     shape: BoxShape.circle,
@@ -286,7 +286,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       child: GestureDetector(
                         onTap: () => _showQuickActions(context, ref, user),
                         child: Container(
-                          padding: const EdgeInsets.all(7),
+                          padding: const EdgeInsets.all(AppSizes.xs),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(20),
@@ -343,7 +343,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSizes.md),
                 Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 6,
@@ -377,7 +377,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSizes.md),
               ],
             ),
           ),
@@ -389,7 +389,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.md),
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -413,8 +413,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     const SizedBox(width: 6),
                     Text(
                       'Net Worth',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontSize: 12,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isDark
                                 ? AppColors.secondaryLabelDark
@@ -445,7 +444,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           const SizedBox(height: 16),
           // Financial health bar — income vs expense proportion
           _buildHealthBar(context, isDark, user),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSizes.sm),
           Row(
             children: [
               Expanded(
@@ -460,7 +459,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   valueColor: AppColors.systemGreen,
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: AppSizes.sm),
               Expanded(
                 child: _statCard(
                   context,
@@ -475,7 +474,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               ),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: AppSizes.sm),
           _buildCashFlowCard(context, isDark, user),
           const SizedBox(height: 24),
 
@@ -501,7 +500,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     icon: CupertinoIcons.calendar,
                     iconColor: AppColors.tealBlue,
                     label: 'Joined',
-                    value: DateFormat('MMM d, yyyy').format(user.createdAt)),
+                    value: DateFormat(AppDateFormats.mediumDate).format(user.createdAt)),
                 _divider(context),
                 _infoRow(context, isDark,
                     icon: CupertinoIcons.doc_text,
@@ -549,7 +548,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       .format(user.totalExpense / _monthsSince(user.createdAt)),
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: AppSizes.sm),
               Expanded(
                 child: _insightCard(
                   context,
@@ -579,7 +578,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                   onTap: () => _handleResetPassword(context, ref, user),
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: AppSizes.sm),
               Expanded(
                 child: _actionButton(
                   context,
@@ -658,11 +657,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             const SizedBox(width: 5),
             Text(
               'Income ${fmt.format(user.totalIncome)}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: isDark
                         ? AppColors.secondaryLabelDark
                         : AppColors.secondaryLabel,
-                    fontSize: 11,
                   ),
             ),
             const Spacer(),
@@ -677,11 +675,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             const SizedBox(width: 5),
             Text(
               'Expenses ${fmt.format(user.totalExpense)}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: isDark
                         ? AppColors.secondaryLabelDark
                         : AppColors.secondaryLabel,
-                    fontSize: 11,
                   ),
             ),
           ],
@@ -701,7 +698,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         : AppColors.systemBackground;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -736,7 +733,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                         ? AppColors.secondaryLabelDark
                         : AppColors.secondaryLabel,
                     fontWeight: FontWeight.w500,
-                    fontSize: 13,
                   ),
             ),
           ),
@@ -825,7 +821,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           ),
         ),
         error: (_, __) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.md),
           child: Row(
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle,
@@ -845,7 +841,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         data: (entries) {
           if (entries.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.md),
               child: Row(
                 children: [
                   Icon(
@@ -918,7 +914,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       } else if (day == yesterday) {
         label = 'Yesterday';
       } else {
-        label = DateFormat('MMM d, yyyy').format(dt);
+        label = DateFormat(AppDateFormats.mediumDate).format(dt);
       }
       result.putIfAbsent(label, () => []).add(entry);
     }
@@ -930,17 +926,17 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     final local = lastActive.toLocal();
     final today = DateUtils.dateOnly(DateTime.now());
     final day = DateUtils.dateOnly(local);
-    final timeStr = DateFormat('h:mm a').format(local);
+    final timeStr = DateFormat(AppDateFormats.timeOnly).format(local);
     if (day == today) return 'Today, $timeStr';
     if (day == today.subtract(const Duration(days: 1)))
       return 'Yesterday, $timeStr';
     final diff = today.difference(day).inDays;
     if (diff < 7) return '$diff days ago';
-    return DateFormat('MMM d, yyyy').format(local);
+    return DateFormat(AppDateFormats.mediumDate).format(local);
   }
 
   static String _formatJoinDate(DateTime createdAt) =>
-      DateFormat('MMM d, yyyy').format(createdAt.toLocal());
+      DateFormat(AppDateFormats.mediumDate).format(createdAt.toLocal());
 
   static double _monthsSince(DateTime date) {
     final now = DateTime.now();
@@ -972,8 +968,8 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     if (rawDate != null) {
       try {
         final dt = DateTime.parse(rawDate).toLocal();
-        formattedDate = DateFormat('MMM d, yyyy').format(dt);
-        formattedTime = DateFormat('h:mm a').format(dt);
+        formattedDate = DateFormat(AppDateFormats.mediumDate).format(dt);
+        formattedTime = DateFormat(AppDateFormats.timeOnly).format(dt);
       } catch (_) {
         formattedDate = rawDate;
       }
@@ -999,7 +995,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 Expanded(
                   child: Container(
                     width: 2,
-                    margin: const EdgeInsets.only(top: 5),
+                    margin: const EdgeInsets.only(top: AppSizes.xs),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -1031,7 +1027,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 13,
                                     color: isDark
                                         ? AppColors.labelDark
                                         : AppColors.label,
@@ -1041,8 +1036,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       if (formattedTime.isNotEmpty)
                         Text(
                           formattedTime,
-                          style: TextStyle(
-                            fontSize: 11,
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                             color: AppColors.brandTeal,
                           ),
@@ -1053,8 +1047,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     const SizedBox(height: 3),
                     Text(
                       formattedDate,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontSize: 11,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: isDark
                                 ? AppColors.secondaryLabelDark
                                 : AppColors.secondaryLabel,
@@ -1066,7 +1059,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontSize: 10,
                             color: isDark
                                 ? AppColors.tertiaryLabelDark
                                 : AppColors.systemGray3,
@@ -1100,7 +1092,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         const SizedBox(width: 8),
         if (icon != null) ...[
           Icon(icon, size: 18, color: AppColors.brandTeal),
-          const SizedBox(width: 7),
+          const SizedBox(width: AppSizes.xs),
         ],
         Expanded(
           child: Text(
@@ -1127,9 +1119,9 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: isFullWidth ? 14 : 14,
-          horizontal: 12,
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSizes.md,
+          horizontal: AppSizes.sm,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -1166,7 +1158,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
-                          fontSize: 10.5,
                           letterSpacing: -0.3,
                         ),
                   ),
@@ -1277,7 +1268,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     // Handle bar
                     Center(
                       child: Container(
-                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        margin: const EdgeInsets.only(top: AppSizes.sm, bottom: AppSizes.sm),
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
@@ -1290,7 +1281,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     ),
                     // Header
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.xs, AppSizes.md, AppSizes.sm),
                       child: Row(
                         children: [
                           Text(
@@ -1307,8 +1298,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                           const SizedBox(width: 8),
                           Text(
                             '${entries.length} events',
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w500,
                               color: AppColors.brandTeal,
                             ),
@@ -1492,7 +1482,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
   Widget _badge(BuildContext context,
       {required String label, required Color color, required IconData icon}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
@@ -1504,8 +1494,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           const SizedBox(width: 3.5),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w700,
               color: color,
               letterSpacing: -0.3,
@@ -1522,7 +1511,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       required String label,
       required String value}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.md),
       child: Row(
         children: [
           Container(
@@ -1543,7 +1532,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                         ? AppColors.secondaryLabelDark
                         : AppColors.secondaryLabel,
                     fontWeight: FontWeight.w500,
-                    fontSize: 13,
                   ),
             ),
           ),
@@ -1583,7 +1571,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         : AppColors.systemBackground;
     final hasGradient = gradient != null;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.md),
       decoration: BoxDecoration(
         color: hasGradient ? null : cardColor,
         gradient: gradient,
@@ -1615,7 +1603,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
               size: 16.5,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSizes.sm),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -1625,7 +1613,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                           ? AppColors.secondaryLabelDark
                           : AppColors.secondaryLabel),
                   fontWeight: FontWeight.w700,
-                  fontSize: 9.5,
                 ),
           ),
           const SizedBox(height: 4),
@@ -1657,7 +1644,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSizes.sm),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -1680,7 +1667,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
             ),
             child: Icon(icon, color: iconColor, size: 15),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: AppSizes.sm),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -1688,7 +1675,6 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                       ? AppColors.secondaryLabelDark
                       : AppColors.secondaryLabel,
                   fontWeight: FontWeight.w700,
-                  fontSize: 9,
                 ),
           ),
           const SizedBox(height: 4),
@@ -1714,13 +1700,13 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.lg),
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard),
@@ -1731,7 +1717,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     width: 84,
                     height: 84,
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull)),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSizes.md),
                 LoadingSkeleton(
                     width: 135,
                     height: 14,
@@ -1741,7 +1727,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                     width: 180,
                     height: 10,
                     borderRadius: BorderRadius.circular(4)),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSizes.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -1771,13 +1757,13 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
           LoadingSkeleton(
               height: 95,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
-          const SizedBox(height: 9),
+          const SizedBox(height: AppSizes.sm),
           Row(children: [
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
                     borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
-            const SizedBox(width: 9),
+            const SizedBox(width: AppSizes.sm),
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
@@ -1799,7 +1785,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 child: LoadingSkeleton(
                     height: 95,
                     borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
-            const SizedBox(width: 9),
+            const SizedBox(width: AppSizes.sm),
             Expanded(
                 child: LoadingSkeleton(
                     height: 95,
@@ -1814,13 +1800,13 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
                 child: LoadingSkeleton(
                     height: 81,
                     borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
-            const SizedBox(width: 9),
+            const SizedBox(width: AppSizes.sm),
             Expanded(
                 child: LoadingSkeleton(
                     height: 81,
                     borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
           ]),
-          const SizedBox(height: 9),
+          const SizedBox(height: AppSizes.sm),
           LoadingSkeleton(
               height: 42,
               borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
@@ -1869,14 +1855,13 @@ class _ActivityDayGroupState extends State<_ActivityDayGroup> {
         InkWell(
           onTap: () => setState(() => _expanded = !_expanded),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
             child: Row(
               children: [
                 Text(
                   widget.label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 11,
                         color: isDark
                             ? AppColors.secondaryLabelDark
                             : AppColors.secondaryLabel,
@@ -1888,8 +1873,7 @@ class _ActivityDayGroupState extends State<_ActivityDayGroup> {
                   opacity: _expanded ? 0.0 : 1.0,
                   child: Text(
                     '$count ${count == 1 ? 'event' : 'events'}',
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                       color: AppColors.brandTeal,
                     ),

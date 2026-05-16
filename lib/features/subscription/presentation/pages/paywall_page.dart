@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/subscription_provider.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 
 class PaywallPage extends ConsumerStatefulWidget {
   const PaywallPage({super.key});
@@ -266,12 +267,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                 ),
               ),
               child: _isPurchasing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
+                  ? const LoadingIndicator(color: Colors.white)
                   : const Text(
                       'Start 7-Day Free Trial',
                       style: TextStyle(

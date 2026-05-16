@@ -336,7 +336,10 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "deleted": "Deleted",
-    "deletedMessage": "Budget deleted successfully"
+    "deletedMessage": "Budget deleted successfully",
+    "searchHint": "Search budgets...",
+    "noSearchResults": "No budgets found",
+    "noSearchResultsMessage": "Try a different category name"
   },
   "budgetHero": {
     "totalBudgeted": "Total Budgeted",
@@ -600,7 +603,10 @@
     "feature2": "• Set optional deadlines",
     "feature3": "• Track progress with contributions",
     "feature4": "• Categorize your goals",
-    "feature5": "• Celebrate when you achieve them!"
+    "feature5": "• Celebrate when you achieve them!",
+    "searchHint": "Search goals...",
+    "noSearchResults": "No goals found",
+    "noSearchResultsMessage": "Try a different goal name"
   },
   "goalDetail": {
     "title": "Goal Details",
@@ -747,7 +753,11 @@
     "title": "Notifications",
     "markAllRead": "Mark all read",
     "emptyTitle": "No notifications",
-    "emptyMessage": "You're all caught up! Notifications about budgets, bills, and financial insights will appear here."
+    "emptyMessage": "You're all caught up! Notifications about budgets, bills, and financial insights will appear here.",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago"
   },
   "notificationSettings": {
     "title": "Notification Settings",
@@ -876,6 +886,9 @@
     "dueDayValue": "Day {day} of month",
     "notes": "Notes",
     "addedOn": "Added On"
+  },
+  "recurring": {
+    "searchHint": "Search recurring transactions..."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

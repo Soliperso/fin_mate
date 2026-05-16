@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
@@ -214,14 +216,7 @@ class _AddContributionBottomSheetState
                   ),
                   onPressed: _isLoading ? null : _submitContribution,
                   child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.white,
-                          ),
-                        )
+                      ? const LoadingIndicator(color: AppColors.white)
                       : const Text('Add Contribution'),
                 ),
               ),
@@ -247,7 +242,7 @@ class _TransactionPicker extends ConsumerWidget {
       parts.add(tx.description!);
     }
     final name = parts.isNotEmpty ? parts.join(' · ') : tx.type.displayName;
-    final date = DateFormat('MMM d').format(tx.date);
+    final date = DateFormat(AppDateFormats.shortDate).format(tx.date);
     return '$symbol${tx.amount.toStringAsFixed(2)} — $name — $date';
   }
 

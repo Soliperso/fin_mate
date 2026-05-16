@@ -336,7 +336,10 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "deleted": "Supprimé",
-    "deletedMessage": "Budget supprimé avec succès"
+    "deletedMessage": "Budget supprimé avec succès",
+    "searchHint": "Rechercher des budgets...",
+    "noSearchResults": "Aucun budget trouvé",
+    "noSearchResultsMessage": "Essayez un autre nom de catégorie"
   },
   "budgetHero": {
     "totalBudgeted": "Total budgété",
@@ -600,7 +603,10 @@
     "feature2": "• Définissez des délais optionnels",
     "feature3": "• Suivez vos progrès avec des contributions",
     "feature4": "• Catégorisez vos objectifs",
-    "feature5": "• Célébrez quand vous les atteignez !"
+    "feature5": "• Célébrez quand vous les atteignez !",
+    "searchHint": "Rechercher des objectifs...",
+    "noSearchResults": "Aucun objectif trouvé",
+    "noSearchResultsMessage": "Essayez un autre nom d'objectif"
   },
   "goalDetail": {
     "title": "Détails de l'objectif",
@@ -747,7 +753,11 @@
     "title": "Notifications",
     "markAllRead": "Tout marquer comme lu",
     "emptyTitle": "Aucune notification",
-    "emptyMessage": "Vous êtes à jour ! Les notifications sur les budgets, les factures et les analyses financières apparaîtront ici."
+    "emptyMessage": "Vous êtes à jour ! Les notifications sur les budgets, les factures et les analyses financières apparaîtront ici.",
+    "justNow": "À l'instant",
+    "minutesAgo": "il y a {count} min",
+    "hoursAgo": "il y a {count} h",
+    "daysAgo": "il y a {count} j"
   },
   "notificationSettings": {
     "title": "Paramètres de notification",
@@ -868,6 +878,9 @@
     "dueDayValue": "Jour {day} du mois",
     "notes": "Notes",
     "addedOn": "Ajouté le"
+  },
+  "recurring": {
+    "searchHint": "Rechercher des transactions récurrentes..."
   },
   "errors": {
     "generic": "Une erreur s'est produite. Veuillez réessayer.",

@@ -1,11 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoSwitch;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../transactions/domain/entities/category_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
@@ -80,6 +81,7 @@ class _CreateBudgetBottomSheetState
           padding: const EdgeInsets.all(AppSizes.lg),
           child: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,15 +348,11 @@ class _CreateBudgetBottomSheetState
                     style: const TextStyle(
                         color: AppColors.textSecondary, fontSize: 12),
                   ),
-                  trailing: Transform.scale(
-                    scale: 0.75,
-                    child: CupertinoSwitch(
-                      value: _carryOverEnabled,
-                      activeTrackColor: AppColors.brandTeal,
-                      thumbColor: AppColors.white,
-                      onChanged: (val) =>
-                          setState(() => _carryOverEnabled = val),
-                    ),
+                  trailing: Switch.adaptive(
+                    value: _carryOverEnabled,
+                    activeTrackColor: AppColors.brandTeal,
+                    onChanged: (val) =>
+                        setState(() => _carryOverEnabled = val),
                   ),
                 ),
                 const SizedBox(height: AppSizes.md),
@@ -386,12 +384,7 @@ class _CreateBudgetBottomSheetState
                               ),
                               onPressed: _isLoading ? null : _saveBudget,
                               child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    )
+                                  ? const LoadingIndicator()
                                   : Text('createBudget.create'.tr()),
                             )
                           : FilledButton(
@@ -401,12 +394,7 @@ class _CreateBudgetBottomSheetState
                               ),
                               onPressed: _isLoading ? null : _saveBudget,
                               child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    )
+                                  ? const LoadingIndicator()
                                   : Text('createBudget.update'.tr()),
                             ),
                     ),

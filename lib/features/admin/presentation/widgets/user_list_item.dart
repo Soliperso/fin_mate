@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../domain/entities/admin_user_entity.dart';
@@ -245,7 +246,7 @@ class UserListItem extends StatelessWidget {
   String _formatJoinDate(DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year) {
-      return 'Joined ${DateFormat('MMM d').format(date)}';
+      return 'Joined ${DateFormat(AppDateFormats.shortDate).format(date)}';
     }
     return 'Joined ${DateFormat('MMM d, y').format(date)}';
   }

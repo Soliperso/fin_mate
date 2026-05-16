@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../data/datasources/transaction_remote_datasource.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../domain/entities/transaction_entity.dart';
@@ -100,10 +102,15 @@ class TransactionListState {
   final bool hideFutureTransactions;
   final bool showNotes;
 
+  final bool isLoadingMore;
+  final bool hasMore;
+
   const TransactionListState({
     this.transactions = const [],
     this.filteredTransactions = const [],
     this.isLoading = false,
+    this.isLoadingMore = false,
+    this.hasMore = true,
     this.error,
     this.selectedFilter = 'All',
     this.searchQuery = '',
@@ -120,6 +127,8 @@ class TransactionListState {
     List<TransactionEntity>? transactions,
     List<TransactionEntity>? filteredTransactions,
     bool? isLoading,
+    bool? isLoadingMore,
+    bool? hasMore,
     String? error,
     String? selectedFilter,
     String? searchQuery,
@@ -139,6 +148,8 @@ class TransactionListState {
       transactions: transactions ?? this.transactions,
       filteredTransactions: filteredTransactions ?? this.filteredTransactions,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
       error: error,
       selectedFilter: selectedFilter ?? this.selectedFilter,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -152,6 +163,19 @@ class TransactionListState {
           hideFutureTransactions ?? this.hideFutureTransactions,
       showNotes: showNotes ?? this.showNotes,
     );
+  }
+
+  /// Transactions grouped by date string, sorted newest-first.
+  /// Computed once per state update — not on every build().
+  Map<String, List<TransactionEntity>> get groupedByDate {
+    final sorted = [...filteredTransactions]
+      ..sort((a, b) => b.date.compareTo(a.date));
+    final grouped = <String, List<TransactionEntity>>{};
+    for (final tx in sorted) {
+      final key = DateFormat(AppDateFormats.fullDate).format(tx.date);
+      grouped.putIfAbsent(key, () => []).add(tx);
+    }
+    return grouped;
   }
 
   bool get hasActiveFilters =>
@@ -177,25 +201,65 @@ class TransactionListState {
 class TransactionListNotifier extends StateNotifier<TransactionListState> {
   final TransactionRepository _repository;
 
+  static const _pageSize = 50;
+  int _currentOffset = 0;
+
   TransactionListNotifier(this._repository)
       : super(const TransactionListState()) {
     loadTransactions();
   }
 
+  DateTime get _startDate {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month - 2, 1);
+  }
+
+  DateTime get _endDate {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month + 1, 0);
+  }
+
   Future<void> loadTransactions() async {
+    _currentOffset = 0;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final now = DateTime.now();
-      final startDate = DateTime(now.year, now.month - 2, 1);
-      final endDate = DateTime(now.year, now.month + 1, 0);
       final transactions = await _repository.getTransactions(
-        startDate: startDate,
-        endDate: endDate,
+        startDate: _startDate,
+        endDate: _endDate,
+        limit: _pageSize,
+        offset: 0,
       );
-      state = state.copyWith(transactions: transactions, isLoading: false);
+      _currentOffset = transactions.length;
+      state = state.copyWith(
+        transactions: transactions,
+        isLoading: false,
+        hasMore: transactions.length == _pageSize,
+      );
       _applyFilters();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (!state.hasMore || state.isLoadingMore || state.isLoading) return;
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final more = await _repository.getTransactions(
+        startDate: _startDate,
+        endDate: _endDate,
+        limit: _pageSize,
+        offset: _currentOffset,
+      );
+      _currentOffset += more.length;
+      state = state.copyWith(
+        transactions: [...state.transactions, ...more],
+        isLoadingMore: false,
+        hasMore: more.length == _pageSize,
+      );
+      _applyFilters();
+    } catch (e) {
+      state = state.copyWith(isLoadingMore: false);
     }
   }
 

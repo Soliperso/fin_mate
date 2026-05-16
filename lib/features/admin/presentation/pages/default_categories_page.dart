@@ -7,6 +7,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/utils/category_icon_utils.dart'
     show expenseIconOptions, getCategoryIcon, incomeIconOptions;
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../providers/admin_providers.dart';
 
 class DefaultCategoriesPage extends ConsumerStatefulWidget {
@@ -292,12 +293,7 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
                               }
                             },
                       child: saving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator()
                           : const Text('Save'),
                     ),
                   ],

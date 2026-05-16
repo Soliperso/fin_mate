@@ -9,6 +9,7 @@ abstract class TransactionRepository {
     String? categoryId,
     String? type,
     int? limit,
+    int? offset,
   });
 
   Future<TransactionEntity> createTransaction(TransactionEntity transaction);

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
@@ -51,7 +52,7 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
 
   Color _rowBg(bool isEven, bool isDark) {
     return isEven
-        ? (isDark ? const Color(0xFF141416) : AppColors.systemGray5)
+        ? (isDark ? AppColors.inputFillDark : AppColors.systemGray5)
         : (isDark
             ? AppColors.secondarySystemBackgroundDark
             : AppColors.systemGray6);
@@ -119,7 +120,7 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currencyLarge = ref.watch(currencyFormat0Provider);
     final currencyDetail = ref.watch(currencyFormat2Provider);
-    final dateFormat = DateFormat('MMM yyyy', context.locale.languageCode);
+    final dateFormat = DateFormat(AppDateFormats.monthYear, context.locale.languageCode);
 
     final visibleCount =
         _expanded ? widget.result.schedule.length : widget.monthsToShow;
@@ -216,9 +217,8 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
                     ? 'schedule.showLess'.tr()
                     : 'schedule.seeFullSchedule'.tr(
                         namedArgs: {'months': '${widget.result.totalMonths}'}),
-                style: const TextStyle(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
-                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -299,13 +299,14 @@ class _ColumnHeadersRow extends StatelessWidget {
   }
 
   Widget _headerLabel(String text) {
-    return Text(
-      text.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textSecondary,
-        letterSpacing: 0.3,
+    return Builder(
+      builder: (context) => Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textSecondary,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }
@@ -436,7 +437,6 @@ class _ScheduleRow extends StatelessWidget {
                       currencyDetail.format(snap.interestThisMonth),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.systemOrange,
-                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
                     ),
@@ -517,7 +517,7 @@ class _BreakdownPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: isDark ? const Color(0xFF0E0E10) : AppColors.systemGray5,
+      color: isDark ? AppColors.systemBackgroundDark : AppColors.systemGray5,
       padding: EdgeInsets.fromLTRB(
         AppSizes.md + 52 + AppSizes.sm,
         AppSizes.xs + 2,
@@ -585,7 +585,7 @@ class _YearSeparatorRow extends StatelessWidget {
         vertical: AppSizes.xs + 2,
       ),
       color: isDark
-          ? const Color(0xFF0A0A0C)
+          ? AppColors.systemBackgroundDark
           : AppColors.systemGray5.withValues(alpha: 0.7),
       child: Row(
         children: [
@@ -600,8 +600,7 @@ class _YearSeparatorRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
             child: Text(
               '  $year  ',
-              style: const TextStyle(
-                fontSize: 10,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
                 letterSpacing: 0.5,
@@ -654,8 +653,7 @@ class _PaidOffMilestoneRow extends StatelessWidget {
           Expanded(
             child: Text(
               'schedule.paidOff'.tr(namedArgs: {'name': debtName}),
-              style: const TextStyle(
-                fontSize: 12,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.systemGreen,
               ),
@@ -741,8 +739,7 @@ class _SummaryItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(
-            fontSize: 13,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w700,
             color: color,
           ),
@@ -750,8 +747,7 @@ class _SummaryItem extends StatelessWidget {
         const SizedBox(height: AppSizes.xs),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           ),

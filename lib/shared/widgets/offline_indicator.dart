@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -20,6 +21,7 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
   bool _isRetrying = false;
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
   }
 
   void _setupConnectivityListener() {
-    Connectivity().onConnectivityChanged.listen((result) {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((result) {
       final isOffline = result.contains(ConnectivityResult.none);
       if (isOffline != _isOffline) {
         setState(() {
@@ -88,6 +90,7 @@ class _OfflineIndicatorState extends State<OfflineIndicator>
 
   @override
   void dispose() {
+    _connectivitySub?.cancel();
     _controller.dispose();
     super.dispose();
   }

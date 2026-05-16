@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -27,7 +28,7 @@ class SettingsPage extends ConsumerWidget {
         ),
       ),
       body: settingsState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(itemCount: 6, itemHeight: 56),
         error: (error, stackTrace) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

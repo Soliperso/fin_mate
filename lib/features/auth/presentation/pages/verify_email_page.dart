@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
 
@@ -256,11 +257,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                   onPressed:
                       (_isComplete && !_isVerifying) ? _handleVerify : null,
                   child: _isVerifying
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const LoadingIndicator()
                       : Text('auth.verify.verifyButton'.tr()),
                 ),
 
@@ -276,11 +273,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     TextButton(
                       onPressed: _isResending ? null : _handleResend,
                       child: _isResending
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator(size: 16)
                           : Text('auth.verify.resend'.tr()),
                     ),
                   ],
@@ -345,7 +338,7 @@ class _OtpBox extends StatelessWidget {
             filled: true,
             fillColor: isDark
                 ? AppColors.tertiarySystemBackgroundDark
-                : const Color(0xFFF2F2F7),
+                : AppColors.secondarySystemBackground,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,

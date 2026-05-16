@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/notification_service.dart';
@@ -165,7 +165,7 @@ class NotificationCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _formatTime(notification.createdAt),
+                              _formatTime(context, notification.createdAt),
                               style: Theme.of(context)
                                   .textTheme
                                   .labelMedium
@@ -245,18 +245,21 @@ class NotificationCard extends StatelessWidget {
     }
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return 'notifPage.justNow'.tr();
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
+      return 'notifPage.minutesAgo'
+          .tr(namedArgs: {'count': '${difference.inMinutes}'});
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return 'notifPage.hoursAgo'
+          .tr(namedArgs: {'count': '${difference.inHours}'});
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return 'notifPage.daysAgo'
+          .tr(namedArgs: {'count': '${difference.inDays}'});
     } else {
       return DateFormat('MMM dd').format(dateTime);
     }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../providers/settings_providers.dart';
@@ -55,7 +56,7 @@ class _NotificationSettingsPageState
         ),
       ),
       body: settingsState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(itemCount: 5, itemHeight: 56),
         error: (error, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

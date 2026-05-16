@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
@@ -183,7 +184,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 6.0),
                     child: Text(
-                      DateFormat('MMM').format(data.month),
+                      DateFormat(AppDateFormats.monthOnly).format(data.month),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontSize: 9,
                             color: AppColors.textSecondary,
@@ -323,7 +324,7 @@ class _CashFlowChartState extends ConsumerState<CashFlowChart> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 6.0),
                     child: Text(
-                      DateFormat('MMM').format(data.month),
+                      DateFormat(AppDateFormats.monthOnly).format(data.month),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontSize: 9,
                             color: AppColors.textSecondary,

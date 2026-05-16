@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../domain/entities/debt_entity.dart';
@@ -264,7 +265,7 @@ class _CalendarCard extends StatelessWidget {
     final isViewingCurrentMonth =
         displayMonth.year == today.year && displayMonth.month == today.month;
 
-    final monthLabel = DateFormat('MMMM yyyy').format(displayMonth);
+    final monthLabel = DateFormat(AppDateFormats.fullMonthYear).format(displayMonth);
     const dayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
     return Container(
@@ -530,7 +531,7 @@ class _DayDetailSheet extends ConsumerWidget {
                 ?.copyWith(fontWeight: FontWeight.w700),
           ),
           Text(
-            DateFormat('MMMM yyyy').format(displayMonth),
+            DateFormat(AppDateFormats.fullMonthYear).format(displayMonth),
             style: Theme.of(context)
                 .textTheme
                 .bodySmall

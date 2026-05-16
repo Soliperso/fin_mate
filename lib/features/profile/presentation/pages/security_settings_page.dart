@@ -12,6 +12,7 @@ import '../../../../core/services/mfa_provider.dart';
 import '../../../../core/services/mfa_service.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
@@ -836,11 +837,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                     minimumSize: const Size.fromHeight(AppSizes.buttonHeightMd),
                   ),
                   child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const LoadingIndicator()
                       : Text('security.updatePassword'.tr()),
                 ),
                 const SizedBox(height: AppSizes.sm),

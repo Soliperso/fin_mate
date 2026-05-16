@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/glass_container.dart';
@@ -94,7 +95,7 @@ class NetWorthTrendChart extends ConsumerWidget {
                           return Padding(
                             padding: const EdgeInsets.only(top: AppSizes.sm),
                             child: Text(
-                              DateFormat('MMM d').format(snapshot.date),
+                              DateFormat(AppDateFormats.shortDate).format(snapshot.date),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall

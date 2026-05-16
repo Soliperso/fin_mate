@@ -8,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/password_strength_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 
 class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
@@ -342,11 +343,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           ? null
                           : _handleSignup,
                       child: authState.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator()
                           : Text('auth.signup.createButton'.tr()),
                     ),
                   ),

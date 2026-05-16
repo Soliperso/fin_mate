@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import '../constants/app_date_formats.dart';
 
 /// Service for exporting user data in various formats
 class DataExportService {
@@ -69,7 +70,7 @@ class DataExportService {
   Future<String> saveJsonExportToFile(String jsonData) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final timestamp = DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
       final fileName = 'finmate_export_$timestamp.json';
       final file = File('${directory.path}/$fileName');
 
@@ -84,7 +85,7 @@ class DataExportService {
   Future<String> saveCsvExportToFile(String csvData, String filename) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final timestamp = DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
       final fileName = '${filename}_export_$timestamp.csv';
       final file = File('${directory.path}/$fileName');
 

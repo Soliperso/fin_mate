@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/services/sentry_service.dart';
 import '../models/transaction_model.dart';
 import '../models/account_model.dart';
 import '../models/category_model.dart';
@@ -17,6 +19,7 @@ class TransactionRemoteDataSource {
     String? categoryId,
     String? type,
     int? limit,
+    int? offset,
   }) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
@@ -45,8 +48,9 @@ class TransactionRemoteDataSource {
 
     var orderedQuery = query.order('date', ascending: false);
 
-    final response =
-        limit != null ? await orderedQuery.limit(limit) : await orderedQuery;
+    final pageSize = limit ?? 50;
+    final from = offset ?? 0;
+    final response = await orderedQuery.range(from, from + pageSize - 1);
 
     return (response as List).map((json) {
       final data = Map<String, dynamic>.from(json);
@@ -229,7 +233,8 @@ class TransactionRemoteDataSource {
         'cash_flow': totalIncome - totalExpense,
         'health_score': healthScore,
       };
-    } catch (e) {
+    } catch (e, stack) {
+      unawaited(SentryService.captureException(e, stackTrace: stack, hint: 'getDashboardStats failed'));
       // Return empty stats on error
       return {
         'total_income': 0.0,

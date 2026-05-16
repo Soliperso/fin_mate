@@ -18,6 +18,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     String? categoryId,
     String? type,
     int? limit,
+    int? offset,
   }) async {
     final models = await _dataSource.getTransactions(
       startDate: startDate,
@@ -25,6 +26,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       categoryId: categoryId,
       type: type,
       limit: limit,
+      offset: offset,
     );
     return models.map((m) => m.toEntity()).toList();
   }

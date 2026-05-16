@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../data/datasources/admin_remote_datasource.dart';
 import '../providers/admin_providers.dart';
@@ -478,7 +480,7 @@ class SystemSettingsPage extends ConsumerWidget {
                                 if (createdAt != 'N/A') {
                                   final dateTime = DateTime.parse(createdAt);
                                   formattedTime =
-                                      DateFormat('MMM d, yyyy · h:mm a')
+                                      DateFormat(AppDateFormats.dateTime)
                                           .format(dateTime);
                                 }
                               } catch (_) {
@@ -805,14 +807,7 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
                     ),
                   ),
                   child: _loading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const LoadingIndicator(color: Colors.white)
                       : const Text(
                           'Send to All Users',
                           style: TextStyle(

@@ -238,7 +238,34 @@ class GoalsSummarySlide extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => GestureDetector(
+        onTap: () => ref.invalidate(savingsGoalsProvider),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.sm,
+            vertical: AppSizes.xs,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.error.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(CupertinoIcons.exclamationmark_circle,
+                  size: 14, color: AppColors.error),
+              const SizedBox(width: AppSizes.xs),
+              Text(
+                'Failed to load · Tap to retry',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

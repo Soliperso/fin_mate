@@ -205,6 +205,15 @@ class AdService {
   Future<void> showInterstitialIfEligible({bool shouldShow = true}) async {
     if (!shouldShow) return;
     if (_preloadedInterstitial == null) return;
+    // GAD 11.13.0 crashes on iOS 26+ in the interstitial close-button renderer.
+    // Skip until google_mobile_ads is upgraded to a build that supports iOS 26.
+    if (Platform.isIOS) {
+      final major = int.tryParse(
+            Platform.operatingSystemVersion.split(' ').last.split('.').first,
+          ) ??
+          0;
+      if (major >= 26) return;
+    }
     if (!await _SessionCounter.shouldShowAd()) return;
     await _preloadedInterstitial?.show();
   }

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/gradient_hero_card.dart';
@@ -30,7 +31,7 @@ class DebtHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat0 = ref.watch(currencyFormat0Provider);
     final currencyFormat2 = ref.watch(currencyFormat2Provider);
-    final monthFormat = DateFormat('MMM yyyy', context.locale.languageCode);
+    final monthFormat = DateFormat(AppDateFormats.monthYear, context.locale.languageCode);
 
     final capHit = payoffResult?.hitMaxMonths == true;
     final debtFreeLabel = payoffResult == null

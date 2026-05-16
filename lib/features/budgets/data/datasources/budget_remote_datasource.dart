@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_client.dart';
+import '../../../../core/services/sentry_service.dart';
 import '../models/budget_model.dart';
 
 class BudgetRemoteDataSource {
@@ -193,7 +195,8 @@ class BudgetRemoteDataSource {
         0.0,
         (sum, item) => sum + ((item['amount'] as num?)?.toDouble() ?? 0),
       );
-    } catch (e) {
+    } catch (e, stack) {
+      unawaited(SentryService.captureException(e, stackTrace: stack, hint: 'calculateSpending failed'));
       return 0.0;
     }
   }

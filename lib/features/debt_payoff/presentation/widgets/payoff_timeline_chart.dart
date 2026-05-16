@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../domain/entities/debt_entity.dart';
@@ -36,8 +37,8 @@ class PayoffTimelineChart extends StatelessWidget {
     if (result.schedule.isEmpty) return const SizedBox.shrink();
 
     final locale = context.locale.languageCode;
-    final dateFormatFull = DateFormat('MMM yyyy', locale);
-    final dateFormatShort = DateFormat('MMM yy', locale);
+    final dateFormatFull = DateFormat(AppDateFormats.monthYear, locale);
+    final dateFormatShort = DateFormat(AppDateFormats.monthShortYear, locale);
 
     final initialBalance = debts.fold(0.0, (s, d) => s + d.balance);
     final maxY = max(

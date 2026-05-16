@@ -12,6 +12,7 @@ import '../../../../core/services/secure_storage_provider.dart';
 // import '../../../../core/services/biometric_provider.dart'; // [Biometric]
 // import '../../../../shared/widgets/success_animation.dart'; // [Biometric]
 import '../providers/auth_providers.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key, this.reason});
@@ -320,11 +321,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: ElevatedButton(
                       onPressed: authState.isLoading ? null : _handleLogin,
                       child: authState.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator()
                           : Text('auth.login.loginButton'.tr()),
                     ),
                   ),

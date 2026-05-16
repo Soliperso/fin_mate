@@ -336,7 +336,10 @@
     "cancel": "إلغاء",
     "delete": "حذف",
     "deleted": "تم الحذف",
-    "deletedMessage": "تم حذف الميزانية بنجاح"
+    "deletedMessage": "تم حذف الميزانية بنجاح",
+    "searchHint": "البحث في الميزانيات...",
+    "noSearchResults": "لم يتم العثور على ميزانيات",
+    "noSearchResultsMessage": "جرب اسم فئة مختلف"
   },
   "budgetHero": {
     "totalBudgeted": "إجمالي الميزانية",
@@ -600,7 +603,10 @@
     "feature2": "• حدّد مواعيد نهائية اختيارية",
     "feature3": "• تتبع التقدم عبر المساهمات",
     "feature4": "• صنّف أهدافك",
-    "feature5": "• احتفل عند تحقيقها!"
+    "feature5": "• احتفل عند تحقيقها!",
+    "searchHint": "البحث في الأهداف...",
+    "noSearchResults": "لم يتم العثور على أهداف",
+    "noSearchResultsMessage": "جرب اسم هدف مختلف"
   },
   "goalDetail": {
     "title": "تفاصيل الهدف",
@@ -747,7 +753,11 @@
     "title": "الإشعارات",
     "markAllRead": "تعليم الكل كمقروء",
     "emptyTitle": "لا توجد إشعارات",
-    "emptyMessage": "أنت على اطلاع كامل! ستظهر هنا الإشعارات المتعلقة بالميزانيات والفواتير والتحليلات المالية."
+    "emptyMessage": "أنت على اطلاع كامل! ستظهر هنا الإشعارات المتعلقة بالميزانيات والفواتير والتحليلات المالية.",
+    "justNow": "الآن",
+    "minutesAgo": "منذ {count} د",
+    "hoursAgo": "منذ {count} س",
+    "daysAgo": "منذ {count} ي"
   },
   "notificationSettings": {
     "title": "إعدادات الإشعارات",
@@ -868,6 +878,9 @@
     "dueDayValue": "اليوم {day} من الشهر",
     "notes": "ملاحظات",
     "addedOn": "أُضيف في"
+  },
+  "recurring": {
+    "searchHint": "البحث في المعاملات المتكررة..."
   },
   "errors": {
     "generic": "حدث خطأ ما. الرجاء المحاولة مجدداً.",

@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../providers/auth_providers.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   final String? email;
@@ -129,11 +130,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleResetPassword,
                       child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator()
                           : Text('auth.forgotPassword.sendButton'.tr()),
                     ),
                     const SizedBox(height: AppSizes.md),
@@ -198,11 +195,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       onPressed: _isLoading ? null : _handleResendEmail,
                       icon: const Icon(CupertinoIcons.arrow_counterclockwise),
                       label: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const LoadingIndicator()
                           : Text('auth.forgotPassword.resendEmail'.tr()),
                     ),
                     const SizedBox(height: AppSizes.md),

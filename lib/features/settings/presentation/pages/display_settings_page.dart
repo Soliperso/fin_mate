@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../core/services/theme_provider.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -95,7 +96,7 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
         ),
       ),
       body: settingsState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(itemCount: 6, itemHeight: 56),
         error: (error, stackTrace) => Center(child: Text('Error: $error')),
         data: (_) => SingleChildScrollView(
           controller: _scrollController,
