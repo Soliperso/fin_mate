@@ -357,7 +357,12 @@
     "spentOf": "من",
     "remainingLeft": "متبق",
     "amountOver": "تجاوز",
-    "exceeded": "لقد تجاوزت هذه الميزانية"
+    "exceeded": "لقد تجاوزت هذه الميزانية",
+    "overBudgetBy": "تجاوز الميزانية بمقدار",
+    "statusOnTrack": "في المسار الصحيح هذه الفترة",
+    "statusNearLimit": "اقتربت من حد ميزانيتك",
+    "statusAbovePace": "الإنفاق أعلى من الوتيرة اليومية",
+    "statusExceeded": "تجاوزت الميزانية هذه الفترة"
   },
   "budgetHero": {
     "totalBudgeted": "إجمالي الميزانية",

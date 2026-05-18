@@ -357,7 +357,12 @@
     "spentOf": "of",
     "remainingLeft": "left",
     "amountOver": "over",
-    "exceeded": "You've exceeded this budget"
+    "exceeded": "You've exceeded this budget",
+    "overBudgetBy": "over budget by",
+    "statusOnTrack": "On track this period",
+    "statusNearLimit": "Nearing your budget limit",
+    "statusAbovePace": "Spending above daily pace",
+    "statusExceeded": "Budget exceeded this period"
   },
   "budgetHero": {
     "totalBudgeted": "Total Budgeted",

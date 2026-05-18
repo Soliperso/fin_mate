@@ -38,10 +38,17 @@ class BudgetHeroCard extends ConsumerWidget {
         .inDays
         .clamp(0, 999);
 
+    final totalDays = periodBudget.currentPeriodEnd
+        .difference(periodBudget.currentPeriodStart)
+        .inDays
+        .clamp(1, 999);
+    final daysElapsed = (totalDays - daysRemaining).clamp(0, totalDays);
+    final paceProgress = daysElapsed / totalDays;
+    final dailyBudget = totalBudgeted / totalDays;
+    final dailyActual = daysElapsed > 0 ? totalSpent / daysElapsed : 0.0;
+    final isPaceOver = dailyActual > dailyBudget;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark
-        ? AppColors.secondarySystemBackgroundDark
-        : AppColors.systemBackground;
 
     final badgeColor = pct >= 100
         ? AppColors.systemRed
@@ -54,6 +61,37 @@ class BudgetHeroCard extends ConsumerWidget {
         : pct >= 80
             ? AppColors.systemOrange
             : AppColors.brandTeal;
+
+    final String statusText;
+    final Color statusColor;
+    if (pct >= 100) {
+      statusText = 'Budget exceeded this period';
+      statusColor = AppColors.systemRed;
+    } else if (pct >= 80) {
+      statusText = 'Nearing your budget limit';
+      statusColor = AppColors.systemOrange;
+    } else if (isPaceOver) {
+      statusText = 'Spending above daily pace';
+      statusColor = AppColors.systemOrange;
+    } else {
+      statusText = 'On track this period';
+      statusColor = AppColors.systemGreen;
+    }
+
+    final bool isOverBudget = totalRemaining < 0;
+    final String remainingText = isOverBudget
+        ? 'over budget by ${currency.format(totalRemaining.abs() * convFactor)}'
+        : '${currency.format(totalRemaining * convFactor)} ${'budgets.leftToSpend'.tr()}';
+    final Color remainingColor = isOverBudget ? AppColors.systemRed : progressColor;
+
+    final baseCardColor = isDark
+        ? AppColors.secondarySystemBackgroundDark
+        : AppColors.systemBackground;
+    final cardColor = pct >= 100
+        ? Color.lerp(baseCardColor, AppColors.systemRed, isDark ? 0.08 : 0.04)!
+        : pct >= 80
+            ? Color.lerp(baseCardColor, AppColors.systemOrange, isDark ? 0.08 : 0.04)!
+            : baseCardColor;
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.lg),
@@ -72,7 +110,6 @@ class BudgetHeroCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
@@ -83,6 +120,21 @@ class BudgetHeroCard extends ConsumerWidget {
                       letterSpacing: 1.0,
                     ),
               ),
+              const SizedBox(width: AppSizes.xs),
+              Text(
+                '·',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const SizedBox(width: AppSizes.xs),
+              Text(
+                '${budgets.length} ${'budgets.title'.tr().toLowerCase()}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const Spacer(),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -121,52 +173,62 @@ class BudgetHeroCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSizes.md),
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: overallProgress),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              child: LinearProgressIndicator(
-                value: value,
-                minHeight: 7,
-                backgroundColor: isDark
-                    ? AppColors.tertiarySystemBackgroundDark
-                    : AppColors.systemGray5,
-                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.sm),
-          Builder(
-            builder: (context) {
-              final totalDays = periodBudget.currentPeriodEnd
-                  .difference(periodBudget.currentPeriodStart)
-                  .inDays
-                  .clamp(1, 999);
-              final daysElapsed = (totalDays - daysRemaining).clamp(1, totalDays);
-              final dailyBudget = totalBudgeted / totalDays;
-              final dailyActual = totalSpent / daysElapsed;
-              final isDailyOver = dailyActual > dailyBudget;
-
-              return Text(
-                '${currency.format(dailyActual * convFactor)}/day avg  ·  '
-                '${currency.format(dailyBudget * convFactor)}/day budget',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isDailyOver ? AppColors.systemOrange : AppColors.brandTeal,
-                ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: overallProgress),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) => ClipRRect(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 7,
+                        backgroundColor: isDark
+                            ? AppColors.tertiarySystemBackgroundDark
+                            : AppColors.systemGray5,
+                        valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: (constraints.maxWidth * paceProgress)
+                        .clamp(1.0, constraints.maxWidth - 2),
+                    top: -3,
+                    bottom: -3,
+                    child: Container(
+                      width: 2,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
+          ),
+          const SizedBox(height: AppSizes.sm),
+          Text(
+            statusText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
           const SizedBox(height: AppSizes.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${currency.format(totalRemaining.abs() * convFactor)} ${'budgets.leftToSpend'.tr()}',
+                remainingText,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: remainingColor,
+                      fontWeight: FontWeight.w500,
                     ),
               ),
               Text(
