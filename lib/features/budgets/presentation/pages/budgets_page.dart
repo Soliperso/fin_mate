@@ -4,14 +4,13 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/exchange_rate_provider.dart';
 import '../../../../shared/utils/category_icon_utils.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
-import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 import '../../domain/entities/budget_entity.dart';
@@ -44,6 +43,15 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('budgets.title'.tr()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.add,
+              onTap: () => _showCreateBudgetBottomSheet(context),
+            ),
+          ),
+        ],
       ),
       body: budgetsState.when(
         data: (budgets) {
@@ -114,7 +122,7 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.all(AppSizes.md),
-                          itemCount: filtered.length + 1,
+                          itemCount: filtered.length + 2,
                           itemBuilder: (context, index) {
                             if (index == 0) {
                               return Padding(
@@ -122,7 +130,10 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
                                 child: BudgetHeroCard(budgets: budgets),
                               );
                             }
-                            return _buildBudgetCard(context, filtered[index - 1]);
+                            if (index == 1) {
+                              return _buildSectionHeader(context);
+                            }
+                            return _buildBudgetCard(context, filtered[index - 2]);
                           },
                         ),
                 ),
@@ -177,36 +188,6 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
           ),
         ),
       ),
-      floatingActionButtonAnimator: const InstantFabAnimator(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: budgetsState.valueOrNull?.isNotEmpty == true
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: SizedBox(
-                width: double.infinity,
-                height: AppSizes.buttonHeightMd,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showCreateBudgetBottomSheet(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandTeal,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                    ),
-                  ),
-                  icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: Text(
-                    'budgets.newBudget'.tr(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                  ),
-                ),
-              ),
-            )
-          : const SizedBox.shrink(),
     );
   }
 
@@ -263,8 +244,20 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
     );
   }
 
+  Widget _buildSectionHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.sm),
+      child: Text(
+        'budgets.byCategory'.tr(),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
   Widget _buildBudgetCard(BuildContext context, BudgetEntity budget) {
-    final fmt = ref.watch(currencyFormat0Provider);
+    final fmt = ref.watch(currencyFormat2Provider);
     final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.effectiveAmount;
@@ -279,277 +272,170 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
 
-    final statusColor = isOverBudget
-        ? AppColors.systemRed
-        : isNearLimit
-            ? AppColors.systemOrange
-            : AppColors.systemGreen;
-
     final progressColor = isOverBudget
         ? AppColors.systemRed
         : isNearLimit
             ? AppColors.systemOrange
             : AppColors.brandTeal;
 
-    final periodStart = DateFormat(AppDateFormats.shortDate).format(budget.currentPeriodStart);
-    final periodEnd = DateFormat(AppDateFormats.shortDate).format(budget.currentPeriodEnd);
+    final remainingColor = isOverBudget ? AppColors.systemRed : AppColors.brandTeal;
+    final remainingSign = isOverBudget ? '+' : '';
+    final remainingLabel = isOverBudget ? 'over' : 'left';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.md),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return GestureDetector(
+      onTap: () => _showBudgetOptions(context, budget),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSizes.md),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
           children: [
-            // Left status accent
-            Container(width: 4, color: statusColor),
-            // Card content
-            Expanded(
-              child: InkWell(
-                onTap: () => _showBudgetOptions(context, budget),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header row
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: categoryColor.withValues(alpha: 0.12),
-                              borderRadius:
-                                  BorderRadius.circular(AppSizes.radiusMd),
-                            ),
-                            child: Icon(
-                              _getIconForCategory(budget.categoryIcon, categoryName: budget.categoryName),
-                              color: categoryColor,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: AppSizes.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  budget.categoryName ?? 'Uncategorized',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Text(
-                                      budget.period.displayName,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                    if (budget.carryOverEnabled &&
-                                        budget.lastCarryOverAmount != 0) ...[
-                                      const SizedBox(width: AppSizes.xs),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: (budget.lastCarryOverAmount > 0
-                                                  ? AppColors.systemGreen
-                                                  : AppColors.systemRed)
-                                              .withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(
-                                              AppSizes.radiusFull),
-                                        ),
-                                        child: Text(
-                                          budget.lastCarryOverAmount > 0
-                                              ? '+${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)} rollover'
-                                              : '-${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)} rollover',
-                                          style: TextStyle(
-                                            color:
-                                                budget.lastCarryOverAmount > 0
-                                                    ? AppColors.systemGreen
-                                                    : AppColors.systemRed,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                Text(
-                                  '$periodStart – $periodEnd',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            isOverBudget
-                                ? CupertinoIcons.exclamationmark_circle_fill
-                                : isNearLimit
-                                    ? CupertinoIcons
-                                        .exclamationmark_triangle_fill
-                                    : CupertinoIcons.checkmark_circle_fill,
-                            color: statusColor,
-                            size: 20,
-                          ),
-                          const SizedBox(width: AppSizes.xs),
-                          GestureDetector(
-                            onTap: () =>
-                                _showBudgetOptions(context, budget),
-                            child: const Icon(
-                              CupertinoIcons.ellipsis,
-                              size: 20,
-                              color: AppColors.systemGray,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSizes.sm),
-                      // Percentage label
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          '${budget.spentPercentage.clamp(0, double.infinity).toStringAsFixed(0)}${'budgets.percentUsed'.tr()}',
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: categoryColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                    ),
+                    child: Icon(
+                      _getIconForCategory(budget.categoryIcon,
+                          categoryName: budget.categoryName),
+                      color: categoryColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          budget.categoryName ?? 'Uncategorized',
                           style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: statusColor,
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
-                      ),
-                      const SizedBox(height: AppSizes.xs),
-                      // Progress bar
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: percentage),
-                        duration: const Duration(milliseconds: 700),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, _) => ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radiusFull),
-                          child: LinearProgressIndicator(
-                            value: value,
-                            minHeight: 6,
-                            backgroundColor: isDark
-                                ? AppColors.tertiarySystemBackgroundDark
-                                : AppColors.systemGray5,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(progressColor),
-                            borderRadius:
-                                BorderRadius.circular(AppSizes.radiusFull),
-                          ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Text(
+                              '${fmt.format(spent * convFactor)} of ${fmt.format(budget.effectiveAmount * convFactor)}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                            if (budget.carryOverEnabled &&
+                                budget.lastCarryOverAmount != 0) ...[
+                              const SizedBox(width: AppSizes.xs),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: (budget.lastCarryOverAmount > 0
+                                          ? AppColors.systemGreen
+                                          : AppColors.systemRed)
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                      AppSizes.radiusFull),
+                                ),
+                                child: Text(
+                                  budget.lastCarryOverAmount > 0
+                                      ? '+${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)}'
+                                      : '-${fmt.format(budget.lastCarryOverAmount.abs() * convFactor)}',
+                                  style: TextStyle(
+                                    color: budget.lastCarryOverAmount > 0
+                                        ? AppColors.systemGreen
+                                        : AppColors.systemRed,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$remainingSign${fmt.format(remaining.abs() * convFactor)}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: remainingColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
-                      const SizedBox(height: AppSizes.md),
-                      // Stats row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('budgets.spent'.tr(),
-                                  style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: AppSizes.xs),
-                              Text(
-                                fmt.format(spent * convFactor),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textSecondary,
-                                    ),
-                              ),
-                              if (ref.watch(usdEquivalentProvider(spent)) !=
-                                  null)
-                                Text(
-                                  ref.watch(usdEquivalentProvider(spent))!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                          color: AppColors.textSecondary),
-                                ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                isOverBudget
-                                    ? 'budgets.overBy'.tr()
-                                    : 'budgets.remaining'.tr(),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              const SizedBox(height: AppSizes.xs),
-                              Text(
-                                fmt.format(remaining.abs() * convFactor),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: isOverBudget
-                                          ? AppColors.error
-                                          : AppColors.success,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              if (ref.watch(usdEquivalentProvider(
-                                      remaining.abs())) !=
-                                  null)
-                                Text(
-                                  ref.watch(usdEquivalentProvider(
-                                      remaining.abs()))!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                          color: AppColors.textSecondary),
-                                ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('budgets.budget'.tr(),
-                                  style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: AppSizes.xs),
-                              Text(
-                                fmt.format(budget.effectiveAmount * convFactor),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textSecondary,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      Text(
+                        remainingLabel,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: percentage),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, _) => ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                  child: LinearProgressIndicator(
+                    value: value,
+                    minHeight: 5,
+                    backgroundColor: isDark
+                        ? AppColors.tertiarySystemBackgroundDark
+                        : AppColors.systemGray5,
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                   ),
                 ),
               ),
             ),
+            if (isOverBudget)
+              Container(
+                width: double.infinity,
+                color: AppColors.systemRed.withValues(alpha: 0.08),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.md, vertical: 10),
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.exclamationmark_triangle,
+                        color: AppColors.systemRed, size: 14),
+                    const SizedBox(width: AppSizes.xs),
+                    Text(
+                      'budgets.exceeded'.tr(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.systemRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -565,7 +451,7 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
   }
 
   void _showBudgetOptions(BuildContext context, BudgetEntity budget) {
-    final fmt = ref.watch(currencyFormat0Provider);
+    final fmt = ref.watch(currencyFormat2Provider);
     final convFactor = ref.watch(conversionFactorProvider);
     final spent = budget.spent ?? 0.0;
     final remaining = budget.remaining ?? budget.amount;
