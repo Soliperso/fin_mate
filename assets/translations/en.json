@@ -29,7 +29,8 @@
     "maybeLater": "Maybe Later",
     "required": "Required",
     "invalid": "Invalid",
-    "daysAgo": "{count} days ago"
+    "daysAgo": "{count} days ago",
+    "ok": "OK"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -238,7 +239,16 @@
     "periodToday": "Today",
     "periodWeek": "Week",
     "periodMonth": "Month",
-    "periodYear": "Year"
+    "periodYear": "Year",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "filterTitle": "Filter Transactions",
+    "import": {
+      "headerSingular": "Import 1 Transaction",
+      "headerPlural": "Import {count} Transactions",
+      "skippedSingular": "1 row will be skipped",
+      "skippedPlural": "{count} rows will be skipped"
+    }
   },
   "addTransaction": {
     "editTitle": "Edit Transaction",
@@ -339,7 +349,15 @@
     "deletedMessage": "Budget deleted successfully",
     "searchHint": "Search budgets...",
     "noSearchResults": "No budgets found",
-    "noSearchResultsMessage": "Try a different category name"
+    "noSearchResultsMessage": "Try a different category name",
+    "leftToSpend": "left to spend",
+    "daysRemaining": "days remaining",
+    "byCategory": "By category",
+    "customize": "Customize",
+    "spentOf": "of",
+    "remainingLeft": "left",
+    "amountOver": "over",
+    "exceeded": "You've exceeded this budget"
   },
   "budgetHero": {
     "totalBudgeted": "Total Budgeted",
@@ -392,6 +410,8 @@
     "compare": "Compare",
     "avalanche": "Avalanche",
     "snowball": "Snowball",
+    "avalancheShort": "Highest APR first",
+    "snowballShort": "Smallest balance first",
     "avalancheDesc": "Highest interest rate first — saves the most money",
     "snowballDesc": "Lowest balance first — builds momentum faster",
     "focusOn": "Focus on: {name}",
@@ -417,7 +437,11 @@
     "percentPaid": "% paid off",
     "neverPaysOff": "Never",
     "neverPaysOffInterest": "Grows forever",
-    "neverPaysOffWarning": "Min payment is less than monthly interest — balance grows every month. Add extra payments to escape."
+    "neverPaysOffWarning": "Min payment is less than monthly interest — balance grows every month. Add extra payments to escape.",
+    "active": "Active",
+    "acrossAccounts": "across {count} accounts",
+    "minMonth": "MIN/MONTH",
+    "interestMo": "INTEREST/MO"
   },
   "debtCard": {
     "dueToday": "Due today",
@@ -888,7 +912,24 @@
     "addedOn": "Added On"
   },
   "recurring": {
-    "searchHint": "Search recurring transactions..."
+    "searchHint": "Search recurring transactions...",
+    "title": "Recurring Transactions",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterInactive": "Inactive",
+    "emptyTitle": "No Recurring Transactions",
+    "emptyMessage": "Create recurring transactions to track your bills and income",
+    "emptyFilterTitle": "No {filter} Transactions",
+    "emptyFilterMessage": "There are no {filter} recurring transactions right now",
+    "addButton": "Add Recurring Transaction",
+    "deleteTitle": "Delete Recurring Transaction?",
+    "deleteMessage": "This recurring transaction will be deleted permanently.",
+    "paymentLogged": "{description} logged — next due {date}",
+    "failedToLog": "Failed to log payment",
+    "failedToLoad": "Failed to Load",
+    "failedToLoadMessage": "Unable to load recurring transactions. Please check your connection and try again.",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

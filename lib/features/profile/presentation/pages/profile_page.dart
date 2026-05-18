@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/theme_provider.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
+import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
 // [AI Insights - Commented out]
@@ -45,31 +46,11 @@ class ProfilePage extends ConsumerWidget {
       body: profile == null && profileState.isLoading
           ? _buildProfileSkeleton(context)
           : profile == null && profileState.errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(CupertinoIcons.exclamationmark_circle,
-                          size: 48, color: AppColors.error),
-                      const SizedBox(height: AppSizes.md),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-                        child: Text(
-                          profileState.errorMessage!,
-                          style: const TextStyle(color: AppColors.error),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.md),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(currentUserProfileProvider.notifier)
-                            .loadProfile(),
-                        child: Text('common.retry'.tr()),
-                      ),
-                    ],
-                  ),
+              ? ErrorRetryWidget(
+                  message: profileState.errorMessage!,
+                  onRetry: () => ref
+                      .read(currentUserProfileProvider.notifier)
+                      .loadProfile(),
                 )
               : RefreshIndicator(
                   color: AppColors.brandTeal,
@@ -179,7 +160,8 @@ class ProfilePage extends ConsumerWidget {
                             subtitle: 'profile.securitySub'.tr(),
                             onTap: () => context.push('/profile/security'),
                           ),
-                          if (featureEnabled(featureFlags, 'savings_goals')) ...[
+                          if (featureEnabled(
+                              featureFlags, 'savings_goals')) ...[
                             _buildDivider(context, isDark),
                             _buildSettingsTile(
                               context: context,
@@ -278,19 +260,18 @@ class ProfilePage extends ConsumerWidget {
                             title: 'profile.about'.tr(),
                             subtitle: 'profile.aboutVersion'.tr(),
                             onTap: () async {
-                              final info =
-                                  await PackageInfo.fromPlatform();
+                              final info = await PackageInfo.fromPlatform();
                               if (!context.mounted) return;
                               showDialog(
                                 context: context,
-                                builder: (_) => AlertDialog(
+                                builder: (dialogContext) => AlertDialog(
                                   title: const Text('Finmate'),
                                   content: Text(
                                       'Version ${info.version} (${info.buildNumber})'),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
-                                          Navigator.of(context).pop(),
+                                          Navigator.of(dialogContext).pop(),
                                       child: Text('common.ok'.tr()),
                                     ),
                                   ],

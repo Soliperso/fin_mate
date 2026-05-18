@@ -189,33 +189,14 @@ class _DebtPageState extends ConsumerState<DebtPage>
         ),
       ),
       floatingActionButtonAnimator: const InstantFabAnimator(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true &&
               !_keyboardVisible
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: SizedBox(
-                width: double.infinity,
-                height: AppSizes.buttonHeightMd,
-                child: ElevatedButton.icon(
-                  onPressed: _showAddDebt,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandTeal,
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                    ),
-                  ),
-                  icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: Text(
-                    'debt.addDebt'.tr(),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                ),
-              ),
+          ? FloatingActionButton(
+              onPressed: _showAddDebt,
+              backgroundColor: AppColors.brandTeal,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              child: const Icon(CupertinoIcons.add, size: 24),
             )
           : null,
       body: GestureDetector(
@@ -342,11 +323,15 @@ class _DebtPageState extends ConsumerState<DebtPage>
                               Row(
                                 children: [
                                   Text(
-                                    'debt.strategy'.tr(),
+                                    'debt.strategy'.tr().toUpperCase(),
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleSmall
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                        .labelMedium
+                                        ?.copyWith(
+                                          color: AppColors.systemGray,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.8,
+                                        ),
                                   ),
                                   const Spacer(),
                                   GestureDetector(
@@ -375,47 +360,31 @@ class _DebtPageState extends ConsumerState<DebtPage>
                                 ],
                               ),
                               const SizedBox(height: AppSizes.sm),
-                              SizedBox(
-                                width: double.infinity,
-                                child: SegmentedButton<DebtStrategy>(
-                                  segments: [
-                                    ButtonSegment(
-                                      value: DebtStrategy.avalanche,
-                                      label: Text('debt.avalanche'.tr()),
-                                      icon: const Icon(CupertinoIcons.flame),
-                                    ),
-                                    ButtonSegment(
-                                      value: DebtStrategy.snowball,
-                                      label: Text('debt.snowball'.tr()),
-                                      icon: const Icon(CupertinoIcons.snow),
-                                    ),
-                                  ],
-                                  selected: {strategy},
-                                  onSelectionChanged: (s) => ref
-                                      .read(selectedStrategyProvider.notifier)
-                                      .state = s.first,
-                                  style: ButtonStyle(
-                                    iconColor: WidgetStateProperty.resolveWith(
-                                      (states) =>
-                                          states.contains(WidgetState.selected)
-                                              ? AppColors.brandTeal
-                                              : AppColors.textSecondary,
-                                    ),
-                                    textStyle: WidgetStateProperty.all(
-                                      Theme.of(context)
-                                          .textTheme
-                                          .labelLarge
-                                          ?.copyWith(
-                                            fontSize: (Theme.of(context)
-                                                        .textTheme
-                                                        .labelLarge
-                                                        ?.fontSize ??
-                                                    14) *
-                                                0.8,
-                                          ),
-                                    ),
+                              // Strategy pill buttons
+                              Row(
+                                children: [
+                                  _StrategyPill(
+                                    label: 'debt.avalanche'.tr(),
+                                    subtitle: 'Highest APR first',
+                                    isSelected:
+                                        strategy == DebtStrategy.avalanche,
+                                    onTap: () => ref
+                                        .read(
+                                            selectedStrategyProvider.notifier)
+                                        .state = DebtStrategy.avalanche,
                                   ),
-                                ),
+                                  const SizedBox(width: AppSizes.sm),
+                                  _StrategyPill(
+                                    label: 'debt.snowball'.tr(),
+                                    subtitle: 'Smallest balance first',
+                                    isSelected:
+                                        strategy == DebtStrategy.snowball,
+                                    onTap: () => ref
+                                        .read(
+                                            selectedStrategyProvider.notifier)
+                                        .state = DebtStrategy.snowball,
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: AppSizes.xs),
                               Text(
@@ -709,6 +678,69 @@ class _MetricItem extends StatelessWidget {
               ),
         ),
       ],
+    );
+  }
+}
+
+class _StrategyPill extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _StrategyPill({
+    required this.label,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.sm,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.brandTeal : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.brandTeal
+                  : AppColors.textSecondary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.75)
+                          : AppColors.textSecondary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

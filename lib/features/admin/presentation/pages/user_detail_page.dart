@@ -29,6 +29,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Email copied to clipboard'),
+        backgroundColor: AppColors.success,
         duration: Duration(seconds: 2),
       ),
     );
@@ -1210,6 +1211,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Password reset email sent to ${user.email}'),
+          backgroundColor: AppColors.success,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1408,6 +1410,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user.displayName}\'s account has been disabled'),
+          backgroundColor: AppColors.success,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1459,6 +1462,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user.displayName}\'s account has been enabled'),
+          backgroundColor: AppColors.success,
           duration: const Duration(seconds: 3),
         ),
       );

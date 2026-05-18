@@ -29,7 +29,8 @@
     "maybeLater": "ربما لاحقاً",
     "required": "مطلوب",
     "invalid": "غير صالح",
-    "daysAgo": "منذ {count} أيام"
+    "daysAgo": "منذ {count} أيام",
+    "ok": "حسناً"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
@@ -238,7 +239,16 @@
     "periodToday": "اليوم",
     "periodWeek": "الأسبوع",
     "periodMonth": "الشهر",
-    "periodYear": "السنة"
+    "periodYear": "السنة",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء تحديد الكل",
+    "filterTitle": "تصفية المعاملات",
+    "import": {
+      "headerSingular": "استيراد معاملة واحدة",
+      "headerPlural": "استيراد {count} معاملات",
+      "skippedSingular": "سيتم تخطي صف واحد",
+      "skippedPlural": "سيتم تخطي {count} صفوف"
+    }
   },
   "addTransaction": {
     "editTitle": "تعديل المعاملة",
@@ -339,7 +349,15 @@
     "deletedMessage": "تم حذف الميزانية بنجاح",
     "searchHint": "البحث في الميزانيات...",
     "noSearchResults": "لم يتم العثور على ميزانيات",
-    "noSearchResultsMessage": "جرب اسم فئة مختلف"
+    "noSearchResultsMessage": "جرب اسم فئة مختلف",
+    "leftToSpend": "متبقي للإنفاق",
+    "daysRemaining": "أيام متبقية",
+    "byCategory": "حسب الفئة",
+    "customize": "تخصيص",
+    "spentOf": "من",
+    "remainingLeft": "متبق",
+    "amountOver": "تجاوز",
+    "exceeded": "لقد تجاوزت هذه الميزانية"
   },
   "budgetHero": {
     "totalBudgeted": "إجمالي الميزانية",
@@ -392,6 +410,8 @@
     "compare": "مقارنة",
     "avalanche": "الانهيار الجليدي",
     "snowball": "كرة الثلج",
+    "avalancheShort": "أعلى فائدة أولاً",
+    "snowballShort": "أصغر رصيد أولاً",
     "avalancheDesc": "ابدأ بأعلى نسبة فائدة — يوفّر أكثر",
     "snowballDesc": "ابدأ بأصغر رصيد — يبني الزخم بشكل أسرع",
     "focusOn": "التركيز على: {name}",
@@ -417,7 +437,11 @@
     "percentPaid": "% مسدَّد",
     "neverPaysOff": "لا يُسدَّد أبدًا",
     "neverPaysOffInterest": "يتزايد باستمرار",
-    "neverPaysOffWarning": "الدفعة الأدنى أقل من الفوائد الشهرية — الرصيد يزداد كل شهر. أضف دفعات إضافية للخروج من هذا الفخ."
+    "neverPaysOffWarning": "الدفعة الأدنى أقل من الفوائد الشهرية — الرصيد يزداد كل شهر. أضف دفعات إضافية للخروج من هذا الفخ.",
+    "active": "نشط",
+    "acrossAccounts": "عبر {count} حسابات",
+    "minMonth": "الحد الأدنى/شهر",
+    "interestMo": "الفائدة/شهر"
   },
   "debtCard": {
     "dueToday": "مستحق اليوم",
@@ -880,7 +904,24 @@
     "addedOn": "أُضيف في"
   },
   "recurring": {
-    "searchHint": "البحث في المعاملات المتكررة..."
+    "searchHint": "البحث في المعاملات المتكررة...",
+    "title": "المعاملات المتكررة",
+    "filterAll": "الكل",
+    "filterActive": "نشط",
+    "filterInactive": "غير نشط",
+    "emptyTitle": "لا توجد معاملات متكررة",
+    "emptyMessage": "أنشئ معاملات متكررة لتتبع فواتيرك ودخلك",
+    "emptyFilterTitle": "لا توجد معاملات {filter}",
+    "emptyFilterMessage": "لا توجد معاملات {filter} متكررة الآن",
+    "addButton": "إضافة معاملة متكررة",
+    "deleteTitle": "حذف المعاملة المتكررة؟",
+    "deleteMessage": "ستُحذف هذه المعاملة المتكررة بشكل دائم.",
+    "paymentLogged": "تم تسجيل {description} — الموعد التالي {date}",
+    "failedToLog": "فشل تسجيل الدفع",
+    "failedToLoad": "فشل التحميل",
+    "failedToLoadMessage": "تعذر تحميل المعاملات المتكررة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل"
   },
   "errors": {
     "generic": "حدث خطأ ما. الرجاء المحاولة مجدداً.",

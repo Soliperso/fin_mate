@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../../../../shared/widgets/gradient_hero_card.dart';
@@ -31,37 +30,26 @@ class DebtHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat0 = ref.watch(currencyFormat0Provider);
     final currencyFormat2 = ref.watch(currencyFormat2Provider);
-    final monthFormat = DateFormat(AppDateFormats.monthYear, context.locale.languageCode);
 
     final capHit = payoffResult?.hitMaxMonths == true;
-    final debtFreeLabel = payoffResult == null
-        ? '—'
-        : capHit
-            ? 'debtHero.neverPaysOff'.tr()
-            : monthFormat.format(payoffResult!.debtFreeDate);
-    final totalInterestLabel = payoffResult == null
-        ? '—'
-        : capHit
-            ? 'debtHero.neverPaysOffInterest'.tr()
-            : currencyFormat0.format(payoffResult!.totalInterestPaid);
+
+    final totalMinMonthly =
+        debts.fold<double>(0.0, (s, d) => s + d.minimumPayment);
+    final totalMonthlyInterest =
+        debts.fold<double>(0.0, (s, d) => s + d.monthlyInterest);
 
     // Overall progress — only shown when at least one debt has originalBalance
     double? overallProgress;
-    bool hasAnyOriginal = false;
     double totalOriginal = 0;
     double totalPaid = 0;
     for (final d in debts) {
       final originalBalance = d.originalBalance;
       if (originalBalance != null && originalBalance > 0) {
-        hasAnyOriginal = true;
         totalOriginal += originalBalance;
         totalPaid += (originalBalance - d.balance).clamp(0.0, originalBalance);
       }
-      // Debts without originalBalance are excluded from the progress
-      // calculation — adding their current balance to the denominator (but
-      // nothing to the numerator) would make the progress look lower than it is.
     }
-    if (hasAnyOriginal && totalOriginal > 0) {
+    if (totalOriginal > 0) {
       overallProgress = (totalPaid / totalOriginal).clamp(0.0, 1.0);
     }
 
@@ -71,13 +59,40 @@ class DebtHeroCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Label
-          Text(
-            'debtHero.totalDebt'.tr(),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  letterSpacing: 0.5,
+          // Label row + Active badge
+          Row(
+            children: [
+              Text(
+                'debtHero.totalDebt'.tr(),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      letterSpacing: 0.5,
+                    ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.20),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(CupertinoIcons.arrow_up,
+                        size: 9, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Active',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSizes.xs),
 
@@ -90,20 +105,29 @@ class DebtHeroCard extends ConsumerWidget {
                   letterSpacing: -0.5,
                 ),
           ),
+          const SizedBox(height: 2),
+
+          // Subtitle
+          Text(
+            'across $debtCount ${debtCount == 1 ? 'account' : 'accounts'}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+          ),
           const SizedBox(height: AppSizes.md),
 
-          // Stats row
+          // Stats row: MIN/MONTH + INTEREST/MO
           Row(
             children: [
               HeroStatBadge(
-                  label: 'debtHero.debtFree'.tr(), value: debtFreeLabel),
+                label: 'Min / Month',
+                value: currencyFormat0.format(totalMinMonthly),
+              ),
               const SizedBox(width: AppSizes.sm),
               HeroStatBadge(
-                  label: 'debtHero.totalInterest'.tr(),
-                  value: totalInterestLabel),
-              const SizedBox(width: AppSizes.sm),
-              HeroStatBadge(
-                  label: 'debtHero.accounts'.tr(), value: '$debtCount'),
+                label: 'Interest / Mo',
+                value: currencyFormat0.format(totalMonthlyInterest),
+              ),
             ],
           ),
 

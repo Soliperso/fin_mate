@@ -9,8 +9,8 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
-import '../../../../shared/widgets/instant_fab_animator.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
+import '../../../../shared/widgets/success_animation.dart';
 import '../../../transactions/domain/entities/transaction_entity.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/recurring_transaction_entity.dart';
@@ -60,13 +60,12 @@ class _RecurringTransactionsPageState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Recurring Transaction?'),
-        content: const Text(
-            'This recurring transaction will be deleted permanently.'),
+        title: Text('recurring.deleteTitle'.tr()),
+        content: Text('recurring.deleteMessage'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
@@ -75,9 +74,9 @@ class _RecurringTransactionsPageState
                   .deleteRecurringTransaction(id);
               Navigator.pop(context);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              'common.delete'.tr(),
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
         ],
@@ -130,18 +129,19 @@ class _RecurringTransactionsPageState
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${transaction.description ?? 'Payment'} logged — next due ${_formatDate(next)}',
-            ),
-          ),
+        SuccessSnackbar.show(
+          context,
+          message: 'recurring.paymentLogged'.tr(namedArgs: {
+            'description': transaction.description ?? 'Payment',
+            'date': _formatDate(next),
+          }),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to log payment: $e')),
+        ErrorSnackbar.show(
+          context,
+          message: 'recurring.failedToLog'.tr(),
         );
       }
     }
@@ -161,21 +161,7 @@ class _RecurringTransactionsPageState
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}';
+    return DateFormat('MMM d').format(date);
   }
 
   List<RecurringTransactionEntity> _filterTransactions(
@@ -202,7 +188,7 @@ class _RecurringTransactionsPageState
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: const Text('Recurring Transactions'),
+        title: Text('recurring.title'.tr()),
         centerTitle: false,
         actions: [
           Padding(
@@ -225,13 +211,15 @@ class _RecurringTransactionsPageState
                 padding: const EdgeInsets.fromLTRB(
                     AppSizes.md, AppSizes.sm, AppSizes.md, 0),
                 child: Builder(builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return TextField(
                     controller: _searchController,
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: InputDecoration(
                       hintText: 'recurring.searchHint'.tr(),
-                      hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      hintStyle: TextStyle(
+                          fontSize: 14, color: AppColors.textSecondary),
                       prefixIcon: const Icon(CupertinoIcons.search, size: 18),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? GestureDetector(
@@ -239,8 +227,10 @@ class _RecurringTransactionsPageState
                                 _searchQuery = '';
                                 _searchController.clear();
                               }),
-                              child: const Icon(CupertinoIcons.xmark_circle_fill,
-                                  size: 18, color: AppColors.systemGray3),
+                              child: const Icon(
+                                  CupertinoIcons.xmark_circle_fill,
+                                  size: 18,
+                                  color: AppColors.systemGray3),
                             )
                           : null,
                       filled: true,
@@ -248,11 +238,12 @@ class _RecurringTransactionsPageState
                           ? AppColors.secondarySystemBackgroundDark
                           : AppColors.systemGray6,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusFull),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.md, vertical: 10),
+                          horizontal: AppSizes.md, vertical: AppSizes.sm),
                     ),
                     onChanged: (value) => setState(() => _searchQuery = value),
                   );
@@ -267,7 +258,7 @@ class _RecurringTransactionsPageState
                   children: [
                     Expanded(
                       child: _FilterChip(
-                        label: 'All',
+                        label: 'recurring.filterAll'.tr(),
                         selected: _filterType == 'all',
                         onTap: () => setState(() => _filterType = 'all'),
                       ),
@@ -275,7 +266,7 @@ class _RecurringTransactionsPageState
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: _FilterChip(
-                        label: 'Active',
+                        label: 'recurring.filterActive'.tr(),
                         selected: _filterType == 'active',
                         onTap: () => setState(() => _filterType = 'active'),
                       ),
@@ -283,7 +274,7 @@ class _RecurringTransactionsPageState
                     const SizedBox(width: AppSizes.sm),
                     Expanded(
                       child: _FilterChip(
-                        label: 'Inactive',
+                        label: 'recurring.filterInactive'.tr(),
                         selected: _filterType == 'inactive',
                         onTap: () => setState(() => _filterType = 'inactive'),
                       ),
@@ -304,12 +295,14 @@ class _RecurringTransactionsPageState
                             EmptyStateCard(
                               icon: CupertinoIcons.doc_text,
                               title: _filterType == 'all'
-                                  ? 'No Recurring Transactions'
-                                  : 'No ${_filterType[0].toUpperCase()}${_filterType.substring(1)} Transactions',
+                                  ? 'recurring.emptyTitle'.tr()
+                                  : 'recurring.emptyFilterTitle'
+                                      .tr(namedArgs: {'filter': _filterType}),
                               message: _filterType == 'all'
-                                  ? 'Create recurring transactions to track your bills and income'
-                                  : 'There are no $_filterType recurring transactions right now',
-                              backgroundColor: AppColors.primaryTeal,
+                                  ? 'recurring.emptyMessage'.tr()
+                                  : 'recurring.emptyFilterMessage'
+                                      .tr(namedArgs: {'filter': _filterType}),
+                              backgroundColor: AppColors.brandTeal,
                             ),
                             if (_filterType == 'all') ...[
                               const SizedBox(height: AppSizes.md),
@@ -331,9 +324,9 @@ class _RecurringTransactionsPageState
                                   ),
                                   icon:
                                       const Icon(CupertinoIcons.add, size: 20),
-                                  label: const Text(
-                                    'Add Recurring Transaction',
-                                    style: TextStyle(
+                                  label: Text(
+                                    'recurring.addButton'.tr(),
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16),
                                   ),
@@ -422,42 +415,13 @@ class _RecurringTransactionsPageState
             padding: const EdgeInsets.all(AppSizes.md),
             child: EmptyStateCard(
               icon: CupertinoIcons.exclamationmark_circle,
-              title: 'Failed to Load',
-              message:
-                  'Unable to load recurring transactions. Please check your connection and try again.',
+              title: 'recurring.failedToLoad'.tr(),
+              message: 'recurring.failedToLoadMessage'.tr(),
               backgroundColor: AppColors.error,
             ),
           ),
         ),
       ),
-      floatingActionButtonAnimator: const InstantFabAnimator(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: recurringAsync.valueOrNull?.isNotEmpty == true
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: SizedBox(
-                width: double.infinity,
-                height: AppSizes.buttonHeightMd,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showAddForm(null),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandTeal,
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                    shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                    ),
-                  ),
-                  icon: const Icon(CupertinoIcons.add, size: 20),
-                  label: const Text(
-                    'Add Recurring Transaction',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                ),
-              ),
-            )
-          : const SizedBox.shrink(),
     );
   }
 }
@@ -583,7 +547,7 @@ class _TransactionActionSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${transaction.frequency.displayName}  ·  ${transaction.isActive ? 'Active' : 'Inactive'}',
+                      '${transaction.frequency.displayName}  ·  ${transaction.isActive ? 'recurring.filterActive'.tr() : 'recurring.filterInactive'.tr()}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -615,7 +579,7 @@ class _TransactionActionSheet extends ConsumerWidget {
         // Edit
         _ActionRow(
           icon: CupertinoIcons.pencil,
-          label: 'Edit',
+          label: 'common.edit'.tr(),
           onTap: onEdit,
         ),
 
@@ -630,7 +594,9 @@ class _TransactionActionSheet extends ConsumerWidget {
           icon: transaction.isActive
               ? CupertinoIcons.pause_circle
               : CupertinoIcons.play_circle,
-          label: transaction.isActive ? 'Deactivate' : 'Activate',
+          label: transaction.isActive
+              ? 'recurring.deactivate'.tr()
+              : 'recurring.activate'.tr(),
           onTap: onToggleActive,
         ),
 
@@ -643,7 +609,7 @@ class _TransactionActionSheet extends ConsumerWidget {
         // Delete — destructive, visually separated
         _ActionRow(
           icon: CupertinoIcons.trash,
-          label: 'Delete',
+          label: 'common.delete'.tr(),
           color: AppColors.error,
           onTap: onDelete,
         ),

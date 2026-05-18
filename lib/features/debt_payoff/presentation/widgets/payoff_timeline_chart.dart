@@ -74,7 +74,7 @@ class PayoffTimelineChart extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.md),
           SizedBox(
-            height: 180,
+            height: 210,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -83,7 +83,7 @@ class PayoffTimelineChart extends StatelessWidget {
                   horizontalInterval: _interval(maxY),
                   getDrawingHorizontalLine: (_) => FlLine(
                     color: (isDark ? AppColors.white : AppColors.charcoal)
-                        .withValues(alpha: 0.06),
+                        .withValues(alpha: 0.09),
                     strokeWidth: 1,
                   ),
                 ),
@@ -153,14 +153,14 @@ class PayoffTimelineChart extends StatelessWidget {
                       return TouchedSpotIndicatorData(
                         FlLine(
                           color: (isDark ? AppColors.white : AppColors.charcoal)
-                              .withValues(alpha: 0.2),
-                          strokeWidth: 0.8,
+                              .withValues(alpha: 0.28),
+                          strokeWidth: 1.0,
                         ),
                         FlDotData(
                           show: true,
                           getDotPainter: (spot, percent, bar, idx) =>
                               FlDotCirclePainter(
-                            radius: 3,
+                            radius: 4,
                             color: bar.color ?? AppColors.textSecondary,
                             strokeWidth: 1.5,
                             strokeColor: isDark
@@ -240,11 +240,11 @@ class PayoffTimelineChart extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 10,
-                      height: 10,
+                      width: 14,
+                      height: 8,
                       decoration: BoxDecoration(
                         color: color,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -328,14 +328,21 @@ class PayoffTimelineChart extends StatelessWidget {
       lines.add(LineChartBarData(
         spots: cumulativeSpots[di],
         isCurved: true,
-        curveSmoothness: 0.3,
+        curveSmoothness: 0.35,
         color: color,
-        barWidth: 1.5,
+        barWidth: 1.8,
         isStrokeCapRound: true,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(
           show: true,
-          color: color.withValues(alpha: 0.75),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              color.withValues(alpha: 0.80),
+              color.withValues(alpha: 0.22),
+            ],
+          ),
         ),
       ));
     }
@@ -354,7 +361,7 @@ class PayoffTimelineChart extends StatelessWidget {
 
   String _compactCurrency(double value) {
     if (value >= 1000000) return '\$${(value / 1000000).toStringAsFixed(1)}M';
-    if (value >= 1000) return '\$${(value / 1000).toStringAsFixed(0)}K';
+    if (value >= 1000) return '\$${(value / 1000).toStringAsFixed(value < 10000 ? 1 : 0)}K';
     return '\$${value.toStringAsFixed(0)}';
   }
 }

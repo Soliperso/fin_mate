@@ -237,16 +237,16 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final discard = await showAdaptiveDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog.adaptive(
+      builder: (dialogContext) => AlertDialog.adaptive(
         title: Text('profile.unsavedChanges'.tr()),
         content: Text('profile.discardChangesMessage'.tr()),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text('common.cancel'.tr()),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: TextButton.styleFrom(
                 foregroundColor: AppColors.error),
             child: Text('profile.discard'.tr()),

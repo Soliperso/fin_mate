@@ -163,7 +163,6 @@ To activate a dormant route: uncomment its import at the top of `router.dart` an
 | Route | Feature |
 |---|---|
 | `/dashboard` | Dashboard (net worth, cash flow, health score, upcoming bills carousel) |
-| `/dashboard/emergency-fund` | Emergency Fund tracker |
 | `/transactions`, `/transactions/add` | Transactions + add/edit + CSV import/export |
 | `/transactions/scan-receipt` | ML Kit receipt scanner |
 | `/budgets` | Budgets |
@@ -221,7 +220,7 @@ The AI Insights feature (`lib/features/ai_insights/`) uses **OpenAI GPT-4o-mini*
 
 ### Active (routed and working)
 - Auth (email/password, MFA TOTP + email OTP, biometric, OTP verify)
-- Dashboard (net worth, cash flow, health score, upcoming bills carousel, emergency fund)
+- Dashboard (net worth, cash flow, health score, upcoming bills carousel)
 - Transactions (CRUD, receipt scanner via ML Kit, CSV import/export)
 - Budgets, Emergency Fund
 - Debt Payoff (Avalanche/Snowball, payment plans, DTI widget)

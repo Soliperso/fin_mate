@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_date_formats.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -66,7 +66,7 @@ class _ImportPreviewBottomSheetState
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.brandTeal.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
                 child: const Icon(CupertinoIcons.arrow_down_to_line,
                     color: AppColors.brandTeal, size: 18),
@@ -77,14 +77,20 @@ class _ImportPreviewBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Import $count Transaction${count == 1 ? '' : 's'}',
+                      count == 1
+                          ? 'transactions.import.headerSingular'.tr()
+                          : 'transactions.import.headerPlural'
+                              .tr(namedArgs: {'count': count.toString()}),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                     ),
                     if (skipped > 0)
                       Text(
-                        '$skipped row${skipped == 1 ? '' : 's'} will be skipped',
+                        skipped == 1
+                            ? 'transactions.import.skippedSingular'.tr()
+                            : 'transactions.import.skippedPlural'
+                                .tr(namedArgs: {'count': skipped.toString()}),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.systemOrange,
                             ),
@@ -228,7 +234,8 @@ class _ImportPreviewBottomSheetState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.success,
+        duration: const Duration(seconds: 3),
       ),
     );
   }

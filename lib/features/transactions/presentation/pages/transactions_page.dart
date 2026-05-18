@@ -183,12 +183,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           child: Text(
                             _selectedIds.length ==
                                     state.filteredTransactions.length
-                                ? 'Deselect All'
-                                : 'Select All',
+                                ? 'transactions.deselectAll'.tr()
+                                : 'transactions.selectAll'.tr(),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.only(right: AppSizes.sm),
                           child: IconButton(
                             icon: Icon(
                               _selectedIds.isNotEmpty
@@ -236,37 +236,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ],
         ),
         floatingActionButtonAnimator: const InstantFabAnimator(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: state.transactions.isNotEmpty &&
                 state.filteredTransactions.isNotEmpty &&
                 !_isSelecting
-            ? Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: AppSizes.buttonHeightMd,
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.go('/transactions/add'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandTeal,
-                      foregroundColor: Colors.white,
-                      elevation: 4,
-                      shadowColor: AppColors.brandTeal.withValues(alpha: 0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusFull),
-                      ),
-                    ),
-                    icon: const Icon(CupertinoIcons.add, size: 20),
-                    label: Text(
-                      'addTransaction.newTitle'.tr(),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 16),
-                    ),
-                  ),
-                ),
+            ? FloatingActionButton(
+                onPressed: () => context.go('/transactions/add'),
+                backgroundColor: AppColors.brandTeal,
+                foregroundColor: Colors.white,
+                elevation: 4,
+                child: const Icon(CupertinoIcons.add, size: 24),
               )
-            : const SizedBox.shrink(),
+            : null,
         body: Column(
           children: [
             if (!_isSelecting) _buildSearchBar(context, notifier),
@@ -352,23 +332,27 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                 AppSizes.md,
                                 0,
                               ),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    'All',
-                                    'Today',
-                                    'Week',
-                                    'Month',
-                                    'Year'
-                                  ]
-                                      .map((period) => _buildPeriodChip(
-                                          context,
-                                          period,
-                                          state.selectedPeriod,
-                                          notifier))
-                                      .toList(),
-                                ),
+                              child: Row(
+                                children: [
+                                  'All',
+                                  'Today',
+                                  'Week',
+                                  'Month',
+                                  'Year',
+                                ]
+                                    .expand((period) => [
+                                          Expanded(
+                                            child: _buildPeriodChip(
+                                              context,
+                                              period,
+                                              state.selectedPeriod,
+                                              notifier,
+                                            ),
+                                          ),
+                                          if (period != 'Year')
+                                            const SizedBox(width: AppSizes.xs),
+                                        ])
+                                    .toList(),
                               ),
                             ),
 
@@ -615,32 +599,30 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     TransactionListNotifier notifier,
   ) {
     final isSelected = period == selectedPeriod;
-    return Padding(
-      padding: const EdgeInsets.only(right: AppSizes.sm),
-      child: GestureDetector(
-        onTap: () => notifier.setPeriod(period),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-          decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () => notifier.setPeriod(period),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.brandTeal
+              : AppColors.brandTeal.withValues(alpha: 0.0),
+          borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+          border: Border.all(
             color: isSelected
                 ? AppColors.brandTeal
-                : AppColors.brandTeal.withValues(alpha: 0.0),
-            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.brandTeal
-                  : AppColors.textSecondary.withValues(alpha: 0.3),
-              width: 1,
-            ),
+                : AppColors.textSecondary.withValues(alpha: 0.3),
+            width: 1,
           ),
-          child: Text(
-            'transactions.period$period'.tr(),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
-            ),
+        ),
+        child: Text(
+          'transactions.period$period'.tr(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
           ),
         ),
       ),
@@ -660,9 +642,34 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final fmt = ref.watch(currencyFormat2Provider);
     final convFactor = ref.watch(conversionFactorProvider);
 
-    // Compute income/expense ignoring the type-chip filter so the summary
-    // always shows the full period picture (only date range + hide-future applied).
-    var periodTxns = List<TransactionEntity>.from(state.transactions);
+    // Use all historical transactions for accurate summary when period is specified
+    final useAllTransactions = state.selectedPeriod != 'All' || state.selectedFilter == 'All';
+    final allHistoricalTxns = useAllTransactions ? ref.watch(allHistoricalTransactionsProvider) : null;
+
+    if (allHistoricalTxns is AsyncValue<List<TransactionEntity>>) {
+      return allHistoricalTxns.when(
+        data: (allTxns) => _buildSummaryRowContent(
+          context, state, ref, allTxns, fmt, convFactor),
+        loading: () => _buildSummaryRowSkeleton(context),
+        error: (err, stack) => _buildSummaryRowContent(
+          context, state, ref, state.transactions, fmt, convFactor),
+      );
+    }
+
+    return _buildSummaryRowContent(
+      context, state, ref, state.transactions, fmt, convFactor);
+  }
+
+  Widget _buildSummaryRowContent(
+      BuildContext context,
+      TransactionListState state,
+      WidgetRef ref,
+      List<TransactionEntity> txnsSource,
+      dynamic fmt,
+      double convFactor) {
+    // Apply filtering based on state
+    var periodTxns = List<TransactionEntity>.from(txnsSource);
+
     if (state.hideFutureTransactions) {
       final now = DateTime.now();
       final todayDate = DateTime(now.year, now.month, now.day);
@@ -702,6 +709,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       }).toList();
     }
 
+    // Apply type filter (Income/Expense) to make summary accurate to filtered view
+    if (state.selectedFilter != 'All') {
+      periodTxns = periodTxns.where((t) {
+        if (state.selectedFilter == 'Income')
+          return t.type == TransactionType.income;
+        if (state.selectedFilter == 'Expense')
+          return t.type == TransactionType.expense;
+        return true;
+      }).toList();
+    }
+
     final income = _totalIncome(periodTxns);
     final expense = _totalExpense(periodTxns);
     final remaining = income - expense;
@@ -728,30 +746,37 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         child: IntrinsicHeight(
           child: Row(
             children: [
-              _buildSummaryCell(
-                context: context,
-                icon: CupertinoIcons.arrow_up,
-                color: AppColors.systemGreen,
-                label: 'transactions.filterIncome'.tr(),
-                amount: fmt.format(income * convFactor),
-                horizontal: isFiltered,
-              ),
-              VerticalDivider(
-                width: 1,
-                thickness: 0.5,
-                indent: 10,
-                endIndent: 10,
-                color: Theme.of(context).dividerColor,
-              ),
-              _buildSummaryCell(
-                context: context,
-                icon: CupertinoIcons.arrow_down,
-                color: AppColors.systemRed,
-                label: 'transactions.filterExpense'.tr(),
-                amount: fmt.format(expense * convFactor),
-                horizontal: isFiltered,
-              ),
-              if (!isFiltered) ...[
+              if (state.selectedFilter == 'Income')
+                Expanded(
+                  child: _buildSummaryCell(
+                    context: context,
+                    icon: CupertinoIcons.arrow_up,
+                    color: AppColors.systemGreen,
+                    label: 'transactions.filterIncome'.tr(),
+                    amount: fmt.format(income * convFactor),
+                    horizontal: isFiltered,
+                  ),
+                )
+              else if (state.selectedFilter == 'Expense')
+                Expanded(
+                  child: _buildSummaryCell(
+                    context: context,
+                    icon: CupertinoIcons.arrow_down,
+                    color: AppColors.systemRed,
+                    label: 'transactions.filterExpense'.tr(),
+                    amount: fmt.format(expense * convFactor),
+                    horizontal: isFiltered,
+                  ),
+                )
+              else ...[
+                _buildSummaryCell(
+                  context: context,
+                  icon: CupertinoIcons.arrow_up,
+                  color: AppColors.systemGreen,
+                  label: 'transactions.filterIncome'.tr(),
+                  amount: fmt.format(income * convFactor),
+                  horizontal: isFiltered,
+                ),
                 VerticalDivider(
                   width: 1,
                   thickness: 0.5,
@@ -761,11 +786,28 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
                 _buildSummaryCell(
                   context: context,
-                  icon: Icons.account_balance_wallet_outlined,
-                  color: remainingColor,
-                  label: 'Remaining',
-                  amount: fmt.format(remaining.abs() * convFactor),
+                  icon: CupertinoIcons.arrow_down,
+                  color: AppColors.systemRed,
+                  label: 'transactions.filterExpense'.tr(),
+                  amount: fmt.format(expense * convFactor),
+                  horizontal: isFiltered,
                 ),
+                if (!isFiltered) ...[
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 0.5,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  _buildSummaryCell(
+                    context: context,
+                    icon: Icons.account_balance_wallet_outlined,
+                    color: remainingColor,
+                    label: 'Remaining',
+                    amount: '${remaining >= 0 ? '+' : '-'}${fmt.format(remaining.abs() * convFactor)}',
+                  ),
+                ],
               ],
             ],
           ),
@@ -839,6 +881,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ],
               ),
       ),
+    );
+  }
+
+  Widget _buildSummaryRowSkeleton(BuildContext context) {
+    return Padding(
+      padding:
+          const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
+      child: SkeletonCard(height: 80),
     );
   }
 
@@ -979,7 +1029,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           top: AppSizes.md,
           bottom: 96, // clears the FAB + its margin
         ),
-        itemCount: groups.length + 1 + (state.isLoadingMore ? 1 : 0), // +1 banner, +1 when loading more
+        itemCount: groups.length +
+            1 +
+            (state.isLoadingMore ? 1 : 0), // +1 banner, +1 when loading more
         itemBuilder: (context, groupIndex) {
           if (groupIndex == groups.length) {
             return const Padding(
@@ -998,6 +1050,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           final cardBg = isDark
               ? AppColors.secondarySystemBackgroundDark
               : AppColors.systemBackground;
+
+          final groupFmt = ref.watch(currencyFormat2Provider);
+          final groupConv = ref.watch(conversionFactorProvider);
+
+          // Daily net for this date group (income − expense for that day only)
+          final groupIncome = txList
+              .where((t) => t.type == TransactionType.income)
+              .fold(0.0, (s, t) => s + t.amount);
+          final groupExpense = txList
+              .where((t) => t.type == TransactionType.expense)
+              .fold(0.0, (s, t) => s + t.amount);
+          final groupBalance = groupIncome - groupExpense;
+
+          final groupBalanceColor =
+              groupBalance >= 0 ? AppColors.systemGreen : AppColors.systemRed;
+          final groupBalanceText =
+              '${groupBalance >= 0 ? '+' : '-'}${groupFmt.format(groupBalance.abs() * groupConv)}';
 
           final groupCard = TweenAnimationBuilder<double>(
             key: ValueKey(entry.key),
@@ -1018,14 +1087,37 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   padding: const EdgeInsets.only(
                     top: AppSizes.sm,
                     bottom: AppSizes.xs,
+                    right: AppSizes.md,
                   ),
-                  child: Text(
-                    entry.key,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppColors.systemGray,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.key.toUpperCase(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                color: AppColors.systemGray,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                letterSpacing: 0.5,
+                              ),
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
+                      Text(
+                        groupBalanceText,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium
+                            ?.copyWith(
+                              color: groupBalanceColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(
@@ -1214,25 +1306,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         ),
                   ),
                   const SizedBox(height: 2),
-                  if (ref.watch(usdEquivalentProvider(
-                          transaction.amount.abs())) !=
+                  if (ref.watch(
+                          usdEquivalentProvider(transaction.amount.abs())) !=
                       null)
                     Text(
-                      ref.watch(usdEquivalentProvider(
-                          transaction.amount.abs()))!,
-                      style:
-                          Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                      ref.watch(
+                          usdEquivalentProvider(transaction.amount.abs()))!,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                     )
                   else
                     Text(
                       DateFormat(AppDateFormats.timeOnly)
                           .format(transaction.createdAt.toLocal()),
-                      style:
-                          Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                     ),
                   if (isProjected) ...[
                     const SizedBox(height: 3),
@@ -1245,13 +1335,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       ),
                       child: Text(
                         'Projected',
-                        style:
-                            Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.systemBlue,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.3,
-                                ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.systemBlue,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
                       ),
                     ),
                   ],
@@ -1504,7 +1593,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final csv = CsvExportService().export(transactions);
     final dir = await getTemporaryDirectory();
-    final stamp = DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
+    final stamp =
+        DateFormat(AppDateFormats.exportTimestamp).format(DateTime.now());
     final file = File('${dir.path}/finmate_transactions_$stamp.csv');
     await file.writeAsString(csv);
 
@@ -1547,12 +1637,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       if (!context.mounted) return;
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Text('Invalid File'),
           content: Text(e.message),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('OK'),
             ),
           ],
@@ -1624,7 +1714,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Filter Transactions',
+                          'transactions.filterTitle'.tr(),
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -1715,7 +1805,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             controller: _minAmountController,
                             decoration: InputDecoration(
                               labelText: 'transactions.minAmount'.tr(),
-                              prefixText: '${ref.watch(currencySymbolProvider)} ',
+                              prefixText:
+                                  '${ref.watch(currencySymbolProvider)} ',
                               border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.circular(AppSizes.radiusMd),
@@ -1735,7 +1826,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             controller: _maxAmountController,
                             decoration: InputDecoration(
                               labelText: 'transactions.maxAmount'.tr(),
-                              prefixText: '${ref.watch(currencySymbolProvider)} ',
+                              prefixText:
+                                  '${ref.watch(currencySymbolProvider)} ',
                               border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.circular(AppSizes.radiusMd),

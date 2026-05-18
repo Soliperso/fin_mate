@@ -29,7 +29,8 @@
     "maybeLater": "Peut-être plus tard",
     "required": "Requis",
     "invalid": "Invalide",
-    "daysAgo": "Il y a {count} jours"
+    "daysAgo": "Il y a {count} jours",
+    "ok": "OK"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -238,7 +239,16 @@
     "periodToday": "Aujourd'hui",
     "periodWeek": "Semaine",
     "periodMonth": "Mois",
-    "periodYear": "Année"
+    "periodYear": "Année",
+    "selectAll": "Tout Sélectionner",
+    "deselectAll": "Tout Désélectionner",
+    "filterTitle": "Filtrer les Transactions",
+    "import": {
+      "headerSingular": "Importer 1 Transaction",
+      "headerPlural": "Importer {count} Transactions",
+      "skippedSingular": "1 ligne sera ignorée",
+      "skippedPlural": "{count} lignes seront ignorées"
+    }
   },
   "addTransaction": {
     "editTitle": "Modifier la transaction",
@@ -339,7 +349,15 @@
     "deletedMessage": "Budget supprimé avec succès",
     "searchHint": "Rechercher des budgets...",
     "noSearchResults": "Aucun budget trouvé",
-    "noSearchResultsMessage": "Essayez un autre nom de catégorie"
+    "noSearchResultsMessage": "Essayez un autre nom de catégorie",
+    "leftToSpend": "restant à dépenser",
+    "daysRemaining": "jours restants",
+    "byCategory": "Par catégorie",
+    "customize": "Personnaliser",
+    "spentOf": "sur",
+    "remainingLeft": "restant",
+    "amountOver": "dépassé",
+    "exceeded": "Vous avez dépassé ce budget"
   },
   "budgetHero": {
     "totalBudgeted": "Total budgété",
@@ -392,6 +410,8 @@
     "compare": "Comparer",
     "avalanche": "Avalanche",
     "snowball": "Boule de neige",
+    "avalancheShort": "Taux le plus élevé",
+    "snowballShort": "Plus petit solde",
     "avalancheDesc": "Remboursez d'abord le taux d'intérêt le plus élevé — économisez le plus",
     "snowballDesc": "Remboursez d'abord le plus petit solde — gagnez en motivation",
     "focusOn": "Priorité : {name}",
@@ -417,7 +437,11 @@
     "percentPaid": "% remboursé",
     "neverPaysOff": "Jamais",
     "neverPaysOffInterest": "Croît indéfiniment",
-    "neverPaysOffWarning": "La mensualité minimale est inférieure aux intérêts mensuels — le solde augmente chaque mois. Augmentez vos paiements pour vous en sortir."
+    "neverPaysOffWarning": "La mensualité minimale est inférieure aux intérêts mensuels — le solde augmente chaque mois. Augmentez vos paiements pour vous en sortir.",
+    "active": "Actif",
+    "acrossAccounts": "sur {count} comptes",
+    "minMonth": "MIN/MOIS",
+    "interestMo": "INTÉRÊTS/MOIS"
   },
   "debtCard": {
     "dueToday": "Dû aujourd'hui",
@@ -880,7 +904,24 @@
     "addedOn": "Ajouté le"
   },
   "recurring": {
-    "searchHint": "Rechercher des transactions récurrentes..."
+    "searchHint": "Rechercher des transactions récurrentes...",
+    "title": "Transactions Récurrentes",
+    "filterAll": "Toutes",
+    "filterActive": "Actives",
+    "filterInactive": "Inactives",
+    "emptyTitle": "Aucune Transaction Récurrente",
+    "emptyMessage": "Créez des transactions récurrentes pour suivre vos factures et vos revenus",
+    "emptyFilterTitle": "Aucune Transaction {filter}",
+    "emptyFilterMessage": "Il n'y a pas de transactions {filter} récurrentes en ce moment",
+    "addButton": "Ajouter une Transaction Récurrente",
+    "deleteTitle": "Supprimer la Transaction Récurrente ?",
+    "deleteMessage": "Cette transaction récurrente sera supprimée définitivement.",
+    "paymentLogged": "{description} enregistré — prochaine échéance {date}",
+    "failedToLog": "Échec de l'enregistrement du paiement",
+    "failedToLoad": "Échec du Chargement",
+    "failedToLoadMessage": "Impossible de charger les transactions récurrentes. Vérifiez votre connexion et réessayez.",
+    "activate": "Activer",
+    "deactivate": "Désactiver"
   },
   "errors": {
     "generic": "Une erreur s'est produite. Veuillez réessayer.",

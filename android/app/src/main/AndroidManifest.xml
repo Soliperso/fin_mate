@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!-- Camera (required by image_picker for receipt scanner and profile photo) -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
     <!-- Notification permission (required on Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 

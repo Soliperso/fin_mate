@@ -258,21 +258,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 _FadeTransitionPage(child: const BudgetsPage()),
           ),
           GoRoute(
-            path: '/recurring-transactions',
-            name: 'recurring-transactions',
-            pageBuilder: (context, state) =>
-                const CupertinoPage(child: RecurringTransactionsPage()),
-            routes: [
-              GoRoute(
-                path: 'add',
-                name: 'add-recurring-transaction',
-                builder: (context, state) => AddRecurringTransactionPage(
-                  transaction: state.extra as RecurringTransactionEntity?,
-                ),
-              ),
-            ],
-          ),
-          GoRoute(
             path: '/transactions',
             name: 'transactions',
             pageBuilder: (context, state) => _FadeTransitionPage(
@@ -330,28 +315,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           //   name: 'insights',
           //   pageBuilder: (context, state) => _FadeTransitionPage(child: const AiInsightsPage()),
           // ),
-          GoRoute(
-            path: '/notifications',
-            name: 'notifications',
-            pageBuilder: (context, state) =>
-                const CupertinoPage(child: NotificationsPage()),
-          ),
-          GoRoute(
-            path: '/goals',
-            name: 'goals',
-            pageBuilder: (context, state) =>
-                const CupertinoPage(child: SavingsGoalsPage()),
-            routes: [
-              GoRoute(
-                path: ':goalId',
-                name: 'goal-detail',
-                builder: (context, state) {
-                  final goalId = state.pathParameters['goalId']!;
-                  return GoalDetailPage(goalId: goalId);
-                },
-              ),
-            ],
-          ),
           // [MVP: Pricing - Commented out for initial launch]
           // GoRoute(
           //   path: '/pricing',
@@ -399,30 +362,70 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+        ],
+      ),
+
+      // Full-screen routes (no bottom nav bar) — must live outside ShellRoute
+      // in go_router v14+ where parentNavigatorKey inside ShellRoute is disallowed.
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: NotificationsPage()),
+      ),
+      GoRoute(
+        path: '/goals',
+        name: 'goals',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SavingsGoalsPage()),
+        routes: [
           GoRoute(
-            path: '/settings',
-            name: 'settings',
-            pageBuilder: (context, state) =>
-                const CupertinoPage(child: SettingsPage()),
-            routes: [
-              GoRoute(
-                path: 'notifications',
-                name: 'notification-settings',
-                builder: (context, state) => const NotificationSettingsPage(),
-              ),
-              GoRoute(
-                path: 'display',
-                name: 'display-settings',
-                builder: (context, state) => DisplaySettingsPage(
-                  section: state.uri.queryParameters['section'],
-                ),
-              ),
-              GoRoute(
-                path: 'data-privacy',
-                name: 'data-privacy',
-                builder: (context, state) => const DataPrivacyPage(),
-              ),
-            ],
+            path: ':goalId',
+            name: 'goal-detail',
+            builder: (context, state) {
+              final goalId = state.pathParameters['goalId']!;
+              return GoalDetailPage(goalId: goalId);
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/recurring-transactions',
+        name: 'recurring-transactions',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: RecurringTransactionsPage()),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'add-recurring-transaction',
+            builder: (context, state) => AddRecurringTransactionPage(
+              transaction: state.extra as RecurringTransactionEntity?,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingsPage()),
+        routes: [
+          GoRoute(
+            path: 'notifications',
+            name: 'notification-settings',
+            builder: (context, state) => const NotificationSettingsPage(),
+          ),
+          GoRoute(
+            path: 'display',
+            name: 'display-settings',
+            builder: (context, state) => DisplaySettingsPage(
+              section: state.uri.queryParameters['section'],
+            ),
+          ),
+          GoRoute(
+            path: 'data-privacy',
+            name: 'data-privacy',
+            builder: (context, state) => const DataPrivacyPage(),
           ),
         ],
       ),

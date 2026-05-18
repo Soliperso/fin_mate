@@ -296,7 +296,9 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text('${user.displayName}\'s account disabled')),
+                content: Text('${user.displayName}\'s account disabled'),
+                backgroundColor: AppColors.success,
+              ),
             );
           }
         } catch (e) {
@@ -333,7 +335,10 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
           await ref.read(adminRepositoryProvider).resetUserPassword(user.email);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Password reset email sent')),
+              const SnackBar(
+                content: Text('Password reset email sent'),
+                backgroundColor: AppColors.success,
+              ),
             );
           }
         } catch (e) {

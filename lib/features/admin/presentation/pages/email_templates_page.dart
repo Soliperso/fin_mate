@@ -575,7 +575,10 @@ class _EditorSheetState extends State<_EditorSheet> {
                         text: widget.bodyCtrl.text));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Body copied to clipboard')),
+                        content: Text('Body copied to clipboard'),
+                        backgroundColor: AppColors.success,
+                        duration: Duration(seconds: 2),
+                      ),
                     );
                   },
                   icon: const Icon(CupertinoIcons.doc_on_doc, size: 14),

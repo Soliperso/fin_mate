@@ -339,7 +339,10 @@ class SystemSettingsPage extends ConsumerWidget {
       await ref.read(adminRemoteDataSourceProvider).cleanOldData();
       messenger.showSnackBar(
         const SnackBar(
-            content: Text('Old analytics data removed successfully.')),
+          content: Text('Old analytics data removed successfully.'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
+        ),
       );
     } catch (e) {
       messenger.showSnackBar(
@@ -659,7 +662,11 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
       await widget.datasource.broadcastNotification(title, body);
       navigator.pop();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Notification sent to all users.')),
+        const SnackBar(
+          content: Text('Notification sent to all users.'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
+        ),
       );
     } catch (e) {
       if (mounted) {

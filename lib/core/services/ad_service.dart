@@ -55,8 +55,6 @@ class AdService {
   static const _testInterstitialAndroid =
       'ca-app-pub-3940256099942544/1033173712';
   static const _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
-  static const _testNativeAndroid = 'ca-app-pub-3940256099942544/2247696110';
-  static const _testNativeIos = 'ca-app-pub-3940256099942544/3986624511';
 
   /// Get the appropriate banner ad unit ID for the current platform.
   /// Uses the value from .env / --dart-define when set; falls back to Google's
@@ -121,6 +119,7 @@ class AdService {
       await banner.load();
       return await completer.future;
     } catch (e) {
+      banner.dispose();
       if (!completer.isCompleted) completer.complete(null);
       return null;
     }
@@ -165,19 +164,6 @@ class AdService {
       if (!completer.isCompleted) completer.complete(null);
       return null;
     }
-  }
-
-  /// Get the appropriate native ad unit ID for the current platform.
-  String get nativeAdUnitId {
-    if (Platform.isAndroid) {
-      final id = EnvConfig.admobNativeAndroid;
-      return id.isNotEmpty ? id : _testNativeAndroid;
-    }
-    if (Platform.isIOS) {
-      final id = EnvConfig.admobNativeIos;
-      return id.isNotEmpty ? id : _testNativeIos;
-    }
-    throw UnsupportedError('Unsupported platform');
   }
 
   InterstitialAd? _preloadedInterstitial;

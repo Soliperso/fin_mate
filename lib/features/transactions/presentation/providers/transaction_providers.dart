@@ -43,6 +43,13 @@ final recentTransactionsProvider =
   return await repository.getRecentTransactions(limit: 10);
 });
 
+// All Historical Transactions Provider (for summary calculations)
+final allHistoricalTransactionsProvider =
+    FutureProvider<List<TransactionEntity>>((ref) async {
+  final repository = ref.watch(transactionRepositoryProvider);
+  return await repository.getTransactions(limit: 10000);
+});
+
 // Accounts Provider
 final accountsProvider = FutureProvider<List<AccountEntity>>((ref) async {
   final repository = ref.watch(transactionRepositoryProvider);
@@ -253,7 +260,9 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       );
       _currentOffset += more.length;
       state = state.copyWith(
-        transactions: [...state.transactions, ...more],
+        transactions: {
+          for (final t in [...state.transactions, ...more]) t.id: t,
+        }.values.toList(),
         isLoadingMore: false,
         hasMore: more.length == _pageSize,
       );
