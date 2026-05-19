@@ -121,12 +121,12 @@ class DebtHeroCard extends ConsumerWidget {
             children: [
               HeroStatBadge(
                 label: 'Min / Month',
-                value: currencyFormat0.format(totalMinMonthly),
+                value: currencyFormat2.format(totalMinMonthly),
               ),
               const SizedBox(width: AppSizes.sm),
               HeroStatBadge(
                 label: 'Interest / Mo',
-                value: currencyFormat0.format(totalMonthlyInterest),
+                value: currencyFormat2.format(totalMonthlyInterest),
               ),
             ],
           ),

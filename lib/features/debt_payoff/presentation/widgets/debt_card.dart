@@ -214,15 +214,19 @@ class DebtCard extends ConsumerWidget {
                                             size: 10,
                                           ),
                                           const SizedBox(width: 3),
-                                          Text(
-                                            'debtCard.nextUp'.tr(namedArgs: {
-                                              'reason': focusReason
-                                            }),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.4,
+                                          Flexible(
+                                            child: Text(
+                                              'debtCard.nextUp'.tr(namedArgs: {
+                                                'reason': focusReason
+                                              }),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.4,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],

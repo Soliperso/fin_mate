@@ -460,7 +460,7 @@
     "paymentHistory": "سجل الدفعات",
     "deleteDebt": "حذف الدين",
     "minPayment": "الحد الأدنى: {amount}/شهر",
-    "monthsLeft": "~{months} أشهر (الحد الأدنى فقط)",
+    "monthsLeft": "~{months} أشهر",
     "deleteTitle": "حذف الدين",
     "deleteMessage": "إزالة \"{name}\" من متتبع الديون؟ لا يمكن التراجع عن هذا الإجراء.",
     "cancel": "إلغاء",
@@ -543,7 +543,11 @@
     "saveInInterest": "وفّر {amount} في الفوائد",
     "capWarning": "بالدفعات الأدنى، يستغرق سداد هذا الدين أكثر من 50 عامًا.",
     "withExtraPayoff": "بهذه الدفعة الإضافية: يُسدَّد خلال {months} شهرًا",
-    "withExtraInterest": "إجمالي الفوائد: {amount}"
+    "withExtraInterest": "إجمالي الفوائد: {amount}",
+    "currentPlan": "الخطة الحالية",
+    "withExtraLabel": "مع إضافي",
+    "moneySooner": "{months} أشهر مبكرًا",
+    "interestSaved": "وُفِّر {amount}"
   },
   "monthlyFunding": {
     "title": "الأموال الشهرية المطلوبة",

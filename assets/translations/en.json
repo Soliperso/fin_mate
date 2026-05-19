@@ -460,7 +460,7 @@
     "paymentHistory": "Payment History",
     "deleteDebt": "Delete Debt",
     "minPayment": "Min: {amount}/mo",
-    "monthsLeft": "~{months} mo (min. only)",
+    "monthsLeft": "~{months} mo",
     "deleteTitle": "Delete Debt",
     "deleteMessage": "Remove \"{name}\" from your debt tracker? This cannot be undone.",
     "cancel": "Cancel",
@@ -543,7 +543,11 @@
     "saveInInterest": "Save {amount} in interest",
     "capWarning": "At minimum payments, this debt takes 50+ years to clear.",
     "withExtraPayoff": "With this extra payment: paid off in {months} months",
-    "withExtraInterest": "Total interest: {amount}"
+    "withExtraInterest": "Total interest: {amount}",
+    "currentPlan": "Current plan",
+    "withExtraLabel": "With extra",
+    "moneySooner": "{months} mo sooner",
+    "interestSaved": "{amount} saved"
   },
   "monthlyFunding": {
     "title": "Monthly Funds Required",

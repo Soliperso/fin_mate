@@ -455,7 +455,7 @@
     "paymentHistory": "Historique des paiements",
     "deleteDebt": "Supprimer la dette",
     "minPayment": "Min : {amount}/mois",
-    "monthsLeft": "~{months} mois (minimum seulement)",
+    "monthsLeft": "~{months} mois",
     "deleteTitle": "Supprimer la dette",
     "deleteMessage": "Supprimer \"{name}\" de votre suivi de dettes ? Cette action est irréversible.",
     "cancel": "Annuler",
@@ -538,7 +538,11 @@
     "saveInInterest": "Économisez {amount} en intérêts",
     "capWarning": "Avec les paiements minimaux, cette dette prend plus de 50 ans à solder.",
     "withExtraPayoff": "Avec ce paiement supplémentaire : soldé en {months} mois",
-    "withExtraInterest": "Intérêts totaux : {amount}"
+    "withExtraInterest": "Intérêts totaux : {amount}",
+    "currentPlan": "Plan actuel",
+    "withExtraLabel": "Avec extra",
+    "moneySooner": "{months} mois plus tôt",
+    "interestSaved": "{amount} économisé"
   },
   "monthlyFunding": {
     "title": "Fonds mensuels requis",

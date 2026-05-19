@@ -18,30 +18,56 @@ class ExtraPaymentCard extends ConsumerStatefulWidget {
 }
 
 class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
-  late TextEditingController _controller;
-  late FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    final initial = ref.read(extraPaymentProvider);
-    _controller = TextEditingController(
-      text: initial > 0 ? initial.toInt().toString() : '',
+  void _showEditDialog(BuildContext context, double currentValue) {
+    final controller = TextEditingController(
+      text: currentValue > 0 ? currentValue.toInt().toString() : '',
     );
-    _focusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _onTextChanged(String value) {
-    final parsed = double.tryParse(value) ?? 0;
-    final clamped = parsed.clamp(0, 2000).toDouble();
-    ref.read(extraPaymentProvider.notifier).setValue(clamped);
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        ),
+        title: Text('extraPayment.title'.tr()),
+        titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          textAlign: TextAlign.center,
+          decoration: InputDecoration(
+            prefixText: '\$ ',
+            suffixText: '/mo',
+            hintText: '0',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              borderSide: const BorderSide(color: AppColors.success),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              final parsed =
+                  (double.tryParse(controller.text) ?? 0).clamp(0, 2000).toDouble();
+              ref.read(extraPaymentProvider.notifier).setValue(parsed);
+              Navigator.pop(dialogContext);
+            },
+            child: Text('common.confirm'.tr()),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -50,14 +76,6 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
     final baseResult = ref.watch(payoffResultProvider);
     final simResult = ref.watch(simulatedPayoffProvider);
     final currencyFormat = ref.watch(currencyFormat0Provider);
-
-    // Sync slider → text field when not actively typing
-    ref.listen<double>(extraPaymentProvider, (_, next) {
-      if (!_focusNode.hasFocus) {
-        final newText = next > 0 ? next.toInt().toString() : '';
-        if (_controller.text != newText) _controller.text = newText;
-      }
-    });
 
     int? monthsSaved;
     double? interestSaved;
@@ -79,7 +97,7 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // ── Header ───────────────────────────────────────────────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -125,69 +143,65 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
             ),
             const SizedBox(height: AppSizes.md),
 
-            // Value label — above the slider
+            // ── Tappable value badge ──────────────────────────────────────────
             Center(
-              child: Text(
-                extra == 0
-                    ? 'extraPayment.moveSlider'.tr()
-                    : 'extraPayment.extraPerMonth'.tr(
-                        namedArgs: {'amount': currencyFormat.format(extra)}),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: extra == 0
-                          ? AppColors.textSecondary
-                          : AppColors.success,
-                      fontWeight: FontWeight.w600,
+              child: GestureDetector(
+                onTap: () => _showEditDialog(context, extra),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: extra > 0
+                        ? AppColors.success.withValues(alpha: 0.10)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius:
+                        BorderRadius.circular(AppSizes.radiusFull),
+                    border: Border.all(
+                      color: extra > 0
+                          ? AppColors.success.withValues(alpha: 0.35)
+                          : Theme.of(context).dividerColor,
                     ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        extra > 0
+                            ? '+${currencyFormat.format(extra)}/mo'
+                            : 'extraPayment.moveSlider'.tr(),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              color: extra > 0
+                                  ? AppColors.success
+                                  : AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        CupertinoIcons.pencil,
+                        size: 13,
+                        color: extra > 0
+                            ? AppColors.success
+                            : AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.sm),
 
-            // Manual text input
-            TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: InputDecoration(
-                prefixText: '\$ ',
-                suffixText: '/mo',
-                hintText: '0',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.sm,
-                  vertical: AppSizes.xs + 2,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  borderSide: BorderSide(
-                    color: AppColors.success.withValues(alpha: 0.4),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  borderSide: const BorderSide(color: AppColors.success),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  borderSide: BorderSide(
-                    color: AppColors.success.withValues(alpha: 0.3),
-                  ),
-                ),
-              ),
-              onChanged: _onTextChanged,
-              onSubmitted: (_) => _focusNode.unfocus(),
-            ),
-            const SizedBox(height: AppSizes.sm),
-
-            // Slider
+            // ── Slider ───────────────────────────────────────────────────────
             Row(
               children: [
                 Text(
                   '\$0',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
                 Expanded(
@@ -198,32 +212,38 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                           AppColors.success.withValues(alpha: 0.2),
                       thumbColor: AppColors.success,
                       overlayColor: AppColors.success.withValues(alpha: 0.12),
-                      trackHeight: 4,
+                      trackHeight: 6,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 12,
+                      ),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 22,
+                      ),
                     ),
                     child: Slider(
                       value: extra,
                       min: 0,
                       max: 2000,
                       divisions: 80,
-                      onChanged: (v) =>
-                          ref.read(extraPaymentProvider.notifier).setValue(v),
+                      onChanged: (v) {
+                        HapticFeedback.selectionClick();
+                        ref.read(extraPaymentProvider.notifier).setValue(v);
+                      },
                     ),
                   ),
                 ),
                 Text(
                   '\$2K',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ],
             ),
 
-            // Impact summary
-            if (monthsSaved != null &&
-                interestSaved != null &&
-                extra > 0 &&
-                simResult != null) ...[
+            // ── Impact panel ─────────────────────────────────────────────────
+            if (extra > 0 && baseResult != null && simResult != null) ...[
               const SizedBox(height: AppSizes.md),
               if (baseHitCap) ...[
                 Container(
@@ -236,72 +256,33 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                       width: 0.5,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      _ImpactRow(
-                        icon: CupertinoIcons.exclamationmark_triangle,
-                        iconColor: AppColors.warning,
-                        textColor: AppColors.warning,
-                        text: 'extraPayment.capWarning'.tr(),
+                      Icon(CupertinoIcons.exclamationmark_triangle,
+                          size: 14, color: AppColors.warning),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'extraPayment.capWarning'.tr(),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.warning,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: AppSizes.sm),
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Column(
-                    children: [
-                      _ImpactRow(
-                        icon: CupertinoIcons.calendar,
-                        text: 'extraPayment.withExtraPayoff'.tr(
-                            namedArgs: {'months': '${simResult.totalMonths}'}),
-                      ),
-                      const SizedBox(height: 4),
-                      _ImpactRow(
-                        icon: CupertinoIcons.money_dollar,
-                        text: 'extraPayment.withExtraInterest'.tr(namedArgs: {
-                          'amount':
-                              currencyFormat.format(simResult.totalInterestPaid)
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ] else ...[
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: Column(
-                    children: [
-                      _ImpactRow(
-                        icon: CupertinoIcons.calendar,
-                        text: monthsSaved > 0
-                            ? 'extraPayment.payOffSooner'
-                                .tr(namedArgs: {'months': '$monthsSaved'})
-                            : 'extraPayment.sameTimeline'.tr(),
-                      ),
-                      if (interestSaved > 0) ...[
-                        const SizedBox(height: 4),
-                        _ImpactRow(
-                          icon: CupertinoIcons.money_dollar,
-                          text: 'extraPayment.saveInInterest'.tr(namedArgs: {
-                            'amount': currencyFormat.format(interestSaved)
-                          }),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
               ],
+              _ComparisonPanel(
+                baseResult: baseResult,
+                simResult: simResult,
+                monthsSaved: monthsSaved,
+                interestSaved: interestSaved,
+                currencyFormat: currencyFormat,
+              ),
             ],
           ],
         ),
@@ -310,33 +291,173 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
   }
 }
 
-class _ImpactRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color? iconColor;
-  final Color? textColor;
+// ── Comparison panel ─────────────────────────────────────────────────────────
 
-  const _ImpactRow({
-    required this.icon,
-    required this.text,
-    this.iconColor,
-    this.textColor,
+class _ComparisonPanel extends StatelessWidget {
+  final dynamic baseResult;
+  final dynamic simResult;
+  final int? monthsSaved;
+  final double? interestSaved;
+  final NumberFormat currencyFormat;
+
+  const _ComparisonPanel({
+    required this.baseResult,
+    required this.simResult,
+    required this.monthsSaved,
+    required this.interestSaved,
+    required this.currencyFormat,
   });
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = iconColor ?? AppColors.success;
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: effectiveColor),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: textColor ?? AppColors.success,
-                  fontWeight: FontWeight.w600,
+    final monthFmt = DateFormat('MMM yyyy');
+    final baseDate = monthFmt.format(baseResult.debtFreeDate);
+    final simDate = monthFmt.format(simResult.debtFreeDate);
+    final baseInterest = currencyFormat.format(baseResult.totalInterestPaid);
+    final simInterest = currencyFormat.format(simResult.totalInterestPaid);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.sm + 2),
+      decoration: BoxDecoration(
+        color: AppColors.success.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+        border: Border.all(
+          color: AppColors.success.withValues(alpha: 0.18),
+          width: 0.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Column headers
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'extraPayment.currentPlan'.tr(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
                 ),
+              ),
+              Expanded(
+                child: Text(
+                  'extraPayment.withExtraLabel'.tr(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.xs),
+          Divider(
+            height: 1,
+            color: AppColors.success.withValues(alpha: 0.15),
+          ),
+          const SizedBox(height: AppSizes.xs + 2),
+
+          // Debt-free date row
+          _ComparisonRow(
+            icon: CupertinoIcons.calendar,
+            baseValue: baseDate,
+            simValue: simDate,
+            savingsLabel: monthsSaved != null && monthsSaved! > 0
+                ? 'extraPayment.moneySooner'
+                    .tr(namedArgs: {'months': '$monthsSaved'})
+                : null,
+            context: context,
+          ),
+          const SizedBox(height: AppSizes.xs + 2),
+
+          // Interest row
+          _ComparisonRow(
+            icon: CupertinoIcons.money_dollar_circle,
+            baseValue: baseInterest,
+            simValue: simInterest,
+            savingsLabel: interestSaved != null && interestSaved! > 0
+                ? 'extraPayment.interestSaved'
+                    .tr(namedArgs: {'amount': currencyFormat.format(interestSaved!)})
+                : null,
+            context: context,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ComparisonRow extends StatelessWidget {
+  final IconData icon;
+  final String baseValue;
+  final String simValue;
+  final String? savingsLabel;
+  final BuildContext context;
+
+  const _ComparisonRow({
+    required this.icon,
+    required this.baseValue,
+    required this.simValue,
+    required this.context,
+    this.savingsLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Base column
+        Expanded(
+          child: Row(
+            children: [
+              Icon(icon, size: 13, color: AppColors.textSecondary),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  baseValue,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Simulated column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 13, color: AppColors.success),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      simValue,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              if (savingsLabel != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  '↓ $savingsLabel',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ],
+            ],
           ),
         ),
       ],

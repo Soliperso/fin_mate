@@ -455,7 +455,7 @@
     "paymentHistory": "Historial de pagos",
     "deleteDebt": "Eliminar deuda",
     "minPayment": "Mín: {amount}/mes",
-    "monthsLeft": "~{months} meses (solo mínimo)",
+    "monthsLeft": "~{months} meses",
     "deleteTitle": "Eliminar deuda",
     "deleteMessage": "¿Eliminar \"{name}\" de tu rastreador de deudas? Esta acción no se puede deshacer.",
     "cancel": "Cancelar",
@@ -538,7 +538,11 @@
     "saveInInterest": "Ahorra {amount} en intereses",
     "capWarning": "Con pagos mínimos, esta deuda tarda más de 50 años en liquidarse.",
     "withExtraPayoff": "Con este pago extra: liquidado en {months} meses",
-    "withExtraInterest": "Interés total: {amount}"
+    "withExtraInterest": "Interés total: {amount}",
+    "currentPlan": "Plan actual",
+    "withExtraLabel": "Con extra",
+    "moneySooner": "{months} meses antes",
+    "interestSaved": "{amount} ahorrado"
   },
   "monthlyFunding": {
     "title": "Fondos mensuales requeridos",
