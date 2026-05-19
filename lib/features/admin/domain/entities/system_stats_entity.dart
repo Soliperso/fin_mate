@@ -11,7 +11,7 @@ class SystemStatsEntity extends Equatable {
   final double totalNetWorth;
   final int totalAccounts;
   final int totalBudgets;
-  final int totalBillGroups;
+  final int totalDebts;
   final int disabledUsers; // Users with is_active = false (admin-disabled)
 
   const SystemStatsEntity({
@@ -24,7 +24,7 @@ class SystemStatsEntity extends Equatable {
     required this.totalNetWorth,
     required this.totalAccounts,
     required this.totalBudgets,
-    required this.totalBillGroups,
+    required this.totalDebts,
     this.disabledUsers = 0,
   });
 
@@ -39,7 +39,7 @@ class SystemStatsEntity extends Equatable {
         totalNetWorth,
         totalAccounts,
         totalBudgets,
-        totalBillGroups,
+        totalDebts,
         disabledUsers,
       ];
 

@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/config/supabase_client.dart';
 import '../../data/datasources/admin_remote_datasource.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../domain/entities/admin_user_entity.dart';
@@ -33,18 +36,47 @@ final adminRepositoryProvider = Provider<AdminRepository>((ref) {
 });
 
 // ============================================================================
-// Users List Provider
+// Users List Provider (Real-time)
 // ============================================================================
 
 final usersListProvider =
-    FutureProvider.autoDispose.family<List<AdminUserEntity>, UsersFilter>(
-  (ref, filter) async {
+    StreamProvider.autoDispose.family<List<AdminUserEntity>, UsersFilter>(
+  (ref, filter) async* {
     final repository = ref.watch(adminRepositoryProvider);
-    return await repository.getAllUsers(
-      limit: filter.limit,
-      offset: filter.offset,
-      searchQuery: filter.searchQuery,
-    );
+    final changeController = StreamController<void>.broadcast();
+    late RealtimeChannel channel;
+
+    try {
+      // Initial fetch
+      yield await repository.getAllUsers(
+        limit: filter.limit,
+        offset: filter.offset,
+        searchQuery: filter.searchQuery,
+      );
+
+      // Set up real-time listener on user_profiles changes
+      channel = supabase
+          .channel('user_profiles:${filter.hashCode}')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'user_profiles',
+            callback: (_) => changeController.add(null),
+          )
+          .subscribe();
+
+      // Refetch when changes detected
+      yield* changeController.stream.asyncMap((_) async {
+        return await repository.getAllUsers(
+          limit: filter.limit,
+          offset: filter.offset,
+          searchQuery: filter.searchQuery,
+        );
+      });
+    } finally {
+      await changeController.close();
+      await supabase.removeChannel(channel);
+    }
   },
 );
 
@@ -85,13 +117,56 @@ class UsersFilter {
 }
 
 // ============================================================================
-// System Stats Provider
+// System Stats Provider (Real-time)
 // ============================================================================
 
 final systemStatsProvider =
-    FutureProvider.autoDispose<SystemStatsEntity>((ref) async {
+    StreamProvider.autoDispose<SystemStatsEntity>((ref) async* {
   final repository = ref.watch(adminRepositoryProvider);
-  return await repository.getSystemStats();
+  final changeController = StreamController<void>.broadcast();
+  late RealtimeChannel channel;
+
+  try {
+    // Initial fetch
+    yield await repository.getSystemStats();
+
+    // Set up real-time listener on all tables that contribute to system stats
+    channel = supabase
+        .channel('admin_system_stats')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'user_profiles',
+          callback: (_) => changeController.add(null),
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'transactions',
+          callback: (_) => changeController.add(null),
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'accounts',
+          callback: (_) => changeController.add(null),
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'budgets',
+          callback: (_) => changeController.add(null),
+        )
+        .subscribe();
+
+    // Refetch stats when changes detected
+    yield* changeController.stream.asyncMap((_) async {
+      return await repository.getSystemStats();
+    });
+  } finally {
+    await changeController.close();
+    await supabase.removeChannel(channel);
+  }
 });
 
 // ============================================================================

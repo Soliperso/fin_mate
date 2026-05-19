@@ -18,13 +18,19 @@ class AnalyticsOverviewTab extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return statsAsync.when(
-      data: (stats) => SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSizes.pagePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Users — 3-column compact tiles ───────────────────────────
+      data: (stats) => RefreshIndicator(
+        color: AppColors.brandTeal,
+        onRefresh: () async {
+          ref.invalidate(systemStatsProvider);
+          await Future.delayed(const Duration(milliseconds: 400));
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSizes.pagePadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            // ── Users — 4-column compact tiles ───────────────────────────
             _sectionLabel(context, 'Users', isDark),
             const SizedBox(height: AppSizes.sm),
             IntrinsicHeight(
@@ -63,6 +69,17 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                       iconColor: AppColors.tealBlue,
                       label: 'New This Month',
                       value: stats.newUsersThisMonth.toString(),
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Expanded(
+                    child: _miniTile(
+                      context,
+                      isDark: isDark,
+                      icon: CupertinoIcons.xmark_circle,
+                      iconColor: AppColors.error,
+                      label: 'Disabled',
+                      value: stats.disabledUsers.toString(),
                     ),
                   ),
                 ],
@@ -115,7 +132,7 @@ class AnalyticsOverviewTab extends ConsumerWidget {
             ),
             const SizedBox(height: AppSizes.lg),
 
-            // ── System Data — 3-column compact tiles ──────────────────────
+            // ── System Data — 4-column compact tiles ──────────────────────
             _sectionLabel(context, 'System Data', isDark),
             const SizedBox(height: AppSizes.sm),
             IntrinsicHeight(
@@ -160,6 +177,18 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                       showWatermark: false,
                     ),
                   ),
+                  const SizedBox(width: AppSizes.sm),
+                  Expanded(
+                    child: _miniTile(
+                      context,
+                      isDark: isDark,
+                      icon: CupertinoIcons.creditcard_fill,
+                      iconColor: AppColors.error,
+                      label: 'Debts',
+                      value: stats.totalDebts.toString(),
+                      showWatermark: false,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -188,7 +217,8 @@ class AnalyticsOverviewTab extends ConsumerWidget {
               onTap: () => context.push('/admin/settings'),
             ),
             const SizedBox(height: AppSizes.xl),
-          ],
+            ],
+          ),
         ),
       ),
       loading: () => _buildSkeleton(context),
@@ -557,6 +587,11 @@ class AnalyticsOverviewTab extends ConsumerWidget {
                 child: LoadingSkeleton(
                     height: 80,
                     borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
+            const SizedBox(width: AppSizes.sm),
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 80,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
           ]),
           const SizedBox(height: AppSizes.lg),
           LoadingSkeleton(
@@ -582,6 +617,11 @@ class AnalyticsOverviewTab extends ConsumerWidget {
               width: 80, height: 12, borderRadius: BorderRadius.circular(4)),
           const SizedBox(height: AppSizes.sm),
           Row(children: [
+            Expanded(
+                child: LoadingSkeleton(
+                    height: 80,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusCard))),
+            const SizedBox(width: AppSizes.sm),
             Expanded(
                 child: LoadingSkeleton(
                     height: 80,

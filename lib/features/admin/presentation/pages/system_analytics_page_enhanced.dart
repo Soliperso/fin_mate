@@ -9,6 +9,7 @@ import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
+import '../../data/constants/engagement_metrics_config.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/analytics_line_chart.dart';
 import '../widgets/analytics_bar_chart.dart';
@@ -312,7 +313,7 @@ class _SystemAnalyticsPageEnhancedState
                 child: RotationTransition(
                   turns: _refreshController,
                   child: Icon(
-                    CupertinoIcons.arrow_counterclockwise,
+                    CupertinoIcons.arrow_clockwise,
                     size: 18,
                     color: Theme.of(context).iconTheme.color,
                   ),
@@ -790,17 +791,8 @@ class _SystemAnalyticsPageEnhancedState
 
   /// Returns (icon, color) for an engagement metric based on its name.
   (IconData, Color) _engagementAccent(String metricName) {
-    final name = metricName.toLowerCase();
-    if (name.contains('rate') || name.contains('retention')) {
-      return (CupertinoIcons.arrow_up_right_circle, AppColors.systemGreen);
-    }
-    if (name.contains('session') || name.contains('duration')) {
-      return (CupertinoIcons.timer, AppColors.systemOrange);
-    }
-    if (name.contains('transaction')) {
-      return (CupertinoIcons.arrow_right_arrow_left, AppColors.brandTeal);
-    }
-    return (CupertinoIcons.chart_bar, AppColors.systemBlue);
+    final config = EngagementMetricsConfig.getByDisplayName(metricName);
+    return (config?.icon ?? CupertinoIcons.chart_bar, config?.color ?? AppColors.systemBlue);
   }
 
   // ── Features Tab ───────────────────────────────────────────────────────────

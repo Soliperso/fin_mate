@@ -12,7 +12,7 @@ class SystemStatsModel extends SystemStatsEntity {
     required super.totalNetWorth,
     required super.totalAccounts,
     required super.totalBudgets,
-    required super.totalBillGroups,
+    required super.totalDebts,
     super.disabledUsers,
   });
 
@@ -27,7 +27,7 @@ class SystemStatsModel extends SystemStatsEntity {
       totalNetWorth: ((json['total_net_worth'] as num?) ?? 0).toDouble(),
       totalAccounts: (json['total_accounts'] as int?) ?? 0,
       totalBudgets: (json['total_budgets'] as int?) ?? 0,
-      totalBillGroups: (json['total_bill_groups'] as int?) ?? 0,
+      totalDebts: (json['total_debts'] as int?) ?? 0,
       disabledUsers: (json['disabled_users'] as int?) ?? 0,
     );
   }
