@@ -9,7 +9,7 @@ import '../../../../core/providers/display_format_provider.dart';
 import '../../../../core/providers/feature_flag_provider.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
-import '../../../../shared/widgets/instant_fab_animator.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/empty_state_card.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
@@ -40,29 +40,19 @@ class DebtPage extends ConsumerStatefulWidget {
 }
 
 class _DebtPageState extends ConsumerState<DebtPage>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  bool _keyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeMetrics() {
-    final bottom = View.of(context).viewInsets.bottom;
-    final visible = bottom > 0;
-    if (visible != _keyboardVisible) setState(() => _keyboardVisible = visible);
   }
 
   List<DebtEntity> _sortedDebts(List<DebtEntity> debts) {
@@ -187,18 +177,16 @@ class _DebtPageState extends ConsumerState<DebtPage>
             Tab(text: 'debt.trackTab'.tr()),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSizes.sm),
+            child: CircularIconButton(
+              icon: CupertinoIcons.add,
+              onTap: _showAddDebt,
+            ),
+          ),
+        ],
       ),
-      floatingActionButtonAnimator: const InstantFabAnimator(),
-      floatingActionButton: debtsAsync.valueOrNull?.isNotEmpty == true &&
-              !_keyboardVisible
-          ? FloatingActionButton(
-              onPressed: _showAddDebt,
-              backgroundColor: AppColors.brandTeal,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              child: const Icon(CupertinoIcons.add, size: 24),
-            )
-          : null,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.translucent,

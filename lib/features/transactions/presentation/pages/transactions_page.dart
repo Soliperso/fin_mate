@@ -642,22 +642,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final fmt = ref.watch(currencyFormat2Provider);
     final convFactor = ref.watch(conversionFactorProvider);
 
-    // Use all historical transactions for accurate summary when period is specified
-    final useAllTransactions = state.selectedPeriod != 'All' || state.selectedFilter == 'All';
-    final allHistoricalTxns = useAllTransactions ? ref.watch(allHistoricalTransactionsProvider) : null;
+    final allHistoricalTxns = ref.watch(allHistoricalTransactionsProvider);
 
-    if (allHistoricalTxns is AsyncValue<List<TransactionEntity>>) {
-      return allHistoricalTxns.when(
-        data: (allTxns) => _buildSummaryRowContent(
+    return allHistoricalTxns.when(
+      data: (allTxns) => _buildSummaryRowContent(
           context, state, ref, allTxns, fmt, convFactor),
-        loading: () => _buildSummaryRowSkeleton(context),
-        error: (err, stack) => _buildSummaryRowContent(
+      loading: () => _buildSummaryRowSkeleton(context),
+      error: (_, __) => _buildSummaryRowContent(
           context, state, ref, state.transactions, fmt, convFactor),
-      );
-    }
-
-    return _buildSummaryRowContent(
-      context, state, ref, state.transactions, fmt, convFactor);
+    );
   }
 
   Widget _buildSummaryRowContent(
@@ -1203,6 +1196,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 transactionId: transaction.id,
               ));
           ref.invalidate(dashboardNotifierProvider);
+          ref.invalidate(allHistoricalTransactionsProvider);
           ref.invalidate(recentTransactionsProvider);
           ref.invalidate(monthlyFlowDataProvider);
           ref.invalidate(netWorthSnapshotsProvider);
@@ -1478,6 +1472,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           transactionId: ids.first,
                         ));
                 ref.invalidate(dashboardNotifierProvider);
+                ref.invalidate(allHistoricalTransactionsProvider);
                 ref.invalidate(recentTransactionsProvider);
                 ref.invalidate(monthlyFlowDataProvider);
                 ref.invalidate(netWorthSnapshotsProvider);

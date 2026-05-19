@@ -884,7 +884,9 @@
     "today": "اليوم",
     "dayDetails": "يوم {day}",
     "nothingOnThisDay": "لا دفعات في هذا اليوم.",
-    "alreadyPaid": "مدفوع"
+    "alreadyPaid": "مدفوع",
+    "noDueDateSection": "بدون تاريخ استحقاق",
+    "noDueDateSet": "لا يوجد تاريخ استحقاق"
   },
   "debtDetail": {
     "progress": "التقدم",

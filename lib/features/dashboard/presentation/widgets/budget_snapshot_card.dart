@@ -54,7 +54,7 @@ class BudgetSnapshotCard extends ConsumerWidget {
         final currencyFmt = ref.watch(currencyFormat2Provider);
 
         return GestureDetector(
-          onTap: () => context.go('/budgets'),
+          onTap: () => context.push('/budgets'),
           child: Container(
             decoration: BoxDecoration(
               color: isDark

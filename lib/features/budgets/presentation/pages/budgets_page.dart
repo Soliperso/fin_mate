@@ -43,6 +43,13 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('budgets.title'.tr()),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () =>
+                context.canPop() ? context.pop() : context.go('/dashboard'),
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),

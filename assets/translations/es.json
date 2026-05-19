@@ -879,7 +879,9 @@
     "today": "Hoy",
     "dayDetails": "Día {day}",
     "nothingOnThisDay": "Sin pagos en este día.",
-    "alreadyPaid": "Pagado"
+    "alreadyPaid": "Pagado",
+    "noDueDateSection": "Sin fecha de vencimiento",
+    "noDueDateSet": "Sin fecha de vencimiento"
   },
   "debtDetail": {
     "progress": "Progreso",

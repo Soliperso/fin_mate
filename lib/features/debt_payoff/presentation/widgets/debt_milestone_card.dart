@@ -7,11 +7,18 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
 
-class DebtMilestoneCard extends ConsumerWidget {
+class DebtMilestoneCard extends ConsumerStatefulWidget {
   const DebtMilestoneCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DebtMilestoneCard> createState() => _DebtMilestoneCardState();
+}
+
+class _DebtMilestoneCardState extends ConsumerState<DebtMilestoneCard> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final gamification = ref.watch(debtGamificationProvider);
     if (gamification == null) return const SizedBox.shrink();
 
@@ -36,112 +43,131 @@ class DebtMilestoneCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSizes.xs),
-                  decoration: BoxDecoration(
-                    color: AppColors.systemYellow.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  child: const Icon(
-                    CupertinoIcons.star_fill,
-                    size: 16,
-                    color: AppColors.systemYellow,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.sm),
-                Expanded(
-                  child: Text(
-                    'Your Progress',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Badge chip
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.sm,
-                        vertical: AppSizes.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandTeal.withValues(alpha: 0.12),
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusFull),
-                        border: Border.all(
-                          color: AppColors.brandTeal.withValues(alpha: 0.3),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getBadgeIcon(gamification.badgeIcon),
-                            size: 13,
-                            color: AppColors.brandTeal,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            gamification.badgeTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: AppColors.brandTeal,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ],
-                      ),
+            // Header row — tappable to expand/collapse
+            GestureDetector(
+              onTap: gamification.milestones.isNotEmpty
+                  ? () => setState(() => _isExpanded = !_isExpanded)
+                  : null,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.xs),
+                    decoration: BoxDecoration(
+                      color: AppColors.systemYellow.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
-                    // Badge hint (months to next level)
-                    if (gamification.monthsToNextBadge != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
+                    child: const Icon(
+                      CupertinoIcons.star_fill,
+                      size: 16,
+                      color: AppColors.systemYellow,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Expanded(
+                    child: Text(
+                      'Your Progress',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Badge chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.sm,
+                          vertical: AppSizes.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandTeal.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusFull),
+                          border: Border.all(
+                            color: AppColors.brandTeal.withValues(alpha: 0.3),
+                            width: 0.5,
+                          ),
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              '${gamification.monthsToNextBadge} mo to ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 10,
-                                  ),
+                            Icon(
+                              _getBadgeIcon(gamification.badgeIcon),
+                              size: 13,
+                              color: AppColors.brandTeal,
                             ),
-                            if (gamification.nextBadgeIcon.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 3),
-                                child: Icon(
-                                  _getBadgeIcon(gamification.nextBadgeIcon),
-                                  size: 10,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
+                            const SizedBox(width: 4),
                             Text(
-                              gamification.nextBadgeTitle,
+                              gamification.badgeTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall
                                   ?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 10,
+                                    color: AppColors.brandTeal,
+                                    fontWeight: FontWeight.w600,
                                   ),
                             ),
                           ],
                         ),
                       ),
+                      // Badge hint (months to next level)
+                      if (gamification.monthsToNextBadge != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${gamification.monthsToNextBadge} mo to ',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 10,
+                                    ),
+                              ),
+                              if (gamification.nextBadgeIcon.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 3),
+                                  child: Icon(
+                                    _getBadgeIcon(gamification.nextBadgeIcon),
+                                    size: 10,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              Text(
+                                gamification.nextBadgeTitle,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 10,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (gamification.milestones.isNotEmpty) ...[
+                    const SizedBox(width: AppSizes.sm),
+                    AnimatedRotation(
+                      turns: _isExpanded ? 0.0 : 0.5,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      child: const Icon(
+                        CupertinoIcons.chevron_down,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: AppSizes.sm),
 
@@ -174,18 +200,29 @@ class DebtMilestoneCard extends ConsumerWidget {
               ],
             ),
 
-            if (gamification.milestones.isNotEmpty) ...[
-              const SizedBox(height: AppSizes.sm),
-              const Divider(height: 1),
-              const SizedBox(height: AppSizes.sm),
-              ...gamification.milestones.map(
-                (m) => _MilestoneRow(
-                  milestone: m,
-                  currencyFormat: currencyFormat,
-                  isDark: isDark,
-                ),
+            // Collapsible per-debt milestone rows
+            if (gamification.milestones.isNotEmpty)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _isExpanded
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: AppSizes.sm),
+                          const Divider(height: 1),
+                          const SizedBox(height: AppSizes.sm),
+                          ...gamification.milestones.map(
+                            (m) => _MilestoneRow(
+                              milestone: m,
+                              currencyFormat: currencyFormat,
+                              isDark: isDark,
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ],
           ],
         ),
       ),

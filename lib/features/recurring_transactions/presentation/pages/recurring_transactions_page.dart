@@ -190,6 +190,13 @@ class _RecurringTransactionsPageState
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('recurring.title'.tr()),
         centerTitle: false,
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.chevron_left,
+            onTap: () =>
+                context.canPop() ? context.pop() : context.go('/dashboard'),
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.sm),

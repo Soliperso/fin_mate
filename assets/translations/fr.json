@@ -879,7 +879,9 @@
     "today": "Aujourd'hui",
     "dayDetails": "Jour {day}",
     "nothingOnThisDay": "Aucun paiement ce jour.",
-    "alreadyPaid": "Payé"
+    "alreadyPaid": "Payé",
+    "noDueDateSection": "Sans date d'échéance",
+    "noDueDateSet": "Pas de date d'échéance"
   },
   "debtDetail": {
     "progress": "Progression",

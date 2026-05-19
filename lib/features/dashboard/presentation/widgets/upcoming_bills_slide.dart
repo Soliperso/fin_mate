@@ -46,7 +46,7 @@ class UpcomingBillsSlide extends ConsumerWidget {
         }
 
         return GestureDetector(
-          onTap: () => context.go('/recurring-transactions'),
+          onTap: () => context.push('/recurring-transactions'),
           child: Container(
             decoration: BoxDecoration(
               color: isDark

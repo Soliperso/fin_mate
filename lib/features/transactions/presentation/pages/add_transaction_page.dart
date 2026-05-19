@@ -137,11 +137,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       if (userId == null) throw Exception('Not authenticated');
 
       final repository = ref.read(transactionRepositoryProvider);
-      final allTransactions = await repository.getTransactions();
-      final match =
-          allTransactions.where((t) => t.id == widget.transactionId).toList();
-      if (match.isEmpty) throw Exception('Transaction not found');
-      final transaction = match.first;
+      final transaction =
+          await repository.getTransactionById(widget.transactionId!);
+      if (transaction == null) throw Exception('Transaction not found');
 
       final type = transaction.type == TransactionType.income
           ? 'income'
@@ -1772,6 +1770,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
       ref.invalidate(dashboardNotifierProvider);
       ref.invalidate(transactionListProvider);
+      ref.invalidate(allHistoricalTransactionsProvider);
       ref.invalidate(recentTransactionsProvider);
       ref.invalidate(monthlyFlowDataProvider);
       ref.invalidate(netWorthSnapshotsProvider);

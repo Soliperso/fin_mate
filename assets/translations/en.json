@@ -892,7 +892,9 @@
     "today": "Today",
     "dayDetails": "Day {day}",
     "nothingOnThisDay": "No payments on this day.",
-    "alreadyPaid": "Paid"
+    "alreadyPaid": "Paid",
+    "noDueDateSection": "No Due Date",
+    "noDueDateSet": "No due date"
   },
   "debtDetail": {
     "progress": "Progress",

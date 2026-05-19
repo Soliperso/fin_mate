@@ -110,7 +110,22 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
         debts.where((d) => d.dueDay != null).map((d) => d.dueDay!).toSet();
     final upcoming = _upcomingPayments(debts);
     final pastDue = _pastDuePayments(debts, payments);
+    final noDueDate = _noDueDateDebts(debts);
     final isCurrentMonth = _displayMonth == _currentMonth;
+
+    final totalDueCount = debts.where((d) => d.dueDay != null).length;
+    final paidCount = debts.where((d) {
+      if (d.dueDay == null) return false;
+      return payments.any((p) =>
+          p.debtId == d.id &&
+          p.paymentDate.year == _displayMonth.year &&
+          p.paymentDate.month == _displayMonth.month);
+    }).length;
+
+    final upcomingTotal =
+        upcoming.fold(0.0, (s, item) => s + item.$1.minimumPayment);
+    final pastDueTotal =
+        pastDue.fold(0.0, (s, d) => s + d.minimumPayment);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -131,6 +146,8 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
             isCurrentMonth: isCurrentMonth,
             onGoToToday: _goToToday,
             onDayTap: (day) => _onDayTapped(day, debts),
+            paidCount: paidCount,
+            totalDueCount: totalDueCount,
           ),
           const SizedBox(height: AppSizes.md),
           if (pastDue.isNotEmpty) ...[
@@ -138,6 +155,9 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
               label: 'track.pastDue'.tr(),
               color: AppColors.error,
               icon: CupertinoIcons.exclamationmark_circle_fill,
+              count: pastDue.length,
+              totalAmount: pastDueTotal,
+              currencyFormat: currencyFormat,
             ),
             const SizedBox(height: AppSizes.xs),
             ...pastDue.map((d) => _PaymentRow(
@@ -152,6 +172,9 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
             label: 'track.upcoming'.tr(),
             color: AppColors.brandTeal,
             icon: CupertinoIcons.calendar,
+            count: upcoming.length,
+            totalAmount: upcomingTotal,
+            currencyFormat: currencyFormat,
           ),
           const SizedBox(height: AppSizes.xs),
           if (upcoming.isEmpty)
@@ -173,7 +196,27 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
                   daysUntil: item.$2,
                   isPastDue: false,
                   currencyFormat: currencyFormat,
+                  onTap: () => _openLogPayment(item.$1),
                 )),
+          if (noDueDate.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.md),
+            _SectionLabel(
+              label: 'track.noDueDateSection'.tr(),
+              color: AppColors.brandTeal,
+              icon: CupertinoIcons.calendar,
+              count: noDueDate.length,
+              totalAmount: noDueDate.fold<double>(
+                  0.0, (s, d) => s + d.minimumPayment),
+              currencyFormat: currencyFormat,
+            ),
+            const SizedBox(height: AppSizes.xs),
+            ...noDueDate.map((d) => _PaymentRow(
+                  debt: d,
+                  isPastDue: false,
+                  currencyFormat: currencyFormat,
+                  onTap: () => _openLogPayment(d),
+                )),
+          ],
         ],
       ),
     );
@@ -224,6 +267,10 @@ class _PaymentCalendarTabState extends ConsumerState<PaymentCalendarTab> {
     }
     return result;
   }
+
+  List<DebtEntity> _noDueDateDebts(List<DebtEntity> debts) {
+    return debts.where((d) => d.dueDay == null).toList();
+  }
 }
 
 // ── Calendar card ─────────────────────────────────────────────────────────────
@@ -237,6 +284,8 @@ class _CalendarCard extends StatelessWidget {
   final bool isCurrentMonth;
   final VoidCallback onGoToToday;
   final void Function(int day) onDayTap;
+  final int paidCount;
+  final int totalDueCount;
 
   const _CalendarCard({
     required this.displayMonth,
@@ -247,6 +296,8 @@ class _CalendarCard extends StatelessWidget {
     required this.isCurrentMonth,
     required this.onGoToToday,
     required this.onDayTap,
+    required this.paidCount,
+    required this.totalDueCount,
   });
 
   @override
@@ -375,9 +426,8 @@ class _CalendarCard extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: isToday
-                          ? BoxDecoration(
-                              color:
-                                  AppColors.brandTeal.withValues(alpha: 0.15),
+                          ? const BoxDecoration(
+                              color: AppColors.brandTeal,
                               shape: BoxShape.circle,
                             )
                           : null,
@@ -386,8 +436,8 @@ class _CalendarCard extends StatelessWidget {
                         '$day',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight:
-                                  isToday ? FontWeight.bold : FontWeight.normal,
-                              color: isToday ? AppColors.brandTeal : null,
+                                  isToday ? FontWeight.w700 : FontWeight.normal,
+                              color: isToday ? AppColors.white : null,
                             ),
                       ),
                     ),
@@ -465,6 +515,58 @@ class _CalendarCard extends StatelessWidget {
               ),
             ],
           ),
+          if (totalDueCount > 0) ...[
+            const SizedBox(height: AppSizes.sm),
+            const Divider(height: 1),
+            const SizedBox(height: AppSizes.sm),
+            Row(
+              children: [
+                Icon(
+                  paidCount == totalDueCount
+                      ? CupertinoIcons.checkmark_circle_fill
+                      : CupertinoIcons.circle,
+                  size: 13,
+                  color: paidCount == totalDueCount
+                      ? AppColors.success
+                      : AppColors.textSecondary,
+                ),
+                const SizedBox(width: AppSizes.xs),
+                Expanded(
+                  child: Text(
+                    '$paidCount of $totalDueCount debts paid this month',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+                Text(
+                  '$paidCount / $totalDueCount',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: paidCount == totalDueCount
+                            ? AppColors.success
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.xs),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              child: LinearProgressIndicator(
+                value: totalDueCount == 0
+                    ? 0
+                    : paidCount / totalDueCount,
+                minHeight: 4,
+                backgroundColor: isDark
+                    ? AppColors.separatorDark.withValues(alpha: 0.5)
+                    : AppColors.separator.withValues(alpha: 0.4),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.brandTeal),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -649,11 +751,17 @@ class _SectionLabel extends StatelessWidget {
   final String label;
   final Color color;
   final IconData icon;
+  final int? count;
+  final double? totalAmount;
+  final NumberFormat? currencyFormat;
 
   const _SectionLabel({
     required this.label,
     required this.color,
     required this.icon,
+    this.count,
+    this.totalAmount,
+    this.currencyFormat,
   });
 
   @override
@@ -669,6 +777,15 @@ class _SectionLabel extends StatelessWidget {
                 color: color,
               ),
         ),
+        const Spacer(),
+        if (count != null && totalAmount != null && currencyFormat != null)
+          Text(
+            '$count ${count == 1 ? 'debt' : 'debts'} · ${currencyFormat!.format(totalAmount)}',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
       ],
     );
   }
@@ -688,6 +805,8 @@ IconData _iconForDebtType(String debtType) {
       return CupertinoIcons.house;
     case 'medical':
       return CupertinoIcons.heart;
+    case 'other':
+      return CupertinoIcons.ellipsis_circle;
     default:
       return CupertinoIcons.money_dollar_circle;
   }
@@ -710,7 +829,8 @@ class _PaymentRow extends StatelessWidget {
 
   Color _urgencyColor() {
     if (isPastDue) return AppColors.error;
-    if (daysUntil == null || daysUntil! <= 1) return AppColors.error;
+    if (daysUntil == null) return AppColors.brandTeal;
+    if (daysUntil! <= 1) return AppColors.error;
     if (daysUntil! <= 7) return AppColors.warning;
     return AppColors.brandTeal;
   }
@@ -720,13 +840,17 @@ class _PaymentRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final urgency = _urgencyColor();
 
-    final cardBg = isDark
-        ? AppColors.secondarySystemBackgroundDark
-        : AppColors.secondarySystemBackground;
+    final cardBg = isPastDue
+        ? AppColors.error.withValues(alpha: isDark ? 0.08 : 0.04)
+        : (isDark
+            ? AppColors.secondarySystemBackgroundDark
+            : AppColors.secondarySystemBackground);
 
     String subtitle;
     if (isPastDue) {
       subtitle = 'track.missedThisMonth'.tr();
+    } else if (daysUntil == null) {
+      subtitle = 'track.noDueDateSet'.tr();
     } else if (daysUntil == 0) {
       subtitle = 'track.dueToday'.tr();
     } else if (daysUntil == 1) {
@@ -834,8 +958,8 @@ class _PaymentRow extends StatelessWidget {
                                     ?.color
                                     ?.withValues(alpha: 0.75)),
                     ),
-                    if (isPastDue) ...[
-                      const SizedBox(height: 2),
+                    const SizedBox(height: 2),
+                    if (isPastDue)
                       Text(
                         'track.markAsPaid'.tr(),
                         style: Theme.of(context).textTheme.labelSmall
@@ -844,8 +968,16 @@ class _PaymentRow extends StatelessWidget {
                                     .withValues(alpha: 0.85),
                                 fontWeight: FontWeight.w500,
                                 fontSize: 11),
+                      )
+                    else
+                      Text(
+                        'min. payment',
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 10),
                       ),
-                    ],
                   ],
                 ),
               ),
