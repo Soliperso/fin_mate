@@ -555,6 +555,9 @@ class AppTheme {
         ),
         side: BorderSide.none,
       ),
+      badgeTheme: const BadgeThemeData(
+        textColor: Colors.white,
+      ),
     );
   }
 
