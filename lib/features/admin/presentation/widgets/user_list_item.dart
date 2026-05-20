@@ -193,43 +193,48 @@ class UserListItem extends StatelessWidget {
                         ),
 
                         const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        Row(
                           mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              NumberFormat.compactCurrency(symbol: '\$')
-                                  .format(user.netWorth),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: isDark
-                                    ? AppColors.labelDark
-                                    : AppColors.label,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  NumberFormat.compactCurrency(symbol: '\$')
+                                      .format(user.netWorth),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? AppColors.labelDark
+                                        : AppColors.label,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${user.transactionCount} txns',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark
+                                        ? AppColors.secondaryLabelDark
+                                        : AppColors.secondaryLabel,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${user.transactionCount} txns',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: isDark
-                                    ? AppColors.secondaryLabelDark
-                                    : AppColors.secondaryLabel,
-                              ),
+                            const SizedBox(width: 8),
+                            // Arrow Icon
+                            Icon(
+                              CupertinoIcons.chevron_right,
+                              color: isDark
+                                  ? AppColors.tertiaryLabelDark
+                                  : AppColors.systemGray3,
+                              size: 16,
                             ),
                           ],
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Arrow Icon
-                        Icon(
-                          CupertinoIcons.chevron_right,
-                          color: isDark
-                              ? AppColors.tertiaryLabelDark
-                              : AppColors.systemGray3,
-                          size: 16,
                         ),
                       ],
                     ),
