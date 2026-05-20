@@ -216,100 +216,106 @@ class RecurringTransactionListItem extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: AppSizes.xs),
-                        // Trailing: amount + status + pay
-                        Column(
+                        // Trailing: amount + status + pay + menu
+                        Row(
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              '${isIncome ? '+' : isExpense ? '-' : ''}${currencyFormat.format(transaction.amount)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    color: isActive
-                                        ? (isIncome
-                                            ? AppColors.success
-                                            : isExpense
-                                                ? AppColors.error
-                                                : AppColors.textPrimary)
-                                        : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: AppSizes.xs),
-                            Row(
+                            Column(
                               mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: isActive
-                                        ? AppColors.success
-                                        : AppColors.textSecondary
-                                            .withValues(alpha: 0.4),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
                                 Text(
-                                  isActive ? 'Active' : 'Inactive',
+                                  '${isIncome ? '+' : isExpense ? '-' : ''}${currencyFormat.format(transaction.amount)}',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .labelMedium
+                                      .titleSmall
                                       ?.copyWith(
-                                        fontWeight: FontWeight.w500,
                                         color: isActive
-                                            ? AppColors.success
+                                            ? (isIncome
+                                                ? AppColors.success
+                                                : isExpense
+                                                    ? AppColors.error
+                                                    : AppColors.textPrimary)
                                             : AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                 ),
+                                const SizedBox(height: AppSizes.xs),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: isActive
+                                            ? AppColors.success
+                                            : AppColors.textSecondary
+                                                .withValues(alpha: 0.4),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isActive ? 'Active' : 'Inactive',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: isActive
+                                                ? AppColors.success
+                                                : AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                if (onMarkPaid != null &&
+                                    isExpense &&
+                                    isActive) ...[
+                                  const SizedBox(height: AppSizes.xs),
+                                  GestureDetector(
+                                    onTap: onMarkPaid,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSizes.sm,
+                                        vertical: AppSizes.xs,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSizes.radiusFull,
+                                        ),
+                                        border: Border.all(
+                                          color: AppColors.success
+                                              .withValues(alpha: 0.25),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Pay now',
+                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.success,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                            if (onMarkPaid != null &&
-                                isExpense &&
-                                isActive) ...[
-                              const SizedBox(height: AppSizes.xs),
-                              GestureDetector(
-                                onTap: onMarkPaid,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSizes.sm,
-                                    vertical: AppSizes.xs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.success
-                                        .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusFull,
-                                    ),
-                                    border: Border.all(
-                                      color: AppColors.success
-                                          .withValues(alpha: 0.25),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Pay now',
-                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.success,
-                                    ),
-                                  ),
-                                ),
+                            // 3-dot menu indicator
+                            Padding(
+                              padding: const EdgeInsets.only(left: AppSizes.sm),
+                              child: Icon(
+                                CupertinoIcons.ellipsis_vertical,
+                                size: 16,
+                                color:
+                                    AppColors.textSecondary.withValues(alpha: 0.5),
                               ),
-                            ],
+                            ),
                           ],
-                        ),
-                        // 3-dot menu indicator
-                        Padding(
-                          padding: const EdgeInsets.only(left: AppSizes.sm),
-                          child: Icon(
-                            CupertinoIcons.ellipsis_vertical,
-                            size: 16,
-                            color:
-                                AppColors.textSecondary.withValues(alpha: 0.5),
-                          ),
                         ),
                       ],
                     ),
