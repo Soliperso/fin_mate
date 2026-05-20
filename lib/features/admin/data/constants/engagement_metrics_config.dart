@@ -3,57 +3,79 @@ import 'package:finmate/core/constants/app_colors.dart';
 
 /// Configuration for engagement metrics displayed in analytics
 class EngagementMetricsConfig {
-  static final Map<String, EngagementMetricConfig> _metrics = {
-    'daily_active_users_avg': EngagementMetricConfig(
-      key: 'daily_active_users_avg',
-      displayName: 'Daily Active Users (Avg)',
-      description: 'Average number of unique users per day',
-      icon: CupertinoIcons.person_2,
-      color: AppColors.brandTeal,
-    ),
-    'transactions_per_user': EngagementMetricConfig(
-      key: 'transactions_per_user',
-      displayName: 'Transactions Per Active User',
-      description: 'Average transactions per active user',
-      icon: CupertinoIcons.arrow_right_arrow_left,
-      color: AppColors.brandTeal,
-    ),
-    'average_transaction_value': EngagementMetricConfig(
-      key: 'average_transaction_value',
-      displayName: 'Average Transaction Value',
-      description: 'Average amount per transaction',
-      icon: CupertinoIcons.money_dollar_circle,
-      color: AppColors.systemBlue,
-    ),
-    'user_retention_rate': EngagementMetricConfig(
-      key: 'user_retention_rate',
-      displayName: 'User Retention Rate',
-      description: 'Percentage of users from first half still active in second half',
-      icon: CupertinoIcons.arrow_up_right_circle,
-      color: AppColors.systemGreen,
-    ),
-    'bill_settlement_rate': EngagementMetricConfig(
-      key: 'bill_settlement_rate',
-      displayName: 'Bill Settlement Rate',
-      description: 'Percentage of expense splits that have been settled',
-      icon: CupertinoIcons.checkmark_circle,
-      color: AppColors.systemGreen,
-    ),
-  };
+  static late final Map<String, EngagementMetricConfig> _metrics;
 
-  static Map<String, EngagementMetricConfig> get metrics => _metrics;
+  static void _initializeIfNeeded() {
+    if (!_metricsInitialized) {
+      _metrics = {
+        'daily_active_users_avg': EngagementMetricConfig(
+          key: 'daily_active_users_avg',
+          displayName: 'Daily Active Users (Avg)',
+          description: 'Average number of unique users per day',
+          icon: CupertinoIcons.person_2,
+          color: AppColors.brandTeal,
+        ),
+        'transactions_per_user': EngagementMetricConfig(
+          key: 'transactions_per_user',
+          displayName: 'Transactions Per Active User',
+          description: 'Average transactions per active user',
+          icon: CupertinoIcons.arrow_right_arrow_left,
+          color: AppColors.brandTeal,
+        ),
+        'average_transaction_value': EngagementMetricConfig(
+          key: 'average_transaction_value',
+          displayName: 'Average Transaction Value',
+          description: 'Average amount per transaction',
+          icon: CupertinoIcons.money_dollar_circle,
+          color: AppColors.systemBlue,
+        ),
+        'user_retention_rate': EngagementMetricConfig(
+          key: 'user_retention_rate',
+          displayName: 'User Retention Rate',
+          description: 'Percentage of users from first half still active in second half',
+          icon: CupertinoIcons.arrow_up_right_circle,
+          color: AppColors.systemGreen,
+        ),
+        'bill_settlement_rate': EngagementMetricConfig(
+          key: 'bill_settlement_rate',
+          displayName: 'Bill Settlement Rate',
+          description: 'Percentage of expense splits that have been settled',
+          icon: CupertinoIcons.checkmark_circle,
+          color: AppColors.systemGreen,
+        ),
+      };
+      _metricsInitialized = true;
+    }
+  }
+
+  static bool _metricsInitialized = false;
+
+  static Map<String, EngagementMetricConfig> get metrics {
+    _initializeIfNeeded();
+    return _metrics;
+  }
 
   /// Get metric config by display name (for backward compatibility with existing SQL)
   static EngagementMetricConfig? getByDisplayName(String displayName) {
-    return _metrics.values.firstWhere(
-      (metric) => metric.displayName == displayName,
-      orElse: () => EngagementMetricConfig.fallback(),
-    );
+    try {
+      return metrics.values.firstWhere(
+        (metric) => metric.displayName == displayName,
+        orElse: () => EngagementMetricConfig.fallback(),
+      );
+    } catch (e) {
+      // Fallback if any error occurs during lookup
+      return EngagementMetricConfig.fallback();
+    }
   }
 
   /// Get all metric display names
   static List<String> getAllDisplayNames() {
-    return _metrics.values.map((m) => m.displayName).toList();
+    try {
+      return metrics.values.map((m) => m.displayName).toList();
+    } catch (e) {
+      // Return empty list if initialization fails
+      return [];
+    }
   }
 }
 
