@@ -938,47 +938,49 @@ class _PaymentRow extends StatelessWidget {
                   ),
                 ),
               ),
-              // Amount
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.md, vertical: AppSizes.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      currencyFormat.format(debt.minimumPayment),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: isPastDue
-                                ? AppColors.error.withValues(alpha: 0.85)
-                                : Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.color
-                                    ?.withValues(alpha: 0.75)),
-                    ),
-                    const SizedBox(height: 2),
-                    if (isPastDue)
+              // Trailing: Amount
+              SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md, vertical: AppSizes.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Text(
-                        'track.markAsPaid'.tr(),
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(
-                                color: AppColors.brandTeal
-                                    .withValues(alpha: 0.85),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 11),
-                      )
-                    else
-                      Text(
-                        'min. payment',
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(
-                                color: AppColors.textTertiary,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 10),
+                        currencyFormat.format(debt.minimumPayment),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isPastDue
+                                  ? AppColors.error.withValues(alpha: 0.85)
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color
+                                      ?.withValues(alpha: 0.75)),
                       ),
-                  ],
+                      const SizedBox(height: 2),
+                      if (isPastDue)
+                        Text(
+                          'track.markAsPaid'.tr(),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                  color: AppColors.brandTeal
+                                      .withValues(alpha: 0.85),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 11),
+                        )
+                      else
+                        Text(
+                          'min. payment',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                  color: AppColors.textTertiary,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 10),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],
