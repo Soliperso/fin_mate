@@ -83,12 +83,17 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final profile = await _repository.getProfile(userId);
-      state = state.copyWith(profile: profile, isLoading: false);
+      // Guard against state updates after disposal
+      if (mounted) {
+        state = state.copyWith(profile: profile, isLoading: false);
+      }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Failed to load profile: ${e.toString()}',
-      );
+      if (mounted) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to load profile: ${e.toString()}',
+        );
+      }
     }
   }
 
@@ -107,12 +112,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         dateOfBirth: dateOfBirth,
         currency: currency,
       );
-      state = ProfileState(profile: profile, isLoading: false);
+      if (mounted) {
+        state = ProfileState(profile: profile, isLoading: false);
+      }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Failed to update profile: ${e.toString()}',
-      );
+      if (mounted) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Failed to update profile: ${e.toString()}',
+        );
+      }
       rethrow;
     }
   }
@@ -132,12 +141,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         avatarUrl: avatarUrl,
       );
 
-      state = ProfileState(profile: profile, isUploadingAvatar: false);
+      if (mounted) {
+        state = ProfileState(profile: profile, isUploadingAvatar: false);
+      }
     } catch (e) {
-      state = state.copyWith(
-        isUploadingAvatar: false,
-        errorMessage: 'Failed to upload avatar: ${e.toString()}',
-      );
+      if (mounted) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          errorMessage: 'Failed to upload avatar: ${e.toString()}',
+        );
+      }
       rethrow;
     }
   }
@@ -146,12 +159,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = state.copyWith(isUploadingAvatar: true, errorMessage: null);
     try {
       await _repository.deleteAvatar(userId);
-      await loadProfile(); // Reload profile
+      if (mounted) {
+        await loadProfile(); // Reload profile
+      }
     } catch (e) {
-      state = state.copyWith(
-        isUploadingAvatar: false,
-        errorMessage: 'Failed to delete avatar: ${e.toString()}',
-      );
+      if (mounted) {
+        state = state.copyWith(
+          isUploadingAvatar: false,
+          errorMessage: 'Failed to delete avatar: ${e.toString()}',
+        );
+      }
       rethrow;
     }
   }
