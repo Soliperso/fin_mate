@@ -236,104 +236,110 @@ class DebtCard extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            // Progress ring + balance
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            // Trailing: progress ring + balance + menu
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                DebtProgressRing(
-                                  progressPercent: progressValue != null
-                                      ? progressValue * 100
-                                      : null,
-                                  size: 54,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    DebtProgressRing(
+                                      progressPercent: progressValue != null
+                                          ? progressValue * 100
+                                          : null,
+                                      size: 54,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      currencyFormat.format(debt.balance),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.error),
+                                    ),
+                                    if (debt.originalBalance != null &&
+                                        debt.originalBalance! > 0) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${debt.debtType == 'credit_card' ? 'Limit' : 'Original'}: ${currencyFormat.format(debt.originalBalance!)}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  currencyFormat.format(debt.balance),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.error),
-                                ),
-                                if (debt.originalBalance != null &&
-                                    debt.originalBalance! > 0) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${debt.debtType == 'credit_card' ? 'Limit' : 'Original'}: ${currencyFormat.format(debt.originalBalance!)}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
+                                const SizedBox(width: AppSizes.xs),
+                                PopupMenuButton<String>(
+                                  icon: Icon(
+                                    CupertinoIcons.ellipsis_vertical,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
                                   ),
-                                ],
+                                  elevation: 8,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(AppSizes.radiusMd),
+                                    side: BorderSide(
+                                      color: Theme.of(context).dividerColor,
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                  itemBuilder: (_) => [
+                                    PopupMenuItem(
+                                      value: 'log_payment',
+                                      child: _MenuRow(
+                                        icon: CupertinoIcons.add_circled,
+                                        label: 'debtCard.logPayment'.tr(),
+                                        color: AppColors.success,
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'edit',
+                                      child: _MenuRow(
+                                        icon: CupertinoIcons.pencil,
+                                        label: 'debtCard.editDebt'.tr(),
+                                        color: AppColors.systemBlue,
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'history',
+                                      child: _MenuRow(
+                                        icon: CupertinoIcons.clock,
+                                        label: 'debtCard.paymentHistory'.tr(),
+                                        color: AppColors.brandTeal,
+                                      ),
+                                    ),
+                                    const PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: _MenuRow(
+                                        icon: CupertinoIcons.trash,
+                                        label: 'debtCard.deleteDebt'.tr(),
+                                        isDestructive: true,
+                                      ),
+                                    ),
+                                  ],
+                                  onSelected: (value) {
+                                    switch (value) {
+                                      case 'log_payment':
+                                        onLogPayment();
+                                      case 'edit':
+                                        onEdit();
+                                      case 'history':
+                                        onHistory();
+                                      case 'delete':
+                                        _confirmDelete(context);
+                                    }
+                                  },
+                                ),
                               ],
-                            ),
-                            const SizedBox(width: AppSizes.xs),
-                            PopupMenuButton<String>(
-                              icon: Icon(
-                                CupertinoIcons.ellipsis_vertical,
-                                color: AppColors.textSecondary,
-                                size: 20,
-                              ),
-                              elevation: 8,
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppSizes.radiusMd),
-                                side: BorderSide(
-                                  color: Theme.of(context).dividerColor,
-                                  width: 0.5,
-                                ),
-                              ),
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'log_payment',
-                                  child: _MenuRow(
-                                    icon: CupertinoIcons.add_circled,
-                                    label: 'debtCard.logPayment'.tr(),
-                                    color: AppColors.success,
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: _MenuRow(
-                                    icon: CupertinoIcons.pencil,
-                                    label: 'debtCard.editDebt'.tr(),
-                                    color: AppColors.systemBlue,
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'history',
-                                  child: _MenuRow(
-                                    icon: CupertinoIcons.clock,
-                                    label: 'debtCard.paymentHistory'.tr(),
-                                    color: AppColors.brandTeal,
-                                  ),
-                                ),
-                                const PopupMenuDivider(),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: _MenuRow(
-                                    icon: CupertinoIcons.trash,
-                                    label: 'debtCard.deleteDebt'.tr(),
-                                    isDestructive: true,
-                                  ),
-                                ),
-                              ],
-                              onSelected: (value) {
-                                switch (value) {
-                                  case 'log_payment':
-                                    onLogPayment();
-                                  case 'edit':
-                                    onEdit();
-                                  case 'history':
-                                    onHistory();
-                                  case 'delete':
-                                    _confirmDelete(context);
-                                }
-                              },
                             ),
                           ],
                         ),
