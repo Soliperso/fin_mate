@@ -314,21 +314,17 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
         range = DateTimeRange(start: today, end: today);
         break;
       case 'Week':
-        final weekStart = today.subtract(Duration(days: today.weekday - 1));
-        final weekEnd = weekStart.add(const Duration(days: 6));
-        range = DateTimeRange(start: weekStart, end: weekEnd);
+        range = DateTimeRange(
+          start: today.subtract(Duration(days: today.weekday - 1)),
+          end: today,
+        );
         break;
       case 'Month':
-        range = DateTimeRange(
-          start: DateTime(now.year, now.month, 1),
-          end: DateTime(now.year, now.month + 1, 0),
-        );
+        range =
+            DateTimeRange(start: DateTime(now.year, now.month, 1), end: today);
         break;
       case 'Year':
-        range = DateTimeRange(
-          start: DateTime(now.year, 1, 1),
-          end: DateTime(now.year, 12, 31),
-        );
+        range = DateTimeRange(start: DateTime(now.year, 1, 1), end: today);
         break;
       default:
         range = null;
@@ -423,10 +419,7 @@ class TransactionListNotifier extends StateNotifier<TransactionListState> {
       filtered = filtered.where((t) {
         final description = (t.description ?? '').toLowerCase();
         final category = (t.categoryName ?? '').toLowerCase();
-        final account = (t.accountName ?? '').toLowerCase();
-        return description.contains(query) ||
-            category.contains(query) ||
-            account.contains(query);
+        return description.contains(query) || category.contains(query);
       }).toList();
     }
 

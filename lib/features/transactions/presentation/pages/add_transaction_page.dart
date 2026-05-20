@@ -546,8 +546,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         onTap: () => setState(() {
           _selectedType = type;
           _selectedCategory = null;
-          _linkedDebt = null;
-          _linkedGoal = null;
           if (_categoryScrollController.hasClients) {
             _categoryScrollController.jumpToItem(0);
           }
@@ -760,10 +758,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                                     child: Text(d.name))),
                                           ],
                                           onChanged: (d) =>
-                                              setState(() {
-                                                _linkedDebt = d;
-                                                if (d != null) _linkedGoal = null;
-                                              }),
+                                              setState(() => _linkedDebt = d),
                                         ),
                                       ),
                                     ),
@@ -804,7 +799,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                       child: DropdownButton<SavingsGoal?>(
                                         value: _linkedGoal,
                                         hint: Text(
-                                          'addTransaction.linkGoal'.tr(),
+                                          'Save toward goal (Optional)',
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyMedium
@@ -838,7 +833,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                           setState(() {
                                             _linkedGoal = g;
                                             if (g != null) {
-                                              _linkedDebt = null;
                                               _selectedType = 'expense';
                                               _selectedCategory = 'Savings';
                                               WidgetsBinding.instance

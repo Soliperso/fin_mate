@@ -14,8 +14,8 @@
 	<string>LHVP55DRTQ</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>com.chebli.finmate</key>
-		<string>match AppStore com.chebli.finmate</string>
+		<key>com.finmate.finmate</key>
+		<string>match AppStore com.finmate.finmate</string>
 	</dict>
 </dict>
 </plist>

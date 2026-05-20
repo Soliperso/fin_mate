@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-// iOS-only plugin — calls are guarded by Platform.isIOS; safe to import on Android (no-op)
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
