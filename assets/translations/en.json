@@ -274,6 +274,7 @@
     "repeatLabel": "Repeat",
     "attachFile": "Attach a receipt or file",
     "linkDebt": "Link to debt (optional)",
+    "linkGoal": "Save toward goal (Optional)",
     "noteHint": "Add a note (optional)",
     "reminderHint": "Custom reminder message (optional)",
     "cancel": "Cancel"

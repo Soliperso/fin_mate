@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.chebli.finmate"
-    compileSdk = 36
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -689,7 +689,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       final q = state.searchQuery.toLowerCase();
       periodTxns = periodTxns.where((t) {
         return (t.description ?? '').toLowerCase().contains(q) ||
-            (t.categoryName ?? '').toLowerCase().contains(q);
+            (t.categoryName ?? '').toLowerCase().contains(q) ||
+            (t.accountName ?? '').toLowerCase().contains(q);
       }).toList();
     }
 

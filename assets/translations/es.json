@@ -274,6 +274,7 @@
     "repeatLabel": "Repetir",
     "attachFile": "Adjuntar un recibo o archivo",
     "linkDebt": "Vincular a deuda (opcional)",
+    "linkGoal": "Ahorrar para un objetivo (Opcional)",
     "noteHint": "Agregar una nota (opcional)",
     "reminderHint": "Mensaje de recordatorio personalizado (opcional)",
     "cancel": "Cancelar"

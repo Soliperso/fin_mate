@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 
@@ -92,7 +93,7 @@ class BiometricService {
   String getBiometricTypeName(BiometricType type) {
     switch (type) {
       case BiometricType.face:
-        return 'Face ID';
+        return Platform.isIOS ? 'Face ID' : 'Face Unlock';
       case BiometricType.fingerprint:
         return 'Fingerprint';
       case BiometricType.iris:
