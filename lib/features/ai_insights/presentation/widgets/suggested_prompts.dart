@@ -89,11 +89,11 @@ class _PromptChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: AppColors.brandTeal.withValues(
-              alpha: isDark ? 0.12 : 0.06,
+              alpha: isDark ? 0.25 : 0.06,
             ),
             border: Border.all(
               color: AppColors.brandTeal.withValues(
-                alpha: isDark ? 0.4 : 0.25,
+                alpha: isDark ? 0.5 : 0.25,
               ),
             ),
             borderRadius: BorderRadius.circular(AppSizes.radiusLg),
@@ -107,7 +107,9 @@ class _PromptChip extends StatelessWidget {
                 prompt,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: isDark
+                      ? Colors.white.withValues(alpha: 0.75)
+                      : AppColors.brandTeal,
                     ),
               ),
             ],

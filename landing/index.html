@@ -265,118 +265,21 @@ nav {
   opacity: 0.5;
 }
 
-/* Phone mockup */
-.hero-visual { display: flex; justify-content: center; align-items: flex-end; position: relative; }
-.phone-frame {
-  width: 240px;
-  background: var(--ink);
-  border-radius: 36px;
-  border: 2px solid rgba(255,255,255,0.08);
-  overflow: hidden;
+/* Hero screenshot */
+.hero-visual { display: flex; justify-content: center; align-items: center; }
+.hero-screens-wrap { display: flex; justify-content: center; align-items: center; width: 100%; }
+.hero-screens-img {
+  width: 100%;
+  max-width: 675px;
+  border-radius: 20px;
   box-shadow:
-    0 40px 80px rgba(0,0,0,0.4),
-    0 0 0 1px rgba(255,255,255,0.04),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-  position: relative;
-  z-index: 2;
+    0 60px 120px rgba(0,0,0,0.55),
+    0 20px 40px rgba(0,0,0,0.3),
+    0 0 0 1px rgba(255,255,255,0.06);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: block;
 }
-.phone-notch {
-  width: 80px;
-  height: 20px;
-  background: var(--ink);
-  border-radius: 0 0 14px 14px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 3;
-}
-.phone-screen {
-  background: #1a1a1a;
-  padding: 16px;
-  min-height: 460px;
-}
-.phone-status {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-.phone-time { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.8); }
-.phone-icons { display: flex; gap: 4px; }
-.phone-icons span { display: block; width: 14px; height: 7px; background: rgba(255,255,255,0.4); border-radius: 1px; }
-.dash-greeting { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
-.dash-balance {
-  font-family: 'Syne', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-  margin-bottom: 2px;
-}
-.dash-balance span { color: var(--gold); font-size: 14px; vertical-align: super; }
-.dash-label { font-size: 8px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
-.dash-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.dash-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 6px;
-  padding: 10px;
-}
-.dash-card-label { font-size: 7px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-.dash-card-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff; }
-.dash-card-val.up { color: #4caf8a; }
-.dash-card-val.down { color: #e05252; }
-.dash-section-label { font-size: 8px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-.budget-item { margin-bottom: 8px; }
-.budget-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-.budget-item-name { font-size: 9px; color: rgba(255,255,255,0.65); }
-.budget-item-pct { font-size: 8px; color: rgba(255,255,255,0.4); }
-.budget-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-.budget-bar-fill { height: 100%; border-radius: 2px; }
-.phone-nav {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0 6px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  margin-top: 12px;
-}
-.phone-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.phone-nav-icon { width: 18px; height: 14px; display: flex; align-items: center; justify-content: center; }
-.phone-nav-icon svg { width: 14px; height: 14px; opacity: 0.35; }
-.phone-nav-item.active .phone-nav-icon svg { opacity: 1; }
-.phone-nav-dot { width: 3px; height: 3px; border-radius: 50%; }
-.phone-nav-item.active .phone-nav-dot { background: var(--gold); }
-.phone-glow {
-  position: absolute;
-  bottom: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200px;
-  height: 120px;
-  background: radial-gradient(ellipse, rgba(61,122,114,0.4) 0%, transparent 70%);
-  pointer-events: none;
-}
-.phone-second {
-  position: absolute;
-  right: -30px;
-  bottom: 60px;
-  width: 160px;
-  background: var(--ink);
-  border-radius: 26px;
-  border: 2px solid rgba(255,255,255,0.06);
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  opacity: 0.7;
-  z-index: 1;
-}
-.phone-second .phone-screen {
-  min-height: 0;
-  padding: 12px;
-}
+.hero-screens-img:hover { transform: translateY(-10px) scale(1.015); }
 
 /* ─── STAT STRIP ─────────────────────────────────────── */
 .stat-strip {
@@ -1011,86 +914,12 @@ footer {
     </div>
 
     <div class="hero-visual">
-      <div style="position:relative; padding-bottom: 60px;">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="phone-status">
-              <span class="phone-time">9:41</span>
-              <div class="phone-icons">
-                <span style="width:20px;height:7px;background:rgba(255,255,255,0.3);border-radius:1px;"></span>
-                <span style="width:14px;height:7px;background:rgba(255,255,255,0.3);border-radius:1px;"></span>
-                <span style="width:12px;height:7px;background:rgba(255,255,255,0.2);border-radius:1px;"></span>
-              </div>
-            </div>
-            <div class="dash-greeting">Good morning</div>
-            <div class="dash-balance"><span>$</span>12,840</div>
-            <div class="dash-label">Net Worth</div>
-            <div class="dash-row">
-              <div class="dash-card">
-                <div class="dash-card-label">Income</div>
-                <div class="dash-card-val up">+$4,200</div>
-              </div>
-              <div class="dash-card">
-                <div class="dash-card-label">Spending</div>
-                <div class="dash-card-val down">−$2,840</div>
-              </div>
-            </div>
-            <div class="dash-row">
-              <div class="dash-card">
-                <div class="dash-card-label">Debt Left</div>
-                <div class="dash-card-val" style="color:#e8b84b;">$8,200</div>
-              </div>
-              <div class="dash-card">
-                <div class="dash-card-label">Savings</div>
-                <div class="dash-card-val up">$2,100</div>
-              </div>
-            </div>
-            <div class="dash-section-label">Budgets this month</div>
-            <div class="budget-item">
-              <div class="budget-item-top">
-                <span class="budget-item-name">Groceries</span>
-                <span class="budget-item-pct">72%</span>
-              </div>
-              <div class="budget-bar"><div class="budget-bar-fill" style="width:72%;background:#4caf8a;"></div></div>
-            </div>
-            <div class="budget-item">
-              <div class="budget-item-top">
-                <span class="budget-item-name">Dining Out</span>
-                <span class="budget-item-pct">94%</span>
-              </div>
-              <div class="budget-bar"><div class="budget-bar-fill" style="width:94%;background:#e8b84b;"></div></div>
-            </div>
-            <div class="budget-item">
-              <div class="budget-item-top">
-                <span class="budget-item-name">Transport</span>
-                <span class="budget-item-pct">41%</span>
-              </div>
-              <div class="budget-bar"><div class="budget-bar-fill" style="width:41%;background:#3d7a72;"></div></div>
-            </div>
-            <div class="phone-nav">
-              <div class="phone-nav-item active">
-                <div class="phone-nav-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                </div>
-                <div class="phone-nav-dot"></div>
-              </div>
-              <div class="phone-nav-item">
-                <div class="phone-nav-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </div>
-                <div class="phone-nav-dot"></div>
-              </div>
-              <div class="phone-nav-item">
-                <div class="phone-nav-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
-                </div>
-                <div class="phone-nav-dot"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="phone-glow"></div>
+      <div class="hero-screens-wrap">
+        <img
+          src="three_screens.png"
+          alt="Finmate app — Dashboard, Debt Payoff, and Emergency Funds screens"
+          class="hero-screens-img"
+        >
       </div>
     </div>
   </div>

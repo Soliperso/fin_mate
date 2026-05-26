@@ -398,6 +398,48 @@ class AdminRemoteDataSource {
     });
   }
 
+  /// Set the gradual rollout percentage (0–100) for a feature flag
+  Future<void> setRolloutPercentage(String key, int percentage) async {
+    await _supabase.rpc('admin_set_rollout_percentage', params: {
+      'p_key': key,
+      'p_pct': percentage,
+    });
+  }
+
+  /// Get version settings for all platforms (ios, android)
+  Future<List<Map<String, dynamic>>> getAppVersions() async {
+    final result = await _supabase
+        .from('app_versions')
+        .select(
+            'platform, min_version, latest_version, release_notes, force_update, updated_at, updated_by')
+        .order('platform');
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Update version settings for a platform (admin only via RPC)
+  Future<void> setAppVersion({
+    required String platform,
+    required String minVersion,
+    required String latestVersion,
+    required String releaseNotes,
+    required bool forceUpdate,
+  }) async {
+    await _supabase.rpc('admin_set_app_version', params: {
+      'p_platform': platform,
+      'p_min_version': minVersion,
+      'p_latest_version': latestVersion,
+      'p_release_notes': releaseNotes.isEmpty ? null : releaseNotes,
+      'p_force_update': forceUpdate,
+    });
+  }
+
+  /// Get data health check results (admin only)
+  Future<List<Map<String, dynamic>>> getDataHealth() async {
+    final result = await _supabase.rpc('admin_get_data_health');
+    if (result == null) return [];
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
   /// Delete analytics_events older than 90 days
   Future<void> cleanOldData() async {
     await _supabase.rpc('cleanup_old_analytics');
@@ -409,6 +451,90 @@ class AdminRemoteDataSource {
       'p_title': title,
       'p_body': body,
     });
+  }
+
+  /// Get paginated feedback submissions (admin only)
+  Future<List<Map<String, dynamic>>> getFeedback({
+    String? category,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final result = await _supabase.rpc('admin_get_feedback', params: {
+      'p_category': category,
+      'p_limit': limit,
+      'p_offset': offset,
+    });
+    if (result == null) return [];
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Mark a feedback entry as reviewed or unreviewed
+  Future<void> setFeedbackReviewed(String id, {required bool reviewed}) async {
+    await _supabase.rpc('admin_set_feedback_reviewed', params: {
+      'p_id': id,
+      'p_reviewed': reviewed,
+    });
+  }
+
+  /// Get all announcements (admin view — includes inactive)
+  Future<List<Map<String, dynamic>>> getAnnouncements() async {
+    final result = await _supabase
+        .from('announcements')
+        .select(
+            'id, title, message, cta_label, cta_url, active, starts_at, ends_at, created_by, updated_at')
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  /// Create a new announcement banner
+  Future<void> createAnnouncement({
+    required String title,
+    required String message,
+    String? ctaLabel,
+    String? ctaUrl,
+    required bool active,
+    required DateTime startsAt,
+    DateTime? endsAt,
+  }) async {
+    final email = _supabase.auth.currentUser?.email;
+    await _supabase.from('announcements').insert({
+      'title': title,
+      'message': message,
+      'cta_label': ctaLabel?.isEmpty == true ? null : ctaLabel,
+      'cta_url': ctaUrl?.isEmpty == true ? null : ctaUrl,
+      'active': active,
+      'starts_at': startsAt.toUtc().toIso8601String(),
+      'ends_at': endsAt?.toUtc().toIso8601String(),
+      'created_by': email,
+    });
+  }
+
+  /// Update an existing announcement
+  Future<void> updateAnnouncement({
+    required String id,
+    required String title,
+    required String message,
+    String? ctaLabel,
+    String? ctaUrl,
+    required bool active,
+    required DateTime startsAt,
+    DateTime? endsAt,
+  }) async {
+    await _supabase.from('announcements').update({
+      'title': title,
+      'message': message,
+      'cta_label': ctaLabel?.isEmpty == true ? null : ctaLabel,
+      'cta_url': ctaUrl?.isEmpty == true ? null : ctaUrl,
+      'active': active,
+      'starts_at': startsAt.toUtc().toIso8601String(),
+      'ends_at': endsAt?.toUtc().toIso8601String(),
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', id);
+  }
+
+  /// Delete an announcement
+  Future<void> deleteAnnouncement(String id) async {
+    await _supabase.from('announcements').delete().eq('id', id);
   }
 
   /// Get all system-wide default categories (is_default = TRUE)

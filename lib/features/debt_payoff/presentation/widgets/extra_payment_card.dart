@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -212,12 +214,21 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                           AppColors.success.withValues(alpha: 0.2),
                       thumbColor: AppColors.success,
                       overlayColor: AppColors.success.withValues(alpha: 0.12),
-                      trackHeight: 6,
+                      trackHeight: 3,
                       thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 12,
+                        enabledThumbRadius: 10,
                       ),
                       overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 22,
+                        overlayRadius: 18,
+                      ),
+                      showValueIndicator: ShowValueIndicator.onDrag,
+                      valueIndicatorShape: const _PillValueIndicatorShape(),
+                      valueIndicatorColor: AppColors.success,
+                      valueIndicatorTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
                       ),
                     ),
                     child: Slider(
@@ -225,6 +236,9 @@ class _ExtraPaymentCardState extends ConsumerState<ExtraPaymentCard> {
                       min: 0,
                       max: 2000,
                       divisions: 80,
+                      label: extra > 0
+                          ? '+${currencyFormat.format(extra)}/mo'
+                          : '\$0',
                       onChanged: (v) {
                         HapticFeedback.selectionClick();
                         ref.read(extraPaymentProvider.notifier).setValue(v);
@@ -462,5 +476,79 @@ class _ComparisonRow extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// ── Pill-shaped value indicator ───────────────────────────────────────────────
+
+class _PillValueIndicatorShape extends SliderComponentShape {
+  const _PillValueIndicatorShape();
+
+  static const double _padding = 10.0;
+  static const double _height = 28.0;
+  static const double _tipHeight = 6.0;
+  static const double _radius = 14.0;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size.fromHeight(_height + _tipHeight);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required ui.TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final double scale = activationAnimation.value;
+    if (scale == 0.0) return;
+
+    final double pillW =
+        math.max(labelPainter.width + _padding * 2, _height);
+    final double pillH = _height;
+
+    final Offset pillCenter =
+        center + Offset(0, -(pillH / 2 + _tipHeight + 2));
+
+    final paint = Paint()
+      ..color = (sliderTheme.valueIndicatorColor ?? Colors.black)
+          .withValues(alpha: scale);
+
+    final path = Path();
+    final Rect rect = Rect.fromCenter(
+      center: pillCenter,
+      width: pillW,
+      height: pillH,
+    );
+    path.addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(_radius)));
+    // Small downward triangle tip
+    final double tipX = pillCenter.dx;
+    final double tipTop = pillCenter.dy + pillH / 2;
+    path.moveTo(tipX - 5, tipTop);
+    path.lineTo(tipX + 5, tipTop);
+    path.lineTo(tipX, tipTop + _tipHeight);
+    path.close();
+
+    canvas.save();
+    canvas.translate(pillCenter.dx, pillCenter.dy);
+    canvas.scale(scale);
+    canvas.translate(-pillCenter.dx, -pillCenter.dy);
+    canvas.drawPath(path, paint);
+
+    labelPainter.paint(
+      canvas,
+      pillCenter +
+          Offset(-labelPainter.width / 2, -labelPainter.height / 2),
+    );
+    canvas.restore();
   }
 }

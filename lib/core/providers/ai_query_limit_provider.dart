@@ -1,153 +1,92 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/payment_config.dart';
 import 'subscription_provider.dart';
 
-/// Provider to track AI query usage for the current month
+/// SharedPreferences key for the lifetime per-install AI chat query count.
+const _kAiQueryCountKey = 'ai_chat_query_count';
+
+// ============================================================================
+// Usage Provider
+// ============================================================================
+
+/// Reads the current lifetime AI chat query count from SharedPreferences.
+/// Resets only on app reinstall — not monthly.
 final aiQueryUsageProvider = FutureProvider<AIQueryUsage>((ref) async {
-  final user = ref.watch(authNotifierProvider).user;
-  if (user == null) {
-    throw Exception('User not authenticated');
-  }
-
-  final supabase = Supabase.instance.client;
-
-  // Get current month's start and end dates
-  final now = DateTime.now();
-  final monthStart = DateTime(now.year, now.month, 1);
-  final monthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-
-  try {
-    // Query ai_usage_tracking table for current month
-    final response = await supabase
-        .from('ai_usage_tracking')
-        .select('query_count')
-        .eq('user_id', user.id)
-        .gte('month_start', monthStart.toIso8601String())
-        .lte('month_start', monthEnd.toIso8601String())
-        .maybeSingle();
-
-    final queryCount = response?['query_count'] as int? ?? 0;
-
-    return AIQueryUsage(
-      queriesUsed: queryCount,
-      monthStart: monthStart,
-      monthEnd: monthEnd,
-    );
-  } catch (e) {
-    // If no record exists yet, return 0 queries used
-    return AIQueryUsage(
-      queriesUsed: 0,
-      monthStart: monthStart,
-      monthEnd: monthEnd,
-    );
-  }
+  final prefs = await SharedPreferences.getInstance();
+  final count = prefs.getInt(_kAiQueryCountKey) ?? 0;
+  return AIQueryUsage(queriesUsed: count);
 });
 
-/// Provider to check if user can make another AI query
+// ============================================================================
+// Gate Provider
+// ============================================================================
+
+/// Returns true if the user can send another AI chat message.
+/// Premium users always return true. Free users are limited to 10 lifetime queries.
 final canMakeQueryProvider = FutureProvider<bool>((ref) async {
-  // Check if user is premium
   final isPremium = await ref.watch(isPremiumProvider.future);
-  if (isPremium) {
-    return true; // Premium users have unlimited queries
-  }
+  if (isPremium) return true;
 
-  // Check freemium query limit
   final usage = await ref.watch(aiQueryUsageProvider.future);
-  return usage.queriesUsed < PaymentConfig.freemiumAIQueriesPerMonth;
+  return !usage.hasReachedLimit;
 });
 
-/// Provider for AI query operations
+// ============================================================================
+// Operations Provider
+// ============================================================================
+
+/// Provider for mutating AI query usage.
 final aiQueryOperationsProvider =
     Provider<AIQueryOperations>((ref) => AIQueryOperations(ref));
 
-/// Operations for managing AI query usage
 class AIQueryOperations {
   final Ref _ref;
-
   AIQueryOperations(this._ref);
 
-  /// Increment the query count for current month
+  /// Increments the per-install query count in SharedPreferences.
+  /// No-op for premium users.
   Future<void> incrementQueryCount() async {
-    final user = _ref.read(authNotifierProvider).user;
-    if (user == null) {
-      throw Exception('User not authenticated');
-    }
-
-    // Don't count queries for premium users
     final isPremium = await _ref.read(isPremiumProvider.future);
-    if (isPremium) {
-      return;
-    }
+    if (isPremium) return;
 
-    final supabase = Supabase.instance.client;
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getInt(_kAiQueryCountKey) ?? 0;
+    await prefs.setInt(_kAiQueryCountKey, current + 1);
 
-    try {
-      // Try to get existing record for current month
-      final existing = await supabase
-          .from('ai_usage_tracking')
-          .select('id, query_count')
-          .eq('user_id', user.id)
-          .eq('month_start', monthStart.toIso8601String())
-          .maybeSingle();
-
-      if (existing != null) {
-        // Update existing record
-        final currentCount = existing['query_count'] as int;
-        await supabase
-            .from('ai_usage_tracking')
-            .update({'query_count': currentCount + 1}).eq('id', existing['id']);
-      } else {
-        // Create new record for this month
-        await supabase.from('ai_usage_tracking').insert({
-          'user_id': user.id,
-          'month_start': monthStart.toIso8601String(),
-          'query_count': 1,
-        });
-      }
-
-      // Invalidate the usage provider to refresh the count
-      _ref.invalidate(aiQueryUsageProvider);
-    } catch (e) {
-      throw Exception('Failed to increment query count: $e');
-    }
+    // Invalidate so the banner and gate refresh immediately
+    _ref.invalidate(aiQueryUsageProvider);
   }
 
-  /// Get days until query limit resets
-  int getDaysUntilReset() {
-    final now = DateTime.now();
-    final nextMonth = DateTime(now.year, now.month + 1, 1);
-    return nextMonth.difference(now).inDays + 1;
+  /// Resets the local query counter. Used after a successful purchase
+  /// so the new premium user gets a clean slate on downgrade (if ever).
+  Future<void> resetQueryCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kAiQueryCountKey);
+    _ref.invalidate(aiQueryUsageProvider);
   }
 }
 
-/// Model for AI query usage data
+// ============================================================================
+// Model
+// ============================================================================
+
 class AIQueryUsage {
   final int queriesUsed;
-  final DateTime monthStart;
-  final DateTime monthEnd;
 
-  AIQueryUsage({
-    required this.queriesUsed,
-    required this.monthStart,
-    required this.monthEnd,
-  });
+  const AIQueryUsage({required this.queriesUsed});
 
-  /// Check if user has reached the query limit
+  /// True when the user has hit the 10-query lifetime free limit.
   bool get hasReachedLimit =>
       queriesUsed >= PaymentConfig.freemiumAIQueriesPerMonth;
 
-  /// Get remaining queries
+  /// Queries remaining before the paywall kicks in (min 0).
   int get queriesRemaining {
     final remaining = PaymentConfig.freemiumAIQueriesPerMonth - queriesUsed;
     return remaining > 0 ? remaining : 0;
   }
 
-  /// Get usage percentage (0.0 to 1.0)
-  double get usagePercentage {
-    return queriesUsed / PaymentConfig.freemiumAIQueriesPerMonth;
-  }
+  /// Progress value for the usage bar, clamped 0.0–1.0.
+  double get usagePercentage =>
+      (queriesUsed / PaymentConfig.freemiumAIQueriesPerMonth).clamp(0.0, 1.0);
 }

@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/subscription_provider.dart';
+import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 
 class PaywallPage extends ConsumerStatefulWidget {
@@ -23,7 +24,11 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
   String? _loadError;
 
   static const _benefits = [
-    (CupertinoIcons.sparkles, 'Unlimited AI Insights', 'vs. 10/month on free'),
+    (
+      CupertinoIcons.sparkles,
+      'Unlimited AI Chat',
+      'Free plan includes 10 lifetime requests'
+    ),
     (
       CupertinoIcons.camera,
       'Receipt scanning with OCR',
@@ -78,6 +83,8 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
 
         ref.invalidate(isPremiumProvider);
         ref.invalidate(subscriptionTierProvider);
+        // Clear the local query count so the banner disappears immediately
+        await ref.read(aiQueryOperationsProvider).resetQueryCount();
 
         if (mounted) Navigator.of(context).pop(true);
       }

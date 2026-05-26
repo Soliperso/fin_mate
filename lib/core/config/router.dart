@@ -22,8 +22,11 @@ import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/scan_receipt_page.dart';
 import '../../features/transactions/presentation/pages/transaction_detail_page.dart';
-// [AI Insights - Commented out]
-// import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_insights_page.dart';
+import '../../features/ai_insights/presentation/pages/ai_chat_page.dart';
+import '../../features/ai_insights/presentation/pages/balance_forecast_page.dart';
+import '../../features/ai_insights/presentation/pages/smart_alerts_page.dart';
+import '../../features/ai_insights/presentation/pages/goal_coach_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/savings_goals/presentation/pages/savings_goals_page.dart';
 import '../../features/savings_goals/presentation/pages/goal_detail_page.dart';
@@ -51,6 +54,14 @@ import '../../features/admin/presentation/pages/system_settings_page.dart';
 import '../../features/admin/presentation/pages/default_categories_page.dart';
 import '../../features/admin/presentation/pages/feature_toggles_page.dart';
 import '../../features/admin/presentation/pages/email_templates_page.dart';
+import '../../features/admin/presentation/pages/maintenance_page.dart';
+import '../../features/admin/presentation/pages/force_update_page.dart';
+import '../../features/admin/presentation/pages/app_version_page.dart';
+import '../../features/admin/presentation/pages/announcements_page.dart';
+import '../../features/admin/presentation/pages/feedback_viewer_page.dart';
+import '../../features/admin/presentation/pages/data_health_page.dart';
+import '../providers/feature_flag_provider.dart';
+import '../providers/app_version_provider.dart';
 import '../../features/recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 import '../../features/recurring_transactions/domain/entities/recurring_transaction_entity.dart';
@@ -107,6 +118,14 @@ class _RouterNotifier extends ChangeNotifier {
     _ref.listen(isAdminProvider, (previous, next) {
       notifyListeners();
     });
+    // Re-evaluate when maintenance mode flag changes.
+    _ref.listen(appFeatureFlagsProvider, (previous, next) {
+      notifyListeners();
+    });
+    // Re-evaluate when force-update status resolves.
+    _ref.listen(forceUpdateRequiredProvider, (previous, next) {
+      notifyListeners();
+    });
   }
 }
 
@@ -141,6 +160,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If not authenticated and trying to access protected route
       if (!isAuthenticated && !isAuthRoute) {
         return '/login';
+      }
+
+      // Force update — redirect all authenticated users to /force-update when
+      // the installed version is below the admin-set minimum.
+      if (isAuthenticated && state.matchedLocation != '/force-update') {
+        final forceUpdate =
+            ref.read(forceUpdateRequiredProvider).valueOrNull ?? false;
+        if (forceUpdate) return '/force-update';
+      }
+
+      // Maintenance mode — redirect non-admin authenticated users to /maintenance.
+      // Admins always retain full access so they can turn maintenance off.
+      if (isAuthenticated && state.matchedLocation != '/maintenance') {
+        final flagsAsync = ref.read(appFeatureFlagsProvider);
+        final isMaintenanceOn =
+            flagsAsync.valueOrNull?['maintenance_mode'] ?? false;
+        if (isMaintenanceOn) {
+          final isAdmin =
+              ref.read(profileProvider).valueOrNull?.isAdmin ?? false;
+          if (!isAdmin) return '/maintenance';
+        }
       }
 
       // If authenticated and trying to access auth routes, redirect to dashboard
@@ -187,6 +227,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/',
         name: 'splash',
         builder: (context, state) => const SplashPage(),
+      ),
+      // Maintenance mode — shown to non-admin users when maintenance_mode flag is on
+      GoRoute(
+        path: '/maintenance',
+        name: 'maintenance',
+        builder: (context, state) => const MaintenancePage(),
+      ),
+      // Force update — shown when installed version is below admin-set minimum
+      GoRoute(
+        path: '/force-update',
+        name: 'force-update',
+        builder: (context, state) => const ForceUpdatePage(),
       ),
       // Auth Routes
       GoRoute(
@@ -309,12 +361,34 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // [AI Insights - Commented out]
-          // GoRoute(
-          //   path: '/insights',
-          //   name: 'insights',
-          //   pageBuilder: (context, state) => _FadeTransitionPage(child: const AiInsightsPage()),
-          // ),
+          GoRoute(
+            path: '/insights',
+            name: 'insights',
+            pageBuilder: (context, state) =>
+                _FadeTransitionPage(child: const AiInsightsPage()),
+            routes: [
+              GoRoute(
+                path: 'chat',
+                name: 'ai-chat',
+                builder: (context, state) => const AiChatPage(),
+              ),
+              GoRoute(
+                path: 'forecast',
+                name: 'ai-forecast',
+                builder: (context, state) => const BalanceForecastPage(),
+              ),
+              GoRoute(
+                path: 'alerts',
+                name: 'ai-alerts',
+                builder: (context, state) => const SmartAlertsPage(),
+              ),
+              GoRoute(
+                path: 'goal-coach',
+                name: 'goal-coach',
+                builder: (context, state) => const GoalCoachPage(),
+              ),
+            ],
+          ),
           // [MVP: Pricing - Commented out for initial launch]
           // GoRoute(
           //   path: '/pricing',
@@ -473,6 +547,26 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'admin-email-templates',
         builder: (context, state) => const EmailTemplatesPage(),
       ),
+      GoRoute(
+        path: '/admin/app-versions',
+        name: 'admin-app-versions',
+        builder: (context, state) => const AppVersionPage(),
+      ),
+      GoRoute(
+        path: '/admin/announcements',
+        name: 'admin-announcements',
+        builder: (context, state) => const AnnouncementsPage(),
+      ),
+      GoRoute(
+        path: '/admin/feedback',
+        name: 'admin-feedback',
+        builder: (context, state) => const FeedbackViewerPage(),
+      ),
+      GoRoute(
+        path: '/admin/data-health',
+        name: 'admin-data-health',
+        builder: (context, state) => const DataHealthPage(),
+      ),
     ],
   );
 });
@@ -530,7 +624,7 @@ class _MainShellState extends ConsumerState<MainShell>
     if (path.startsWith('/transactions')) return '/transactions';
     if (path.startsWith('/budgets')) return '/budgets';
     if (path.startsWith('/debt')) return '/debt';
-    if (path.startsWith('/profile')) return '/profile';
+    if (path.startsWith('/insights')) return '/insights';
     return path;
   }
 
@@ -598,11 +692,11 @@ class _MainShellState extends ConsumerState<MainShell>
                   onTap: () => context.go('/debt'),
                 ),
                 _TabItem(
-                  icon: CupertinoIcons.person,
-                  activeIcon: CupertinoIcons.person_fill,
-                  label: 'nav.profile'.tr(),
+                  icon: CupertinoIcons.sparkles,
+                  activeIcon: CupertinoIcons.sparkles,
+                  label: 'AI',
                   isSelected: selectedIndex == 4,
-                  onTap: () => context.go('/profile'),
+                  onTap: () => context.go('/insights'),
                 ),
               ],
             ),
@@ -618,8 +712,8 @@ class _MainShellState extends ConsumerState<MainShell>
     if (location.startsWith('/transactions')) return 1;
     if (location.startsWith('/budgets')) return 2;
     if (location.startsWith('/debt')) return 3;
-    if (location.startsWith('/profile')) return 4;
-    return 0;
+    if (location.startsWith('/insights')) return 4;
+    return -1;
   }
 }
 

@@ -48,7 +48,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.md),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.sm, vertical: AppSizes.sm),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
@@ -117,7 +118,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
                           ),
                         )
                       : Icon(
-                          CupertinoIcons.arrow_up_circle_fill,
+                          CupertinoIcons.paperplane_fill,
                           color:
                               _hasText ? Colors.white : AppColors.textTertiary,
                           size: 20,

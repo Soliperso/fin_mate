@@ -29,7 +29,8 @@ import 'core/services/auto_backup_service.dart';
 import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
-// import 'package:purchases_flutter/purchases_flutter.dart'; // [V1.1: RevenueCat]
+// [MVP: Payment Service - Commented out for initial launch]
+// import 'package:purchases_flutter/purchases_flutter.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -69,27 +70,44 @@ void main() async {
         ),
       );
 
-      // [V1.1: RevenueCat — disabled until production key is configured]
+      // [MVP: Payment Service - Commented out for initial launch]
+      // RevenueCat — configure and log in existing user if present
       // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
       //   await Purchases.configure(
       //     PurchasesConfiguration(EnvConfig.revenueCatApiKey),
       //   );
-      //   RevenueCatState.configured = true;
       //   final existingUser = Supabase.instance.client.auth.currentUser;
       //   if (existingUser != null) {
       //     unawaited(() async {
-      //       try { await Purchases.logIn(existingUser.id); } catch (_) {}
+      //       try {
+      //         await Purchases.logIn(existingUser.id);
+      //       } catch (_) {}
       //     }());
       //   }
       // }
 
-      // Listen for deep link authentication (email confirmation)
-      Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-        final event = data.event;
-        if (event == AuthChangeEvent.signedIn) {
-          // User authenticated via deep link
-        }
-      });
+      // Listen for auth state changes — keep RevenueCat in sync
+      // Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      //   final event = data.event;
+      //   if (event == AuthChangeEvent.signedIn) {
+      //     final userId = data.session?.user.id;
+      //     if (userId != null && EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //       unawaited(() async {
+      //         try {
+      //           await Purchases.logIn(userId);
+      //         } catch (_) {}
+      //       }());
+      //     }
+      //   } else if (event == AuthChangeEvent.signedOut) {
+      //     if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+      //       unawaited(() async {
+      //         try {
+      //           await Purchases.logOut();
+      //         } catch (_) {}
+      //       }());
+      //     }
+      //   }
+      // });
 
       // Phase 3 — parallel: analytics (needs Supabase) + localization + prefs
       // These are all independent of each other

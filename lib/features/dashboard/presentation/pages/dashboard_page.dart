@@ -31,6 +31,7 @@ import '../widgets/upcoming_bills_slide.dart';
 import '../widgets/get_started_card.dart';
 import '../widgets/savings_rate_card.dart';
 import '../widgets/spending_breakdown_card.dart';
+import '../widgets/announcement_banner_strip.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -204,6 +205,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Announcement banners ───────────────────────────────────
+                const AnnouncementBannerStrip(),
                 // ── Hero card ─────────────────────────────────────────────
                 NetWorthCard(
                   netWorth: stats.netWorth,

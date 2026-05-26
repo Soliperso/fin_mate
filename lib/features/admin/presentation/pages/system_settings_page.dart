@@ -84,6 +84,55 @@ class SystemSettingsPage extends ConsumerWidget {
             ]),
             const SizedBox(height: AppSizes.lg),
 
+            // ── App Versions ──────────────────────────────────────────────
+            _sectionLabel(context, 'App Versions'),
+            const SizedBox(height: AppSizes.sm),
+            _buildSettingsCard(context, isDark, tiles: [
+              _SettingsTileData(
+                icon: CupertinoIcons.arrow_up_circle,
+                iconColor: AppColors.brandTeal,
+                title: 'Version Manager',
+                subtitle: 'Set minimum versions and force update per platform',
+                onTap: () => context.push('/admin/app-versions'),
+              ),
+            ]),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Announcements & Feedback ──────────────────────────────────
+            _sectionLabel(context, 'Announcements & Feedback'),
+            const SizedBox(height: AppSizes.sm),
+            _buildSettingsCard(context, isDark, tiles: [
+              _SettingsTileData(
+                icon: CupertinoIcons.speaker_2,
+                iconColor: AppColors.systemOrange,
+                title: 'Announcement Banners',
+                subtitle: 'Push dismissible banners to users\' dashboards',
+                onTap: () => context.push('/admin/announcements'),
+              ),
+              _SettingsTileData(
+                icon: CupertinoIcons.chat_bubble_text,
+                iconColor: AppColors.systemBlue,
+                title: 'User Feedback',
+                subtitle: 'View bug reports and suggestions from users',
+                onTap: () => context.push('/admin/feedback'),
+              ),
+            ]),
+            const SizedBox(height: AppSizes.lg),
+
+            // ── Data Health ───────────────────────────────────────────────
+            _sectionLabel(context, 'Data Health'),
+            const SizedBox(height: AppSizes.sm),
+            _buildSettingsCard(context, isDark, tiles: [
+              _SettingsTileData(
+                icon: CupertinoIcons.waveform_path_ecg,
+                iconColor: AppColors.brandTeal,
+                title: 'Data Health Monitor',
+                subtitle: 'Check for data integrity issues across all users',
+                onTap: () => context.push('/admin/data-health'),
+              ),
+            ]),
+            const SizedBox(height: AppSizes.lg),
+
             // ── System Maintenance ────────────────────────────────────────
             _sectionLabel(context, 'System Maintenance'),
             const SizedBox(height: AppSizes.sm),

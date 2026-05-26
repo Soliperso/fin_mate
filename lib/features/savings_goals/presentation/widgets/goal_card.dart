@@ -51,10 +51,10 @@ class GoalCard extends ConsumerWidget {
                     child: Icon(
                       isCompleted
                           ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.money_dollar,
+                          : CupertinoIcons.flag_fill,
                       color:
                           isCompleted ? AppColors.success : AppColors.brandTeal,
-                      size: 24,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -62,12 +62,50 @@ class GoalCard extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          goal.name,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                goal.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.systemGray
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(
+                                    AppSizes.radiusSm),
+                              ),
+                              child: Text(
+                                isCompleted
+                                    ? 'Done'
+                                    : goal.isOverdue
+                                        ? 'Overdue'
+                                        : 'Active',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: isCompleted
+                                          ? AppColors.success
+                                          : goal.isOverdue
+                                              ? AppColors.error
+                                              : AppColors.systemGray,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
                         if (goal.category != null)
                           Text(
@@ -80,62 +118,37 @@ class GoalCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (goal.deadline != null && !isCompleted)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.sm,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: goal.isOverdue
-                            ? AppColors.error.withValues(alpha: 0.1)
-                            : AppColors.warning.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                      ),
-                      child: Text(
-                        '${goal.daysRemaining} days',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: goal.isOverdue
-                                  ? AppColors.error
-                                  : AppColors.warning,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
                 ],
               ),
-              const SizedBox(height: AppSizes.md),
+              const SizedBox(height: AppSizes.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     currencyFormat.format(goal.currentAmount),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: isCompleted
-                              ? AppColors.success
-                              : AppColors.brandTeal,
-                          fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                   ),
                   Text(
                     'of ${currencyFormat.format(goal.targetAmount)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSizes.sm),
+              const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: progress / 100,
                 backgroundColor: AppColors.lightGray,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   isCompleted ? AppColors.success : AppColors.brandTeal,
                 ),
-                minHeight: 8,
-                borderRadius: BorderRadius.circular(4),
+                minHeight: 4,
+                borderRadius: BorderRadius.circular(2),
               ),
-              const SizedBox(height: AppSizes.xs),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -160,8 +173,8 @@ class GoalCard extends ConsumerWidget {
                           GestureDetector(
                             onTap: onContribute,
                             child: Container(
-                              width: 28,
-                              height: 28,
+                              width: 32,
+                              height: 32,
                               decoration: BoxDecoration(
                                 color: AppColors.brandTeal,
                                 shape: BoxShape.circle,

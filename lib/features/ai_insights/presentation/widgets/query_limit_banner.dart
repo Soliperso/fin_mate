@@ -7,7 +7,9 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../../../../core/providers/subscription_provider.dart';
 
-/// Compact single-row strip showing AI query usage for freemium users.
+/// Compact single-row strip showing AI chat query usage for freemium users.
+/// Appears when the user has used 7 or more of their 10 free queries.
+/// Disappears entirely for premium users.
 class QueryLimitBanner extends ConsumerWidget {
   const QueryLimitBanner({super.key});
 
@@ -22,6 +24,7 @@ class QueryLimitBanner extends ConsumerWidget {
 
         return queryUsageAsync.when(
           data: (usage) {
+            // Only show when 7+ queries used (warning zone + limit)
             if (usage.queriesUsed < 7) return const SizedBox.shrink();
             return _CompactStrip(usage: usage);
           },
@@ -35,16 +38,13 @@ class QueryLimitBanner extends ConsumerWidget {
   }
 }
 
-class _CompactStrip extends ConsumerWidget {
+class _CompactStrip extends StatelessWidget {
   final AIQueryUsage usage;
   const _CompactStrip({required this.usage});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final operations = ref.read(aiQueryOperationsProvider);
-    final daysUntilReset = operations.getDaysUntilReset();
+  Widget build(BuildContext context) {
     final hasReachedLimit = usage.hasReachedLimit;
-
     final accentColor = hasReachedLimit ? AppColors.error : AppColors.brandTeal;
 
     return Container(
@@ -74,11 +74,12 @@ class _CompactStrip extends ConsumerWidget {
           ),
           const SizedBox(width: AppSizes.sm),
           Text(
-            '${usage.queriesUsed}/10 queries',
+            '${usage.queriesUsed}/10 free queries',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color:
-                      hasReachedLimit ? AppColors.error : AppColors.textPrimary,
+                  color: hasReachedLimit
+                      ? AppColors.error
+                      : AppColors.textPrimary,
                 ),
           ),
           const SizedBox(width: AppSizes.sm),
@@ -94,26 +95,18 @@ class _CompactStrip extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: AppSizes.sm),
-          if (hasReachedLimit)
-            GestureDetector(
-              onTap: () => context.push('/pricing'),
-              child: Text(
-                'Upgrade',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.brandTeal,
-                      fontWeight: FontWeight.w700,
-                      decoration: TextDecoration.underline,
-                      decorationColor: AppColors.brandTeal,
-                    ),
-              ),
-            )
-          else
-            Text(
-              'Resets in ${daysUntilReset}d',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textTertiary,
+          GestureDetector(
+            onTap: () => context.push('/paywall'),
+            child: Text(
+              hasReachedLimit ? 'Upgrade' : 'Go Premium',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.brandTeal,
+                    fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.brandTeal,
                   ),
             ),
+          ),
         ],
       ),
     );

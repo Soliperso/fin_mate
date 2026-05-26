@@ -379,11 +379,9 @@ class _DefaultCategoriesPageState extends ConsumerState<DefaultCategoriesPage>
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.pagePadding, vertical: AppSizes.md),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        ),
+      child: Material(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
         clipBehavior: Clip.antiAlias,
         child: ListView.separated(
           padding: EdgeInsets.zero,

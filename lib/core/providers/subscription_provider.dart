@@ -3,18 +3,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_client.dart';
 
 // ============================================================================
-// Subscription Tier Provider
+// Subscription Tier Provider (Supabase source of truth)
 // ============================================================================
 
-/// FutureProvider that fetches the current user's subscription tier
+/// Fetches the current user's subscription tier from Supabase user_profiles.
+/// Falls back to 'freemium' on any error.
 final subscriptionTierProvider = FutureProvider<String?>((ref) async {
   try {
-    final auth = Supabase.instance.client.auth;
-    final userId = auth.currentUser?.id;
-
-    if (userId == null) {
-      return null;
-    }
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return null;
 
     final response = await supabase
         .from('user_profiles')
@@ -22,12 +19,8 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
         .eq('id', userId)
         .maybeSingle();
 
-    if (response == null) {
-      return 'freemium';
-    }
-
-    return response['subscription_tier'] as String? ?? 'freemium';
-  } catch (e) {
+    return response?['subscription_tier'] as String? ?? 'freemium';
+  } catch (_) {
     return 'freemium';
   }
 });
@@ -36,36 +29,32 @@ final subscriptionTierProvider = FutureProvider<String?>((ref) async {
 // Premium Status Provider
 // ============================================================================
 
-/// Returns true when the user has an active premium subscription tier.
+/// Returns true when the user has an active premium subscription.
+/// Source of truth: Supabase user_profiles.subscription_tier.
+// [MVP: RevenueCat - Commented out; re-enable alongside Purchases.configure() in main.dart]
 final isPremiumProvider = FutureProvider<bool>((ref) async {
   final tier = await ref.read(subscriptionTierProvider.future);
   return tier == 'premium';
 });
 
 // ============================================================================
-// Subscription Info Provider
+// Detailed Subscription Info Provider
 // ============================================================================
 
-/// Helper provider to get detailed subscription information
+/// Returns full subscription details from Supabase for display in profile/settings.
 final userSubscriptionProvider =
     FutureProvider<Map<String, dynamic>?>((ref) async {
   try {
-    final auth = Supabase.instance.client.auth;
-    final userId = auth.currentUser?.id;
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return null;
 
-    if (userId == null) {
-      return null;
-    }
-
-    final response = await supabase
+    return await supabase
         .from('user_profiles')
         .select(
             'id, subscription_tier, subscription_status, subscription_end_date, trial_end_date, created_at')
         .eq('id', userId)
         .maybeSingle();
-
-    return response;
-  } catch (e) {
+  } catch (_) {
     return null;
   }
 });

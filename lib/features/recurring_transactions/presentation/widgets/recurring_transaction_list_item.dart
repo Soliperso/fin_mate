@@ -125,7 +125,7 @@ class RecurringTransactionListItem extends ConsumerWidget {
                             size: 22,
                           ),
                         ),
-                        const SizedBox(width: AppSizes.sm),
+                        const SizedBox(width: AppSizes.md),
                         // Description + meta
                         Expanded(
                           child: Column(
@@ -137,7 +137,7 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                     'Recurring ${transaction.type}',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyLarge
+                                    .titleMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: isActive
@@ -195,9 +195,9 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: AppSizes.sm),
+                              const SizedBox(height: 8),
                               Wrap(
-                                spacing: 5,
+                                spacing: 6,
                                 runSpacing: 4,
                                 children: [
                                   _PillBadge(
@@ -215,8 +215,8 @@ class RecurringTransactionListItem extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: AppSizes.xs),
-                        // Trailing: amount + status + pay + menu
+                        const SizedBox(width: AppSizes.md),
+                        // Trailing: amount + pay + menu
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -229,7 +229,7 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                   '${isIncome ? '+' : isExpense ? '-' : ''}${currencyFormat.format(transaction.amount)}',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .titleSmall
+                                      .bodyMedium
                                       ?.copyWith(
                                         color: isActive
                                             ? (isIncome
@@ -241,46 +241,16 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                         fontWeight: FontWeight.w700,
                                       ),
                                 ),
-                                const SizedBox(height: AppSizes.xs),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: isActive
-                                            ? AppColors.success
-                                            : AppColors.textSecondary
-                                                .withValues(alpha: 0.4),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      isActive ? 'Active' : 'Inactive',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: isActive
-                                                ? AppColors.success
-                                                : AppColors.textSecondary,
-                                          ),
-                                    ),
-                                  ],
-                                ),
                                 if (onMarkPaid != null &&
                                     isExpense &&
                                     isActive) ...[
-                                  const SizedBox(height: AppSizes.xs),
+                                  const SizedBox(height: 8),
                                   GestureDetector(
                                     onTap: onMarkPaid,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: AppSizes.sm,
-                                        vertical: AppSizes.xs,
+                                        horizontal: 12,
+                                        vertical: 5,
                                       ),
                                       decoration: BoxDecoration(
                                         color: AppColors.success
@@ -290,12 +260,12 @@ class RecurringTransactionListItem extends ConsumerWidget {
                                         ),
                                         border: Border.all(
                                           color: AppColors.success
-                                              .withValues(alpha: 0.25),
+                                              .withValues(alpha: 0.3),
                                         ),
                                       ),
                                       child: Text(
                                         'Pay now',
-                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.success,
                                         ),
@@ -307,7 +277,7 @@ class RecurringTransactionListItem extends ConsumerWidget {
                             ),
                             // 3-dot menu indicator
                             Padding(
-                              padding: const EdgeInsets.only(left: AppSizes.sm),
+                              padding: const EdgeInsets.only(left: AppSizes.md),
                               child: Icon(
                                 CupertinoIcons.ellipsis_vertical,
                                 size: 16,

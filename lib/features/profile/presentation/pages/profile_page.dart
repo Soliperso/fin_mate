@@ -17,6 +17,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 // import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/feature_flag_provider.dart';
 import '../providers/profile_providers.dart';
+import '../../../../core/services/feedback_service.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -248,6 +249,14 @@ class ProfilePage extends ConsumerWidget {
                         _buildSettingsCard(context, isDark, children: [
                           _buildSettingsTile(
                             context: context,
+                            icon: CupertinoIcons.chat_bubble_text,
+                            title: 'Send Feedback',
+                            subtitle: 'Report a bug or suggest a feature',
+                            onTap: () => _showFeedbackSheet(context),
+                          ),
+                          _buildDivider(context, isDark),
+                          _buildSettingsTile(
+                            context: context,
                             icon: CupertinoIcons.hand_raised,
                             title: 'profile.legal'.tr(),
                             subtitle: 'profile.legalSub'.tr(),
@@ -359,6 +368,140 @@ class ProfilePage extends ConsumerWidget {
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
+      ),
+    );
+  }
+
+  Future<void> _showFeedbackSheet(BuildContext context) async {
+    String category = 'bug';
+    final msgCtrl = TextEditingController();
+    bool sending = false;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModal) => Padding(
+          padding: EdgeInsets.only(
+            left: AppSizes.pagePadding,
+            right: AppSizes.pagePadding,
+            top: AppSizes.md,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSizes.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSecondary.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.md),
+              Text(
+                'Send Feedback',
+                style: Theme.of(ctx)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: AppSizes.sm),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'bug', label: Text('Bug')),
+                  ButtonSegment(
+                      value: 'suggestion', label: Text('Suggestion')),
+                  ButtonSegment(value: 'other', label: Text('Other')),
+                ],
+                selected: {category},
+                onSelectionChanged: (s) =>
+                    setModal(() => category = s.first),
+                style: ButtonStyle(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const SizedBox(height: AppSizes.sm),
+              TextField(
+                controller: msgCtrl,
+                maxLines: 4,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Describe the issue or idea...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.md),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: sending
+                      ? null
+                      : () async {
+                          if (msgCtrl.text.trim().isEmpty) return;
+                          setModal(() => sending = true);
+                          try {
+                            await FeedbackService.submit(
+                              category: category,
+                              message: msgCtrl.text.trim(),
+                            );
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Thanks for your feedback!'),
+                                ),
+                              );
+                            }
+                          } catch (_) {
+                            setModal(() => sending = false);
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Failed to send. Please try again.'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: sending
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Submit',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 16),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -44,21 +44,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
             .toList();
         state = AsyncValue.data(messages);
       } else {
-        final welcomeMessage = ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          sender: MessageSender.assistant,
-          content:
-              'Hi! I\'m your AI financial assistant. Ask me anything about your finances, '
-              'spending patterns, upcoming bills, or balance forecast. How can I help you today?',
-          timestamp: DateTime.now(),
-          followUpSuggestions: [
-            'What\'s my current balance?',
-            'Show my spending by category',
-            'What bills are due soon?',
-          ],
-        );
-        state = AsyncValue.data([welcomeMessage]);
-        await _saveChatHistory([welcomeMessage]);
+        state = AsyncValue.data([]);
       }
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -174,19 +160,8 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     await _activeStream?.cancel();
     _activeStream = null;
     _queryProcessor.clearOpenAiSession();
-    final welcomeMessage = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      sender: MessageSender.assistant,
-      content: 'Chat history cleared. How can I help you today?',
-      timestamp: DateTime.now(),
-      followUpSuggestions: [
-        'What\'s my current balance?',
-        'Show my spending by category',
-        'What bills are due soon?',
-      ],
-    );
-    state = AsyncValue.data([welcomeMessage]);
-    await _saveChatHistory([welcomeMessage]);
+    state = AsyncValue.data([]);
+    await _saveChatHistory([]);
   }
 }
 
