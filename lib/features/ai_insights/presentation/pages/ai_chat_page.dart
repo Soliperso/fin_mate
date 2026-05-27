@@ -137,7 +137,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
               const QueryLimitBanner(),
               Expanded(
                 child: !hasMessages
-                    ? _buildWelcome(isDark)
+                    ? _buildWelcome(isDark, suggestedPrompts)
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.symmetric(
@@ -182,7 +182,31 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     );
   }
 
-  Widget _buildWelcome(bool isDark) {
+  IconData _iconForPrompt(String prompt) {
+    final p = prompt.toLowerCase();
+    if (p.contains('debt') || p.contains('payoff') || p.contains('credit')) {
+      return CupertinoIcons.creditcard;
+    }
+    if (p.contains('bill') || p.contains('due') || p.contains('week')) {
+      return CupertinoIcons.calendar_today;
+    }
+    if (p.contains('save') || p.contains('saving') || p.contains('goal')) {
+      return CupertinoIcons.chart_bar_alt_fill;
+    }
+    if (p.contains('spend') || p.contains('expens') || p.contains('budget') ||
+        p.contains('afford') || p.contains('categor')) {
+      return CupertinoIcons.arrow_up_circle;
+    }
+    if (p.contains('balance') || p.contains('account')) {
+      return CupertinoIcons.creditcard;
+    }
+    if (p.contains('income') || p.contains('earn')) {
+      return CupertinoIcons.arrow_down_circle;
+    }
+    return CupertinoIcons.sparkles;
+  }
+
+  Widget _buildWelcome(bool isDark, List<String> prompts) {
     final meta = supabase.auth.currentUser?.userMetadata;
     final rawName =
         meta?['full_name'] as String? ?? meta?['name'] as String? ?? '';
@@ -193,13 +217,6 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     final cardColor = isDark
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
-
-    const prompts = [
-      ('Am I saving enough?', CupertinoIcons.chart_bar_alt_fill),
-      ('How am I doing on debt payoff?', CupertinoIcons.creditcard),
-      ('What are my top expenses?', CupertinoIcons.arrow_up_circle),
-      ('Give me a monthly summary', CupertinoIcons.calendar_today),
-    ];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -284,8 +301,7 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                 ),
           ),
           const SizedBox(height: AppSizes.sm),
-          ...prompts.map((p) {
-            final (text, icon) = p;
+          ...prompts.map((text) {
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSizes.xs + 2),
               child: GestureDetector(
@@ -303,7 +319,8 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(icon, size: 18, color: AppColors.brandTeal),
+                      Icon(_iconForPrompt(text),
+                          size: 18, color: AppColors.brandTeal),
                       const SizedBox(width: AppSizes.sm),
                       Expanded(
                         child: Text(
