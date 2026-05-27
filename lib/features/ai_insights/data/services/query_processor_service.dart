@@ -25,8 +25,13 @@ class QueryProcessorService {
   void clearOpenAiSession() => _openAiService.clearSession();
 
   /// Streams the AI response token by token (delegates to OpenAI SSE).
-  Stream<String> streamMessage(String userMessage) =>
-      _openAiService.sendMessageStreaming(userMessage);
+  Stream<String> streamMessage(String userMessage) async* {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await _openAiService.initSession(userId);
+    }
+    yield* _openAiService.sendMessageStreaming(userMessage);
+  }
 
   /// Helper to get the current currency format
   NumberFormat _getCurrencyFormat({int decimalDigits = 2}) {

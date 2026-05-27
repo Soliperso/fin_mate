@@ -113,6 +113,74 @@ class OpenAiChatService {
       debugPrint('[OpenAiChatService] Failed to fetch upcoming bills: $e');
     }
 
+    try {
+      // Debts
+      final debts = await _supabase
+          .from('debts')
+          .select('name, current_balance, interest_rate, minimum_payment, type')
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+      if ((debts as List).isNotEmpty) {
+        double totalDebt = 0;
+        buffer.writeln('\nDebts:');
+        for (final d in debts) {
+          final bal = (d['current_balance'] as num).toDouble();
+          totalDebt += bal;
+          buffer.writeln(
+              '- ${d['name']} (${d['type']}): \$${bal.toStringAsFixed(2)} @ ${d['interest_rate']}% APR, min \$${(d['minimum_payment'] as num).toStringAsFixed(2)}/mo');
+        }
+        buffer.writeln('Total debt: \$${totalDebt.toStringAsFixed(2)}');
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch debts: $e');
+    }
+
+    try {
+      // Monthly budgets
+      final budgets = await _supabase
+          .from('budgets')
+          .select('amount, categories(name)')
+          .eq('user_id', userId);
+
+      if ((budgets as List).isNotEmpty) {
+        buffer.writeln('\nMonthly budgets:');
+        for (final b in budgets) {
+          final catName =
+              (b['categories'] as Map<String, dynamic>?)?['name'] as String? ??
+                  'Unknown';
+          buffer.writeln(
+              '- $catName: \$${(b['amount'] as num).toStringAsFixed(2)}');
+        }
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch budgets: $e');
+    }
+
+    try {
+      // Savings goals
+      final goals = await _supabase
+          .from('savings_goals')
+          .select('name, target_amount, current_amount, target_date')
+          .eq('user_id', userId)
+          .eq('is_completed', false);
+
+      if ((goals as List).isNotEmpty) {
+        buffer.writeln('\nSavings goals:');
+        for (final g in goals) {
+          final target = (g['target_amount'] as num).toDouble();
+          final current = (g['current_amount'] as num).toDouble();
+          final pct =
+              target > 0 ? (current / target * 100).toStringAsFixed(0) : '0';
+          final due = g['target_date'] != null ? ', due ${g['target_date']}' : '';
+          buffer.writeln(
+              '- ${g['name']}: \$${current.toStringAsFixed(2)} of \$${target.toStringAsFixed(2)} ($pct%$due)');
+        }
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch savings goals: $e');
+    }
+
     return buffer.toString();
   }
 
