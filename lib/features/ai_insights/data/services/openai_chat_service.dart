@@ -181,6 +181,106 @@ class OpenAiChatService {
       debugPrint('[OpenAiChatService] Failed to fetch savings goals: $e');
     }
 
+    try {
+      // This month's income
+      final now = DateTime.now();
+      final monthStart =
+          DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+      final income = await _supabase
+          .from('transactions')
+          .select('amount')
+          .eq('user_id', userId)
+          .eq('type', 'income')
+          .gte('date', monthStart);
+
+      final totalIncome = (income as List)
+          .fold(0.0, (sum, t) => sum + (t['amount'] as num).toDouble());
+      if (totalIncome > 0) {
+        buffer.writeln('\nIncome this month: \$${totalIncome.toStringAsFixed(2)}');
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch income: $e');
+    }
+
+    try {
+      // Budget utilization — spent vs limit per category this month
+      final now = DateTime.now();
+      final monthStart =
+          DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+      final budgets = await _supabase
+          .from('budgets')
+          .select('amount, category_id, categories(name)')
+          .eq('user_id', userId);
+
+      if ((budgets as List).isNotEmpty) {
+        final categoryIds = budgets.map((b) => b['category_id']).toList();
+        final spent = await _supabase
+            .from('transactions')
+            .select('amount, category_id')
+            .eq('user_id', userId)
+            .eq('type', 'expense')
+            .gte('date', monthStart)
+            .inFilter('category_id', categoryIds);
+
+        final spentByCategory = <dynamic, double>{};
+        for (final t in spent as List) {
+          final id = t['category_id'];
+          spentByCategory[id] =
+              (spentByCategory[id] ?? 0) + (t['amount'] as num).toDouble();
+        }
+
+        buffer.writeln('\nBudget utilization this month:');
+        for (final b in budgets) {
+          final catName =
+              (b['categories'] as Map<String, dynamic>?)?['name'] as String? ??
+                  'Unknown';
+          final limit = (b['amount'] as num).toDouble();
+          final usedAmt = spentByCategory[b['category_id']] ?? 0.0;
+          final pct = limit > 0 ? (usedAmt / limit * 100).toStringAsFixed(0) : '0';
+          buffer.writeln(
+              '- $catName: \$${usedAmt.toStringAsFixed(2)} of \$${limit.toStringAsFixed(2)} ($pct%)');
+        }
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch budget utilization: $e');
+    }
+
+    try {
+      // Last month's top spending by category
+      final now = DateTime.now();
+      final lastMonthStart =
+          DateTime(now.year, now.month - 1, 1).toIso8601String().split('T')[0];
+      final lastMonthEnd =
+          DateTime(now.year, now.month, 0).toIso8601String().split('T')[0];
+      final lastMonthTxns = await _supabase
+          .from('transactions')
+          .select('amount, categories(name)')
+          .eq('user_id', userId)
+          .eq('type', 'expense')
+          .gte('date', lastMonthStart)
+          .lte('date', lastMonthEnd);
+
+      final lastMonthTotals = <String, double>{};
+      for (final t in lastMonthTxns as List) {
+        final cat =
+            (t['categories'] as Map<String, dynamic>?)?['name'] as String? ??
+                'Other';
+        lastMonthTotals[cat] =
+            (lastMonthTotals[cat] ?? 0) + (t['amount'] as num).toDouble();
+      }
+
+      if (lastMonthTotals.isNotEmpty) {
+        final sorted = lastMonthTotals.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+        buffer.writeln('\nTop spending last month:');
+        for (final e in sorted.take(5)) {
+          buffer.writeln('- ${e.key}: \$${e.value.toStringAsFixed(2)}');
+        }
+      }
+    } catch (e) {
+      debugPrint('[OpenAiChatService] Failed to fetch last month spending: $e');
+    }
+
     return buffer.toString();
   }
 
