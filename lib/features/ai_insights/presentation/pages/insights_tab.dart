@@ -13,7 +13,6 @@ import '../../../../shared/widgets/empty_state_card.dart';
 import '../providers/insights_providers.dart';
 import '../widgets/goal_coach_entry_card.dart';
 import '../widgets/monthly_summary_card.dart';
-import '../widgets/subscription_monitor_card.dart';
 import '../../domain/entities/recurring_expense_pattern.dart';
 import '../../domain/entities/spending_anomaly.dart';
 import '../../domain/entities/proactive_alert.dart';
@@ -287,9 +286,6 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
                 const SizedBox(height: AppSizes.lg),
               ],
             ),
-
-            // ── 5. Subscriptions & Bills ─────────────────────────────────
-            const SubscriptionMonitorCard(),
 
             // ── 5. Recurring Price Changes ───────────────────────────────
             recurringExpensesAsync.when(

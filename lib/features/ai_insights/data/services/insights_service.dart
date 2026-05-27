@@ -472,47 +472,35 @@ class InsightsService {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
-      final startDate = DateTime.now().subtract(Duration(days: daysToAnalyze));
-      final transactions = await _supabase
-          .from('transactions')
-          .select('amount, description, date, categories(name)')
+      final rows = await _supabase
+          .from('recurring_transactions')
+          .select('id, description, amount, frequency, next_occurrence')
           .eq('user_id', userId)
           .eq('type', 'expense')
-          .gte('date', startDate.toIso8601String().split('T')[0])
-          .order('date', ascending: true);
+          .eq('is_active', true)
+          .order('amount', ascending: false);
 
-      if ((transactions as List).isEmpty) return [];
-
-      // Group transactions by normalized merchant name
-      final merchantGroups = <String, List<Map<String, dynamic>>>{};
-
-      for (final tx in transactions) {
-        final merchant =
-            _normalizeMerchantName(tx['description'] as String? ?? 'Unknown');
-        merchantGroups[merchant] ??= [];
-        merchantGroups[merchant]!.add(tx);
-      }
-
-      final patterns = <RecurringExpensePattern>[];
-
-      // Analyze each merchant group
-      for (final entry in merchantGroups.entries) {
-        final merchant = entry.key;
-        final txs = entry.value;
-
-        // Only consider merchants with 2+ transactions
-        if (txs.length < 2) continue;
-
-        final pattern = _analyzeRecurringPattern(merchant, txs);
-        if (pattern != null) {
-          patterns.add(pattern);
-        }
-      }
-
-      // Sort by average amount (highest first)
-      patterns.sort((a, b) => b.averageAmount.compareTo(a.averageAmount));
-
-      return patterns;
+      return (rows as List).map((row) {
+        final frequency = row['frequency'] as String? ?? 'monthly';
+        final interval = switch (frequency) {
+          'weekly' => RecurringInterval.weekly,
+          'yearly' => RecurringInterval.yearly,
+          _ => RecurringInterval.monthly,
+        };
+        final nextDate = row['next_occurrence'] != null
+            ? DateTime.tryParse(row['next_occurrence'] as String)
+            : null;
+        return RecurringExpensePattern(
+          id: row['id'] as String,
+          merchantName: row['description'] as String? ?? 'Unknown',
+          averageAmount: (row['amount'] as num).toDouble(),
+          interval: interval,
+          nextExpectedDate: nextDate,
+          occurrenceCount: 1,
+          category: 'Recurring',
+          transactionDates: [],
+        );
+      }).toList();
     } catch (e) {
       return [];
     }
@@ -750,114 +738,6 @@ class InsightsService {
         'insight': 'Unable to analyze patterns',
       };
     }
-  }
-
-  // Helper methods
-
-  String _normalizeMerchantName(String name) {
-    // Remove common suffixes and normalize
-    var normalized = name.toLowerCase().trim();
-    const suffixes = [
-      ' inc',
-      ' ltd',
-      ' co',
-      ' corp',
-      ' llc',
-      ' store',
-      ' shop'
-    ];
-    for (final suffix in suffixes) {
-      if (normalized.endsWith(suffix)) {
-        normalized =
-            normalized.substring(0, normalized.length - suffix.length).trim();
-      }
-    }
-    return normalized;
-  }
-
-  RecurringExpensePattern? _analyzeRecurringPattern(
-      String merchant, List<Map<String, dynamic>> transactions) {
-    if (transactions.length < 2) return null;
-
-    // Extract amounts and dates
-    final amounts = <double>[];
-    final dates = <DateTime>[];
-
-    for (final tx in transactions) {
-      amounts.add((tx['amount'] as num).toDouble());
-      dates.add(DateTime.parse(tx['date'] as String));
-    }
-
-    // Check amount consistency (±5%)
-    final avgAmount = amounts.fold<double>(0, (a, b) => a + b) / amounts.length;
-    final variance =
-        amounts.where((a) => (a - avgAmount).abs() / avgAmount <= 0.05).length;
-
-    if (variance < amounts.length * 0.7)
-      return null; // Less than 70% consistent
-
-    // Detect interval pattern
-    final intervals = <int>[];
-    for (int i = 1; i < dates.length; i++) {
-      intervals.add(dates[i].difference(dates[i - 1]).inDays);
-    }
-
-    if (intervals.isEmpty) return null;
-
-    final avgInterval =
-        intervals.fold<int>(0, (a, b) => a + b) ~/ intervals.length;
-    final interval = _detectInterval(avgInterval);
-
-    if (interval == RecurringInterval.unknown) return null;
-
-    // Check for price changes
-    bool isPriceIncreased = false;
-    double? priceChangePercent;
-
-    if (amounts.length >= 2) {
-      final recentAvg = amounts
-              .sublist((amounts.length / 2).toInt())
-              .fold<double>(0, (a, b) => a + b) /
-          (amounts.length / 2).toInt();
-      final oldAvg = amounts
-              .sublist(0, (amounts.length / 2).toInt())
-              .fold<double>(0, (a, b) => a + b) /
-          (amounts.length / 2).toInt();
-
-      priceChangePercent = ((recentAvg - oldAvg) / oldAvg * 100).abs();
-      isPriceIncreased = recentAvg > oldAvg && priceChangePercent > 5;
-    }
-
-    // Calculate next expected date
-    final lastDate = dates.last;
-    final nextExpectedDate = lastDate.add(Duration(days: avgInterval));
-
-    final category =
-        transactions.first['categories']?['name'] as String? ?? 'Uncategorized';
-
-    return RecurringExpensePattern(
-      id: merchant.hashCode.toString(),
-      merchantName: merchant,
-      averageAmount: avgAmount,
-      previousAmount: amounts.length >= 2 ? amounts[amounts.length - 2] : null,
-      interval: interval,
-      lastOccurrence: lastDate,
-      nextExpectedDate: nextExpectedDate,
-      occurrenceCount: amounts.length,
-      category: category,
-      isPriceIncreased: isPriceIncreased,
-      priceChangePercentage: priceChangePercent,
-      transactionDates: dates,
-    );
-  }
-
-  RecurringInterval _detectInterval(int avgDays) {
-    if (avgDays >= 6 && avgDays <= 8) return RecurringInterval.weekly;
-    if (avgDays >= 13 && avgDays <= 15) return RecurringInterval.biweekly;
-    if (avgDays >= 28 && avgDays <= 31) return RecurringInterval.monthly;
-    if (avgDays >= 88 && avgDays <= 92) return RecurringInterval.quarterly;
-    if (avgDays >= 360 && avgDays <= 370) return RecurringInterval.yearly;
-    return RecurringInterval.unknown;
   }
 
   // Phase 3: Proactive Alerts

@@ -105,7 +105,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     _activeStream = _queryProcessor.streamMessage(text).listen(
       (chunk) {
         if (!mounted) return;
-        buffer.write(chunk);
+        buffer.write(chunk.replaceAll('*', ''));
         final current = state.valueOrNull;
         if (current == null) return;
         final idx = current.indexWhere((m) => m.id == assistantId);
