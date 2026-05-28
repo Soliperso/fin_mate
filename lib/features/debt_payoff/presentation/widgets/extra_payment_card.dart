@@ -463,12 +463,23 @@ class _ComparisonRow extends StatelessWidget {
               ),
               if (savingsLabel != null) ...[
                 const SizedBox(height: 2),
-                Text(
-                  '↓ $savingsLabel',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.w700,
-                      ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.arrow_down,
+                      size: 10,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      savingsLabel!,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ],
                 ),
               ],
             ],

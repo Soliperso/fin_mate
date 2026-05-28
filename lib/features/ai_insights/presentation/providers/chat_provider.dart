@@ -67,7 +67,9 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   }
 
   /// Send a message, streaming the AI response token by token.
-  Future<void> sendMessage(String text) async {
+  /// Pass [goalId] when sending from the goal coach so messages are scoped
+  /// to that goal and excluded from the main AI chat history.
+  Future<void> sendMessage(String text, {String? goalId}) async {
     if (text.trim().isEmpty) return;
 
     // Cancel any in-flight stream before starting a new one
@@ -75,6 +77,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     _activeStream = null;
 
     final currentMessages = state.value ?? [];
+    final goalMeta = goalId != null ? {'goalId': goalId} : null;
 
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -82,6 +85,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
       content: text,
       timestamp: DateTime.now(),
       status: MessageStatus.sent,
+      metadata: goalMeta,
     );
 
     final withUser = [...currentMessages, userMessage];
@@ -97,6 +101,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
       content: '',
       timestamp: DateTime.now(),
       status: MessageStatus.streaming,
+      metadata: goalMeta,
     );
     state = AsyncValue.data([...withUser, placeholder]);
 

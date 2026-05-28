@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/ai_query_limit_provider.dart';
+import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 
 class PaywallPage extends ConsumerStatefulWidget {
@@ -27,7 +29,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     (
       CupertinoIcons.sparkles,
       'Unlimited AI Chat',
-      'Free plan includes 10 lifetime requests'
+      'No limits, no interruptions'
     ),
     (
       CupertinoIcons.camera,
@@ -84,9 +86,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         ref.invalidate(isPremiumProvider);
         ref.invalidate(subscriptionTierProvider);
         // Clear the local query count so the banner disappears immediately
-        await ref.read(aiQueryOperationsProvider).resetQueryCount();
+        ref.read(aiQueryOperationsProvider).resetQueryCount();
 
-        if (mounted) Navigator.of(context).pop(true);
+        if (mounted) context.pop(true);
       }
     } on PurchasesError catch (e) {
       if (e.code != PurchasesErrorCode.purchaseCancelledError && mounted) {
@@ -112,7 +114,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
       ref.invalidate(subscriptionTierProvider);
 
       if (result.entitlements.active.containsKey('premium')) {
-        if (mounted) Navigator.of(context).pop(true);
+        if (mounted) context.pop(true);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No active subscription found.')),
@@ -136,10 +138,13 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(CupertinoIcons.xmark,
-              color: isDark ? Colors.white70 : AppColors.brandTeal),
-          onPressed: () => Navigator.of(context).pop(false),
+        leading: Center(
+          child: CircularIconButton(
+            icon: CupertinoIcons.xmark,
+            onTap: () => context.pop(false),
+            backgroundColor: AppColors.brandTeal.withValues(alpha: 0.15),
+            iconColor: Colors.white,
+          ),
         ),
       ),
       body: SafeArea(
@@ -188,14 +193,28 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         children: [
           // ── Header ────────────────────────────────────────────────
           Container(
-            width: 72,
-            height: 72,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.brandTeal.withValues(alpha: 0.15),
+              color: AppColors.brandTeal.withValues(alpha: 0.08),
+              border: Border.all(
+                color: AppColors.brandTeal.withValues(alpha: 0.20),
+                width: 1.5,
+              ),
             ),
-            child: const Icon(CupertinoIcons.star_fill,
-                size: 36, color: AppColors.brandTeal),
+            child: Center(
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.brandTeal.withValues(alpha: 0.20),
+                ),
+                child: const Icon(CupertinoIcons.star_fill,
+                    size: 26, color: AppColors.brandTeal),
+              ),
+            ),
           ),
           const SizedBox(height: AppSizes.md),
           Text(
@@ -249,6 +268,12 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                         ],
                       ),
                     ),
+                    const SizedBox(width: AppSizes.sm),
+                    const Icon(
+                      CupertinoIcons.checkmark_circle_fill,
+                      size: 16,
+                      color: AppColors.systemGreen,
+                    ),
                   ],
                 ),
               )),
@@ -264,24 +289,35 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
           // ── CTA ───────────────────────────────────────────────────
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isPurchasing ? null : _purchase,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandTeal,
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.md + 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.brandTeal, AppColors.brandTealLight],
                 ),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
               ),
-              child: _isPurchasing
-                  ? const LoadingIndicator(color: Colors.white)
-                  : const Text(
-                      'Start 7-Day Free Trial',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    ),
+              child: ElevatedButton(
+                onPressed: _isPurchasing ? null : _purchase,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  disabledBackgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: AppSizes.md + 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                  ),
+                ),
+                child: _isPurchasing
+                    ? const LoadingIndicator(color: Colors.white)
+                    : const Text(
+                        'Start 7-Day Free Trial',
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      ),
+              ),
             ),
           ),
           const SizedBox(height: AppSizes.sm),
@@ -311,7 +347,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     final isSelected = _selectedPackage?.identifier == pkg.identifier;
     final price = pkg.storeProduct.priceString;
     final title = isAnnual ? 'Annual' : 'Monthly';
-    final subtitle = isAnnual ? '$price / year — save 58%' : '$price / month';
+    final subtitle = isAnnual
+        ? '\$${(pkg.storeProduct.price / 12).toStringAsFixed(2)} / month · $price billed annually · save 58%'
+        : '$price / month';
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPackage = pkg),

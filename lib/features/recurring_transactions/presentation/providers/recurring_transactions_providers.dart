@@ -105,6 +105,9 @@ class RecurringTransactionsOperationsNotifier
     }
   }
 
+  static int _daysInMonth(int year, int month) =>
+      DateTime(year, month + 1, 0).day;
+
   static DateTime _advance(DateTime from, RecurringFrequency frequency) {
     switch (frequency) {
       case RecurringFrequency.daily:
@@ -113,13 +116,12 @@ class RecurringTransactionsOperationsNotifier
         return from.add(const Duration(days: 7));
       case RecurringFrequency.monthly:
         final newMonth = from.month + 1;
-        return DateTime(
-          from.year + (newMonth > 12 ? 1 : 0),
-          newMonth > 12 ? newMonth - 12 : newMonth,
-          from.day,
-        );
+        final newYear = from.year + (newMonth > 12 ? 1 : 0);
+        final m = newMonth > 12 ? newMonth - 12 : newMonth;
+        return DateTime(newYear, m, from.day.clamp(1, _daysInMonth(newYear, m)));
       case RecurringFrequency.yearly:
-        return DateTime(from.year + 1, from.month, from.day);
+        return DateTime(from.year + 1, from.month,
+            from.day.clamp(1, _daysInMonth(from.year + 1, from.month)));
     }
   }
 

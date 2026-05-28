@@ -8,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../providers/settings_providers.dart';
+import '../../../../core/providers/display_format_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -15,6 +16,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsOperationsProvider);
+    final displayFormat = ref.watch(displayFormatProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -95,7 +97,7 @@ class SettingsPage extends ConsumerWidget {
                   subtitle: 'settings.currencyDefault'.tr(),
                   onTap: () =>
                       context.push('/settings/display?section=currency'),
-                  trailingText: 'USD',
+                  trailingText: displayFormat.currencyCode,
                 ),
                 _buildDivider(context, isDark),
                 _buildSettingsTile(
@@ -106,7 +108,7 @@ class SettingsPage extends ConsumerWidget {
                   subtitle: 'settings.dateFormatDisplay'.tr(),
                   onTap: () =>
                       context.push('/settings/display?section=dateformat'),
-                  trailingText: 'MM/DD/YYYY',
+                  trailingText: displayFormat.dateFormat,
                 ),
               ]),
               const SizedBox(height: AppSizes.lg),

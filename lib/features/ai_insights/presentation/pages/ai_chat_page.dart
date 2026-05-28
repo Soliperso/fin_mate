@@ -127,10 +127,12 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
       ),
       body: chatAsync.when(
         data: (messages) {
+          final generalMessages =
+              messages.where((m) => m.metadata?['goalId'] == null).toList();
           final isStreaming = _isSendingCheck ||
-              messages.any((m) => m.status == MessageStatus.streaming);
+              generalMessages.any((m) => m.status == MessageStatus.streaming);
           if (isStreaming) _scrollToBottom();
-          final hasMessages = messages.isNotEmpty;
+          final hasMessages = generalMessages.isNotEmpty;
 
           return Column(
             children: [
@@ -142,10 +144,10 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                         controller: _scrollController,
                         padding: const EdgeInsets.symmetric(
                             vertical: AppSizes.md),
-                        itemCount: messages.length,
+                        itemCount: generalMessages.length,
                         itemBuilder: (context, index) =>
                             EnhancedChatMessageBubble(
-                          message: messages[index],
+                          message: generalMessages[index],
                           onFollowUpTap: _handleSendMessage,
                           onActionTap: _handleActionTap,
                         ),

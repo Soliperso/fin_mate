@@ -1,3 +1,4 @@
+import 'dart:math' show sqrt;
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -543,7 +544,18 @@ class InsightsService {
         categoryStats[category]!['count'] += 1;
       }
 
-      // Calculate averages and detect anomalies
+      // Pre-compute std deviation per category for z-score detection
+      final categoryStdDev = <String, double>{};
+      for (final entry in categoryStats.entries) {
+        final amounts = entry.value['amounts'] as List<double>;
+        final avg = (entry.value['total'] as double) / (entry.value['count'] as int);
+        if (amounts.length >= 3) {
+          final variance = amounts.fold(0.0, (sum, a) => sum + (a - avg) * (a - avg)) / amounts.length;
+          categoryStdDev[entry.key] = sqrt(variance);
+        }
+      }
+
+      // Detect anomalies using z-score (threshold 2.5σ); fall back to 2× for thin samples
       final anomalies = <SpendingAnomaly>[];
 
       for (final tx in transactions) {
@@ -552,11 +564,14 @@ class InsightsService {
         final amount = (tx['amount'] as num).toDouble();
         final stats = categoryStats[category]!;
         final average = (stats['total'] as double) / (stats['count'] as int);
+        final stdDev = categoryStdDev[category];
 
-        final deviation = ((amount - average) / average * 100).abs();
+        final bool isAnomaly = stdDev != null && stdDev > 0
+            ? (amount - average) / stdDev > 2.5
+            : amount > average * 2;
 
-        // Flag transactions 2x+ the average
-        if (amount > average * 2) {
+        if (isAnomaly) {
+          final deviation = ((amount - average) / average * 100).abs();
           anomalies.add(SpendingAnomaly(
             id: '${tx['id']}_anomaly',
             transactionId: tx['id'] as String,
@@ -956,6 +971,42 @@ class InsightsService {
     // Sort: critical first, then by creation time
     alerts.sort((a, b) => b.severity.index.compareTo(a.severity.index));
     return alerts;
+  }
+
+  /// Detect overdue recurring income (missed / late paychecks)
+  Future<List<ProactiveAlert>> detectIncomeAlerts() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return [];
+      final now = DateTime.now();
+      final todayStr = now.toIso8601String().split('T')[0];
+
+      final rows = await _supabase
+          .from('recurring_transactions')
+          .select('id, description, amount, next_occurrence')
+          .eq('user_id', userId)
+          .eq('type', 'income')
+          .eq('is_active', true)
+          .lt('next_occurrence', todayStr);
+
+      return (rows as List).map((row) {
+        final due = DateTime.parse(row['next_occurrence'] as String);
+        final daysLate = now.difference(due).inDays;
+        final desc = row['description'] as String? ?? 'Income';
+        final amount = (row['amount'] as num).toDouble();
+        return ProactiveAlert(
+          id: 'income_late_${row['id']}',
+          type: AlertType.cashFlowWarning,
+          severity: daysLate > 3 ? AlertSeverity.high : AlertSeverity.medium,
+          title: 'Late income: $desc',
+          message:
+              '\$${amount.toStringAsFixed(2)} was expected $daysLate day${daysLate != 1 ? 's' : ''} ago.',
+          createdAt: now,
+        );
+      }).toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   /// Expand a recurring transaction into individual occurrences within [days]

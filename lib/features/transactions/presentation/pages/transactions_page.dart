@@ -1173,10 +1173,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             : '-';
 
     final isSelected = _selectedIds.contains(transaction.id);
-    final today = DateTime.now();
-    final isProjected = transaction.date.isAfter(
-      DateTime(today.year, today.month, today.day),
-    );
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -1237,7 +1233,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSizes.md,
-            vertical: 12,
+            vertical: 10,
           ),
           child: Row(
             children: [
@@ -1255,90 +1251,35 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ),
                 ),
               Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 ),
                 child: Icon(_getTransactionIcon(transaction),
-                    color: iconColor, size: 20),
+                    color: iconColor, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaction.description ?? 'Transaction',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (transaction.categoryName != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        transaction.categoryName!,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
+                child: Text(
+                  transaction.categoryName != null
+                      ? '${transaction.description ?? 'Transaction'} · ${transaction.categoryName}'
+                      : transaction.description ?? 'Transaction',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
-                  ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: AppSizes.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$amountPrefix${currencyFormat.format(transaction.amount.abs() * convFactor)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: iconColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  if (ref.watch(
-                          usdEquivalentProvider(transaction.amount.abs())) !=
-                      null)
-                    Text(
-                      ref.watch(
-                          usdEquivalentProvider(transaction.amount.abs()))!,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    )
-                  else
-                    Text(
-                      DateFormat(AppDateFormats.timeOnly)
-                          .format(transaction.createdAt.toLocal()),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+              Text(
+                '$amountPrefix${currencyFormat.format(transaction.amount.abs() * convFactor)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: iconColor,
+                      fontWeight: FontWeight.w600,
                     ),
-                  if (isProjected) ...[
-                    const SizedBox(height: 3),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: AppColors.systemBlue.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Projected',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.systemBlue,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
-                            ),
-                      ),
-                    ),
-                  ],
-                ],
               ),
             ],
           ),

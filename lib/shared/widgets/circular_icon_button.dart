@@ -7,6 +7,8 @@ class CircularIconButton extends StatelessWidget {
   final VoidCallback onTap;
   final double size;
   final double iconSize;
+  final Color? backgroundColor;
+  final Color? iconColor;
 
   const CircularIconButton({
     super.key,
@@ -14,6 +16,8 @@ class CircularIconButton extends StatelessWidget {
     required this.onTap,
     this.size = 36,
     this.iconSize = 18,
+    this.backgroundColor,
+    this.iconColor,
   });
 
   @override
@@ -25,12 +29,12 @@ class CircularIconButton extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Theme.of(context).cardTheme.color,
+          color: backgroundColor ?? Theme.of(context).cardTheme.color,
         ),
         child: Icon(
           icon,
           size: iconSize,
-          color: Theme.of(context).iconTheme.color,
+          color: iconColor ?? Theme.of(context).iconTheme.color,
         ),
       ),
     );

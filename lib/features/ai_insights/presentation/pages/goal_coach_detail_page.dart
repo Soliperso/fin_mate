@@ -2,10 +2,13 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/providers/ai_query_limit_provider.dart';
 import '../../../../core/providers/display_format_provider.dart';
+import '../widgets/query_limit_banner.dart';
 import '../../../savings_goals/domain/entities/savings_goal_entity.dart';
 import '../../../savings_goals/presentation/providers/savings_goal_providers.dart';
 import '../providers/chat_provider.dart';
@@ -31,6 +34,7 @@ class _GoalCoachDetailPageState extends ConsumerState<GoalCoachDetailPage>
   late double _boostAmount; // extra monthly contribution (what-if slider)
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _chatScroll = ScrollController();
+  bool _isSendingCheck = false;
 
   @override
   void initState() {
@@ -48,13 +52,30 @@ class _GoalCoachDetailPageState extends ConsumerState<GoalCoachDetailPage>
     super.dispose();
   }
 
-  void _sendMessage(String text) {
-    if (text.trim().isEmpty) return;
+  Future<void> _sendMessage(String text) async {
+    if (_isSendingCheck || text.trim().isEmpty) return;
+    setState(() => _isSendingCheck = true);
+
+    final canMakeQuery = await ref.read(canMakeQueryProvider.future);
+
+    if (!mounted) return;
+    setState(() => _isSendingCheck = false);
+
+    if (!canMakeQuery) {
+      if (mounted) context.push('/paywall');
+      return;
+    }
+
+    try {
+      await ref.read(aiQueryOperationsProvider).incrementQueryCount();
+    } catch (e) {
+      debugPrint('Failed to increment query count: $e');
+    }
+
     _chatController.clear();
-    // Prefix the user message with goal context so the AI stays focused
     final contextualPrompt =
         'Regarding my "${widget.goal.name}" savings goal: $text';
-    ref.read(chatProvider.notifier).sendMessage(contextualPrompt);
+    ref.read(chatProvider.notifier).sendMessage(contextualPrompt, goalId: widget.goal.id);
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_chatScroll.hasClients) {
         _chatScroll.animateTo(
@@ -178,11 +199,12 @@ class _GoalCoachDetailPageState extends ConsumerState<GoalCoachDetailPage>
     return chatAsync.when(
       data: (messages) {
         final goalMessages = messages
-            .where((m) => m.content.contains(goal.name))
+            .where((m) => m.metadata?['goalId'] == goal.id)
             .toList();
 
         return Column(
           children: [
+            const QueryLimitBanner(),
             // Context banner
             Container(
               padding: const EdgeInsets.symmetric(
@@ -251,50 +273,91 @@ class _GoalCoachDetailPageState extends ConsumerState<GoalCoachDetailPage>
                       itemBuilder: (_, i) {
                         final msg = goalMessages[i];
                         final isUser = msg.sender == MessageSender.user;
-                        return Align(
-                          alignment: isUser
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth:
-                                  MediaQuery.of(context).size.width * 0.78,
+
+                        final avatar = Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isUser
+                                  ? [AppColors.brandTeal, AppColors.tealDark]
+                                  : [AppColors.brandTeal, AppColors.tealLight],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 10),
-                            decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.brandTeal.withValues(alpha: 0.25),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            isUser
+                                ? CupertinoIcons.person_fill
+                                : CupertinoIcons.sparkles,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        );
+
+                        final bubble = Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.72,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isUser ? AppColors.brandTeal : cardColor,
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(14),
+                              topRight: const Radius.circular(14),
+                              bottomLeft: Radius.circular(isUser ? 14 : 4),
+                              bottomRight: Radius.circular(isUser ? 4 : 14),
+                            ),
+                            border: isUser
+                                ? null
+                                : Border.all(
+                                    color: isDark
+                                        ? AppColors.borderDark
+                                        : AppColors.borderLight,
+                                  ),
+                          ),
+                          child: Text(
+                            msg.content,
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.5,
                               color: isUser
-                                  ? AppColors.brandTeal
-                                  : cardColor,
-                              borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(14),
-                                topRight: const Radius.circular(14),
-                                bottomLeft:
-                                    Radius.circular(isUser ? 14 : 4),
-                                bottomRight:
-                                    Radius.circular(isUser ? 4 : 14),
-                              ),
-                              border: isUser
-                                  ? null
-                                  : Border.all(
-                                      color: isDark
-                                          ? AppColors.borderDark
-                                          : AppColors.borderLight,
-                                    ),
+                                  ? Colors.white
+                                  : (isDark ? Colors.white : Colors.black87),
                             ),
-                            child: Text(
-                              msg.content,
-                              style: TextStyle(
-                                fontSize: 13,
-                                height: 1.5,
-                                color: isUser
-                                    ? Colors.white
-                                    : (isDark
-                                        ? Colors.white
-                                        : Colors.black87),
-                              ),
-                            ),
+                          ),
+                        );
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            mainAxisAlignment: isUser
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isUser) ...[
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: AppSizes.sm, right: AppSizes.xs),
+                                  child: avatar,
+                                ),
+                              ],
+                              bubble,
+                              if (isUser) ...[
+                                const SizedBox(width: AppSizes.sm),
+                                avatar,
+                              ],
+                            ],
                           ),
                         );
                       },

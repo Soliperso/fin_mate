@@ -1,29 +1,39 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/payment_config.dart';
+import '../config/supabase_client.dart';
 import 'subscription_provider.dart';
 
-/// SharedPreferences key for the lifetime per-install AI chat query count.
-const _kAiQueryCountKey = 'ai_chat_query_count';
-
 // ============================================================================
-// Usage Provider
+// Usage Provider — backed by Supabase user_profiles.free_uses_count
 // ============================================================================
 
-/// Reads the current lifetime AI chat query count from SharedPreferences.
-/// Resets only on app reinstall — not monthly.
+/// Reads the current lifetime premium-feature use count from Supabase.
+/// Falls back to 0 on any error so the user is never erroneously blocked.
 final aiQueryUsageProvider = FutureProvider<AIQueryUsage>((ref) async {
-  final prefs = await SharedPreferences.getInstance();
-  final count = prefs.getInt(_kAiQueryCountKey) ?? 0;
-  return AIQueryUsage(queriesUsed: count);
+  try {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return const AIQueryUsage(queriesUsed: 0);
+
+    final response = await supabase
+        .from('user_profiles')
+        .select('free_uses_count')
+        .eq('id', userId)
+        .maybeSingle();
+
+    final count = (response?['free_uses_count'] as int?) ?? 0;
+    return AIQueryUsage(queriesUsed: count);
+  } catch (_) {
+    return const AIQueryUsage(queriesUsed: 0);
+  }
 });
 
 // ============================================================================
 // Gate Provider
 // ============================================================================
 
-/// Returns true if the user can send another AI chat message.
-/// Premium users always return true. Free users are limited to 10 lifetime queries.
+/// Returns true if the user can use another premium feature.
+/// Premium users always return true. Free users are limited to 10 lifetime uses.
 final canMakeQueryProvider = FutureProvider<bool>((ref) async {
   final isPremium = await ref.watch(isPremiumProvider.future);
   if (isPremium) return true;
@@ -36,7 +46,7 @@ final canMakeQueryProvider = FutureProvider<bool>((ref) async {
 // Operations Provider
 // ============================================================================
 
-/// Provider for mutating AI query usage.
+/// Provider for mutating premium feature usage.
 final aiQueryOperationsProvider =
     Provider<AIQueryOperations>((ref) => AIQueryOperations(ref));
 
@@ -44,25 +54,30 @@ class AIQueryOperations {
   final Ref _ref;
   AIQueryOperations(this._ref);
 
-  /// Increments the per-install query count in SharedPreferences.
+  /// Atomically increments the Supabase counter via RPC.
   /// No-op for premium users.
   Future<void> incrementQueryCount() async {
     final isPremium = await _ref.read(isPremiumProvider.future);
     if (isPremium) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final current = prefs.getInt(_kAiQueryCountKey) ?? 0;
-    await prefs.setInt(_kAiQueryCountKey, current + 1);
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
 
-    // Invalidate so the banner and gate refresh immediately
+    try {
+      await supabase.rpc(
+        'increment_free_uses',
+        params: {'p_user_id': userId},
+      );
+    } catch (_) {
+      // Non-fatal: if the RPC fails the gate will re-read on next open
+    }
+
     _ref.invalidate(aiQueryUsageProvider);
   }
 
-  /// Resets the local query counter. Used after a successful purchase
-  /// so the new premium user gets a clean slate on downgrade (if ever).
-  Future<void> resetQueryCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kAiQueryCountKey);
+  /// Resets the local provider cache (e.g. after a successful purchase).
+  /// The Supabase counter is kept for audit purposes; premium check bypasses it.
+  void resetQueryCount() {
     _ref.invalidate(aiQueryUsageProvider);
   }
 }
@@ -76,17 +91,14 @@ class AIQueryUsage {
 
   const AIQueryUsage({required this.queriesUsed});
 
-  /// True when the user has hit the 10-query lifetime free limit.
   bool get hasReachedLimit =>
       queriesUsed >= PaymentConfig.freemiumAIQueriesPerMonth;
 
-  /// Queries remaining before the paywall kicks in (min 0).
   int get queriesRemaining {
     final remaining = PaymentConfig.freemiumAIQueriesPerMonth - queriesUsed;
     return remaining > 0 ? remaining : 0;
   }
 
-  /// Progress value for the usage bar, clamped 0.0–1.0.
   double get usagePercentage =>
       (queriesUsed / PaymentConfig.freemiumAIQueriesPerMonth).clamp(0.0, 1.0);
 }

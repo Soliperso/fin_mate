@@ -17,15 +17,25 @@ class AiInsightsPage extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final statsAsync = ref.watch(dashboardStatsProvider);
     final alertsAsync = ref.watch(typedProactiveAlertsProvider);
+    final goalAlertsAsync = ref.watch(goalAlertsProvider);
+    final incomeAlertsAsync = ref.watch(incomeAlertsProvider);
     final dismissedIds = ref.watch(dismissedAlertIdsProvider);
     final insightsAsync = ref.watch(spendingInsightsProvider);
     final goalsAsync = ref.watch(savingsGoalsProvider);
 
-    final activeAlertCount = alertsAsync.whenOrNull(
-          data: (alerts) =>
-              alerts.where((a) => !dismissedIds.contains(a.id)).length,
-        ) ??
-        0;
+    final activeAlertCount =
+        (alertsAsync.whenOrNull(
+              data: (alerts) =>
+                  alerts.where((a) => !dismissedIds.contains(a.id)).length,
+            ) ?? 0) +
+        (goalAlertsAsync.whenOrNull(
+              data: (alerts) =>
+                  alerts.where((a) => !dismissedIds.contains(a.id)).length,
+            ) ?? 0) +
+        (incomeAlertsAsync.whenOrNull(
+              data: (alerts) =>
+                  alerts.where((a) => !dismissedIds.contains(a.id)).length,
+            ) ?? 0);
 
     final activeGoalCount = goalsAsync.whenOrNull(
           data: (goals) => goals.where((g) => !g.isCompleted).length,
@@ -86,6 +96,8 @@ class AiInsightsPage extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(dashboardStatsProvider);
           ref.invalidate(typedProactiveAlertsProvider);
+          ref.invalidate(goalAlertsProvider);
+          ref.invalidate(incomeAlertsProvider);
           ref.invalidate(spendingInsightsProvider);
           ref.invalidate(savingsGoalsProvider);
         },

@@ -240,11 +240,11 @@ class PayoffTimelineChart extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 14,
-                      height: 8,
+                      width: 10,
+                      height: 10,
                       decoration: BoxDecoration(
                         color: color,
-                        borderRadius: BorderRadius.circular(3),
+                        shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -261,24 +261,32 @@ class PayoffTimelineChart extends StatelessWidget {
 
           const SizedBox(height: AppSizes.sm),
           Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  CupertinoIcons.flag,
-                  size: 14,
-                  color: AppColors.success,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'payoffChart.debtFreeLabel'
-                      .tr(namedArgs: {'date': debtFreeLabel}),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    CupertinoIcons.flag_fill,
+                    size: 13,
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'payoffChart.debtFreeLabel'
+                        .tr(namedArgs: {'date': debtFreeLabel}),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

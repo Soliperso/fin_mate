@@ -129,7 +129,7 @@ class BudgetHeroCard extends ConsumerWidget {
               ),
               const SizedBox(width: AppSizes.xs),
               Text(
-                '${budgets.length} ${'budgets.title'.tr().toLowerCase()}',
+                '${budgets.length} ${budgets.length == 1 ? 'budget' : 'budgets.title'.tr().toLowerCase()}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -143,7 +143,7 @@ class BudgetHeroCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 ),
                 child: Text(
-                  '${pct.toStringAsFixed(0)} %',
+                  '${pct.toStringAsFixed(0)}%',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: badgeColor,
                         fontWeight: FontWeight.w700,

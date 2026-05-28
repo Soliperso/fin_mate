@@ -19,7 +19,7 @@ class BalanceTimelineChart extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final currencyFmt0 = ref.watch(currencyFormat0Provider);
+    final currencyFmt = ref.watch(currencyFormat2Provider);
 
     final balances = forecast.dailyForecasts.map((f) => f.projectedBalance).toList();
     final minBalance = balances.reduce((a, b) => a < b ? a : b);
@@ -50,16 +50,17 @@ class BalanceTimelineChart extends ConsumerWidget {
               isCurved: true,
               curveSmoothness: 0.4,
               color: const Color(0xFF4ECB71),
-              barWidth: 1.5,
+              barWidth: 2.0,
               isStrokeCapRound: false,
               dotData: FlDotData(
                 show: true,
                 getDotPainter: (spot, percent, barData, index) {
                   if (index == lowPointIndex) {
                     return FlDotCirclePainter(
-                      radius: 3.5,
+                      radius: 5,
                       color: Colors.amber,
-                      strokeWidth: 0,
+                      strokeWidth: 1.5,
+                      strokeColor: Colors.white,
                     );
                   }
                   return FlDotCirclePainter(
@@ -70,11 +71,29 @@ class BalanceTimelineChart extends ConsumerWidget {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: const Color(0xFF4ECB71).withValues(alpha: 0.12),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF4ECB71).withValues(alpha: 0.25),
+                    const Color(0xFF4ECB71).withValues(alpha: 0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
             ),
           ],
-          extraLinesData: const ExtraLinesData(),
+          extraLinesData: ExtraLinesData(
+            horizontalLines: minBalance < 0
+                ? [
+                    HorizontalLine(
+                      y: 0,
+                      color: Colors.white.withValues(alpha: 0.25),
+                      strokeWidth: 1,
+                      dashArray: [4, 4],
+                    ),
+                  ]
+                : [],
+          ),
           lineTouchData: LineTouchData(
             enabled: true,
             touchTooltipData: LineTouchTooltipData(
@@ -84,7 +103,7 @@ class BalanceTimelineChart extends ConsumerWidget {
                   if (idx < 0 || idx >= forecast.dailyForecasts.length) return null;
                   final day = forecast.dailyForecasts[idx];
                   return LineTooltipItem(
-                    '${DateFormat('MMM d').format(day.date)}\n${currencyFmt0.format(day.projectedBalance)}',
+                    '${DateFormat('MMM d').format(day.date)}\n${currencyFmt.format(day.projectedBalance)}',
                     const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

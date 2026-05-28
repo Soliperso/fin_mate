@@ -138,7 +138,7 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
                               );
                             }
                             if (index == 1) {
-                              return _buildSectionHeader(context);
+                              return _buildSectionHeader(context, count: filtered.length);
                             }
                             return _buildBudgetCard(context, filtered[index - 2]);
                           },
@@ -251,14 +251,25 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context) {
+  Widget _buildSectionHeader(BuildContext context, {required int count}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.sm),
-      child: Text(
-        'budgets.byCategory'.tr(),
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        children: [
+          Text(
+            'budgets.byCategory'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(width: AppSizes.xs),
+          Text(
+            '· $count',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ],
       ),
     );
   }

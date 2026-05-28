@@ -187,50 +187,6 @@ class AnalyticsService {
     );
   }
 
-  /// Track bill splitting events
-  Future<void> trackGroupCreated({
-    required String groupId,
-    required int memberCount,
-  }) async {
-    await logEvent(
-      eventName: 'group_created',
-      properties: {
-        'group_id': groupId,
-        'member_count': memberCount,
-      },
-    );
-  }
-
-  Future<void> trackExpenseCreated({
-    required String expenseId,
-    required String groupId,
-    required double amount,
-  }) async {
-    await logEvent(
-      eventName: 'expense_created',
-      properties: {
-        'expense_id': expenseId,
-        'group_id': groupId,
-        'amount': amount,
-      },
-    );
-  }
-
-  Future<void> trackSettlementRecorded({
-    required String settlementId,
-    required String groupId,
-    required double amount,
-  }) async {
-    await logEvent(
-      eventName: 'settlement_recorded',
-      properties: {
-        'settlement_id': settlementId,
-        'group_id': groupId,
-        'amount': amount,
-      },
-    );
-  }
-
   /// Track savings goal events
   Future<void> trackGoalCreated({
     required String goalId,

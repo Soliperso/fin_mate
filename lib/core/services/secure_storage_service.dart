@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Service for securely storing sensitive data like credentials
@@ -123,5 +124,22 @@ class SecureStorageService {
       _storage.delete(key: _keyMfaMethod),
       _storage.delete(key: _keyTotpSecret),
     ]);
+  }
+
+  // ============================================================================
+  // Smart Alert Dismissals
+  // ============================================================================
+
+  Future<Set<String>> getDismissedAlertIds(String userId) async {
+    final raw = await _storage.read(key: 'dismissed_alerts_$userId');
+    if (raw == null || raw.isEmpty) return {};
+    return Set<String>.from(jsonDecode(raw) as List);
+  }
+
+  Future<void> saveDismissedAlertIds(String userId, Set<String> ids) async {
+    await _storage.write(
+      key: 'dismissed_alerts_$userId',
+      value: jsonEncode(ids.toList()),
+    );
   }
 }

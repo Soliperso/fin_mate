@@ -149,7 +149,7 @@ class _ForecastBody extends StatelessWidget {
               _MetricCard(
                 label: 'PROJECTED BALANCE',
                 value: currencyFmt.format(projectedBalance),
-                valueColor: AppColors.brandTeal,
+                valueColor: projectedBalance >= 0 ? AppColors.brandTeal : AppColors.systemRed,
                 isDark: isDark,
               ),
               const SizedBox(width: AppSizes.sm),
@@ -170,7 +170,7 @@ class _ForecastBody extends StatelessWidget {
             children: [
               _MetricCard(
                 label: 'LOW POINT',
-                value: currencyFmt0.format(lowPoint),
+                value: currencyFmt.format(lowPoint),
                 valueColor: lowPoint > 500
                     ? AppColors.brandTeal
                     : lowPoint > 100
@@ -182,7 +182,11 @@ class _ForecastBody extends StatelessWidget {
               _MetricCard(
                 label: 'CONFIDENCE',
                 value: '$confidence%',
-                valueColor: isDark ? Colors.white : Colors.black87,
+                valueColor: confidence >= 70
+                    ? AppColors.brandTeal
+                    : confidence >= 40
+                        ? AppColors.systemOrange
+                        : AppColors.systemRed,
                 isDark: isDark,
               ),
             ],
@@ -357,11 +361,17 @@ class _InsightRow extends StatelessWidget {
       _ => (CupertinoIcons.lightbulb_fill, const Color(0xFF4A9EBF)),
     };
 
+    final bgColor = switch (type) {
+      'warning' => AppColors.systemOrange.withValues(alpha: 0.08),
+      'positive' => AppColors.systemGreen.withValues(alpha: 0.08),
+      _ => cardColor,
+    };
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.xs + 2),
       padding: const EdgeInsets.all(AppSizes.sm + 2),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         border: Border.all(
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -371,7 +381,7 @@ class _InsightRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: color),
+          Icon(icon, size: 18, color: color),
           const SizedBox(width: AppSizes.sm),
           Expanded(
             child: Text(

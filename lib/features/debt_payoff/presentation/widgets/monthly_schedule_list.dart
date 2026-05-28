@@ -203,14 +203,13 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
         if (widget.result.totalMonths > widget.monthsToShow) ...[
           const SizedBox(height: AppSizes.xs),
           Center(
-            child: TextButton.icon(
+            child: OutlinedButton.icon(
               onPressed: () => setState(() => _expanded = !_expanded),
               icon: Icon(
                 _expanded
                     ? CupertinoIcons.chevron_up
                     : CupertinoIcons.chevron_down,
                 size: 13,
-                color: AppColors.textSecondary,
               ),
               label: Text(
                 _expanded
@@ -218,17 +217,18 @@ class _MonthlyScheduleListState extends ConsumerState<MonthlyScheduleList> {
                     : 'schedule.seeFullSchedule'.tr(
                         namedArgs: {'months': '${widget.result.totalMonths}'}),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
-              style: TextButton.styleFrom(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.brandTeal,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.sm,
+                  horizontal: AppSizes.md,
                   vertical: AppSizes.xs,
                 ),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: const StadiumBorder(),
               ),
             ),
           ),
@@ -391,8 +391,8 @@ class _ScheduleRow extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                        width: 4,
-                        height: 4,
+                        width: 6,
+                        height: 6,
                         decoration: BoxDecoration(
                           color: focusDebtColor,
                           shape: BoxShape.circle,

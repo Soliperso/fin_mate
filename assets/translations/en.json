@@ -920,7 +920,15 @@
     "dueDay": "Due Day",
     "dueDayValue": "Day {day} of month",
     "notes": "Notes",
-    "addedOn": "Added On"
+    "addedOn": "Added On",
+    "dailyInterest": "Daily Interest",
+    "lastPayment": "Last Payment",
+    "nextDueDate": "Next Due",
+    "principalPaid": "Principal Paid",
+    "interestPaid": "Interest Paid",
+    "accountDetails": "Account Details",
+    "loanTerms": "Loan Terms",
+    "payoffAmount": "Payoff Amount"
   },
   "recurring": {
     "searchHint": "Search recurring transactions...",

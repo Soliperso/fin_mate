@@ -912,7 +912,15 @@
     "dueDay": "يوم الاستحقاق",
     "dueDayValue": "اليوم {day} من الشهر",
     "notes": "ملاحظات",
-    "addedOn": "أُضيف في"
+    "addedOn": "أُضيف في",
+    "dailyInterest": "الفائدة اليومية",
+    "lastPayment": "آخر دفعة",
+    "nextDueDate": "الاستحقاق التالي",
+    "principalPaid": "المبلغ الأصلي المدفوع",
+    "interestPaid": "الفائدة المدفوعة",
+    "accountDetails": "تفاصيل الحساب",
+    "loanTerms": "شروط القرض",
+    "payoffAmount": "مبلغ السداد"
   },
   "recurring": {
     "searchHint": "البحث في المعاملات المتكررة...",

@@ -41,7 +41,6 @@ class PaymentConfig {
     'Basic charts & analytics',
     '10 AI queries per month',
     '6 months transaction history',
-    'Unlimited bill splitting',
     'CSV export (last 30 days)',
   ];
 

@@ -247,6 +247,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/paywall',
         name: 'paywall',
         pageBuilder: (context, state) =>

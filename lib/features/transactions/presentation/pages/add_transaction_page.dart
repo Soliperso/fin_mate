@@ -243,6 +243,17 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     });
   }
 
+  void _onAmountDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      final current = double.tryParse(_amountController.text) ?? 0.0;
+      // 1 px of horizontal drag = $0.10; clamp to [0, 9999999.99]
+      final updated =
+          (current + details.delta.dx * 0.1).clamp(0.0, 9999999.99);
+      _amountController.text =
+          updated > 0 ? updated.toStringAsFixed(2) : '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -379,36 +390,39 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ),
         const SizedBox(height: AppSizes.lg),
 
-        // Amount display (read-only, updated by numpad)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Text(
-                ref.watch(currencySymbolProvider),
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+        // Amount display — drag left/right to scrub value, or use numpad below
+        GestureDetector(
+          onHorizontalDragUpdate: _onAmountDragUpdate,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  ref.watch(currencySymbolProvider),
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: displayText.isEmpty
+                        ? _typeColor.withValues(alpha: 0.25)
+                        : _typeColor,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              Text(
+                displayText.isEmpty ? '0.00' : displayText,
+                style: TextStyle(
+                  fontSize: 52,
+                  fontWeight: FontWeight.w700,
                   color: displayText.isEmpty
                       ? _typeColor.withValues(alpha: 0.25)
                       : _typeColor,
-                  letterSpacing: -0.5,
+                  letterSpacing: -2,
                 ),
               ),
-            ),
-            Text(
-              displayText.isEmpty ? '0.00' : displayText,
-              style: TextStyle(
-                fontSize: 52,
-                fontWeight: FontWeight.w700,
-                color: displayText.isEmpty
-                    ? _typeColor.withValues(alpha: 0.25)
-                    : _typeColor,
-                letterSpacing: -2,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (isInvalid)
           Padding(
@@ -1069,7 +1083,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   // Future<void> _pickAttachment() async { ... }
 
   void _showCategoryPicker() {
-    final categories = _loadedCategories;
+    final categories = List.from(_loadedCategories)
+      ..sort((a, b) => (a.name as String).compareTo(b.name as String));
     if (categories.isEmpty) return;
 
     final initialIndex =
@@ -1651,6 +1666,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           categoriesProvider(_selectedType == 'expense' ? 'expense' : 'income')
               .future);
 
+      if (categoriesAsync.isEmpty) throw StateError('No categories available');
       final category = categoriesAsync.firstWhere(
         (c) => c.name == _selectedCategory,
         orElse: () => categoriesAsync.first,

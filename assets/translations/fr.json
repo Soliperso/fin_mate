@@ -907,7 +907,15 @@
     "dueDay": "Jour d'échéance",
     "dueDayValue": "Jour {day} du mois",
     "notes": "Notes",
-    "addedOn": "Ajouté le"
+    "addedOn": "Ajouté le",
+    "dailyInterest": "Intérêts Journaliers",
+    "lastPayment": "Dernier Paiement",
+    "nextDueDate": "Prochaine Échéance",
+    "principalPaid": "Capital Remboursé",
+    "interestPaid": "Intérêts Payés",
+    "accountDetails": "Détails du Compte",
+    "loanTerms": "Conditions du Prêt",
+    "payoffAmount": "Montant de Remboursement"
   },
   "recurring": {
     "searchHint": "Rechercher des transactions récurrentes...",

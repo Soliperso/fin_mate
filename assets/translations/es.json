@@ -907,7 +907,15 @@
     "dueDay": "Día de vencimiento",
     "dueDayValue": "Día {day} del mes",
     "notes": "Notas",
-    "addedOn": "Agregado el"
+    "addedOn": "Agregado el",
+    "dailyInterest": "Interés Diario",
+    "lastPayment": "Último Pago",
+    "nextDueDate": "Próximo Vencimiento",
+    "principalPaid": "Capital Pagado",
+    "interestPaid": "Intereses Pagados",
+    "accountDetails": "Detalles de Cuenta",
+    "loanTerms": "Términos del Préstamo",
+    "payoffAmount": "Monto de Liquidación"
   },
   "recurring": {
     "searchHint": "Buscar transacciones recurrentes...",

@@ -58,7 +58,7 @@ class DebtCostSplitCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: const Icon(
-                    CupertinoIcons.building_2_fill,
+                    CupertinoIcons.creditcard_fill,
                     color: AppColors.brandTeal,
                     size: 18,
                   ),
@@ -198,13 +198,32 @@ class DebtCostSplitCard extends ConsumerWidget {
 
             // ── Insight line ──────────────────────────────────────────────
             Center(
-              child: Text(
-                'debtCost.youllPay'
-                    .tr(namedArgs: {'pct': interestExtraPercent}),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.systemOrange.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.exclamationmark_circle_fill,
+                      size: 13,
+                      color: AppColors.systemOrange,
                     ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'debtCost.youllPay'
+                          .tr(namedArgs: {'pct': interestExtraPercent}),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.systemOrange,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

@@ -117,7 +117,7 @@ class OpenAiChatService {
       // Debts
       final debts = await _supabase
           .from('debts')
-          .select('name, current_balance, interest_rate, minimum_payment, type')
+          .select('name, balance, interest_rate, minimum_payment, debt_type')
           .eq('user_id', userId)
           .eq('is_active', true);
 
@@ -125,10 +125,10 @@ class OpenAiChatService {
         double totalDebt = 0;
         buffer.writeln('\nDebts:');
         for (final d in debts) {
-          final bal = (d['current_balance'] as num).toDouble();
+          final bal = (d['balance'] as num).toDouble();
           totalDebt += bal;
           buffer.writeln(
-              '- ${d['name']} (${d['type']}): \$${bal.toStringAsFixed(2)} @ ${d['interest_rate']}% APR, min \$${(d['minimum_payment'] as num).toStringAsFixed(2)}/mo');
+              '- ${d['name']} (${d['debt_type']}): \$${bal.toStringAsFixed(2)} @ ${d['interest_rate']}% APR, min \$${(d['minimum_payment'] as num).toStringAsFixed(2)}/mo');
         }
         buffer.writeln('Total debt: \$${totalDebt.toStringAsFixed(2)}');
       }
@@ -161,7 +161,7 @@ class OpenAiChatService {
       // Savings goals
       final goals = await _supabase
           .from('savings_goals')
-          .select('name, target_amount, current_amount, target_date')
+          .select('name, target_amount, current_amount, deadline')
           .eq('user_id', userId)
           .eq('is_completed', false);
 
@@ -172,7 +172,7 @@ class OpenAiChatService {
           final current = (g['current_amount'] as num).toDouble();
           final pct =
               target > 0 ? (current / target * 100).toStringAsFixed(0) : '0';
-          final due = g['target_date'] != null ? ', due ${g['target_date']}' : '';
+          final due = g['deadline'] != null ? ', due ${g['deadline']}' : '';
           buffer.writeln(
               '- ${g['name']}: \$${current.toStringAsFixed(2)} of \$${target.toStringAsFixed(2)} ($pct%$due)');
         }

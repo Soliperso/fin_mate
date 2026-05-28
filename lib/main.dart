@@ -29,7 +29,7 @@ import 'core/services/auto_backup_service.dart';
 import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
-// [MVP: Payment Service - Commented out for initial launch]
+// [MVP: RevenueCat - Commented out for testing]
 // import 'package:purchases_flutter/purchases_flutter.dart';
 
 void main() async {
@@ -70,8 +70,7 @@ void main() async {
         ),
       );
 
-      // [MVP: Payment Service - Commented out for initial launch]
-      // RevenueCat — configure and log in existing user if present
+      // [MVP: RevenueCat - Commented out for testing]
       // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
       //   await Purchases.configure(
       //     PurchasesConfiguration(EnvConfig.revenueCatApiKey),
@@ -86,7 +85,7 @@ void main() async {
       //   }
       // }
 
-      // Listen for auth state changes — keep RevenueCat in sync
+      // [MVP: RevenueCat - Commented out for testing]
       // Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       //   final event = data.event;
       //   if (event == AuthChangeEvent.signedIn) {

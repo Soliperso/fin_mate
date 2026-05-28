@@ -377,7 +377,7 @@ class _InsightsTabState extends ConsumerState<InsightsTab> {
       direction: DismissDirection.endToStart,
       onDismissed: (_) => ref
           .read(dismissedAlertIdsProvider.notifier)
-          .update((s) => {...s, alert.id}),
+          .dismiss(alert.id),
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSizes.md),

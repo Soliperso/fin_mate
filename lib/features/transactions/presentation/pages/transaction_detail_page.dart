@@ -87,7 +87,7 @@ class TransactionDetailPage extends ConsumerWidget {
       BuildContext context, WidgetRef ref, TransactionEntity transaction) {
     final currencyFormat = ref.watch(currencyFormat2Provider);
     final convFactor = ref.watch(conversionFactorProvider);
-    final dateFormat = DateFormat('M/d/yy, h:mm a');
+    final dateFormat = DateFormat('MMMM d, yyyy');
     final cardColor = Theme.of(context).cardTheme.color;
     final isIncome = transaction.type == TransactionType.income;
     final isTransfer = transaction.type == TransactionType.transfer;
@@ -97,138 +97,205 @@ class TransactionDetailPage extends ConsumerWidget {
             ? AppColors.slateBlue
             : AppColors.error;
     final topPadding = MediaQuery.of(context).padding.top;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ── Hero section ────────────────────────────────────────────────────
-          Stack(
-            children: [
-              // Amount + title + date (centered)
-              Padding(
-                padding: EdgeInsets.only(
-                  top: topPadding + 72,
-                  left: AppSizes.lg,
-                  right: AppSizes.lg,
-                  bottom: AppSizes.xl,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      currencyFormat.format(transaction.amount.abs() * convFactor),
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: amountColor,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -1.5,
-                            height: 1.1,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── Hero ──────────────────────────────────────────────────────────────
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: screenHeight * 0.44),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  amountColor.withValues(alpha: 0.22),
+                  amountColor.withValues(alpha: 0.0),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: topPadding + 64,
+                    left: AppSizes.lg,
+                    right: AppSizes.lg,
+                    bottom: AppSizes.xl,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Icon circle
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: amountColor.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: amountColor.withValues(alpha: 0.25),
+                            width: 1.5,
                           ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (ref.watch(usdEquivalentProvider(
-                            transaction.amount.abs())) !=
-                        null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        ref.watch(usdEquivalentProvider(
-                            transaction.amount.abs()))!,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                        textAlign: TextAlign.center,
+                        ),
+                        child: Icon(
+                          transaction.categoryName != null
+                              ? getCategoryIcon(transaction.categoryName,
+                                  type: transaction.type.name)
+                              : _typeIcon(transaction.type),
+                          size: 32,
+                          color: amountColor,
+                        ),
                       ),
-                    ],
-                    const SizedBox(height: 8),
-                    if (transaction.description != null &&
-                        transaction.description!.isNotEmpty)
+                      const SizedBox(height: AppSizes.md),
+                      // Amount
                       Text(
-                        transaction.description!,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w400,
+                        currencyFormat
+                            .format(transaction.amount.abs() * convFactor),
+                        style: Theme.of(context)
+                            .textTheme
+                            .displaySmall
+                            ?.copyWith(
+                              color: amountColor,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -2.5,
+                              height: 1.0,
+                              fontSize: 54,
                             ),
                         textAlign: TextAlign.center,
                       ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dateFormat.format(transaction.date),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Floating back button (top-left)
-              Positioned(
-                top: topPadding + 12,
-                left: 16,
-                child: CircularIconButton(
-                  icon: CupertinoIcons.chevron_left,
-                  onTap: () => context.pop(),
-                ),
-              ),
-            ],
-          ),
-
-          // ── Details panel ────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-            child: _panel(
-              cardColor: cardColor,
-              children: [
-                if (transaction.accountName != null)
-                  _panelRow(
-                    context,
-                    label: transaction.type == TransactionType.transfer
-                        ? 'transactionDetail.from'.tr()
-                        : 'transactionDetail.account'.tr(),
-                    value: transaction.accountName!,
+                      if (ref.watch(usdEquivalentProvider(
+                              transaction.amount.abs())) !=
+                          null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          ref.watch(usdEquivalentProvider(
+                              transaction.amount.abs()))!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      if (transaction.description != null &&
+                          transaction.description!.isNotEmpty) ...[
+                        const SizedBox(height: AppSizes.sm),
+                        Text(
+                          transaction.description!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 17,
+                                letterSpacing: -0.2,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      const SizedBox(height: 5),
+                      Text(
+                        dateFormat.format(transaction.date),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                if (transaction.type == TransactionType.transfer &&
-                    transaction.toAccountName != null)
-                  _panelRow(
-                    context,
-                    label: 'transactionDetail.to'.tr(),
-                    value: transaction.toAccountName!,
                   ),
-                _panelRow(
-                  context,
-                  label: 'transactionDetail.type'.tr(),
-                  trailing: _typeBadge(context, transaction.type, amountColor),
                 ),
-                if (transaction.isRecurring)
-                  _panelRow(
-                    context,
-                    label: 'transactionDetail.recurring'.tr(),
-                    value: transaction.recurringInterval ?? 'Yes',
-                    isLast: true,
+                // Back button
+                Positioned(
+                  top: topPadding + 12,
+                  left: 16,
+                  child: CircularIconButton(
+                    icon: CupertinoIcons.chevron_left,
+                    onTap: () => context.pop(),
                   ),
+                ),
               ],
             ),
           ),
+        ),
 
-          // ── Notes panel ──────────────────────────────────────────────────────
-          if (transaction.notes != null && transaction.notes!.isNotEmpty) ...[
-            const SizedBox(height: AppSizes.sm),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4, bottom: 6),
-                    child: Text(
-                      'transactionDetail.notes'.tr(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+        // ── Details + spacer (fills remaining screen above buttons) ───────────
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSizes.md),
+                _sectionLabel(context, 'DETAILS'),
+                const SizedBox(height: AppSizes.xs),
+                _panel(
+                  cardColor: cardColor,
+                  children: [
+                    if (transaction.accountName != null)
+                      _panelRow(
+                        context,
+                        leading: _rowIcon(
+                            CupertinoIcons.creditcard_fill,
+                            AppColors.brandTeal),
+                        label: isTransfer
+                            ? 'transactionDetail.from'.tr()
+                            : 'transactionDetail.account'.tr(),
+                        value: transaction.accountName!,
+                      ),
+                    if (isTransfer && transaction.toAccountName != null)
+                      _panelRow(
+                        context,
+                        leading: _rowIcon(
+                            CupertinoIcons.creditcard_fill,
+                            AppColors.brandTeal),
+                        label: 'transactionDetail.to'.tr(),
+                        value: transaction.toAccountName!,
+                      ),
+                    _panelRow(
+                      context,
+                      leading: _rowIcon(CupertinoIcons.tag_fill, amountColor),
+                      label: 'transactionDetail.type'.tr(),
+                      trailing:
+                          _typeBadge(context, transaction.type, amountColor),
+                      isLast: transaction.categoryName == null &&
+                          !transaction.isRecurring,
                     ),
-                  ),
+                    if (transaction.categoryName != null)
+                      _panelRow(
+                        context,
+                        leading: _rowIcon(
+                          getCategoryIcon(transaction.categoryName,
+                              type: transaction.type.name),
+                          amountColor,
+                        ),
+                        label: 'transactionDetail.category'.tr(),
+                        trailing:
+                            _categoryChip(context, transaction, amountColor),
+                        isLast: !transaction.isRecurring,
+                      ),
+                    if (transaction.isRecurring)
+                      _panelRow(
+                        context,
+                        leading: _rowIcon(
+                            CupertinoIcons.arrow_2_circlepath,
+                            AppColors.brandTeal),
+                        label: 'transactionDetail.recurring'.tr(),
+                        value: transaction.recurringInterval ?? 'Yes',
+                        isLast: true,
+                      ),
+                  ],
+                ),
+                if (transaction.notes != null &&
+                    transaction.notes!.isNotEmpty) ...[
+                  const SizedBox(height: AppSizes.md),
+                  _sectionLabel(context, 'NOTES'),
+                  const SizedBox(height: AppSizes.xs),
                   _panel(
                     cardColor: cardColor,
                     children: [
@@ -243,77 +310,22 @@ class TransactionDetailPage extends ConsumerWidget {
                     ],
                   ),
                 ],
-              ),
+                const Spacer(),
+              ],
             ),
-          ],
+          ),
+        ),
 
-          // ── Category row ─────────────────────────────────────────────────────
-          if (transaction.categoryName != null) ...[
-            const SizedBox(height: AppSizes.sm),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
-              child: _panel(
-                cardColor: cardColor,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Row(
-                      children: [
-                        Text(
-                          'transactionDetail.category'.tr(),
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: amountColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _getCategoryIcon(transaction),
-                                size: 14,
-                                color: amountColor,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                transaction.categoryName!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: amountColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: AppSizes.xl),
-
-          // ── Actions ──────────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.lg),
+        // ── Actions (always pinned to bottom) ─────────────────────────────────
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSizes.lg, AppSizes.xs, AppSizes.lg, AppSizes.md),
             child: Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: FilledButton.icon(
                     onPressed: () async {
                       await context
                           .push('/transactions/add?id=${transaction.id}');
@@ -322,35 +334,72 @@ class TransactionDetailPage extends ConsumerWidget {
                             _transactionDetailProvider(transactionId));
                       }
                     },
-                    icon: const Icon(CupertinoIcons.pencil),
+                    icon: const Icon(CupertinoIcons.pencil, size: 18),
                     label: Text('common.edit'.tr()),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.brandTeal,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.brandTeal,
+                      foregroundColor: Colors.white,
+                      minimumSize:
+                          const Size.fromHeight(AppSizes.buttonHeightMd),
                     ),
                   ),
                 ),
                 const SizedBox(width: AppSizes.md),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _confirmDelete(context, ref, transaction),
-                    icon: const Icon(CupertinoIcons.trash),
+                    onPressed: () =>
+                        _confirmDelete(context, ref, transaction),
+                    icon: const Icon(CupertinoIcons.trash, size: 18),
                     label: Text('common.delete'.tr()),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,
+                      minimumSize:
+                          const Size.fromHeight(AppSizes.buttonHeightMd),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-
-          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSizes.xl),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  IconData _typeIcon(TransactionType type) => switch (type) {
+        TransactionType.income => CupertinoIcons.arrow_down_circle_fill,
+        TransactionType.expense => CupertinoIcons.arrow_up_circle_fill,
+        TransactionType.transfer =>
+          CupertinoIcons.arrow_right_arrow_left_circle_fill,
+      };
+
+  Widget _sectionLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSecondary,
+              letterSpacing: 0.8,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+
+  Widget _rowIcon(IconData icon, Color color) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(icon, size: 15, color: color),
+    );
+  }
 
   Widget _panel({required Color? cardColor, required List<Widget> children}) {
     return Container(
@@ -367,6 +416,7 @@ class TransactionDetailPage extends ConsumerWidget {
 
   Widget _panelRow(
     BuildContext context, {
+    Widget? leading,
     required String label,
     String? value,
     Widget? trailing,
@@ -375,9 +425,13 @@ class TransactionDetailPage extends ConsumerWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           child: Row(
             children: [
+              if (leading != null) ...[
+                leading,
+                const SizedBox(width: 12),
+              ],
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -400,7 +454,7 @@ class TransactionDetailPage extends ConsumerWidget {
         if (!isLast)
           Divider(
             height: 1,
-            indent: 16,
+            indent: 58,
             color: Theme.of(context).dividerColor,
           ),
       ],
@@ -416,16 +470,20 @@ class TransactionDetailPage extends ConsumerWidget {
     return Text(
       label,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
           ),
     );
   }
 
-  IconData _getCategoryIcon(TransactionEntity transaction) {
-    return getCategoryIcon(
-      transaction.categoryName,
-      type: transaction.type.name,
+  Widget _categoryChip(
+      BuildContext context, TransactionEntity transaction, Color amountColor) {
+    return Text(
+      transaction.categoryName!,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
     );
   }
 

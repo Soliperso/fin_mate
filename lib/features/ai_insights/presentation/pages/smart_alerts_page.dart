@@ -10,7 +10,7 @@ import '../../../budgets/presentation/providers/budget_providers.dart';
 import '../../../debt_payoff/presentation/providers/debt_providers.dart';
 
 // Filter categories for the chips row
-enum _AlertFilter { all, spending, budget, debt, forecast }
+enum _AlertFilter { all, spending, budget, debt, forecast, goals }
 
 class SmartAlertsPage extends ConsumerStatefulWidget {
   const SmartAlertsPage({super.key});
@@ -25,6 +25,8 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
   @override
   Widget build(BuildContext context) {
     final alertsAsync = ref.watch(typedProactiveAlertsProvider);
+    final goalAlertsAsync = ref.watch(goalAlertsProvider);
+    final incomeAlertsAsync = ref.watch(incomeAlertsProvider);
     final dismissedIds = ref.watch(dismissedAlertIdsProvider);
     final budgetsAsync = ref.watch(budgetsWithSpendingProvider);
     final debtGamificationAsync = ref.watch(debtGamificationProvider);
@@ -38,7 +40,7 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
 
     final List<_AlertItem> allAlerts = [];
 
-    // Map proactive alerts
+    // Map proactive alerts (cash flow, bill collisions, spending anomalies)
     for (final a in activeAlerts) {
       _AlertSeverityLevel severity;
       _AlertFilter category;
@@ -103,7 +105,7 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
       }
     });
 
-    // Debt milestone wins (debtGamificationProvider is a sync Provider<DebtGamification?>)
+    // Debt milestone wins
     final gam = debtGamificationAsync;
     if (gam != null && gam.milestones.isNotEmpty) {
       for (final m in gam.milestones.take(1)) {
@@ -119,6 +121,42 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
         ));
       }
     }
+
+    // Savings goal alerts
+    goalAlertsAsync.whenOrNull(data: (goalAlerts) {
+      for (final a in goalAlerts.where((a) => !dismissedIds.contains(a.id))) {
+        allAlerts.add(_AlertItem(
+          id: a.id,
+          title: a.title,
+          description: a.message,
+          severity: switch (a.severity) {
+            AlertSeverity.critical || AlertSeverity.high => _AlertSeverityLevel.urgent,
+            AlertSeverity.medium => _AlertSeverityLevel.review,
+            _ => _AlertSeverityLevel.win,
+          },
+          category: _AlertFilter.goals,
+          createdAt: a.createdAt,
+          isRead: a.severity == AlertSeverity.low,
+        ));
+      }
+    });
+
+    // Income (late recurring income) alerts
+    incomeAlertsAsync.whenOrNull(data: (incomeAlerts) {
+      for (final a in incomeAlerts.where((a) => !dismissedIds.contains(a.id))) {
+        allAlerts.add(_AlertItem(
+          id: a.id,
+          title: a.title,
+          description: a.message,
+          severity: a.severity == AlertSeverity.high
+              ? _AlertSeverityLevel.urgent
+              : _AlertSeverityLevel.review,
+          category: _AlertFilter.forecast,
+          createdAt: a.createdAt,
+          isRead: false,
+        ));
+      }
+    });
 
     // Sort: unread first, then by severity
     allAlerts.sort((a, b) {
@@ -177,6 +215,8 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
           ref.invalidate(typedProactiveAlertsProvider);
           ref.invalidate(budgetsWithSpendingProvider);
           ref.invalidate(debtGamificationProvider);
+          ref.invalidate(goalAlertsProvider);
+          ref.invalidate(incomeAlertsProvider);
         },
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -209,7 +249,7 @@ class _SmartAlertsPageState extends ConsumerState<SmartAlertsPage> {
                       isDark: isDark,
                       onDismiss: () => ref
                           .read(dismissedAlertIdsProvider.notifier)
-                          .update((s) => {...s, filtered[index].id}),
+                          .dismiss(filtered[index].id),
                     ),
                     childCount: filtered.length,
                   ),
@@ -243,6 +283,7 @@ class _FilterChipsRow extends StatelessWidget {
       (_AlertFilter.budget, 'Budget'),
       (_AlertFilter.debt, 'Debt'),
       (_AlertFilter.forecast, 'Forecast'),
+      (_AlertFilter.goals, 'Goals'),
     ];
 
     return SizedBox(
