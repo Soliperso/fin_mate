@@ -17,58 +17,66 @@ final insightsServiceProvider = Provider<InsightsService>((ref) {
   return InsightsService();
 });
 
+// All insights FutureProviders use `.autoDispose` so the cached result is
+// discarded the moment the user navigates away from the AI Insights surface.
+// When they return (e.g. after adding a transaction or editing a budget),
+// the provider re-runs and fetches the user's current state — eliminating
+// the "stale forecast / stale alerts" class of bug across this feature.
+
 // Spending patterns provider
 final spendingPatternsProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.analyzeSpendingPatterns();
 });
 
 // Category breakdown provider
 final categoryBreakdownProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, days) async {
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>(
+        (ref, days) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getCategoryBreakdown(days: days);
 });
 
 // Cashflow forecast provider
 final cashflowForecastProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, months) async {
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>(
+        (ref, months) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.generateCashflowForecast(months: months);
 });
 
 // Spending insights provider
 final spendingInsightsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getSpendingInsights();
 });
 
 // Default category breakdown (30 days)
 final defaultCategoryBreakdownProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getCategoryBreakdown(days: 30);
 });
 
 // Default forecast (3 months)
 final defaultForecastProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.generateCashflowForecast(months: 3);
 });
 
 // Proactive alerts provider
 final proactiveAlertsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getProactiveAlerts();
 });
 
 // Subscription changes provider
 final subscriptionChangesProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.detectSubscriptionChanges();
 });
@@ -77,28 +85,28 @@ final subscriptionChangesProvider =
 
 /// Recurring expenses provider
 final recurringExpensesProvider =
-    FutureProvider<List<RecurringExpensePattern>>((ref) async {
+    FutureProvider.autoDispose<List<RecurringExpensePattern>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.detectRecurringExpenses(daysToAnalyze: 180);
 });
 
 /// Spending anomalies provider
 final spendingAnomaliesProvider =
-    FutureProvider<List<SpendingAnomaly>>((ref) async {
+    FutureProvider.autoDispose<List<SpendingAnomaly>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.detectSpendingAnomalies(daysToAnalyze: 90);
 });
 
 /// Merchant frequency insights provider
 final merchantInsightsProvider =
-    FutureProvider<List<MerchantInsight>>((ref) async {
+    FutureProvider.autoDispose<List<MerchantInsight>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.analyzeMerchantFrequency(daysToAnalyze: 90);
 });
 
 /// Weekend vs weekday spending provider
 final weekendVsWeekdayProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getWeekendVsWeekdaySpending(daysToAnalyze: 90);
 });
@@ -107,7 +115,7 @@ final weekendVsWeekdayProvider =
 
 /// Typed proactive alerts provider
 final typedProactiveAlertsProvider =
-    FutureProvider<List<ProactiveAlert>>((ref) async {
+    FutureProvider.autoDispose<List<ProactiveAlert>>((ref) async {
   final service = ref.watch(insightsServiceProvider);
   return await service.getTypedProactiveAlerts();
 });
@@ -142,7 +150,7 @@ final dismissedAlertIdsProvider =
 
 // ── Savings goal alerts ───────────────────────────────────────────────────────
 
-final goalAlertsProvider = FutureProvider<List<ProactiveAlert>>((ref) async {
+final goalAlertsProvider = FutureProvider.autoDispose<List<ProactiveAlert>>((ref) async {
   final goals = await ref.watch(savingsGoalsProvider.future);
   final alerts = <ProactiveAlert>[];
   final now = DateTime.now();
@@ -205,13 +213,15 @@ final goalAlertsProvider = FutureProvider<List<ProactiveAlert>>((ref) async {
 
 // ── Income alerts ─────────────────────────────────────────────────────────────
 
-final incomeAlertsProvider = FutureProvider<List<ProactiveAlert>>((ref) async {
+final incomeAlertsProvider =
+    FutureProvider.autoDispose<List<ProactiveAlert>>((ref) async {
   final service = ref.read(insightsServiceProvider);
   return service.detectIncomeAlerts();
 });
 
 /// Dynamic context-aware suggested prompts
-final dynamicPromptsProvider = FutureProvider<List<String>>((ref) async {
+final dynamicPromptsProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
   final queryProcessor = ref.watch(queryProcessorProvider);
   final userId = Supabase.instance.client.auth.currentUser?.id;
   if (userId == null) return queryProcessor.getSuggestedPrompts();

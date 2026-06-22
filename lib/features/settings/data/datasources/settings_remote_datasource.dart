@@ -180,9 +180,4 @@ class SettingsRemoteDataSource {
     }
   }
 
-  /// Check if user is admin
-  bool get isAdmin {
-    final user = _supabase.auth.currentUser;
-    return user != null;
-  }
 }

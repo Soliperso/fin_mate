@@ -1,16 +1,5 @@
-import 'env_config.dart';
-
 /// Payment and subscription configuration
 class PaymentConfig {
-  // Stripe API Keys - loaded from .env at runtime via EnvConfig
-  static String get stripePublishableKey => EnvConfig.stripePublishableKey;
-
-  // Stripe Price IDs (create these in Stripe Dashboard)
-  // These are the recurring price IDs, not product IDs
-  // Loaded from .env at runtime via EnvConfig
-  static String get monthlyPriceId => EnvConfig.stripeMonthlyPriceId;
-  static String get annualPriceId => EnvConfig.stripeAnnualPriceId;
-
   // Pricing (displayed in UI, actual prices come from stores)
   static const double monthlyPriceUSD = 9.99;
   static const double annualPriceUSD = 49.99;
@@ -19,7 +8,7 @@ class PaymentConfig {
   static const int trialDurationDays = 7;
 
   // Feature limits
-  static const int freemiumAIQueriesPerMonth = 10;
+  static const int freemiumAIQueriesLifetime = 10;
   static const int freemiumHistoryMonths = 6; // 6 months of history
 
   // Premium features list
@@ -39,7 +28,7 @@ class PaymentConfig {
     'Unlimited transactions & budgets',
     'Multi-account tracking',
     'Basic charts & analytics',
-    '10 AI queries per month',
+    '10 free AI queries',
     '6 months transaction history',
     'CSV export (last 30 days)',
   ];

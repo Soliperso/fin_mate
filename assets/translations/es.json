@@ -426,7 +426,11 @@
     "failedToDelete": "Error al eliminar la deuda",
     "capHitDate": "50+ años",
     "capHitInterest": "Crece indefinidamente",
-    "capHitWarning": "El pago mínimo es menor que el interés mensual. El saldo crece cada mes — aumenta tus pagos para salir de esta trampa."
+    "capHitWarning": "El pago mínimo es menor que el interés mensual. El saldo crece cada mes — aumenta tus pagos para salir de esta trampa.",
+    "paidOffSection": "Pagadas",
+    "paidOffOn": "Pagada · {date}",
+    "paidOffTitle": "¡Deuda pagada!",
+    "paidOffMessage": "Has pagado por completo \"{name}\". ¡Excelente trabajo!"
   },
   "debtHero": {
     "totalDebt": "Deuda total",
@@ -523,6 +527,7 @@
     "required": "Requerido",
     "invalidNumber": "Número inválido",
     "mustBeGreaterThanZero": "Debe ser mayor que 0",
+    "exceedsBalance": "No puede superar los {amount} que debes",
     "paymentDate": "Fecha del pago",
     "notes": "Notas (opcional)",
     "cancel": "Cancelar",

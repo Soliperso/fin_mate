@@ -431,7 +431,11 @@
     "failedToDelete": "Failed to delete debt",
     "capHitDate": "50+ yrs",
     "capHitInterest": "Grows forever",
-    "capHitWarning": "Minimum payment is less than monthly interest. Balance grows every month — increase your payment to break free."
+    "capHitWarning": "Minimum payment is less than monthly interest. Balance grows every month — increase your payment to break free.",
+    "paidOffSection": "Paid Off",
+    "paidOffOn": "Paid off · {date}",
+    "paidOffTitle": "Debt Paid Off!",
+    "paidOffMessage": "You've fully paid off \"{name}\". Amazing work!"
   },
   "debtHero": {
     "totalDebt": "Total Debt",
@@ -528,6 +532,7 @@
     "required": "Required",
     "invalidNumber": "Invalid number",
     "mustBeGreaterThanZero": "Must be greater than 0",
+    "exceedsBalance": "Can't exceed the {amount} you owe",
     "paymentDate": "Payment Date",
     "notes": "Notes (optional)",
     "cancel": "Cancel",

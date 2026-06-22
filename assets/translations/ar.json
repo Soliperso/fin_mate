@@ -431,7 +431,11 @@
     "failedToDelete": "فشل حذف الدين",
     "capHitDate": "50+ سنة",
     "capHitInterest": "يتزايد باستمرار",
-    "capHitWarning": "الدفعة الأدنى أقل من الفوائد الشهرية. الرصيد يزداد كل شهر — زِد دفعاتك للخروج من هذا الفخ."
+    "capHitWarning": "الدفعة الأدنى أقل من الفوائد الشهرية. الرصيد يزداد كل شهر — زِد دفعاتك للخروج من هذا الفخ.",
+    "paidOffSection": "مسددة",
+    "paidOffOn": "سُددت · {date}",
+    "paidOffTitle": "تم سداد الدين!",
+    "paidOffMessage": "لقد سددت بالكامل \"{name}\". عمل رائع!"
   },
   "debtHero": {
     "totalDebt": "إجمالي الديون",
@@ -528,6 +532,7 @@
     "required": "مطلوب",
     "invalidNumber": "رقم غير صالح",
     "mustBeGreaterThanZero": "يجب أن يكون أكبر من 0",
+    "exceedsBalance": "لا يمكن أن يتجاوز {amount} المستحقة عليك",
     "paymentDate": "تاريخ الدفعة",
     "notes": "ملاحظات (اختياري)",
     "cancel": "إلغاء",

@@ -7,14 +7,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/services/theme_provider.dart';
-import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/error_retry_widget.dart';
 import '../../../../shared/widgets/loading_skeleton.dart';
 import '../../../../shared/widgets/success_animation.dart';
-// [AI Insights - Commented out]
-// import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-// import '../../../../core/providers/subscription_provider.dart';
+import '../../../../core/config/payment_config.dart';
+import '../../../../core/providers/ai_query_limit_provider.dart';
+import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/feature_flag_provider.dart';
 import '../providers/profile_providers.dart';
 import '../../../../core/services/feedback_service.dart';
@@ -29,20 +30,15 @@ class ProfilePage extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
     final featureFlags = ref.watch(appFeatureFlagsProvider).valueOrNull;
+    final isPremium = ref.watch(isPremiumProvider).valueOrNull ?? false;
+    final aiUsage = ref.watch(aiQueryUsageProvider).valueOrNull;
+    final subscription = ref.watch(userSubscriptionProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('profile.title'.tr()),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSizes.sm),
-            child: CircularIconButton(
-              icon: CupertinoIcons.settings,
-              onTap: () => context.push('/settings'),
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: profile == null && profileState.isLoading
           ? _buildProfileSkeleton(context)
@@ -94,35 +90,29 @@ class ProfilePage extends ConsumerWidget {
                                       color: AppColors.secondaryLabel,
                                     ),
                               ),
-                              if (profile?.isAdmin == true) ...[
+                              if (profile?.isAdmin == true ||
+                                  isPremium) ...[
                                 const SizedBox(height: AppSizes.sm),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSizes.md,
-                                    vertical: AppSizes.xs,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.brandTeal
-                                        .withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(
-                                        AppSizes.radiusFull),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(CupertinoIcons.shield,
-                                          size: 14, color: AppColors.brandTeal),
-                                      const SizedBox(width: AppSizes.xs),
-                                      Text(
-                                        'profile.admin'.tr(),
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: AppColors.brandTeal,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                Wrap(
+                                  spacing: AppSizes.xs,
+                                  runSpacing: AppSizes.xs,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    if (isPremium)
+                                      _statusChip(
+                                        icon: CupertinoIcons.star_fill,
+                                        label: subscription?[
+                                                    'subscription_status'] ==
+                                                'trialing'
+                                            ? 'Premium · Trial'
+                                            : 'Premium',
                                       ),
-                                    ],
-                                  ),
+                                    if (profile?.isAdmin == true)
+                                      _statusChip(
+                                        icon: CupertinoIcons.shield,
+                                        label: 'profile.admin'.tr(),
+                                      ),
+                                  ],
                                 ),
                               ],
                               const SizedBox(height: AppSizes.md),
@@ -189,27 +179,54 @@ class ProfilePage extends ConsumerWidget {
                         const SizedBox(height: AppSizes.lg),
 
                         // ── Subscription ──────────────────────────────────
-                        // [AI Insights - Commented out]
-                        // _sectionLabel(context, 'Subscription'),
-                        // const SizedBox(height: AppSizes.sm),
-                        // _buildSettingsCard(context, isDark, children: [
-                        //   _buildSettingsTile(
-                        //     context: context,
-                        //     icon: CupertinoIcons.star,
-                        //     title: 'Upgrade to Premium',
-                        //     subtitle: 'Unlock unlimited AI, receipt scanning & more',
-                        //     onTap: () => context.push('/paywall'),
-                        //   ),
-                        //   _buildDivider(context, isDark),
-                        //   _buildSettingsTile(
-                        //     context: context,
-                        //     icon: CupertinoIcons.arrow_counterclockwise,
-                        //     title: 'Restore Purchases',
-                        //     subtitle: 'Already subscribed? Tap to restore',
-                        //     onTap: () => _restorePurchases(context, ref),
-                        //   ),
-                        // ]),
-                        // const SizedBox(height: AppSizes.lg);
+                        _sectionLabel(context, 'Subscription'),
+                        const SizedBox(height: AppSizes.sm),
+                        _buildSettingsCard(context, isDark, children: [
+                          if (!isPremium) ...[
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.star,
+                              title: 'Upgrade to Premium',
+                              subtitle:
+                                  'Unlock unlimited AI, receipt scanning & more',
+                              onTap: () => context.push('/paywall'),
+                            ),
+                            _buildDivider(context, isDark),
+                            if (aiUsage != null) ...[
+                              _buildSettingsTile(
+                                context: context,
+                                icon: CupertinoIcons.sparkles,
+                                title: 'AI Queries',
+                                subtitle:
+                                    '${aiUsage.queriesUsed} of ${PaymentConfig.freemiumAIQueriesLifetime} lifetime uses',
+                                onTap: () => context.push('/paywall'),
+                              ),
+                              _buildDivider(context, isDark),
+                            ],
+                          ],
+                          if (isPremium) ...[
+                            _buildSettingsTile(
+                              context: context,
+                              icon: CupertinoIcons.creditcard,
+                              title: 'Manage Subscription',
+                              subtitle: _formatRenewalSubtitle(subscription),
+                              onTap: () => launchUrl(
+                                Uri.parse(
+                                    'https://apps.apple.com/account/subscriptions'),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                            ),
+                            _buildDivider(context, isDark),
+                          ],
+                          _buildSettingsTile(
+                            context: context,
+                            icon: CupertinoIcons.arrow_counterclockwise,
+                            title: 'Restore Purchases',
+                            subtitle: 'Already subscribed? Tap to restore',
+                            onTap: () => _restorePurchases(context, ref),
+                          ),
+                        ]),
+                        const SizedBox(height: AppSizes.lg),
 
                         // ── Preferences ───────────────────────────────────
                         _sectionLabel(
@@ -356,6 +373,55 @@ class ProfilePage extends ConsumerWidget {
                   ),
                 ),
     );
+  }
+
+  Widget _statusChip({required IconData icon, required String label}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: AppSizes.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.brandTeal.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.brandTeal),
+          const SizedBox(width: AppSizes.xs),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.brandTeal,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRenewalSubtitle(Map<String, dynamic>? subscription) {
+    if (subscription == null) return 'View, change, or cancel your plan';
+    final status = subscription['subscription_status'] as String?;
+    final endRaw = subscription['subscription_end_date'] as String?;
+    final trialRaw = subscription['trial_end_date'] as String?;
+    final dateRaw = status == 'trialing' ? (trialRaw ?? endRaw) : endRaw;
+    if (dateRaw == null) return 'View, change, or cancel your plan';
+
+    final date = DateTime.tryParse(dateRaw)?.toLocal();
+    if (date == null) return 'View, change, or cancel your plan';
+
+    final formatted = DateFormat.yMMMd().format(date);
+    if (status == 'trialing') {
+      return 'Trial ends $formatted';
+    }
+    if (status == 'canceled' || status == 'expired') {
+      return 'Access ends $formatted';
+    }
+    return 'Renews $formatted';
   }
 
   Widget _sectionLabel(BuildContext context, String text) {
@@ -770,30 +836,29 @@ class ProfilePage extends ConsumerWidget {
     }
   }
 
-  // [AI Insights - Commented out]
-  // Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {
-  //   try {
-  //     final result = await Purchases.restorePurchases();
-  //     ref.invalidate(isPremiumProvider);
-  //     ref.invalidate(subscriptionTierProvider);
-  //     if (!context.mounted) return;
-  //     if (result.entitlements.active.containsKey('premium')) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Premium restored successfully!')),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('No active subscription found.')),
-  //       );
-  //     }
-  //   } catch (_) {
-  //     if (context.mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Restore failed. Please try again.')),
-  //       );
-  //     }
-  //   }
-  // }
+  Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {
+    try {
+      final result = await Purchases.restorePurchases();
+      ref.invalidate(isPremiumProvider);
+      ref.invalidate(subscriptionTierProvider);
+      if (!context.mounted) return;
+      if (result.entitlements.active.containsKey('premium')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Premium restored successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No active subscription found.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Restore failed. Please try again.')),
+        );
+      }
+    }
+  }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(

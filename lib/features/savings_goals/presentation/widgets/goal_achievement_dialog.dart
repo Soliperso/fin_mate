@@ -8,7 +8,22 @@ import '../../../../core/constants/app_sizes.dart';
 class GoalAchievementDialog extends StatefulWidget {
   final String goalName;
 
-  const GoalAchievementDialog({super.key, required this.goalName});
+  /// Optional overrides so the same celebration can be reused for other
+  /// achievements (e.g. paying off a debt). Defaults preserve the savings-goal
+  /// behaviour exactly.
+  final String? title;
+  final String? message;
+  final String? primaryLabel;
+  final bool showNewGoalButton;
+
+  const GoalAchievementDialog({
+    super.key,
+    this.goalName = '',
+    this.title,
+    this.message,
+    this.primaryLabel,
+    this.showNewGoalButton = true,
+  });
 
   @override
   State<GoalAchievementDialog> createState() => _GoalAchievementDialogState();
@@ -127,9 +142,9 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                           ),
                         ),
                         const SizedBox(height: AppSizes.md),
-                        const Text(
-                          'Goal Achieved!',
-                          style: TextStyle(
+                        Text(
+                          widget.title ?? 'Goal Achieved!',
+                          style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
@@ -137,8 +152,9 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                         ),
                         const SizedBox(height: AppSizes.sm),
                         Text(
-                          'You\'ve reached your savings target for '
-                          '"${widget.goalName}". Amazing work!',
+                          widget.message ??
+                              'You\'ve reached your savings target for '
+                                  '"${widget.goalName}". Amazing work!',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -156,25 +172,27 @@ class _GoalAchievementDialogState extends State<GoalAchievementDialog>
                               foregroundColor: AppColors.white,
                             ),
                             onPressed: () => Navigator.of(context).pop(),
+                            child: Text(
+                              widget.primaryLabel ?? 'Awesome!',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                        if (widget.showNewGoalButton)
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              context.go('/goals');
+                            },
                             child: const Text(
-                              'Awesome!',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              'Start a New Goal',
+                              style: TextStyle(
+                                color: AppColors.brandTeal,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            context.go('/goals');
-                          },
-                          child: const Text(
-                            'Start a New Goal',
-                            style: TextStyle(
-                              color: AppColors.brandTeal,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

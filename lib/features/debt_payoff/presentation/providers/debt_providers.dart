@@ -74,24 +74,30 @@ final extraPaymentProvider =
 final payoffResultProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
   final strategy = ref.watch(selectedStrategyProvider);
-  if (debts == null || debts.isEmpty) return null;
-  return PayoffCalculator.compute(debts: debts, strategy: strategy);
+  if (debts == null) return null;
+  final active = debts.where((d) => !d.isPaidOff).toList();
+  if (active.isEmpty) return null;
+  return PayoffCalculator.compute(debts: active, strategy: strategy);
 });
 
 /// Always-computed Avalanche result — used by strategy comparison sheet.
 final avalancheResultProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
-  if (debts == null || debts.isEmpty) return null;
+  if (debts == null) return null;
+  final active = debts.where((d) => !d.isPaidOff).toList();
+  if (active.isEmpty) return null;
   return PayoffCalculator.compute(
-      debts: debts, strategy: DebtStrategy.avalanche);
+      debts: active, strategy: DebtStrategy.avalanche);
 });
 
 /// Always-computed Snowball result — used by strategy comparison sheet.
 final snowballResultProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
-  if (debts == null || debts.isEmpty) return null;
+  if (debts == null) return null;
+  final active = debts.where((d) => !d.isPaidOff).toList();
+  if (active.isEmpty) return null;
   return PayoffCalculator.compute(
-      debts: debts, strategy: DebtStrategy.snowball);
+      debts: active, strategy: DebtStrategy.snowball);
 });
 
 /// Payoff result with extra monthly payment applied — used by simulator.
@@ -99,9 +105,11 @@ final simulatedPayoffProvider = Provider<PayoffResult?>((ref) {
   final debts = ref.watch(debtsProvider).valueOrNull;
   final strategy = ref.watch(selectedStrategyProvider);
   final extra = ref.watch(extraPaymentProvider);
-  if (debts == null || debts.isEmpty || extra == 0) return null;
+  if (debts == null || extra == 0) return null;
+  final active = debts.where((d) => !d.isPaidOff).toList();
+  if (active.isEmpty) return null;
   return PayoffCalculator.compute(
-    debts: debts,
+    debts: active,
     strategy: strategy,
     extraMonthlyPayment: extra,
   );

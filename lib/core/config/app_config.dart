@@ -5,8 +5,8 @@
 class AppConfig {
   // App Information
   static const String appName = 'Finmate';
-  static const String appVersion = '1.0.0';
-  static const String appBuildNumber = '1';
+  static const String appVersion = '1.2.1';
+  static const String appBuildNumber = '15';
 
   // Storage Keys
   static const String localStorageBox = 'finmate_storage';
@@ -42,9 +42,6 @@ class AppConfig {
   static const int cacheExpirationHours = 24;
   static const int imageCacheExpirationDays = 7;
 
-  // Bill Splitting
-  static const int maxGroupMembers = 50;
-  static const int maxExpensesPerGroup = 1000;
   static const List<String> supportedCurrencies = ['USD', 'EUR', 'GBP', 'CAD'];
   static const String defaultCurrency = 'USD';
 

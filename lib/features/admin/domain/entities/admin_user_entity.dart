@@ -14,6 +14,9 @@ class AdminUserEntity extends Equatable {
   final double netWorth;
   final bool isActive; // Has transactions in last 30 days
   final DateTime? lastActive;
+  final String? subscriptionTier; // 'freemium' | 'premium'
+  final String? subscriptionStatus; // 'active' | 'trialing' | 'canceled' | ...
+  final DateTime? subscriptionEndDate;
 
   const AdminUserEntity({
     required this.id,
@@ -28,6 +31,9 @@ class AdminUserEntity extends Equatable {
     this.totalExpense = 0.0,
     this.netWorth = 0.0,
     this.isActive = false,
+    this.subscriptionTier,
+    this.subscriptionStatus,
+    this.subscriptionEndDate,
   });
 
   @override
@@ -44,6 +50,9 @@ class AdminUserEntity extends Equatable {
         totalExpense,
         netWorth,
         isActive,
+        subscriptionTier,
+        subscriptionStatus,
+        subscriptionEndDate,
       ];
 
   String get displayName {
@@ -66,4 +75,11 @@ class AdminUserEntity extends Equatable {
   }
 
   bool get isAdmin => role == 'admin';
+
+  bool get isPremium =>
+      subscriptionTier == 'premium' &&
+      (subscriptionStatus == 'active' || subscriptionStatus == 'trialing');
+
+  bool get isOnTrial =>
+      subscriptionTier == 'premium' && subscriptionStatus == 'trialing';
 }

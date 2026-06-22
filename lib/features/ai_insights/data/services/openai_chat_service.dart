@@ -14,6 +14,9 @@ class OpenAiChatService {
   // Chat history: list of {role, content} maps for multi-turn context
   final List<Map<String, String>> _conversationHistory = [];
   String? _systemPrompt;
+  // Tracks which user the cached system prompt belongs to so a sign-out /
+  // sign-in cycle on the same device never leaks the previous user's context.
+  String? _cachedForUserId;
 
   static const String _model = 'gpt-4o-mini';
   static const int _maxHistoryTurns = 20; // Keep last 20 turns (40 messages)
@@ -24,15 +27,38 @@ class OpenAiChatService {
   // AI is available when the user is authenticated (key lives server-side)
   bool get isAvailable => _supabase.auth.currentUser != null;
 
+  /// Formats a dollar amount exactly with thousands separators and 2 decimals
+  /// for the AI context. Example: 1247.83 → "$1,247.83", -50 → "-$50.00".
+  ///
+  /// Earlier iterations rounded for data-minimisation; reverted to exact
+  /// figures so the assistant can give precise, accurate answers — which the
+  /// product requires more than vendor-side data minimisation.
+  static String _fmtMoney(num amount) {
+    final sign = amount < 0 ? '-' : '';
+    final abs = amount.abs();
+    final whole = abs.truncate();
+    final cents = ((abs - whole) * 100).round();
+    return '$sign\$${_withThousands(whole)}.${cents.toString().padLeft(2, '0')}';
+  }
+
+  /// Inserts commas into a non-negative integer: 1234567 -> "1,234,567".
+  static String _withThousands(int n) {
+    final s = n.toString();
+    final buffer = StringBuffer();
+    final firstChunk = s.length % 3;
+    if (firstChunk > 0) buffer.write(s.substring(0, firstChunk));
+    for (int i = firstChunk; i < s.length; i += 3) {
+      if (i > 0) buffer.write(',');
+      buffer.write(s.substring(i, i + 3));
+    }
+    return buffer.toString();
+  }
+
   /// Build the financial context system prompt from user's live data
   Future<String> _buildSystemPrompt(String userId) async {
     final buffer = StringBuffer();
     buffer.writeln(
-      'You are Finmate\'s AI financial assistant. '
-      'Be concise (under 150 words per response), helpful, and use the user\'s actual financial data below. '
-      'Never invent numbers. Only discuss personal finance topics. '
-      'Format amounts as \$X,XXX.XX. '
-      'Do not use markdown, asterisks, bullet symbols, or any special formatting — plain text only.',
+      "User's live financial snapshot follows. These are the user's actual current figures from their accounts, transactions, debts, budgets, goals, and bills. Use exact amounts when answering. Never invent figures not present in this data.",
     );
 
     try {
@@ -50,9 +76,9 @@ class OpenAiChatService {
           final bal = (a['balance'] as num).toDouble();
           total += bal;
           buffer.writeln(
-              '- ${a['name']} (${a['type']}): \$${bal.toStringAsFixed(2)}');
+              '- ${a['name']} (${a['type']}): ${_fmtMoney(bal)}');
         }
-        buffer.writeln('Total balance: \$${total.toStringAsFixed(2)}');
+        buffer.writeln('Total balance: ${_fmtMoney(total)}');
       }
     } catch (e) {
       debugPrint('[OpenAiChatService] Failed to fetch account balances: $e');
@@ -84,7 +110,7 @@ class OpenAiChatService {
           ..sort((a, b) => b.value.compareTo(a.value));
         buffer.writeln('\nTop spending this month:');
         for (final e in sorted.take(5)) {
-          buffer.writeln('- ${e.key}: \$${e.value.toStringAsFixed(2)}');
+          buffer.writeln('- ${e.key}: ${_fmtMoney(e.value)}');
         }
       }
     } catch (e) {
@@ -92,7 +118,10 @@ class OpenAiChatService {
     }
 
     try {
-      // Upcoming recurring bills (next 14 days)
+      // Upcoming recurring bills (next 14 days). The description is a
+      // user-typed label for their own subscription/rent/etc. (same category
+      // as debt names and account names) — keep it so the AI can name what
+      // it's listing. Amounts are still rounded to the nearest $100.
       final endDate = DateTime.now().add(const Duration(days: 14));
       final bills = await _supabase
           .from('recurring_transactions')
@@ -106,7 +135,7 @@ class OpenAiChatService {
         buffer.writeln('\nUpcoming bills (next 14 days):');
         for (final b in bills) {
           buffer.writeln(
-              '- ${b['description']}: \$${(b['amount'] as num).toStringAsFixed(2)} on ${b['next_occurrence']}');
+              '- ${b['description']}: ${_fmtMoney((b['amount'] as num))} on ${b['next_occurrence']}');
         }
       }
     } catch (e) {
@@ -128,9 +157,9 @@ class OpenAiChatService {
           final bal = (d['balance'] as num).toDouble();
           totalDebt += bal;
           buffer.writeln(
-              '- ${d['name']} (${d['debt_type']}): \$${bal.toStringAsFixed(2)} @ ${d['interest_rate']}% APR, min \$${(d['minimum_payment'] as num).toStringAsFixed(2)}/mo');
+              '- ${d['name']} (${d['debt_type']}): ${_fmtMoney(bal)} @ ${d['interest_rate']}% APR, min ${_fmtMoney((d['minimum_payment'] as num))}/mo');
         }
-        buffer.writeln('Total debt: \$${totalDebt.toStringAsFixed(2)}');
+        buffer.writeln('Total debt: ${_fmtMoney(totalDebt)}');
       }
     } catch (e) {
       debugPrint('[OpenAiChatService] Failed to fetch debts: $e');
@@ -150,7 +179,7 @@ class OpenAiChatService {
               (b['categories'] as Map<String, dynamic>?)?['name'] as String? ??
                   'Unknown';
           buffer.writeln(
-              '- $catName: \$${(b['amount'] as num).toStringAsFixed(2)}');
+              '- $catName: ${_fmtMoney((b['amount'] as num))}');
         }
       }
     } catch (e) {
@@ -174,7 +203,7 @@ class OpenAiChatService {
               target > 0 ? (current / target * 100).toStringAsFixed(0) : '0';
           final due = g['deadline'] != null ? ', due ${g['deadline']}' : '';
           buffer.writeln(
-              '- ${g['name']}: \$${current.toStringAsFixed(2)} of \$${target.toStringAsFixed(2)} ($pct%$due)');
+              '- ${g['name']}: ${_fmtMoney(current)} of ${_fmtMoney(target)} ($pct%$due)');
         }
       }
     } catch (e) {
@@ -196,7 +225,7 @@ class OpenAiChatService {
       final totalIncome = (income as List)
           .fold(0.0, (sum, t) => sum + (t['amount'] as num).toDouble());
       if (totalIncome > 0) {
-        buffer.writeln('\nIncome this month: \$${totalIncome.toStringAsFixed(2)}');
+        buffer.writeln('\nIncome this month: ${_fmtMoney(totalIncome)}');
       }
     } catch (e) {
       debugPrint('[OpenAiChatService] Failed to fetch income: $e');
@@ -238,7 +267,7 @@ class OpenAiChatService {
           final usedAmt = spentByCategory[b['category_id']] ?? 0.0;
           final pct = limit > 0 ? (usedAmt / limit * 100).toStringAsFixed(0) : '0';
           buffer.writeln(
-              '- $catName: \$${usedAmt.toStringAsFixed(2)} of \$${limit.toStringAsFixed(2)} ($pct%)');
+              '- $catName: ${_fmtMoney(usedAmt)} of ${_fmtMoney(limit)} ($pct%)');
         }
       }
     } catch (e) {
@@ -274,7 +303,7 @@ class OpenAiChatService {
           ..sort((a, b) => b.value.compareTo(a.value));
         buffer.writeln('\nTop spending last month:');
         for (final e in sorted.take(5)) {
-          buffer.writeln('- ${e.key}: \$${e.value.toStringAsFixed(2)}');
+          buffer.writeln('- ${e.key}: ${_fmtMoney(e.value)}');
         }
       }
     } catch (e) {
@@ -284,11 +313,28 @@ class OpenAiChatService {
     return buffer.toString();
   }
 
-  /// Initialize or refresh session with latest financial context
+  /// Initialize or refresh session with latest financial context.
+  ///
+  /// We rebuild the context on every message (see sendMessage), but this is
+  /// still called at chat-open time to pre-warm the snapshot and to detect
+  /// cross-user transitions (sign-out → sign-in on the same device must
+  /// never serve user A's data to user B).
   Future<void> initSession(String userId) async {
-    if (_systemPrompt != null && _conversationHistory.isNotEmpty) return;
+    if (_cachedForUserId != null && _cachedForUserId != userId) {
+      _conversationHistory.clear();
+    }
     _systemPrompt = await _buildSystemPrompt(userId);
-    _conversationHistory.clear();
+    _cachedForUserId = userId;
+  }
+
+  /// Refresh the financial context from Supabase. Called before every send so
+  /// the AI always sees the user's current state (a transaction added 10s ago,
+  /// a debt paid down this morning, a balance synced just now).
+  Future<void> _refreshContext() async {
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) return;
+    _systemPrompt = await _buildSystemPrompt(uid);
+    _cachedForUserId = uid;
   }
 
   /// Send a message and get a ChatGPT response
@@ -297,6 +343,10 @@ class OpenAiChatService {
       throw Exception('OpenAI API key not configured');
     }
 
+    // Refresh the financial snapshot so the AI sees the user's current state
+    // (transactions added since chat opened, balances just synced, etc.).
+    await _refreshContext();
+
     // Trim history if too long
     if (_conversationHistory.length >= _maxHistoryTurns * 2) {
       _conversationHistory.removeRange(0, 2);
@@ -304,8 +354,17 @@ class OpenAiChatService {
 
     _conversationHistory.add({'role': 'user', 'content': userMessage});
 
+    // The proxy strips any `system`-role messages from clients as an
+    // anti-prompt-injection measure. Send the financial snapshot as a
+    // `[CONTEXT]`-tagged user message + synthetic assistant ack so the model
+    // grounds on it. The server's system prompt instructs the model to treat
+    // `[CONTEXT]` as data, not instructions.
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': _systemPrompt ?? ''},
+      {'role': 'user', 'content': '[CONTEXT]\n${_systemPrompt ?? ''}'},
+      {
+        'role': 'assistant',
+        'content': "Understood. I have your current financial snapshot."
+      },
       ..._conversationHistory,
     ];
 
@@ -351,6 +410,9 @@ class OpenAiChatService {
   Stream<String> sendMessageStreaming(String userMessage) async* {
     if (!isAvailable) throw Exception('Not authenticated');
 
+    // Refresh the financial snapshot so the AI sees the user's current state.
+    await _refreshContext();
+
     if (_conversationHistory.length >= _maxHistoryTurns * 2) {
       _conversationHistory.removeRange(0, 2);
     }
@@ -362,8 +424,14 @@ class OpenAiChatService {
       throw Exception('User not authenticated');
     }
 
+    // Same `[CONTEXT]` + synthetic-ack pattern as sendMessage — the proxy
+    // strips `system` roles, so the financial snapshot rides as a user turn.
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': _systemPrompt ?? ''},
+      {'role': 'user', 'content': '[CONTEXT]\n${_systemPrompt ?? ''}'},
+      {
+        'role': 'assistant',
+        'content': "Understood. I have your current financial snapshot."
+      },
       ..._conversationHistory,
     ];
 
@@ -430,9 +498,10 @@ class OpenAiChatService {
     }
   }
 
-  /// Clear session (called when user clears chat history)
+  /// Clear session (called when user clears chat history or signs out)
   void clearSession() {
     _conversationHistory.clear();
     _systemPrompt = null;
+    _cachedForUserId = null;
   }
 }

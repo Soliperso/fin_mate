@@ -426,7 +426,11 @@
     "failedToDelete": "Échec de la suppression de la dette",
     "capHitDate": "50+ ans",
     "capHitInterest": "Croît indéfiniment",
-    "capHitWarning": "La mensualité minimale est inférieure aux intérêts mensuels. Le solde augmente chaque mois — augmentez vos paiements pour vous en sortir."
+    "capHitWarning": "La mensualité minimale est inférieure aux intérêts mensuels. Le solde augmente chaque mois — augmentez vos paiements pour vous en sortir.",
+    "paidOffSection": "Remboursées",
+    "paidOffOn": "Remboursée · {date}",
+    "paidOffTitle": "Dette remboursée !",
+    "paidOffMessage": "Vous avez entièrement remboursé « {name} ». Excellent travail !"
   },
   "debtHero": {
     "totalDebt": "Dette totale",
@@ -523,6 +527,7 @@
     "required": "Requis",
     "invalidNumber": "Nombre invalide",
     "mustBeGreaterThanZero": "Doit être supérieur à 0",
+    "exceedsBalance": "Ne peut dépasser les {amount} que vous devez",
     "paymentDate": "Date du paiement",
     "notes": "Notes (facultatif)",
     "cancel": "Annuler",

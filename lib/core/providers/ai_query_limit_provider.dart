@@ -9,7 +9,7 @@ import 'subscription_provider.dart';
 // ============================================================================
 
 /// Reads the current lifetime premium-feature use count from Supabase.
-/// Falls back to 0 on any error so the user is never erroneously blocked.
+/// Falls back to the limit on any error so a DB failure can't grant free access.
 final aiQueryUsageProvider = FutureProvider<AIQueryUsage>((ref) async {
   try {
     final userId = Supabase.instance.client.auth.currentUser?.id;
@@ -24,7 +24,7 @@ final aiQueryUsageProvider = FutureProvider<AIQueryUsage>((ref) async {
     final count = (response?['free_uses_count'] as int?) ?? 0;
     return AIQueryUsage(queriesUsed: count);
   } catch (_) {
-    return const AIQueryUsage(queriesUsed: 0);
+    return const AIQueryUsage(queriesUsed: PaymentConfig.freemiumAIQueriesLifetime);
   }
 });
 
@@ -92,13 +92,13 @@ class AIQueryUsage {
   const AIQueryUsage({required this.queriesUsed});
 
   bool get hasReachedLimit =>
-      queriesUsed >= PaymentConfig.freemiumAIQueriesPerMonth;
+      queriesUsed >= PaymentConfig.freemiumAIQueriesLifetime;
 
   int get queriesRemaining {
-    final remaining = PaymentConfig.freemiumAIQueriesPerMonth - queriesUsed;
+    final remaining = PaymentConfig.freemiumAIQueriesLifetime - queriesUsed;
     return remaining > 0 ? remaining : 0;
   }
 
   double get usagePercentage =>
-      (queriesUsed / PaymentConfig.freemiumAIQueriesPerMonth).clamp(0.0, 1.0);
+      (queriesUsed / PaymentConfig.freemiumAIQueriesLifetime).clamp(0.0, 1.0);
 }

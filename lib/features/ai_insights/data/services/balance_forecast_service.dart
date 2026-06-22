@@ -302,22 +302,24 @@ class BalanceForecastService {
     }
   }
 
-  /// Calculate safe to spend amount
+  /// Safe-to-spend = how much the user can spend today while keeping their
+  /// 30-day projected minimum above the warning threshold.
+  ///
+  /// Reasoning: every dollar spent today shifts the entire projection down
+  /// by one dollar. So if the minimum projected balance is M and we want
+  /// to preserve a buffer of B above zero, the largest amount we can spend
+  /// without crossing the buffer is `M - B`.
   double _calculateSafeToSpend(
     double currentBalance,
     List<DailyForecast> forecasts,
   ) {
     if (forecasts.isEmpty) return currentBalance;
 
-    // Find the lowest projected balance in next 30 days
-    double minBalance = forecasts
+    final minBalance = forecasts
         .map((f) => f.projectedBalance)
         .reduce((a, b) => a < b ? a : b);
 
-    // Safe to spend is current minus what we need to maintain min balance + buffer
-    final buffer = warningThreshold;
-    final safeAmount = currentBalance - (currentBalance - minBalance) - buffer;
-
+    final safeAmount = minBalance - warningThreshold;
     return safeAmount > 0 ? safeAmount : 0;
   }
 

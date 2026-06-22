@@ -8,6 +8,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/success_animation.dart';
+import '../../../savings_goals/presentation/widgets/goal_achievement_dialog.dart';
 import '../../domain/entities/debt_entity.dart';
 import '../../../../core/providers/display_format_provider.dart';
 import '../providers/debt_providers.dart';
@@ -32,8 +33,12 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
   @override
   void initState() {
     super.initState();
+    // Prefill the minimum payment, but never more than what's still owed.
+    final suggested = widget.debt.minimumPayment > widget.debt.balance
+        ? widget.debt.balance
+        : widget.debt.minimumPayment;
     _amountController = TextEditingController(
-      text: widget.debt.minimumPayment.toStringAsFixed(2),
+      text: suggested.toStringAsFixed(2),
     );
   }
 
@@ -53,6 +58,10 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
 
     setState(() => _isSubmitting = true);
 
+    // Capture the root navigator synchronously (before the async gap) so the
+    // paid-off celebration can be shown after the sheet closes.
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+
     final payment = await ref.read(debtNotifierProvider.notifier).logPayment(
           debtId: widget.debt.id,
           amount: double.parse(_amountController.text),
@@ -69,7 +78,16 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
       ref.invalidate(debtsProvider);
       ref.invalidate(debtSummaryProvider);
       ref.invalidate(debtPaymentsProvider(widget.debt.id));
-      Navigator.pop(context, true);
+      // Did this payment clear the debt? Capture before popping.
+      final nowPaidOff =
+          (widget.debt.balance - double.parse(_amountController.text)) <= 0.001;
+      final debtName = widget.debt.name;
+      Navigator.pop(context, nowPaidOff);
+      // Show the celebration via the root navigator context (captured above)
+      // so it survives the sheet closing — works from any entry point.
+      if (nowPaidOff) {
+        showDebtPaidOffCelebration(rootNavigator.context, debtName);
+      }
     } else {
       showErrorDialog(context, 'Failed to log payment. Please try again.');
     }
@@ -148,6 +166,14 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
                     if (amount == null) return 'logPayment.invalidNumber'.tr();
                     if (amount <= 0)
                       return 'logPayment.mustBeGreaterThanZero'.tr();
+                    // Can't pay more than what's owed on this debt.
+                    if (amount - widget.debt.balance > 0.001) {
+                      return 'logPayment.exceedsBalance'.tr(namedArgs: {
+                        'amount': ref
+                            .read(currencyFormat2Provider)
+                            .format(widget.debt.balance),
+                      });
+                    }
                     return null;
                   },
                 ),
@@ -225,4 +251,21 @@ class _LogPaymentBottomSheetState extends ConsumerState<LogPaymentBottomSheet> {
       ),
     );
   }
+}
+
+/// Shows the celebratory fireworks dialog when a debt is fully paid off.
+/// Reuses the exact same [GoalAchievementDialog] as a reached savings goal, so
+/// both milestones get the identical celebration. Shared by every place that
+/// can log a payment (overview, detail page, track calendar).
+void showDebtPaidOffCelebration(BuildContext context, String debtName) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierColor: Colors.black54,
+    builder: (_) => GoalAchievementDialog(
+      title: 'debt.paidOffTitle'.tr(),
+      message: 'debt.paidOffMessage'.tr(namedArgs: {'name': debtName}),
+      showNewGoalButton: false,
+    ),
+  );
 }

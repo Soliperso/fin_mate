@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/circular_icon_button.dart';
@@ -30,12 +31,14 @@ enum _SortOption {
 
 enum _FilterType {
   all,
+  premium,
   admin,
   active,
   inactive;
 
   String get label => switch (this) {
         _FilterType.all => 'All',
+        _FilterType.premium => 'Premium',
         _FilterType.admin => 'Admin',
         _FilterType.active => 'Active',
         _FilterType.inactive => 'Inactive',
@@ -50,17 +53,35 @@ class UserManagementPage extends ConsumerStatefulWidget {
 }
 
 class _UserManagementPageState extends ConsumerState<UserManagementPage> {
+  static const _kStatsCollapsedKey = 'admin_users_stats_collapsed';
+
   final TextEditingController _searchController = TextEditingController();
   String? _searchQuery;
   _SortOption _sortOption = _SortOption.nameAZ;
   _FilterType _activeFilter = _FilterType.all;
   List<AdminUserEntity> _sourceUsers = [];
   List<AdminUserEntity> _displayUsers = [];
+  bool _statsCollapsed = true;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      if (!mounted) return;
+      setState(() => _statsCollapsed = p.getBool(_kStatsCollapsedKey) ?? true);
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleStats() async {
+    setState(() => _statsCollapsed = !_statsCollapsed);
+    final p = await SharedPreferences.getInstance();
+    await p.setBool(_kStatsCollapsedKey, _statsCollapsed);
   }
 
   void _onSearch(String query) {
@@ -250,6 +271,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
   List<AdminUserEntity> _filterUsers(List<AdminUserEntity> users) =>
       switch (_activeFilter) {
         _FilterType.all => [...users],
+        _FilterType.premium => users.where((u) => u.isPremium).toList(),
         _FilterType.admin => users.where((u) => u.isAdmin).toList(),
         _FilterType.active => users.where((u) => u.isActive).toList(),
         _FilterType.inactive => users.where((u) => !u.isActive).toList(),
@@ -393,6 +415,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
       searchQuery: _searchQuery,
     )));
     final statsAsync = ref.watch(systemStatsProvider);
+    final subscriptionOverviewAsync = ref.watch(subscriptionOverviewProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Sync fresh provider data into local source + filtered lists
@@ -440,6 +463,17 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
         ),
         actions: [
           Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Center(
+              child: CircularIconButton(
+                icon: _statsCollapsed
+                    ? CupertinoIcons.chevron_down
+                    : CupertinoIcons.chevron_up,
+                onTap: _toggleStats,
+              ),
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.only(right: 8),
             child: Center(
               child: CircularIconButton(
@@ -452,11 +486,31 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
       ),
       body: Column(
         children: [
-          // ── Stats Bar ───────────────────────────────────────────────────
-          statsAsync.when(
-            data: (stats) => _buildStatsBar(context, isDark, stats),
-            loading: () => _buildStatsBarSkeleton(context, isDark),
-            error: (_, __) => const SizedBox.shrink(),
+          // ── Collapsible stats area ──────────────────────────────────────
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _statsCollapsed
+                ? const SizedBox.shrink()
+                : Column(
+                    children: [
+                      // ── Subscription Overview ──────────────────────────
+                      subscriptionOverviewAsync.when(
+                        data: (overview) => _buildSubscriptionOverview(
+                            context, isDark, overview),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+
+                      // ── Stats Bar ──────────────────────────────────────
+                      statsAsync.when(
+                        data: (stats) => _buildStatsBar(context, isDark, stats),
+                        loading: () => _buildStatsBarSkeleton(context, isDark),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
           ),
 
           // ── Search Bar ──────────────────────────────────────────────────
@@ -780,6 +834,63 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
     );
   }
 
+  Widget _buildSubscriptionOverview(
+    BuildContext context,
+    bool isDark,
+    SubscriptionOverview overview,
+  ) {
+    if (overview.activeSubscribers == 0 &&
+        overview.trialUsers == 0 &&
+        overview.estimatedMrrCents == 0) {
+      return const SizedBox.shrink();
+    }
+    final mrrText = '\$${overview.estimatedMrrUsd.toStringAsFixed(0)}';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.pagePadding,
+        12,
+        AppSizes.pagePadding,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _statChip(
+              context,
+              isDark,
+              icon: CupertinoIcons.money_dollar_circle,
+              iconColor: AppColors.brandTeal,
+              label: 'MRR',
+              value: mrrText,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _statChip(
+              context,
+              isDark,
+              icon: CupertinoIcons.star_fill,
+              iconColor: AppColors.brandTeal,
+              label: 'Premium',
+              value: overview.activeSubscribers.toString(),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _statChip(
+              context,
+              isDark,
+              icon: CupertinoIcons.clock,
+              iconColor: AppColors.systemPurple,
+              label: 'Trial',
+              value: overview.trialUsers.toString(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatsBar(
     BuildContext context,
     bool isDark,
@@ -922,6 +1033,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
 
   IconData _filterIcon(_FilterType filter) => switch (filter) {
         _FilterType.all => CupertinoIcons.person_2,
+        _FilterType.premium => CupertinoIcons.star_fill,
         _FilterType.admin => CupertinoIcons.shield,
         _FilterType.active => CupertinoIcons.checkmark_circle_fill,
         _FilterType.inactive => CupertinoIcons.xmark_circle,

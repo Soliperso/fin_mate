@@ -77,6 +77,8 @@ class _DebtPageState extends ConsumerState<DebtPage>
   }
 
   void _showLogPayment(DebtEntity debt) async {
+    // The paid-off celebration is fired from within LogPaymentBottomSheet
+    // itself, so every entry point gets it consistently.
     await GlassBottomSheet.show(
       context: context,
       child: LogPaymentBottomSheet(debt: debt),
@@ -261,8 +263,13 @@ class _DebtPageState extends ConsumerState<DebtPage>
               );
             }
 
-            final sorted = _sortedDebts(debts);
-            final totalBalance = debts.fold<double>(0, (s, d) => s + d.balance);
+            final activeDebts =
+                debts.where((d) => !d.isPaidOff).toList(growable: false);
+            final paidOffDebts =
+                debts.where((d) => d.isPaidOff).toList(growable: false);
+            final sorted = _sortedDebts(activeDebts);
+            final totalBalance =
+                activeDebts.fold<double>(0, (s, d) => s + d.balance);
 
             return TabBarView(
               controller: _tabController,
@@ -283,9 +290,9 @@ class _DebtPageState extends ConsumerState<DebtPage>
                       // Hero card — uses simulated result when extra payment is active
                       DebtHeroCard(
                         totalBalance: totalBalance,
-                        debtCount: debts.length,
+                        debtCount: activeDebts.length,
                         payoffResult: activeResult ?? payoffResult,
-                        debts: debts,
+                        debts: activeDebts,
                         extraMonthly: extra,
                       ),
                       const SizedBox(height: AppSizes.md),
@@ -508,60 +515,74 @@ class _DebtPageState extends ConsumerState<DebtPage>
                       ),
                       const SizedBox(height: AppSizes.md),
 
-                      // Section header
-                      Row(
-                        children: [
-                          Text(
-                            'debt.yourDebts'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const Spacer(),
-                          Text(
-                            debts.length == 1
-                                ? 'debt.accountCount'
-                                    .tr(namedArgs: {'count': '1'})
-                                : 'debt.accountCountPlural'.tr(
-                                    namedArgs: {'count': '${debts.length}'}),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSizes.sm),
+                      // Active debts section — hidden when everything is paid off
+                      if (activeDebts.isNotEmpty) ...[
+                        // Section header
+                        Row(
+                          children: [
+                            Text(
+                              'debt.yourDebts'.tr(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const Spacer(),
+                            Text(
+                              activeDebts.length == 1
+                                  ? 'debt.accountCount'
+                                      .tr(namedArgs: {'count': '1'})
+                                  : 'debt.accountCountPlural'.tr(namedArgs: {
+                                      'count': '${activeDebts.length}'
+                                    }),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.sm),
 
-                      // Debt cards
-                      ...sorted.map((debt) {
-                        final isFocus =
-                            payoffResult?.schedule.isNotEmpty == true &&
-                                payoffResult!.schedule.first.focusDebtName ==
-                                    debt.name;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                          child: DebtCard(
-                            debt: debt,
-                            isFocusDebt: isFocus,
-                            focusReason: strategy == DebtStrategy.avalanche
-                                ? 'debt.highestRate'.tr()
-                                : 'debt.lowestBalance'.tr(),
-                            onLogPayment: () => _showLogPayment(debt),
-                            onEdit: () => _showEditDebt(debt),
-                            onHistory: () => _showPaymentHistory(debt),
-                            onDelete: () => _deleteDebt(debt),
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: AppSizes.md),
-                      ExtraPaymentCard(
-                        totalMinimum:
-                            debts.fold(0.0, (s, d) => s + d.minimumPayment),
-                      ),
-                      const SizedBox(height: AppSizes.md),
+                        // Debt cards
+                        ...sorted.map((debt) {
+                          final isFocus =
+                              payoffResult?.schedule.isNotEmpty == true &&
+                                  payoffResult!.schedule.first.focusDebtName ==
+                                      debt.name;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: AppSizes.sm),
+                            child: DebtCard(
+                              debt: debt,
+                              isFocusDebt: isFocus,
+                              focusReason: strategy == DebtStrategy.avalanche
+                                  ? 'debt.highestRate'.tr()
+                                  : 'debt.lowestBalance'.tr(),
+                              onLogPayment: () => _showLogPayment(debt),
+                              onEdit: () => _showEditDebt(debt),
+                              onHistory: () => _showPaymentHistory(debt),
+                              onDelete: () => _deleteDebt(debt),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: AppSizes.md),
+                        ExtraPaymentCard(
+                          totalMinimum: activeDebts.fold(
+                              0.0, (s, d) => s + d.minimumPayment),
+                        ),
+                        const SizedBox(height: AppSizes.md),
+                      ],
                       const DebtMilestoneCard(),
+
+                      // Paid-off ("Debt Free") section — collapsed by default
+                      if (paidOffDebts.isNotEmpty) ...[
+                        const SizedBox(height: AppSizes.md),
+                        _PaidOffSection(
+                          debts: paidOffDebts,
+                          onTapDebt: _showPaymentHistory,
+                          onDeleteDebt: _deleteDebt,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -727,6 +748,198 @@ class _StrategyPill extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Collapsible "Paid Off" section listing debts that have been fully cleared.
+/// Collapsed by default — preserves payoff history without cluttering the
+/// active debt list.
+class _PaidOffSection extends StatefulWidget {
+  final List<DebtEntity> debts;
+  final void Function(DebtEntity) onTapDebt;
+  final void Function(DebtEntity) onDeleteDebt;
+
+  const _PaidOffSection({
+    required this.debts,
+    required this.onTapDebt,
+    required this.onDeleteDebt,
+  });
+
+  @override
+  State<_PaidOffSection> createState() => _PaidOffSectionState();
+}
+
+class _PaidOffSectionState extends State<_PaidOffSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        side: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.separatorDark.withValues(alpha: 0.5)
+              : AppColors.separator.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.xs),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.checkmark_seal_fill,
+                      size: 16,
+                      color: AppColors.success,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.sm),
+                  Text(
+                    'debt.paidOffSection'.tr(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: AppSizes.xs),
+                  Text(
+                    '${widget.debts.length}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const Spacer(),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.25 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded)
+            ...widget.debts.map(
+              (d) => _PaidOffRow(
+                debt: d,
+                onTap: () => widget.onTapDebt(d),
+                onDelete: () => widget.onDeleteDebt(d),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Single row inside the Paid Off section. Resolves the payoff date from the
+/// debt's most recent payment.
+class _PaidOffRow extends ConsumerWidget {
+  final DebtEntity debt;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _PaidOffRow({
+    required this.debt,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final payments = ref.watch(debtPaymentsProvider(debt.id)).valueOrNull;
+    final paidOffDate = payments?.fold<DateTime?>(
+      null,
+      (latest, p) => latest == null || p.paymentDate.isAfter(latest)
+          ? p.paymentDate
+          : latest,
+    );
+    final subtitle = paidOffDate != null
+        ? 'debt.paidOffOn'.tr(namedArgs: {
+            'date': DateFormat(AppDateFormats.mediumDate).format(paidOffDate),
+          })
+        : debt.debtTypeDisplay;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.md,
+          AppSizes.sm,
+          AppSizes.xs,
+          AppSizes.sm,
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              CupertinoIcons.checkmark_alt_circle_fill,
+              size: 18,
+              color: AppColors.success,
+            ),
+            const SizedBox(width: AppSizes.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    debt.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuButton<void>(
+              icon: const Icon(
+                CupertinoIcons.ellipsis,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+              onSelected: (_) => onDelete(),
+              itemBuilder: (context) => [
+                PopupMenuItem<void>(
+                  child: Row(
+                    children: [
+                      const Icon(CupertinoIcons.delete,
+                          size: 16, color: AppColors.error),
+                      const SizedBox(width: AppSizes.sm),
+                      Text('debtCard.deleteDebt'.tr()),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

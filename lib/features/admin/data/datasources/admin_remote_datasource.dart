@@ -60,6 +60,33 @@ class AdminRemoteDataSource {
     }
   }
 
+  /// Get subscription overview for the admin dashboard.
+  /// Returns active subs, trial users, plan breakdown, and estimated MRR.
+  Future<Map<String, int>> getSubscriptionOverview() async {
+    try {
+      final response = await _supabase.rpc('get_subscription_overview');
+      if (response == null || (response as List).isEmpty) {
+        return const {
+          'active_subscribers': 0,
+          'trial_users': 0,
+          'annual_subscribers': 0,
+          'monthly_subscribers': 0,
+          'estimated_mrr_cents': 0,
+        };
+      }
+      final row = response[0] as Map<String, dynamic>;
+      return {
+        'active_subscribers': (row['active_subscribers'] as int?) ?? 0,
+        'trial_users': (row['trial_users'] as int?) ?? 0,
+        'annual_subscribers': (row['annual_subscribers'] as int?) ?? 0,
+        'monthly_subscribers': (row['monthly_subscribers'] as int?) ?? 0,
+        'estimated_mrr_cents': (row['estimated_mrr_cents'] as int?) ?? 0,
+      };
+    } catch (e) {
+      throw Exception('Failed to fetch subscription overview: $e');
+    }
+  }
+
   /// Get user details by ID
   Future<AdminUserModel> getUserDetails(String userId) async {
     try {

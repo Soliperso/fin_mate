@@ -117,6 +117,41 @@ class UsersFilter {
 }
 
 // ============================================================================
+// Subscription Overview Provider (admin dashboard)
+// ============================================================================
+
+class SubscriptionOverview {
+  final int activeSubscribers;
+  final int trialUsers;
+  final int annualSubscribers;
+  final int monthlySubscribers;
+  final int estimatedMrrCents;
+
+  const SubscriptionOverview({
+    required this.activeSubscribers,
+    required this.trialUsers,
+    required this.annualSubscribers,
+    required this.monthlySubscribers,
+    required this.estimatedMrrCents,
+  });
+
+  double get estimatedMrrUsd => estimatedMrrCents / 100.0;
+}
+
+final subscriptionOverviewProvider =
+    FutureProvider.autoDispose<SubscriptionOverview>((ref) async {
+  final ds = ref.watch(adminRemoteDataSourceProvider);
+  final raw = await ds.getSubscriptionOverview();
+  return SubscriptionOverview(
+    activeSubscribers: raw['active_subscribers'] ?? 0,
+    trialUsers: raw['trial_users'] ?? 0,
+    annualSubscribers: raw['annual_subscribers'] ?? 0,
+    monthlySubscribers: raw['monthly_subscribers'] ?? 0,
+    estimatedMrrCents: raw['estimated_mrr_cents'] ?? 0,
+  );
+});
+
+// ============================================================================
 // System Stats Provider (Real-time)
 // ============================================================================
 

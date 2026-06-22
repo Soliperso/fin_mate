@@ -15,10 +15,14 @@ class AdminUserModel extends AdminUserEntity {
     super.totalExpense,
     super.netWorth,
     super.isActive,
+    super.subscriptionTier,
+    super.subscriptionStatus,
+    super.subscriptionEndDate,
   });
 
   factory AdminUserModel.fromJson(Map<String, dynamic> json) {
     final rawLastSignIn = json['last_sign_in_at'] as String?;
+    final rawSubEnd = json['subscription_end_date'] as String?;
     return AdminUserModel(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -32,6 +36,9 @@ class AdminUserModel extends AdminUserEntity {
       totalExpense: ((json['total_expense'] as num?) ?? 0).toDouble(),
       netWorth: ((json['net_worth'] as num?) ?? 0).toDouble(),
       isActive: (json['is_active'] as bool?) ?? false,
+      subscriptionTier: json['subscription_tier'] as String?,
+      subscriptionStatus: json['subscription_status'] as String?,
+      subscriptionEndDate: rawSubEnd != null ? DateTime.parse(rawSubEnd) : null,
     );
   }
 
@@ -49,6 +56,9 @@ class AdminUserModel extends AdminUserEntity {
       'total_expense': totalExpense,
       'net_worth': netWorth,
       'is_active': isActive,
+      'subscription_tier': subscriptionTier,
+      'subscription_status': subscriptionStatus,
+      'subscription_end_date': subscriptionEndDate?.toIso8601String(),
     };
   }
 }

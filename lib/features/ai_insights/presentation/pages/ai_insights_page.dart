@@ -81,16 +81,6 @@ class AiInsightsPage extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              CupertinoIcons.settings,
-              size: 22,
-              color: isDark ? AppColors.secondaryLabelDark : AppColors.textSecondary,
-            ),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

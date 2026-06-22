@@ -29,8 +29,8 @@ import 'core/services/auto_backup_service.dart';
 import 'core/services/review_service.dart';
 import 'core/services/recurring_transaction_processor.dart';
 import 'core/services/notification_provider.dart';
-// [MVP: RevenueCat - Commented out for testing]
-// import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'core/providers/subscription_provider.dart';
 
 void main() async {
   // Run app in error zone to catch all errors
@@ -70,43 +70,41 @@ void main() async {
         ),
       );
 
-      // [MVP: RevenueCat - Commented out for testing]
-      // if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-      //   await Purchases.configure(
-      //     PurchasesConfiguration(EnvConfig.revenueCatApiKey),
-      //   );
-      //   final existingUser = Supabase.instance.client.auth.currentUser;
-      //   if (existingUser != null) {
-      //     unawaited(() async {
-      //       try {
-      //         await Purchases.logIn(existingUser.id);
-      //       } catch (_) {}
-      //     }());
-      //   }
-      // }
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        await Purchases.configure(
+          PurchasesConfiguration(EnvConfig.revenueCatApiKey),
+        );
+        final existingUser = Supabase.instance.client.auth.currentUser;
+        if (existingUser != null) {
+          unawaited(() async {
+            try {
+              await Purchases.logIn(existingUser.id);
+            } catch (_) {}
+          }());
+        }
+      }
 
-      // [MVP: RevenueCat - Commented out for testing]
-      // Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      //   final event = data.event;
-      //   if (event == AuthChangeEvent.signedIn) {
-      //     final userId = data.session?.user.id;
-      //     if (userId != null && EnvConfig.revenueCatApiKey.isNotEmpty) {
-      //       unawaited(() async {
-      //         try {
-      //           await Purchases.logIn(userId);
-      //         } catch (_) {}
-      //       }());
-      //     }
-      //   } else if (event == AuthChangeEvent.signedOut) {
-      //     if (EnvConfig.revenueCatApiKey.isNotEmpty) {
-      //       unawaited(() async {
-      //         try {
-      //           await Purchases.logOut();
-      //         } catch (_) {}
-      //       }());
-      //     }
-      //   }
-      // });
+      Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+        final event = data.event;
+        if (event == AuthChangeEvent.signedIn) {
+          final userId = data.session?.user.id;
+          if (userId != null && EnvConfig.revenueCatApiKey.isNotEmpty) {
+            unawaited(() async {
+              try {
+                await Purchases.logIn(userId);
+              } catch (_) {}
+            }());
+          }
+        } else if (event == AuthChangeEvent.signedOut) {
+          if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+            unawaited(() async {
+              try {
+                await Purchases.logOut();
+              } catch (_) {}
+            }());
+          }
+        }
+      });
 
       // Phase 3 — parallel: analytics (needs Supabase) + localization + prefs
       // These are all independent of each other
@@ -191,6 +189,13 @@ class _FinmateAppState extends ConsumerState<FinmateApp> {
     super.initState();
     // Initialize theme service and load saved theme mode
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (EnvConfig.revenueCatApiKey.isNotEmpty) {
+        Purchases.addCustomerInfoUpdateListener((_) {
+          ref.invalidate(isPremiumProvider);
+          ref.invalidate(subscriptionTierProvider);
+        });
+      }
+
       final themeService = ref.read(themeServiceProvider);
       await themeService.initialize();
       await ref.read(themeModeProvider.notifier).initialize();

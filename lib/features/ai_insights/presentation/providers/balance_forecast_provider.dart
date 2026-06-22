@@ -9,14 +9,16 @@ final balanceForecastServiceProvider = Provider<BalanceForecastService>((ref) {
   return BalanceForecastService();
 });
 
-// Balance forecast provider
-final balanceForecastProvider = FutureProvider<BalanceForecast>((ref) async {
+// Balance forecast provider — autoDispose so navigating to the forecast page
+// always recomputes from the latest accounts / transactions / recurring data.
+final balanceForecastProvider =
+    FutureProvider.autoDispose<BalanceForecast>((ref) async {
   final service = ref.watch(balanceForecastServiceProvider);
   return await service.generate30DayForecast();
 });
 
 // Current balance provider (extracted from forecast)
-final currentBalanceProvider = Provider<double>((ref) {
+final currentBalanceProvider = Provider.autoDispose<double>((ref) {
   final forecastAsync = ref.watch(balanceForecastProvider);
   return forecastAsync.when(
     data: (forecast) => forecast.currentBalance,
@@ -26,7 +28,7 @@ final currentBalanceProvider = Provider<double>((ref) {
 });
 
 // Safe to spend provider (extracted from forecast)
-final safeToSpendProvider = Provider<double>((ref) {
+final safeToSpendProvider = Provider.autoDispose<double>((ref) {
   final forecastAsync = ref.watch(balanceForecastProvider);
   return forecastAsync.when(
     data: (forecast) => forecast.safeToSpend,
@@ -37,7 +39,7 @@ final safeToSpendProvider = Provider<double>((ref) {
 
 // Multi-scenario forecast provider
 final multiScenarioForecastProvider =
-    FutureProvider<List<ForecastScenario>>((ref) async {
+    FutureProvider.autoDispose<List<ForecastScenario>>((ref) async {
   final service = ref.watch(balanceForecastServiceProvider);
   return await service.generateMultiScenarioForecast();
 });
@@ -47,7 +49,8 @@ final selectedForecastScenarioProvider =
     StateProvider<ForecastScenarioType>((ref) => ForecastScenarioType.baseline);
 
 // Derived provider: currently active scenario's BalanceForecast
-final activeForecastProvider = Provider<AsyncValue<BalanceForecast>>((ref) {
+final activeForecastProvider =
+    Provider.autoDispose<AsyncValue<BalanceForecast>>((ref) {
   final scenariosAsync = ref.watch(multiScenarioForecastProvider);
   final selectedType = ref.watch(selectedForecastScenarioProvider);
 

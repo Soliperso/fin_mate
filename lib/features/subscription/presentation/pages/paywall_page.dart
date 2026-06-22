@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/config/env_config.dart';
 import '../../../../core/config/supabase_client.dart';
 import '../../../../core/providers/subscription_provider.dart';
 import '../../../../core/providers/ai_query_limit_provider.dart';
@@ -28,8 +31,8 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
   static const _benefits = [
     (
       CupertinoIcons.sparkles,
-      'Unlimited AI Chat',
-      'No limits, no interruptions'
+      'Unlimited AI financial insights',
+      'Ask anything, get instant answers'
     ),
     (
       CupertinoIcons.camera,
@@ -37,16 +40,28 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
       'Auto-fill transaction details'
     ),
     (
+      CupertinoIcons.clock,
+      'Unlimited transaction history',
+      'Access all your data, forever'
+    ),
+    (
+      CupertinoIcons.chart_bar_square,
+      'Advanced analytics & trends',
+      'Deeper insights into your money'
+    ),
+    (
       CupertinoIcons.doc_on_doc,
-      'Document storage & tax exports',
-      'Receipts saved forever'
+      'Tax document export',
+      'Reports ready for tax season'
     ),
   ];
 
   @override
   void initState() {
     super.initState();
-    _loadOfferings();
+    // Defer until after first frame so the loading indicator renders before
+    // RevenueCat's network + disk-cache work starts on the main thread.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadOfferings());
   }
 
   Future<void> _loadOfferings() async {
@@ -54,15 +69,51 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
       _isLoadingOfferings = true;
       _loadError = null;
     });
+
+    if (EnvConfig.revenueCatApiKey.isEmpty) {
+      setState(() {
+        _loadError = 'Subscription plans are coming soon. Check back after the app launches.';
+        _isLoadingOfferings = false;
+      });
+      return;
+    }
+
     try {
-      final offerings = await Purchases.getOfferings();
+      final offerings = await Purchases.getOfferings()
+          .timeout(const Duration(seconds: 15));
+      if (!mounted) return;
+
+      if (offerings.current == null) {
+        setState(() {
+          _loadError = 'No subscription plans are configured yet. Please try again later.';
+          _isLoadingOfferings = false;
+        });
+        return;
+      }
+
       setState(() {
         _offerings = offerings;
         _selectedPackage =
             offerings.current?.annual ?? offerings.current?.monthly;
         _isLoadingOfferings = false;
       });
+    } on PurchasesError catch (e) {
+      if (!mounted) return;
+      if (kDebugMode) debugPrint('[Paywall] PurchasesError ${e.code}: ${e.message}');
+      setState(() {
+        _loadError = 'Could not load subscription options. Please try again.';
+        _isLoadingOfferings = false;
+      });
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (kDebugMode) debugPrint('[Paywall] PlatformException ${e.code}: ${e.message}');
+      setState(() {
+        _loadError = 'Could not load subscription options. Please try again.';
+        _isLoadingOfferings = false;
+      });
     } catch (e) {
+      if (!mounted) return;
+      if (kDebugMode) debugPrint('[Paywall] Error loading offerings: $e');
       setState(() {
         _loadError = 'Could not load pricing. Please try again.';
         _isLoadingOfferings = false;
@@ -78,9 +129,19 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         PurchaseParams.package(_selectedPackage!),
       );
       if (result.customerInfo.entitlements.active.containsKey('premium')) {
+        final entitlement = result.customerInfo.entitlements.active['premium']!;
+        final isTrial = entitlement.periodType == PeriodType.trial;
+        final now = DateTime.now().toUtc().toIso8601String();
+        // expirationDate is already an ISO-8601 String? in purchases_flutter
+        final endDate = entitlement.expirationDate;
+
         await supabase.from('user_profiles').update({
           'subscription_tier': 'premium',
-          'subscription_status': 'active',
+          'subscription_status': isTrial ? 'trialing' : 'active',
+          'payment_provider': 'apple',
+          'subscription_start_date': now,
+          'subscription_end_date': endDate,
+          'trial_end_date': isTrial ? endDate : null,
         }).eq('id', supabase.auth.currentUser!.id);
 
         ref.invalidate(isPremiumProvider);
@@ -88,7 +149,10 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         // Clear the local query count so the banner disappears immediately
         ref.read(aiQueryOperationsProvider).resetQueryCount();
 
-        if (mounted) context.pop(true);
+        if (mounted) {
+          await _showWelcomeToPremium(isTrial: isTrial);
+          if (mounted) context.pop(true);
+        }
       }
     } on PurchasesError catch (e) {
       if (e.code != PurchasesErrorCode.purchaseCancelledError && mounted) {
@@ -105,6 +169,88 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         );
       }
     }
+  }
+
+  Future<void> _showWelcomeToPremium({required bool isTrial}) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor:
+              isDark ? AppColors.secondarySystemBackgroundDark : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSizes.lg, AppSizes.xl, AppSizes.lg, AppSizes.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.brandTeal, AppColors.brandTealLight],
+                    ),
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.checkmark_alt,
+                    color: Colors.white,
+                    size: 38,
+                  ),
+                ),
+                const SizedBox(height: AppSizes.md),
+                Text(
+                  'Welcome to Premium!',
+                  style:
+                      Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.4,
+                          ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Text(
+                  isTrial
+                      ? 'Your 7-day free trial is active. Enjoy unlimited AI insights, advanced analytics, and every premium feature.'
+                      : 'You now have unlimited AI insights, advanced analytics, and every premium feature.',
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.systemGray,
+                        height: 1.35,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandTeal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text(
+                      'Start Exploring',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _restorePurchases() async {
@@ -186,6 +332,15 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     final annualPkg = current?.annual;
     final monthlyPkg = current?.monthly;
 
+    final reason =
+        GoRouterState.of(context).uri.queryParameters['reason'] ?? '';
+    final headline = reason == 'ai_limit'
+        ? 'You\'ve used all 10 free AI queries'
+        : 'Unlock Finmate Premium';
+    final subheadline = reason == 'ai_limit'
+        ? 'Go Premium to keep asking — no limits, ever.'
+        : 'Start your 7-day free trial — cancel anytime.';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.pagePadding),
       child: Column(
@@ -218,7 +373,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
           ),
           const SizedBox(height: AppSizes.md),
           Text(
-            'Unlock Finmate Premium',
+            headline,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
@@ -227,7 +382,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
           ),
           const SizedBox(height: AppSizes.xs),
           Text(
-            'Start your 7-day free trial — cancel anytime.',
+            subheadline,
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium

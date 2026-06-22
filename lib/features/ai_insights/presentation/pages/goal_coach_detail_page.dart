@@ -62,20 +62,16 @@ class _GoalCoachDetailPageState extends ConsumerState<GoalCoachDetailPage>
     setState(() => _isSendingCheck = false);
 
     if (!canMakeQuery) {
-      if (mounted) context.push('/paywall');
+      if (mounted) context.push('/paywall?reason=ai_limit');
       return;
-    }
-
-    try {
-      await ref.read(aiQueryOperationsProvider).incrementQueryCount();
-    } catch (e) {
-      debugPrint('Failed to increment query count: $e');
     }
 
     _chatController.clear();
     final contextualPrompt =
         'Regarding my "${widget.goal.name}" savings goal: $text';
     ref.read(chatProvider.notifier).sendMessage(contextualPrompt, goalId: widget.goal.id);
+    // Counter is now incremented atomically by the openai-proxy Edge Function.
+    ref.invalidate(aiQueryUsageProvider);
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_chatScroll.hasClients) {
         _chatScroll.animateTo(
@@ -600,12 +596,21 @@ class _ProjectionSection extends StatelessWidget {
         ? AppColors.secondarySystemBackgroundDark
         : AppColors.systemBackground;
 
-    final needed = goal.monthlySavingsNeeded ?? 0;
-    final baseMonths = needed > 0
-        ? (goal.remainingAmount / needed)
+    // "Current pace" is what the user is ACTUALLY saving per month, derived
+    // from currentAmount over months elapsed since the goal was created.
+    // Earlier this used `goal.monthlySavingsNeeded`, which is the *required*
+    // monthly rate to hit the deadline — algebraically that made baseMonths
+    // collapse to "monthsUntilDeadline" regardless of real progress, so the
+    // bar always looked the same. Now it reflects the user's true rate.
+    final monthsElapsed = (DateTime.now().difference(goal.createdAt).inDays / 30.0)
+        .clamp(0.1, double.infinity);
+    final actualMonthlyRate = goal.currentAmount / monthsElapsed;
+    final baseMonths = actualMonthlyRate > 0
+        ? (goal.remainingAmount / actualMonthlyRate)
         : null;
-    final boostedMonths = (needed + boostAmount) > 0
-        ? (goal.remainingAmount / (needed + boostAmount))
+    final boostedRate = actualMonthlyRate + boostAmount;
+    final boostedMonths = boostedRate > 0
+        ? (goal.remainingAmount / boostedRate)
         : baseMonths;
 
     final savedMonths =

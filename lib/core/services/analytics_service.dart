@@ -57,6 +57,7 @@ class AnalyticsService {
     Map<String, dynamic>? properties,
     String? screenName,
   }) async {
+    if (_sessionId == null) await initialize();
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return; // Don't log events for unauthenticated users

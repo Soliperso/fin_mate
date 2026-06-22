@@ -56,18 +56,15 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     setState(() => _isSendingCheck = false);
 
     if (!canMakeQuery) {
-      if (mounted) context.push('/paywall');
+      if (mounted) context.push('/paywall?reason=ai_limit');
       return;
-    }
-
-    try {
-      await ref.read(aiQueryOperationsProvider).incrementQueryCount();
-    } catch (e) {
-      debugPrint('Failed to increment query count: $e');
     }
 
     if (!mounted) return;
     ref.read(chatProvider.notifier).sendMessage(text);
+    // Counter is now incremented atomically by the openai-proxy Edge Function.
+    // Invalidate here so the usage banner reflects the new count after the response.
+    ref.invalidate(aiQueryUsageProvider);
     _scrollToBottom();
     ref.invalidate(dynamicPromptsProvider);
   }

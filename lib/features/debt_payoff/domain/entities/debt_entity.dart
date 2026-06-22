@@ -34,6 +34,10 @@ class DebtEntity extends Equatable {
 
   double get monthlyInterest => balance * (interestRate / 100 / 12);
 
+  /// Whether this debt has been fully paid off (balance reduced to zero).
+  /// Uses a small epsilon for floating-point safety.
+  bool get isPaidOff => balance <= 0.001;
+
   /// Returns estimated months to payoff at minimum payment, or null if not computable.
   int? get monthsToPayoffAtMinimum {
     if (balance <= 0 || minimumPayment <= 0) return null;

@@ -91,40 +91,25 @@ class UserListItem extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: AppSizes.xs),
+                                  if (user.isPremium)
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 4),
+                                      child: _miniBadge(
+                                        context,
+                                        icon: CupertinoIcons.star_fill,
+                                        label: user.isOnTrial
+                                            ? 'Trial'
+                                            : 'Premium',
+                                        color: AppColors.brandTeal,
+                                      ),
+                                    ),
                                   if (user.isAdmin)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.brandTeal
-                                            .withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(
-                                            AppSizes.radiusSm),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            CupertinoIcons.shield,
-                                            size: 12,
-                                            color: AppColors.brandTeal,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Text(
-                                            'Admin',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                                  color: AppColors.brandTeal,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 10,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
+                                    _miniBadge(
+                                      context,
+                                      icon: CupertinoIcons.shield,
+                                      label: 'Admin',
+                                      color: AppColors.brandTeal,
                                     ),
                                   if (!user.isActive)
                                     Container(
@@ -245,6 +230,36 @@ class UserListItem extends StatelessWidget {
           ], // outer Row children
         ), // outer Row
       ), // IntrinsicHeight
+    );
+  }
+
+  Widget _miniBadge(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+          ),
+        ],
+      ),
     );
   }
 

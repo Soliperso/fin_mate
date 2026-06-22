@@ -23,10 +23,7 @@ class QueryLimitBanner extends ConsumerWidget {
         if (isPremium) return const SizedBox.shrink();
 
         return queryUsageAsync.when(
-          data: (usage) {
-            if (usage.queriesUsed < 1) return const SizedBox.shrink();
-            return _CompactStrip(usage: usage);
-          },
+          data: (usage) => _CompactStrip(usage: usage),
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
         );
